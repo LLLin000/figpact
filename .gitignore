@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.pdata
+.DS_Store
+Thumbs.db
+figpact-stage-*/
+ftir-stage-*/
+nmr-stage-*/

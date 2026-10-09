@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "figpact"
+version = "0.1.0"
+description = "Parameter pacts and layout engine for publication figures"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.8",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+figpact = "figpact.cli:main"
