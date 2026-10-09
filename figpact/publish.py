@@ -1,16 +1,35 @@
 """原子发布与人工豁免管理。"""
+import json
+import os
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Optional
+from figpact.qa import signature
 
 
 def staging_dir(prefix: str = "figpact-") -> Path:
     """创建临时暂存目录。"""
-    pass
+    return Path(tempfile.mkdtemp(prefix=prefix))
 
 
 def publish(staging: Path | str, target: Path | str) -> list[str]:
     """将暂存目录下的产物原子替换到目标目录（先写临时文件再 os.replace）。"""
-    pass
+    src_dir = Path(staging)
+    dst_dir = Path(target)
+    dst_dir.mkdir(parents=True, exist_ok=True)
+
+    written: list[str] = []
+    for src in sorted(src_dir.iterdir()):
+        if not src.is_file():
+            continue
+        dst = dst_dir / src.name
+        # 原子替换：同目录下写临时文件然后 os.replace
+        tmp_dst = dst_dir / f".tmp_{src.name}"
+        shutil.copyfile(src, tmp_dst)
+        os.replace(tmp_dst, dst)
+        written.append(src.name)
+    return written
 
 
 class Exemptions:
@@ -21,8 +40,37 @@ class Exemptions:
 
     def load(self) -> dict[str, str]:
         """加载 {签名: 理由}，无 reason 的条目不认。"""
-        pass
+        if not self.path.is_file():
+            return {}
+        try:
+            data = json.loads(self.path.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+
+        out = {}
+        for item in data.get("exemptions", []):
+            sig = str(item.get("signature", ""))
+            reason = str(item.get("reason", "")).strip()
+            if sig and reason:
+                out[sig] = reason
+        return out
 
     def write(self, blockers: list[str], reason: str) -> None:
         """记录新的豁免。reason 为空抛出 ValueError。"""
-        pass
+        clean_reason = str(reason).strip()
+        if not clean_reason:
+            raise ValueError("豁免理由 (reason) 不能为空")
+
+        existing = self.load()
+        for b in blockers:
+            sig = signature(b)
+            if sig:
+                existing[sig] = clean_reason
+
+        payload = {
+            "exemptions": [
+                {"signature": sig, "reason": r} for sig, r in sorted(existing.items())
+            ]
+        }
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
