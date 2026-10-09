@@ -223,12 +223,12 @@ def check_series_order(fig: matplotlib.figure.Figure, order: list[str], min_mm: 
         ys: dict[str, np.ndarray] = {}
         for line in ax.lines:
             gid = line.get_gid() or ""
-            for item in order:
-                if f".curve.{item}" in gid or f".trace.{item}" in gid or gid.endswith(f".{item}") or gid == item:
-                    xy = line.get_xydata()
-                    if xy is not None and len(xy) > 2:
-                        ys[item] = line.get_transform().transform(xy)[:, 1]
-                    break
+            # 优先从 gid 后缀提取 sid，如 fig2_ftir.annotated.curve.ha -> ha
+            sid = gid.rsplit(".", 1)[-1]
+            if sid in order:
+                xy = line.get_xydata()
+                if xy is not None and len(xy) > 2:
+                    ys[sid] = line.get_transform().transform(xy)[:, 1]
         present = [sid for sid in order if sid in ys]
         for lower, upper in zip(present, present[1:]):
             if ys[lower].shape != ys[upper].shape:

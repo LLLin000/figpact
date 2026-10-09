@@ -41,11 +41,12 @@ def cmd_validate(args: argparse.Namespace) -> int:
     if args.script:
         script = Path(args.script).expanduser().resolve()
     else:
-        # 在 yaml 所在目录下寻找 .py
-        candidates = list(yaml_path.parent.glob("*.py"))
+        # 在 yaml 所在目录下寻找绘图脚本 (plot_*.py 或同名或排除 figure_style.py)
+        candidates = [p for p in yaml_path.parent.glob("*.py") if p.name != "figure_style.py"]
         if candidates:
-            script = candidates[0]
-
+            # 优先选 plot_*.py 或含 yaml 主名的脚本
+            matched = [p for p in candidates if yaml_path.stem in p.stem or p.stem.startswith("plot")]
+            script = matched[0] if matched else candidates[0]
     schema = None
     if script and script.is_file():
         try:
