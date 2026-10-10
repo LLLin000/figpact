@@ -48,6 +48,18 @@ _Avoid_: calibrated accuracy
 The established uncertainty of a measurement under its actual rendering conditions. An unknown uncertainty remains unknown; extra decimal places do not reduce it.
 _Avoid_: requested tolerance, mathematical exactness
 
+**Measurement Mode**:
+Read-only observation of objects, dimensions, and spatial relationships. Measurement does not require editable parameters and grants no authority to change a scene.
+_Avoid_: editing session, publication approval
+
+**Editing Mode**:
+Proposing and saving layout changes through explicitly permitted bindings while preserving the scientific payload. Being measurable does not make an object editable.
+_Avoid_: unrestricted manipulation, measurement mode
+
+**Parameter Binding**:
+An explicit connection between an allowed layout control and the objects and relationships it actually affects.
+_Avoid_: measurement prerequisite, guessed control
+
 **Decorative Guide**:
 Auxiliary visual geometry connecting or orienting objects, rather than a measured scientific trace. Layout freedom does not authorize moving protected scientific anchors.
 _Avoid_: scientific curve, editable signal

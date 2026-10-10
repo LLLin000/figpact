@@ -3,7 +3,7 @@
 面向 Agent 的科研图几何测量、排版契约与严格出版验收引擎。
 
 ## 核心设计
-1. **参数契约**：排版参数在 YAML 集中管理，数据与绘图逻辑在 Python 脚本。
+1. **测量与编辑分层**：Figure / Scene 的测量不要求 YAML；可写编辑与保存使用真实 YAML 参数契约，数据与绘图逻辑仍在 Python。
 2. **纯显示位移**：不改数据坐标，不改数据本身，仅在布局完成后施加 Display Shift。
 3. **图元身份（GID）与参数绑定**：每个排版图元具备稳定 ID 并声明关联参数。
 4. **严格验收（QA）与阻断机制**：排版几何越界（裁剪、重叠、压线、顺序颠倒）作为阻断项。
@@ -119,6 +119,27 @@ panels = scene.inspect(snapshot, type="panel")
 快照记录 DPI、renderer、字体环境及 revision；允差是要求，不是测量精度。
 96/300/600 DPI 实测四面板间距均为 6.000 mm、编号上内距均为 2.000 mm；
 没有进行物理标定，因此不确定度保持未知。
+
+### 只测量，不提供 YAML
+
+已有 Matplotlib Figure 可以直接测量，不必先建立排版配置或编辑契约：
+
+```python
+from figpact import GidRegistry, scene, geometry
+
+snapshot = scene.snapshot(fig, GidRegistry(), scope="measurement")
+panels = scene.inspect(snapshot, type="panel")["nodes"]
+gap = geometry.measure_relation("gap", panels[:2], axis="x")
+```
+
+这里只读取图和空间关系，不调用编辑或保存。没有登记的可见对象仍报告风险；
+临时对象身份只用于当前快照，不承诺跨版本稳定，也不虚构 `controlled_by`。
+原有登记信息可直接传入测量，但能测量不等于获准修改。
+
+当前无 YAML 入口是上述 Python 接口；后续统一入口按只读“测量模式”和
+有真实绑定的“编辑模式”区分。编辑模式继续检查参数范围、revision、科学载荷，
+正式发布继续独立 strict；不为只读测量要求伪造 YAML 或科学处理钩子。
+
 
 ## 数据文件说明
 `examples/*/` 数据目录下的 PDF 与 PNG 文件（例如 `examples/ftir/2084_1788253487778_26083154776/26083154776/*.pdf` 为科学指南针测试机构导出的对照报告，`examples/nmr/核磁原始数据/*/pdata/1/thumb.png` 为 Bruker TopSpin 仪器采集生成的原始缩略图）均为仪器原始产物与输入数据，不是 render 导出的渲染产物。render 产生的所有构建产物均通过 `.gitignore` 排除，不进入版本跟踪。
