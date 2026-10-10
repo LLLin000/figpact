@@ -17,6 +17,9 @@ figpact list-params --script <py> [--config <yaml>]
 # 校验 YAML 配置格式与取值范围
 figpact validate <yaml> [--script <py>]
 
+# 试算改动，不保存配置、不覆盖正式图
+figpact try --script <py> --config <yaml> --set <parameter>=<value>
+
 # 渲染图表（支持 --strict 严格模式阻断）
 figpact render --script <py> [--config <yaml>] [--strict]
 
@@ -43,6 +46,10 @@ figpact inspect <gid> --script <py> [--config <yaml>]
 
 inventory 返回测量时的 `figure_dpi` 与 `figure_size_mm`；CLI 与 GUI 的 bbox 位移
 按该 renderer 的 DPI 换算，不能使用 PNG/TIFF 导出的 DPI。
+
+QA 差异和人工豁免按 `(rule_id, scope, object_ids)` 区分，测量数字不参与已识别
+诊断的身份；未知诊断保留完整原文，不能人工豁免。旧文本签名记录不再用于放行，
+需要重新审核后记录规则、对象和理由。
 
 ## 数据文件说明
 `examples/*/` 数据目录下的 PDF 与 PNG 文件（例如 `examples/ftir/2084_1788253487778_26083154776/26083154776/*.pdf` 为科学指南针测试机构导出的对照报告，`examples/nmr/核磁原始数据/*/pdata/1/thumb.png` 为 Bruker TopSpin 仪器采集生成的原始缩略图）均为仪器原始产物与输入数据，不是 render 导出的渲染产物。render 产生的所有构建产物均通过 `.gitignore` 排除，不进入版本跟踪。
