@@ -3,7 +3,7 @@
 面向 Agent 的科研图几何测量、排版契约与严格出版验收引擎。
 
 ## 核心设计
-1. **测量与编辑分层**：Figure / Scene 的测量不要求 YAML；可写编辑与保存使用真实 YAML 参数契约，数据与绘图逻辑仍在 Python。
+1. **测量与编辑分层**：Figure / Scene 的测量不要求 YAML、可编辑绑定或 `prepare_config`；可写编辑与保存使用真实 YAML 参数契约，数据与绘图逻辑仍在 Python。编辑路径上脚本可提供纯归一化钩子 `prepare_config(config) -> dict`，只补齐缺省的布局字段（不读盘、不写盘、不碰科学量、幂等）：会话用它建立基线配置，但 revision 仍按**原始 YAML 字节**计算；`build_scene()` 对传入的配置走同一个钩子，因此会话与 legacy 装载器看到同一套默认值。
 2. **纯显示位移**：不改数据坐标，不改数据本身，仅在布局完成后施加 Display Shift。
 3. **图元身份（GID）与参数绑定**：每个排版图元具备稳定 ID 并声明关联参数。
 4. **严格验收（QA）与阻断机制**：排版几何越界（裁剪、重叠、压线、顺序颠倒）作为阻断项。
@@ -31,6 +31,15 @@ figpact inventory --script <py> [--config <yaml>] [--check-effect]
 
 # 检查特定 gid 图元的几何与绑定详情
 figpact inspect <gid> --script <py> [--config <yaml>]
+
+# 导出每张图、每个 scope 的全部参数清单为 JSON
+figpact export-params --script <py> [--config <yaml>] [--json]
+
+# 遍历可见图元所有可调属性，做五类参数覆盖审计
+figpact audit-params --script <py> [--config <yaml>] [--output <md>]
+
+# 本机持久会话（JSON-RPC）：snapshot / inspect / try_layout / render_preview / commit
+figpact agent --script <py> --config <yaml> --scope <scope> [--output-dir <dir>]
 ```
 
 ## 本地调参预览
@@ -63,10 +72,12 @@ inventory 返回测量时的 `figure_dpi` 与 `figure_size_mm`；CLI 与 GUI 的
 按该 renderer 的 DPI 换算，不能使用 PNG/TIFF 导出的 DPI。
 
 相邻距离使用物理毫米：FTIR `clearance_mm.<scope>.<上方曲线id>` 是包络净距，
-NMR `pitch_mm.main.<上方样品id>` 是基线距离。GUI 支持整组同值、逐对距离和
-`group_y_mm.<scope>` 整组位置；显示实际距离、距画布边界及坐标框的剩余空间。
-改一对不会改变其他相邻距离，也不会缩小信号；放不下时报告超限 mm。
-独立 `shifts_mm` 在距离调整之后叠加，实测值会反映这一步微调。
+NMR `pitch_mm.main.<上方样品id>` 是基线间距——两者都是**声明的目标值**，不是测得的事实。
+GUI 支持整组同值、逐对距离和 `group_y_mm.<scope>` 整组位置；它同时显示**实测**距离、
+距画布边界及坐标框的剩余空间。改一对不会改变其他相邻距离，也不会缩小信号；
+放不下时报告实测超限 mm。`shifts_mm` 是**额外声明**的逐对象显示抬升，在距离调整之后叠加、
+只作用于被点名的对象，实测值会把它算进去：因此声明的毫米数与实测毫米数一般不相等，
+报告以实测为准，不把声明值当测量结果，也不声称它「落在声明的容差内」。
 
 旧 schema 1 YAML 用原脚本 `--config <旧.yaml> --migrate-config <新.yaml>` 显式迁移；
 新文件保留旧图的实测标尺和原点，`layout_reference` 只读，不是调图旋钮。
@@ -136,9 +147,10 @@ gap = geometry.measure_relation("gap", panels[:2], axis="x")
 临时对象身份只用于当前快照，不承诺跨版本稳定，也不虚构 `controlled_by`。
 原有登记信息可直接传入测量，但能测量不等于获准修改。
 
-当前无 YAML 入口是上述 Python 接口；后续统一入口按只读“测量模式”和
-有真实绑定的“编辑模式”区分。编辑模式继续检查参数范围、revision、科学载荷，
-正式发布继续独立 strict；不为只读测量要求伪造 YAML 或科学处理钩子。
+当前无 YAML 的入口是上述 Python 接口；统一入口按只读“测量模式”和有真实绑定的
+“编辑模式”区分，**尚未实现**——现在只有上述 Python 接口，以及下面的既有 CLI 与 GUI
+（两者都在编辑路径上）。编辑模式继续检查参数范围、revision、科学载荷，
+正式发布继续独立 strict；不为只读测量要求伪造 YAML、可编辑绑定或科学处理钩子。
 
 
 ## 数据文件说明

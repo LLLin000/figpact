@@ -99,6 +99,91 @@ def cmd_render(args: argparse.Namespace) -> int:
     return res.returncode
 
 
+#: 真实扰动校验（figpact.effects）只有 EFFECT_OK 算通过；SKIPPED_* 是「声明不可编辑、未扰动」，不是缺陷。
+_REAL_PASS = {'EFFECT_OK'}
+_REAL_SKIPPED_PREFIX = 'SKIPPED'
+#: 旧启发式（脚本自带 --check-effect）的状态词表，只为兼容既有消费者。
+_LEGACY_PASS = {'VERIFIED', 'EFFECT_OK', 'PASS', 'OK', 'EFFECTIVE'}
+
+
+def _effect_scope(args, data):
+    """Explicit --scope wins; a single declared scope is unambiguous; several are AMBIGUOUS."""
+    requested = getattr(args, "scope", None)
+    if requested:
+        return requested, []
+    scopes = data.get("scopes")
+    if isinstance(scopes, dict):
+        names = sorted(scopes)
+        if len(names) == 1:
+            return names[0], names
+        return None, names
+    return None, []
+
+
+def _print_real_effects(report) -> int:
+    """Print the real-perturbation verdicts. Only EFFECT_OK counts as verified."""
+    status = str(report.get("status", "UNKNOWN"))
+    results = report.get("results", [])
+    if status.startswith("UNSUPPORTED"):
+        print(f"[UNSUPPORTED] 生效检查未执行：{status} {report.get('message', '')}".strip(), file=sys.stderr)
+        print("  UNSUPPORTED 不是通过 —— 没有契约就没有可扰动验证的绑定。", file=sys.stderr)
+        return 2
+    for entry in results:
+        name = entry.get("key") or "/".join(str(s) for s in entry.get("path", []))
+        print(f"  • {name:<24} 状态: {entry.get('status', 'UNKNOWN'):<20} "
+              f"声明对象: {len(entry.get('declared_objects', []))}")
+        for line in list(entry.get("diagnostics", []))[:3]:
+            print(f"      - {line}")
+    failing = [e for e in results if e.get("status") not in _REAL_PASS
+               and not str(e.get("status", "")).startswith(_REAL_SKIPPED_PREFIX)]
+    if results and status == "OK" and not failing:
+        print(f"\n[OK] {len(results)} 个声明参数均通过真实临时 YAML 扰动 + 整图重建验证")
+        return 0
+    print(f"\n[未通过] 状态计数: {report.get('counts', {})}", file=sys.stderr)
+    print(f"  未确认生效或与声明不符：{[e.get('key') for e in failing]}", file=sys.stderr)
+    return 1
+
+
+def _print_effect_section(script: Path, config_path: Optional[Path], data: dict, args) -> int:
+    """--check-effect goes through the real validator, never an Artist-mutation heuristic."""
+    print("\n=== 参数生效检查 (Effectiveness Check) ===")
+    scope, options = _effect_scope(args, data)
+    reason = ""
+    report = None
+    if config_path is None:
+        reason = "真实扰动校验需要 --config（没有基线配置就没有可比对的 YAML）"
+    elif scope is None:
+        reason = "无法确定作用域，请显式传 --scope" + (f"；候选：{options}" if options else "")
+    else:
+        try:
+            from figpact.effects import check_effects
+            report = check_effects(script, config_path, scope)
+        except Exception as error:
+            reason = f"真实 YAML 扰动校验不可用：{error}"
+    if report is not None:
+        return _print_real_effects(report)
+
+    effects = data.get("param_effects") or {}
+    if not effects and config_path is not None:
+        effects = _run_script_inventory(script, config_path, check_effect=True).get("param_effects") or {}
+    if not effects:
+        print(f"[UNSUPPORTED] 参数生效检查未执行：{reason}", file=sys.stderr)
+        print("  UNSUPPORTED 不是通过 —— 请修复契约/作用域后重跑，不要据此认为参数已生效。",
+              file=sys.stderr)
+        return 2
+    failing = []
+    for name, info in sorted(effects.items()):
+        status = str(info.get("status", "UNKNOWN"))
+        print(f"  • {name:<24} 状态: {status:<20} 关联图元数: {info.get('bound_gids_count', 0)}")
+        if status not in _LEGACY_PASS:
+            failing.append(name)
+    if failing:
+        print(f"\n[警告] 未确认生效的参数：{', '.join(failing)}", file=sys.stderr)
+        return 1
+    print(f"\n[OK] {len(effects)} 个绑定参数均通过扰动生效验证")
+    return 0
+
+
 def cmd_inventory(args: argparse.Namespace) -> int:
     """转发 --inventory 给脚本，把 JSON 打印成人看的清单，支持生效检查。"""
     script = Path(args.script).expanduser().resolve()
@@ -107,10 +192,9 @@ def cmd_inventory(args: argparse.Namespace) -> int:
         return 1
 
     cmd = [sys.executable, "-X", "utf8", str(script), "--inventory"]
-    if getattr(args, "check_effect", False):
-        cmd.append("--check-effect")
-    if args.config:
-        cmd.extend(["--config", str(Path(args.config).expanduser().resolve())])
+    config_path = Path(args.config).expanduser().resolve() if args.config else None
+    if config_path:
+        cmd.extend(["--config", str(config_path)])
 
     res = subprocess.run(cmd, cwd=str(script.parent), capture_output=True, text=True, encoding="utf-8")
     if res.returncode != 0:
@@ -132,7 +216,6 @@ def cmd_inventory(args: argparse.Namespace) -> int:
     items = data.get("items", [])
     unreg = data.get("unregistered", [])
     unb = data.get("unbound", [])
-    effects = data.get("param_effects", {})
 
     print(f"=== 图元清点清单 (共 {len(items)} 个已登记图元) ===")
     for it in items:
@@ -148,19 +231,8 @@ def cmd_inventory(args: argparse.Namespace) -> int:
     for ub in unb:
         print(f"  - {ub}")
 
-    if effects:
-        print("\n=== 参数生效检查 (Effectiveness Check) ===")
-        no_effect_list = []
-        for p, info in effects.items():
-            st = info.get("status", "UNKNOWN")
-            cnt = info.get("bound_gids_count", 0)
-            print(f"  • {p:<24} 状态: {st:<10} 关联图元数: {cnt}")
-            if st == "NO_EFFECT":
-                no_effect_list.append(p)
-        if no_effect_list:
-            print(f"\n[警告] 发现未生效参数 (NO_EFFECT): {', '.join(no_effect_list)}", file=sys.stderr)
-        else:
-            print("\n[OK] 所有被检查的绑定参数均通过扰动生效验证！")
+    if getattr(args, "check_effect", False):
+        return _print_effect_section(script, config_path, data, args)
 
     return 0
 
@@ -232,8 +304,10 @@ def _set_key_path(d: dict, key: str, val):
     cur[parts[-1]] = val
 
 
-def _run_script_inventory(script: Path, cfg_path: Path) -> dict:
+def _run_script_inventory(script: Path, cfg_path: Path, *, check_effect: bool = False) -> dict:
     cmd = [sys.executable, "-X", "utf8", str(script), "--config", str(cfg_path), "--inventory"]
+    if check_effect:
+        cmd.append("--check-effect")
     res = subprocess.run(cmd, cwd=str(script.parent), capture_output=True, text=True, encoding="utf-8")
     text = res.stdout.strip()
     idx = text.find("{")
@@ -458,6 +532,13 @@ def cmd_try(args: argparse.Namespace) -> int:
 
     return 0
 
+def cmd_agent(args: argparse.Namespace) -> int:
+    """本机持久会话：stdin/stdout 上跑 JSON-RPC，stdout 只承载协议本身。"""
+    from figpact.agent_api import serve
+
+    return serve(args.script, args.config, args.scope, output_dir=args.output_dir)
+
+
 def cmd_export_params(args: argparse.Namespace) -> int:
     """从注册表与脚本规范导出全部参数为结构化 JSON。"""
     script = Path(args.script).expanduser().resolve()
@@ -573,6 +654,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_inv.add_argument("--script", required=True, help="绘图脚本路径")
     p_inv.add_argument("--config", default=None, help="配置文件 YAML 路径")
     p_inv.add_argument("--check-effect", action="store_true", help="执行参数生效扰动检查")
+    p_inv.add_argument("--scope", default=None, help="生效检查使用的作用域（脚本声明多个 scope 时必须显式指定）")
     # inspect <gid> --script <py> --config <yaml>
     p_ins = subparsers.add_parser("inspect", help="检查特定 gid 的图元信息")
     p_ins.add_argument("gid", help="要检查的图元 gid")
@@ -606,6 +688,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_ap.add_argument("--script", required=True, help="绘图脚本路径")
     p_ap.add_argument("--config", default=None, help="配置文件 YAML 路径")
     p_ap.add_argument("--output", default=None, help="输出 Markdown 报告路径")
+
+    # agent --script <py> --config <yaml> --scope <name> [--output-dir <dir>]
+    p_agent = subparsers.add_parser("agent", help="本机持久 JSON-RPC 会话：snapshot/inspect/try_layout/render_preview/commit")
+    p_agent.add_argument("--script", required=True, help="绘图脚本路径")
+    p_agent.add_argument("--config", required=True, help="配置文件 YAML 路径")
+    p_agent.add_argument("--scope", required=True, help="会话作用域（一张图一个工作进程）")
+    p_agent.add_argument("--output-dir", default=None, help="发布产物目录（默认与脚本同目录）")
     args = parser.parse_args(argv)
 
     if args.subcommand == "validate":
@@ -628,6 +717,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         return cmd_export_params(args)
     elif args.subcommand == "audit-params":
         return cmd_audit_params(args)
+    elif args.subcommand == "agent":
+        return cmd_agent(args)
     return 0
 
 
