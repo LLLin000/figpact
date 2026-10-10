@@ -811,6 +811,67 @@ def place_peak_labels(
         else:
             unplaced_gids.append(it["gid"])
 
+    # ── 阶段 A 补充：邻近同层标注错位避让（错层 / 引线错位） ──
+    # 当某标签因与同层相邻标签拥挤而在基础候选范围内找不到可用槽位时，
+    # 允许与该邻近标签协同错位：两标签分别向左/向右拉开，引线连回峰位。
+    if unplaced_gids:
+        still_unplaced = []
+        for ugid in unplaced_gids:
+            it = next(item for item in all_items if item["gid"] == ugid)
+            s_idx = it["sample_idx"]
+            resolved = False
+            for pl_idx, pl in enumerate(placed_stage_a):
+                if pl["item"]["sample_idx"] != s_idx:
+                    continue
+                prev_it = pl["item"]
+                if abs(it["anchor_x_mm"] - prev_it["anchor_x_mm"]) > (it["w_mm"] + prev_it["w_mm"] + min_gap_mm * 2):
+                    continue
+                cands_it = [
+                    round(ax_x1_mm - it["w_mm"] / 2.0 - inset_mm, 4),
+                    round(prev_it["anchor_x_mm"] + prev_it["w_mm"] / 2.0 + it["w_mm"] / 2.0 + min_gap_mm, 4),
+                ]
+                other_boxes = [p["box_mm"] for i, p in enumerate(placed_stage_a) if i != pl_idx]
+                for cx2 in cands_it:
+                    cx1 = round(cx2 - it["w_mm"] / 2.0 - prev_it["w_mm"] / 2.0 - min_gap_mm, 4)
+                    lane_y1 = pl["y_mm"]
+                    lane_y2 = pl["y_mm"]
+                    box1 = (cx1 - prev_it["w_mm"] / 2.0, cx1 + prev_it["w_mm"] / 2.0, lane_y1, lane_y1 + prev_it["h_mm"])
+                    box2 = (cx2 - it["w_mm"] / 2.0, cx2 + it["w_mm"] / 2.0, lane_y2, lane_y2 + it["h_mm"])
+                    if box1[0] < ax_x0_mm + inset_mm or box2[1] > ax_x1_mm - inset_mm:
+                        continue
+                    col1 = any(not (box1[3] <= pb[2] or box1[2] >= pb[3]) and max(pb[0] - box1[1], box1[0] - pb[1]) < min_gap_mm - 1e-9 for pb in other_boxes)
+                    if col1:
+                        continue
+                    col2 = any(not (box2[3] <= pb[2] or box2[2] >= pb[3]) and max(pb[0] - box2[1], box2[0] - pb[1]) < min_gap_mm - 1e-9 for pb in other_boxes)
+                    if col2:
+                        continue
+                    g1_p1, g1_p2 = (prev_it["anchor_x_mm"], prev_it["anchor_y_mm"]), (cx1, lane_y1)
+                    g2_p1, g2_p2 = (it["anchor_x_mm"], it["anchor_y_mm"]), (cx2, lane_y2)
+                    if _segment_hits_box_mm(g1_p1, g1_p2, box2) or _segment_hits_box_mm(g2_p1, g2_p2, box1):
+                        continue
+                    if any(_segment_hits_box_mm(g1_p1, g1_p2, pb) for pb in other_boxes):
+                        continue
+                    if any(_segment_hits_box_mm(g2_p1, g2_p2, pb) for pb in other_boxes):
+                        continue
+                    pl["x_mm"] = cx1
+                    pl["box_mm"] = box1
+                    pl["dx_mm"] = cx1 - prev_it["anchor_x_mm"]
+                    placed_stage_a.append({
+                        "item": it,
+                        "x_mm": cx2,
+                        "y_mm": lane_y2,
+                        "box_mm": box2,
+                        "lane": pl["lane"],
+                        "dx_mm": cx2 - it["anchor_x_mm"],
+                    })
+                    resolved = True
+                    break
+                if resolved:
+                    break
+            if not resolved:
+                still_unplaced.append(ugid)
+        unplaced_gids = still_unplaced
+
     # ── 阶段 B：人工偏移 ──
     # final = base + peak_label_shifts_mm[gid]，不重跑避让，重画引线
     final_placed: list[dict] = []
