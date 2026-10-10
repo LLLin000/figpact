@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Optional
 import yaml
 from figpact.config import ConfigError, check_schema
+from figpact.params import export_params_catalog, audit_artists_coverage
 
 
 def _find_schema_in_script(script_path: Path) -> Optional[dict]:
@@ -417,6 +418,94 @@ def cmd_try(args: argparse.Namespace) -> int:
 
     return 0
 
+def cmd_export_params(args: argparse.Namespace) -> int:
+    """从注册表与脚本规范导出全部参数为结构化 JSON。"""
+    script = Path(args.script).expanduser().resolve()
+    if not script.is_file():
+        print(f"[错误] 脚本不存在：{script}", file=sys.stderr)
+        return 1
+    cfg = Path(args.config).expanduser().resolve() if args.config else None
+    catalog = export_params_catalog(script, cfg)
+    if args.json:
+        print(json.dumps(catalog, ensure_ascii=False, indent=2))
+    else:
+        print(f"图表: {catalog['figure']}")
+        for sc_name, sc_data in catalog["scopes"].items():
+            print(f"\n[作用域: {sc_name}]")
+            for grp in sc_data["groups"]:
+                print(f"  === {grp['group']} ===")
+                for p in grp["params"]:
+                    print(f"    • {p['key']:<30} {p['中文名']:<16} 当前值={p['当前值']} [{p['min']}, {p['max']}] {p['调大会怎样']}")
+    return 0
+
+
+def cmd_audit_params(args: argparse.Namespace) -> int:
+    """渲染后遍历所有可见 artist，输出五类可调属性覆盖审计报告。"""
+    script = Path(args.script).expanduser().resolve()
+    if not script.is_file():
+        print(f"[错误] 脚本不存在：{script}", file=sys.stderr)
+        return 1
+    cfg = Path(args.config).expanduser().resolve() if args.config else None
+    report = audit_artists_coverage(script, cfg)
+
+    out_lines = [
+        f"# 参数全集覆盖审计报告 - {script.name}",
+        "",
+        f"- 脚本: `{script}`",
+        f"- 配置: `{cfg or '默认'}`",
+        f"- 总属性数: {report['total_properties']}",
+        "",
+        "## 1. 五类属性统计",
+        "",
+        "| 分类 | 属性项数 | 占比 | 简要说明 |",
+        "| :--- | :---: | :---: | :--- |",
+    ]
+    tot = report["total_properties"] or 1
+    cat_desc = {
+        "已暴露为 YAML 参数": "已在配置文件和 list_params 中声明为可编辑参数",
+        "全局样式（figure_style 统一）": "由统一出版规范锁死（字族、色板、边框/刻度线宽、虚线样式等）",
+        "科学锁定（峰位、显示窗、归一化、归属）": "涉及实验科学真实性（仪器原始数据、显示范围、官能团/峰归属、化学位移定标）",
+        "由其他参数派生": "由几何约束、实测文本包络框或前序参数算法求解派生，不可单独设置",
+        "未覆盖": "属于图元可见特征但尚未归入上述四类的未管辖项",
+    }
+    for cat, count in report["stats"].items():
+        ratio = (count / tot) * 100.0
+        out_lines.append(f"| {cat} | {count} | {ratio:.1f}% | {cat_desc.get(cat, '')} |")
+
+    out_lines.extend([
+        "",
+        "## 2. 未覆盖项清单及建议归类",
+        "",
+    ])
+    if report["uncovered"]:
+        out_lines.append("| 序号 | Artist 类型 | GID / 标识 | 属性 | 当前状态 | 建议归类与理由 |")
+        out_lines.append("| :---: | :--- | :--- | :--- | :--- | :--- |")
+        for idx, item in enumerate(report["uncovered"], 1):
+            out_lines.append(f"| {idx} | {item['artist_type']} | `{item['gid']}` | {item['property']} | 未覆盖 | {item.get('suggestion', '建议归入全局样式或参数')} |")
+    else:
+        out_lines.append("✓ **全部可见图元属性已完整覆盖并归档于前四类，无未覆盖孤立属性。**")
+
+    out_lines.extend([
+        "",
+        "## 3. 详细属性分布清单 (前 15 条抽样)",
+        "",
+        "| Artist 类型 | GID | 属性 | 分类 | 归类理由 |",
+        "| :--- | :--- | :--- | :--- | :--- |",
+    ])
+    for item in report["entries"][:15]:
+        out_lines.append(f"| {item['artist_type']} | `{item['gid']}` | {item['property']} | {item['category']} | {item['reason']} |")
+
+    md_content = "\n".join(out_lines) + "\n"
+
+    if args.output:
+        out_p = Path(args.output).expanduser().resolve()
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(md_content, encoding="utf-8")
+        print(f"[审计] 审计报告已生成至：{out_p}")
+
+    print("\n" + md_content)
+    return 0
+
 
 
 
@@ -466,6 +555,17 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_try.add_argument("--patch", default=None, help="补丁 YAML 文件路径")
     p_try.add_argument("--set", action="append", default=[], help="键值对覆盖 (k=v)，可重复")
 
+    # export-params --script <py> [--config <yaml>] [--json]
+    p_ep = subparsers.add_parser("export-params", help="导出每张图、每个 scope 的全部参数清单为 JSON")
+    p_ep.add_argument("--script", required=True, help="绘图脚本路径")
+    p_ep.add_argument("--config", default=None, help="配置文件 YAML 路径")
+    p_ep.add_argument("--json", action="store_true", help="以 JSON 格式输出")
+
+    # audit-params --script <py> [--config <yaml>] [--output <report.md>]
+    p_ap = subparsers.add_parser("audit-params", help="遍历可见图元所有可调属性并做五类参数全集审计")
+    p_ap.add_argument("--script", required=True, help="绘图脚本路径")
+    p_ap.add_argument("--config", default=None, help="配置文件 YAML 路径")
+    p_ap.add_argument("--output", default=None, help="输出 Markdown 报告路径")
     args = parser.parse_args(argv)
 
     if args.subcommand == "validate":
@@ -484,6 +584,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     elif args.subcommand == "try":
         return cmd_try(args)
 
+    elif args.subcommand == "export-params":
+        return cmd_export_params(args)
+    elif args.subcommand == "audit-params":
+        return cmd_audit_params(args)
     return 0
 
 
