@@ -76,11 +76,13 @@ def inventory(
             summary = repr(art)
 
         params = registry.params_of(gid)
+        snap = _snapshot_artist(art, fig)
         item_entry: dict[str, Any] = {
             "gid": gid,
             "type": art_type,
             "params": params,
             "summary": summary,
+            "snapshot": snap,
         }
         items.append(item_entry)
 

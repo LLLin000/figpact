@@ -189,6 +189,236 @@ def cmd_list_params(args: argparse.Namespace) -> int:
     return res.returncode
 
 
+def _deep_merge_dict(target: dict, patch: dict) -> None:
+    for k, v in patch.items():
+        if isinstance(v, dict) and isinstance(target.get(k), dict):
+            _deep_merge_dict(target[k], v)
+        else:
+            target[k] = v
+
+
+def _apply_set_key(target: dict, key: str, val_str: str) -> None:
+    val = yaml.safe_load(val_str)
+    parts = key.split(".")
+    cur = target
+    for p in parts[:-1]:
+        if p not in cur or not isinstance(cur[p], dict):
+            cur[p] = {}
+        cur = cur[p]
+    cur[parts[-1]] = val
+
+
+def _get_key_path(d: dict, key: str):
+    parts = key.split(".")
+    cur = d
+    for p in parts:
+        if not isinstance(cur, dict) or p not in cur:
+            return None
+        cur = cur[p]
+    return cur
+
+
+def _set_key_path(d: dict, key: str, val):
+    parts = key.split(".")
+    cur = d
+    for p in parts[:-1]:
+        if p not in cur or not isinstance(cur[p], dict):
+            cur[p] = {}
+        cur = cur[p]
+    cur[parts[-1]] = val
+
+
+def _run_script_inventory(script: Path, cfg_path: Path) -> dict:
+    cmd = [sys.executable, "-X", "utf8", str(script), "--config", str(cfg_path), "--inventory"]
+    res = subprocess.run(cmd, cwd=str(script.parent), capture_output=True, text=True, encoding="utf-8")
+    text = res.stdout.strip()
+    idx = text.find("{")
+    if idx >= 0:
+        try:
+            return json.loads(text[idx:])
+        except Exception:
+            pass
+    return {}
+
+
+def _run_script_strict(script: Path, cfg_path: Path) -> tuple[int, list[str]]:
+    cmd = [sys.executable, "-X", "utf8", str(script), "--config", str(cfg_path), "--strict"]
+    res = subprocess.run(cmd, cwd=str(script.parent), capture_output=True, text=True, encoding="utf-8")
+    qa_lines = []
+    for line in (res.stdout + "\n" + res.stderr).splitlines():
+        l = line.strip()
+        if "[QA]" in l or "[验收]" in l or "[未豁免]" in l or "超出坐标框" in l or "压线" in l or "NO_FEASIBLE_SLOT" in l:
+            qa_lines.append(l)
+    return res.returncode, qa_lines
+
+
+def cmd_try(args: argparse.Namespace) -> int:
+    """把 patch/--set 在内存中合并到当前配置，试算位移、QA 差异与参数可行区间。"""
+    import tempfile
+    from figpact.qa import signature
+
+    script = Path(args.script).expanduser().resolve()
+    if not script.is_file():
+        print(f"[错误] 脚本不存在：{script}", file=sys.stderr)
+        return 1
+
+    config_path = Path(args.config).expanduser().resolve()
+    if not config_path.is_file():
+        print(f"[错误] 配置文件不存在：{config_path}", file=sys.stderr)
+        return 1
+
+    base_config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    patched_config = yaml.safe_load(yaml.safe_dump(base_config))
+
+    modified_keys = []
+    if args.patch:
+        patch_path = Path(args.patch).expanduser().resolve()
+        if not patch_path.is_file():
+            print(f"[错误] Patch 文件不存在：{patch_path}", file=sys.stderr)
+            return 1
+        patch_dict = yaml.safe_load(patch_path.read_text(encoding="utf-8")) or {}
+        _deep_merge_dict(patched_config, patch_dict)
+        modified_keys.extend(list(patch_dict.keys()))
+
+    if args.set:
+        for item in args.set:
+            if "=" in item:
+                k, v = item.split("=", 1)
+                _apply_set_key(patched_config, k.strip(), v.strip())
+                modified_keys.append(k.strip())
+
+    with tempfile.TemporaryDirectory(prefix="figpact-try-") as tmp_dir:
+        td = Path(tmp_dir)
+        base_yaml = td / "base.yaml"
+        patched_yaml = td / "patched.yaml"
+
+        base_yaml.write_text(yaml.safe_dump(base_config), encoding="utf-8")
+        patched_yaml.write_text(yaml.safe_dump(patched_config), encoding="utf-8")
+
+        # 1. 运行 baseline 与 try 的 inventory
+        inv_before = _run_script_inventory(script, base_yaml)
+        inv_after = _run_script_inventory(script, patched_yaml)
+
+        # 2. 运行 baseline 与 try 的 strict 检查
+        code_before, qa_before = _run_script_strict(script, base_yaml)
+        code_after, qa_after = _run_script_strict(script, patched_yaml)
+
+        # 计算对象位移 (mm)
+        print("=== 1. 对象位移 (Movement Delta) ===")
+        snap_map_before = {it["gid"]: it.get("snapshot", {}) for it in inv_before.get("items", [])}
+        snap_map_after = {it["gid"]: it.get("snapshot", {}) for it in inv_after.get("items", [])}
+        moved_count = 0
+        # 获取 dpi 用于像素转毫米
+        px_per_mm = 300.0 / 25.4  # 标准 dpi
+        for gid, s_after in snap_map_after.items():
+            s_before = snap_map_before.get(gid)
+            if not s_before:
+                continue
+            bb0 = s_before.get("bbox")
+            bb1 = s_after.get("bbox")
+            if bb0 and bb1:
+                dx_px = ((bb1[0] + bb1[2]) - (bb0[0] + bb0[2])) / 2.0
+                dy_px = ((bb1[1] + bb1[3]) - (bb0[1] + bb0[3])) / 2.0
+                dx_mm = dx_px / px_per_mm
+                dy_mm = dy_px / px_per_mm
+                dist_mm = (dx_mm**2 + dy_mm**2)**0.5
+                if dist_mm > 0.05:
+                    moved_count += 1
+                    print(f"• [{gid}]: dx = {dx_mm:+.2f} mm, dy = {dy_mm:+.2f} mm (位移 {dist_mm:.2f} mm)")
+            elif s_before.get("position") and s_after.get("position"):
+                p0 = s_before["position"]
+                p1 = s_after["position"]
+                dp = ((p1[0] - p0[0])**2 + (p1[1] - p0[1])**2)**0.5
+                if dp > 1e-4:
+                    moved_count += 1
+                    print(f"• [{gid}]: position 改变 {p0} -> {p1}")
+        if moved_count == 0:
+            print("（无图元发生物理位置位移）")
+
+        # 计算 QA 差异
+        print("\n=== 2. QA 差异 (QA Delta) ===")
+        sig_before = {signature(q): q for q in qa_before}
+        sig_after = {signature(q): q for q in qa_after}
+
+        added_sigs = set(sig_after.keys()) - set(sig_before.keys())
+        removed_sigs = set(sig_before.keys()) - set(sig_after.keys())
+
+        if added_sigs:
+            print("【新增阻断/警告】:")
+            for s in sorted(added_sigs):
+                print(f"  + {sig_after[s]}")
+        else:
+            print("【新增阻断/警告】: 无")
+
+        if removed_sigs:
+            print("【消除阻断/警告】:")
+            for s in sorted(removed_sigs):
+                print(f"  - {sig_before[s]}")
+        else:
+            print("【消除阻断/警告】: 无")
+        print(f"Strict 状态: 修改前 exit={code_before} -> 修改后 exit={code_after}")
+
+        # 3. 参数可行区间二分试算
+        print("\n=== 3. 参数可行区间 (Feasible Interval via Bisection) ===")
+        for p_key in set(modified_keys):
+            val_now = _get_key_path(patched_config, p_key)
+            val_orig = _get_key_path(base_config, p_key)
+            if not isinstance(val_now, (int, float)) or isinstance(val_now, bool):
+                continue
+            if val_orig is None:
+                val_orig = 0.0
+
+            def test_candidate(v_test: float) -> bool:
+                c_test = yaml.safe_load(yaml.safe_dump(base_config))
+                _set_key_path(c_test, p_key, v_test)
+                cand_yaml = td / "cand.yaml"
+                cand_yaml.write_text(yaml.safe_dump(c_test), encoding="utf-8")
+                c_ret, _ = _run_script_strict(script, cand_yaml)
+                return c_ret == 0
+
+            # 二分找边界：以基线为锚点分别向两侧探索
+            # 下界 (向负方向)
+            v_orig_val = float(val_orig)
+            # 探索负方向安全边界
+            low = v_orig_val - max(abs(float(val_now) - v_orig_val) * 3.0, 5.0)
+            high = v_orig_val
+            # 确认 high 是通过的
+            iters_low = 0
+            if test_candidate(high):
+                while high - low > 0.02 and iters_low < 12:
+                    mid = (low + high) / 2.0
+                    iters_low += 1
+                    if test_candidate(mid):
+                        high = mid
+                    else:
+                        low = mid
+                feasible_min = high
+            else:
+                feasible_min = v_orig_val
+
+            # 上界 (向正方向)
+            low_u = v_orig_val
+            high_u = v_orig_val + max(abs(float(val_now) - v_orig_val) * 3.0, 5.0)
+            iters_high = 0
+            if test_candidate(low_u):
+                while high_u - low_u > 0.02 and iters_high < 12:
+                    mid = (low_u + high_u) / 2.0
+                    iters_high += 1
+                    if test_candidate(mid):
+                        low_u = mid
+                    else:
+                        high_u = mid
+                feasible_max = low_u
+            else:
+                feasible_max = v_orig_val
+
+            tot_iters = iters_low + iters_high
+            print(f"• {p_key} 可行 [{feasible_min:.2f}, {feasible_max:.2f}] (二分迭代 {tot_iters} 次，收敛阈值 0.02 mm)")
+
+    return 0
+
+
+
 
 def main(argv: Optional[list[str]] = None) -> int:
     """命令行主入口。"""
@@ -229,6 +459,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_lp.add_argument("--script", required=True, help="绘图脚本路径")
     p_lp.add_argument("--config", default=None, help="配置文件 YAML 路径")
 
+    # try --script <py> --config <yaml> [--patch <patch.yaml>] [--set k=v ...]
+    p_try = subparsers.add_parser("try", help="内存合并配置并试算位移、QA差异与参数可行区间")
+    p_try.add_argument("--script", required=True, help="绘图脚本路径")
+    p_try.add_argument("--config", required=True, help="配置文件 YAML 路径")
+    p_try.add_argument("--patch", default=None, help="补丁 YAML 文件路径")
+    p_try.add_argument("--set", action="append", default=[], help="键值对覆盖 (k=v)，可重复")
 
     args = parser.parse_args(argv)
 
@@ -245,6 +481,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         return cmd_inspect(args)
     elif args.subcommand == "list-params":
         return cmd_list_params(args)
+    elif args.subcommand == "try":
+        return cmd_try(args)
 
     return 0
 
