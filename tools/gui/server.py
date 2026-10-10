@@ -12,7 +12,9 @@ import socketserver
 import sys
 import time
 import urllib.parse
+import tempfile
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -22,9 +24,17 @@ sys.path.insert(0, str(ROOT_DIR))
 
 from figpact.params import export_params_catalog
 from figpact.qa import diagnose, diagnostic_key
-from figpact.preview import preview, revision
+from figpact.preview import preview, revision, load_plot
+from figpact.cli import _run_script_strict
+from figpact.patch import apply_patch_text, config_revision, commit_changes, undo_changes, RevisionConflict
 
 BASELINES = {}
+UNDOS = {}
+OUTPUT_STEMS = {
+    "ftir": ("Fig2_FTIR_transmittance_stacked", "Fig2_FTIR_transmittance_stacked_annotated",
+             "Fig2_FTIR_transmittance_raw_processed"),
+    "nmr": ("Fig2_NMR_pure_stacked",),
+}
 
 
 def baseline_preview(info, scope):
@@ -58,6 +68,56 @@ def _get_preset_figure_info(name: str) -> dict[str, Path]:
         "script": ROOT_DIR / "examples" / "ftir" / "plot_ftir.py",
         "config": ROOT_DIR / "examples" / "ftir" / "ftir.yaml",
     }
+def save_candidate(info, figure, scope, patch, expected, mode):
+    started = time.perf_counter()
+    config = info["config"]
+    if config_revision(config) != expected:
+        raise RevisionConflict("配置已更新，请重新加载；你的磁盘修改未被覆盖")
+    catalog = export_params_catalog(info["script"], config)
+    source = config.read_bytes().decode("utf8")
+    text = apply_patch_text(source, patch, catalog)
+    if mode not in ("draft", "publish"):
+        raise ValueError("保存模式必须是 draft 或 publish")
+    with tempfile.TemporaryDirectory(prefix="figpact-save-") as td:
+        candidate = Path(td) / config.name
+        candidate.write_bytes(text.encode("utf8"))
+        load_plot(info["script"], candidate)  # Validate config without constructing a Figure.
+        changes = {config: candidate.read_bytes()}
+        saved_revision = config_revision(candidate)
+        if mode == "publish":
+            outputs = Path(td) / "outputs"
+            outputs.mkdir()
+            code, qa = _run_script_strict(info["script"], candidate, outputs)
+            if code:
+                return {"state": "publish_failed", "qa_kind": "publish_strict", "qa": qa,
+                        "message": f"正式验收失败（退出码 {code}）；配置与正式图均未修改",
+                        "config_revision": config_revision(config), "seconds": time.perf_counter()-started}
+            for stem in OUTPUT_STEMS[figure]:
+                for extension in ("svg", "pdf", "png", "tiff"):
+                    path = outputs / f"{stem}.{extension}"
+                    if not path.is_file():
+                        raise ValueError(f"缺少正式图件 {path.name}，拒绝更新配置和图件")
+                    changes[config.parent / path.name] = path.read_bytes()
+        try:
+            result = preview(script=info["script"], config=candidate, scope=scope)
+            current_qa, png = result["qa"], result["png"]
+        except Exception as error:
+            if mode == "publish":
+                raise
+            current_qa, png = [f"候选图无法构建：{error}"], None
+        UNDOS[figure] = commit_changes(config, expected, changes)
+    for key in list(BASELINES):
+        if key[0] == str(info["script"]):
+            del BASELINES[key]
+    message = ("完整 strict 通过，配置和全部正式图已发布" if mode == "publish" else
+               "草稿已保存；当前 scope 有阻断，不可发布" if current_qa else
+               "草稿已保存；尚未执行完整 strict，未发布正式图")
+    return {"state": "published" if mode == "publish" else "draft",
+            "qa_kind": "publish_strict" if mode == "publish" else "preview_qa",
+            "qa": qa if mode == "publish" else current_qa, "new_png": png, "message": message,
+            "config_revision": saved_revision, "seconds": time.perf_counter()-started}
+
+
 
 
 class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
@@ -106,9 +166,13 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 _validate_scope(fig_name, scope)
                 info = _get_preset_figure_info(fig_name)
+                config_rev = config_revision(info["config"])
                 baseline = baseline_preview(info, scope)
                 catalog = export_params_catalog(info["script"], info["config"]) if path == "/api/params" else {}
-                catalog.update(current_png=baseline["png"], scope=scope, revision=baseline["revision"])
+                if config_revision(info["config"]) != config_rev:
+                    raise RevisionConflict("加载期间配置发生变化，请重新加载")
+                catalog.update(current_png=baseline["png"], scope=scope, revision=baseline["revision"],
+                               config_revision=config_rev, can_undo=fig_name in UNDOS, qa=baseline["qa"])
             except Exception as exc:
                 self._send_error_json(str(exc))
                 return
@@ -122,6 +186,37 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
             return
         url_parts = urllib.parse.urlparse(self.path)
         path = url_parts.path
+        if path in ("/api/save", "/api/undo"):
+            try:
+                payload = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+                figure, scope = payload["figure"], payload["scope"]
+                _validate_scope(figure, scope)
+                info = _get_preset_figure_info(figure)
+                expected = payload["config_revision"]
+                if path == "/api/undo":
+                    if figure not in UNDOS:
+                        raise ValueError("当前会话没有可撤销的保存")
+                    record = UNDOS[figure]
+                    restored = undo_changes(info["config"], expected, record)
+                    del UNDOS[figure]
+                    for key in list(BASELINES):
+                        if key[0] == str(info["script"]):
+                            del BASELINES[key]
+                    response = {"state": "undone",
+                                "message": "上次保存已撤销" + ("，正式图也已恢复" if len(record["before"]) > 1 else "；正式图未改动"),
+                                "config_revision": restored["after"][info["config"]]}
+                else:
+                    patch = yaml.safe_load(payload.get("patch_yaml", "")) or {}
+                    response = save_candidate(info, figure, scope, patch, expected, payload["mode"])
+            except RevisionConflict as error:
+                self._send_error_json(str(error), 409)
+                return
+            except Exception as error:
+                self._send_error_json(str(error))
+                return
+            self._send_json(response)
+            return
+
 
         if path == "/api/try":
             started = time.perf_counter()

@@ -103,6 +103,7 @@
       gap: 16px;
     }
     .group-card {
+      flex-shrink: 0;
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -338,6 +339,11 @@
           <button class="try-btn" id="run-try-btn" onclick="triggerTry()">所见即所得 (Try)</button>
         </div>
       </div>
+      <div class="panel-header" style="justify-content: flex-start; gap: 8px;">
+        <button class="try-btn" id="save-draft-btn" onclick="persistChanges('draft')">保存草稿</button>
+        <button class="try-btn" id="save-publish-btn" onclick="persistChanges('publish')">保存并发布</button>
+        <button class="reset-btn" id="undo-save-btn" onclick="persistChanges('undo')" disabled>撤销保存</button>
+      </div>
       <div class="controls-scroll" id="controls-container">
         <!-- 动态注入分组与控件 -->
       </div>
@@ -388,20 +394,29 @@
     let activeFigure = "ftir";
     let paramPaths = {};
     let previewRequest = 0;
+    let configRevision = "";
+    let catalogRequest = 0;
+    const undoAvailable = {};
 
     // 页面初始化
     window.addEventListener("DOMContentLoaded", () => {
       loadFigureParams("ftir");
     });
 
-    async function loadFigureParams(figId) {
+    async function loadFigureParams(figId, scope = null) {
+      const request = ++catalogRequest;
       activeFigure = figId;
       document.getElementById("figure-select").value = figId;
       document.getElementById("controls-container").innerHTML = "<div style='color: #94a3b8; font-size: 0.85rem;'>正在加载参数清单...</div>";
       try {
-        const res = await fetch(`/api/params?figure=${encodeURIComponent(figId)}`);
-        currentCatalog = await res.json();
-        if (!res.ok) throw new Error(currentCatalog.error);
+        const res = await fetch(`/api/params?figure=${encodeURIComponent(figId)}` + (scope ? `&scope=${encodeURIComponent(scope)}` : ""));
+        const catalog = await res.json();
+        if (request !== catalogRequest || figId !== activeFigure) return;
+        if (!res.ok) throw new Error(catalog.error);
+        currentCatalog = catalog;
+        configRevision = catalog.config_revision;
+        undoAvailable[figId] = catalog.can_undo;
+        document.getElementById("undo-save-btn").disabled = !undoAvailable[figId];
         document.getElementById("header-script-info").innerText = currentCatalog.script;
 
         // 设置 scope 下拉列表
@@ -438,6 +453,14 @@
         if (currentCatalog.current_png) {
           document.getElementById("figure-img").src = "data:image/png;base64," + currentCatalog.current_png;
           document.getElementById("img-caption").innerText = `基线渲染 · ${currentCatalog.figure} [${activeScope}]`;
+        }
+        const qaBox = document.getElementById("qa-container");
+        qaBox.innerHTML = "";
+        for (const text of [`[${activeScope}] 基线检查：${currentCatalog.qa.length ? "有阻断，不可发布" : "当前版本通过，未正式发布"}`, ...currentCatalog.qa]) {
+          const item = document.createElement("div");
+          item.className = "qa-item " + (currentCatalog.qa.length ? "qa-block" : "qa-pass");
+          item.innerText = text;
+          qaBox.appendChild(item);
         }
 
         renderControls();
@@ -501,9 +524,9 @@
       if (relations.length) {
         const row = document.createElement("div");
         row.className = "group-card";
-        row.innerHTML = `<label for="bulk-gap-mm">全部相邻间距（mm）</label>
-          <input id="bulk-gap-mm" type="number" min="0" max="100" step="0.05" placeholder="输入毫米值">
-          <button class="try-btn" onclick="applyAllGaps()">应用到本组</button>`;
+        row.innerHTML = `<div class="param-row"><label for="bulk-gap-mm">全部相邻间距（mm）</label>
+          <div class="param-input-wrap"><input id="bulk-gap-mm" type="number" required min="0" max="100" step="0.05" placeholder="毫米值">
+          <button class="try-btn" onclick="applyAllGaps()">应用到本组</button></div></div>`;
         container.appendChild(row);
       }
       scopeData.groups.forEach(grp => {
@@ -680,6 +703,63 @@
       navigator.clipboard.writeText(text);
       alert("YAML Patch 已复制到剪贴板！");
     }
+    async function persistChanges(mode) {
+      const figure = activeFigure, scope = activeScope;
+      const patchYaml = updateYamlPatch();
+      if (mode === "draft" && !patchYaml) { alert("没有需要保存的改动"); return; }
+      ++previewRequest;
+      const controls = [...document.querySelectorAll("button,input,select")].map(el => [el, el.disabled]);
+      controls.forEach(([el]) => { el.disabled = true; });
+      const mask = document.getElementById("loading-mask");
+      mask.firstElementChild.innerText = mode === "publish" ? "正在验收全部输出，合格后才发布..." : "正在保存或撤销配置...";
+      mask.style.display = "flex";
+      try {
+        const res = await fetch(mode === "undo" ? "/api/undo" : "/api/save", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({figure, scope, patch_yaml: patchYaml, mode, config_revision: configRevision})
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        if (data.state !== "publish_failed") {
+          configRevision = data.config_revision;
+          undoAvailable[figure] = mode !== "undo";
+          if (mode === "undo") {
+            await loadFigureParams(figure, scope);
+          } else {
+            baselineValues = structuredClone(currentValues);
+            for (const scopeData of Object.values(currentCatalog.scopes)) {
+              for (const group of scopeData.groups) {
+                for (const param of group.params) param.当前值 = structuredClone(currentValues[param.key]);
+              }
+            }
+            updateYamlPatch();
+          }
+        }
+        if (data.new_png) document.getElementById("figure-img").src = "data:image/png;base64," + data.new_png;
+        const message = data.message + (data.seconds ? ` · ${data.seconds.toFixed(2)} 秒` : "");
+        document.getElementById("img-caption").innerText = message
+          + (mode === "draft" && !data.new_png ? "；画面仍是旧预览，当前草稿无法构图" :
+             data.state === "publish_failed" ? "；画面未更新，仍是上次预览" : "");
+        const qaBox = document.getElementById("qa-container");
+        qaBox.innerHTML = "";
+        const blocked = data.state === "publish_failed" || (data.state === "draft" && data.qa.length > 0);
+        for (const text of [message, ...(data.qa || [])]) {
+          const item = document.createElement("div");
+          item.className = "qa-item " + (blocked ? "qa-block" : "qa-movement");
+          item.innerText = text;
+          qaBox.appendChild(item);
+        }
+      } catch (error) {
+        alert("保存失败：" + error.message);
+        document.getElementById("preview-status").innerText = error.message;
+      } finally {
+        controls.forEach(([el, disabled]) => { el.disabled = disabled; });
+        document.getElementById("undo-save-btn").disabled = !undoAvailable[activeFigure];
+        mask.style.display = "none";
+        mask.firstElementChild.innerText = "正在生成当前版本预览...";
+      }
+    }
+
 
     // 触发后端 figpact try
     async function triggerTry(allowUnchanged = false) {
@@ -791,8 +871,10 @@
       } catch (err) {
         alert("请求异常: " + err);
       } finally {
-        mask.style.display = "none";
-        btn.disabled = false;
+        if (request === previewRequest) {
+          mask.style.display = "none";
+          btn.disabled = false;
+        }
       }
     }
   </script>
