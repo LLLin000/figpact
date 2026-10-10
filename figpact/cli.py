@@ -168,6 +168,20 @@ def cmd_inspect(args: argparse.Namespace) -> int:
 
     res = subprocess.run(cmd, cwd=str(script.parent))
     return res.returncode
+def cmd_list_params(args: argparse.Namespace) -> int:
+    """转发 --list-params 给脚本。"""
+    script = Path(args.script).expanduser().resolve()
+    if not script.is_file():
+        print(f"[错误] 脚本不存在：{script}", file=sys.stderr)
+        return 1
+
+    cmd = [sys.executable, "-X", "utf8", str(script), "--list-params"]
+    if args.config:
+        cmd.extend(["--config", str(Path(args.config).expanduser().resolve())])
+
+    res = subprocess.run(cmd, cwd=str(script.parent))
+    return res.returncode
+
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -204,6 +218,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_exp = subparsers.add_parser("export", help="导出图表（等价于 render --strict）")
     p_exp.add_argument("--script", required=True, help="绘图脚本路径")
     p_exp.add_argument("--config", default=None, help="配置文件 YAML 路径")
+    # list-params --script <py> [--config <yaml>]
+    p_lp = subparsers.add_parser("list-params", help="按可见对象分组打印全部参数清单与可微调对象")
+    p_lp.add_argument("--script", required=True, help="绘图脚本路径")
+    p_lp.add_argument("--config", default=None, help="配置文件 YAML 路径")
+
 
     args = parser.parse_args(argv)
 
@@ -218,6 +237,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         return cmd_inventory(args)
     elif args.subcommand == "inspect":
         return cmd_inspect(args)
+    elif args.subcommand == "list-params":
+        return cmd_list_params(args)
 
     return 0
 
