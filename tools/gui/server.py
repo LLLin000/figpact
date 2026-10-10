@@ -28,56 +28,69 @@ sys.path.insert(0, str(ROOT_DIR))
 
 from figpact.cli import (
     _deep_merge_dict,
-    _run_script_inventory,
     _run_script_strict,
 )
 from figpact.params import export_params_catalog
 from figpact.qa import diagnose, diagnostic_key
 
 
-def _render_script_png_base64(script_path: Path, config_path: Path) -> Optional[str]:
-    """通过子进程以 Agg 后端静默渲染图表并返回 PNG base64 字符串。"""
-    code = """import sys, base64, io, importlib.util
+def _run_scoped_plot(script_path: Path, config_path: Path, scope: str, *, geometry=False):
+    """Load the requested scope; never silently substitute another panel."""
+    code = """import sys, base64, io, json, importlib.util
 from pathlib import Path
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
-script_p = Path(sys.argv[1]).resolve()
-cfg_p = Path(sys.argv[2]).resolve()
-
+script_p, cfg_p = (Path(p).resolve() for p in sys.argv[1:3])
+scope, mode = sys.argv[3:5]
+sys.path.insert(0, str(script_p.parent))
+sys.path.insert(0, str(script_p.parents[2]))
 spec = importlib.util.spec_from_file_location('script_mod', script_p)
 mod = importlib.util.module_from_spec(spec)
 sys.argv = [script_p.name, '--config', str(cfg_p), '--inventory']
 try:
     spec.loader.exec_module(mod)
-except SystemExit:
-    pass
-
-fig = getattr(mod, 'fig', None)
-if fig is None and hasattr(mod, 'build_figure_and_registry'):
-    fig, _ = mod.build_figure_and_registry('annotated')
-
-if fig is not None:
+except SystemExit as exc:
+    if exc.code not in (None, 0):
+        raise
+if scope not in mod.SCOPES:
+    raise ValueError('Unknown scope: ' + scope)
+if hasattr(mod, 'build_figure_and_registry'):
+    fig, reg = mod.build_figure_and_registry(scope)
+else:
+    fig, reg = mod.fig, mod.reg
+if mode == 'geometry':
+    from figpact.inventory import inventory
+    result = inventory(fig, reg)
+else:
     buf = io.BytesIO()
     fig.savefig(buf, format='png', dpi=150, bbox_inches='tight')
-    plt.close(fig)
-    print('PNG_B64_DATA:' + base64.b64encode(buf.getvalue()).decode('ascii'))
+    result = base64.b64encode(buf.getvalue()).decode('ascii')
+print('SCOPED_RESULT:' + json.dumps(result, ensure_ascii=False))
+plt.close(fig)
 """
-    try:
-        res = subprocess.run(
-            [sys.executable, "-X", "utf8", "-c", code, str(script_path), str(config_path)],
-            cwd=str(script_path.parent),
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        )
-        for line in res.stdout.splitlines():
-            if line.startswith("PNG_B64_DATA:"):
-                return line[len("PNG_B64_DATA:"):].strip()
-    except Exception as e:
-        print(f"[渲染错误] {e}", file=sys.stderr)
-    return None
+    res = subprocess.run(
+        [sys.executable, "-X", "utf8", "-c", code, str(script_path), str(config_path),
+         scope, "geometry" if geometry else "png"],
+        cwd=str(script_path.parent), capture_output=True, text=True, encoding="utf-8",
+    )
+    if res.returncode:
+        raise ValueError(res.stderr.strip() or res.stdout.strip())
+    for line in reversed(res.stdout.splitlines()):
+        if line.startswith("SCOPED_RESULT:"):
+            return json.loads(line[len("SCOPED_RESULT:"):])
+    raise ValueError("绘图脚本没有返回所选 scope")
+
+
+def _render_script_png_base64(script_path: Path, config_path: Path, scope: str) -> str:
+    return _run_scoped_plot(script_path, config_path, scope)
+
+
+def _validate_scope(name: str, scope: str) -> None:
+    scopes = {"ftir": ("main", "annotated", "compare_raw", "compare_processed"),
+              "nmr": ("main",)}
+    if name not in scopes or scope not in scopes[name]:
+        raise ValueError(f"无效图表或 scope：{name}/{scope}")
 
 
 def _get_preset_figure_info(name: str) -> dict[str, Path]:
@@ -86,6 +99,8 @@ def _get_preset_figure_info(name: str) -> dict[str, Path]:
             "script": ROOT_DIR / "examples" / "nmr" / "08 NMR.py",
             "config": ROOT_DIR / "examples" / "nmr" / "nmr.yaml",
         }
+    if name != "ftir":
+        raise ValueError(f"未知图表：{name}")
     return {
         "script": ROOT_DIR / "examples" / "ftir" / "plot_ftir.py",
         "config": ROOT_DIR / "examples" / "ftir" / "ftir.yaml",
@@ -134,11 +149,16 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == "/api/params":
             fig_name = query.get("figure", ["ftir"])[0]
-            info = _get_preset_figure_info(fig_name)
-            catalog = export_params_catalog(info["script"], info["config"])
-            # 渲染当前基线 PNG
-            current_png_b64 = _render_script_png_base64(info["script"], info["config"])
-            catalog["current_png"] = current_png_b64
+            scope = query.get("scope", ["annotated" if fig_name == "ftir" else "main"])[0]
+            try:
+                _validate_scope(fig_name, scope)
+                info = _get_preset_figure_info(fig_name)
+                catalog = export_params_catalog(info["script"], info["config"])
+                catalog["current_png"] = _render_script_png_base64(info["script"], info["config"], scope)
+                catalog["scope"] = scope
+            except ValueError as exc:
+                self._send_error_json(str(exc))
+                return
             self._send_json(catalog)
             return
 
@@ -162,6 +182,12 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
             fig_name = payload.get("figure", "ftir")
             patch_yaml_str = payload.get("patch_yaml", "")
             run_bisection = payload.get("bisection", False)
+            scope = payload.get("scope")
+            try:
+                _validate_scope(fig_name, scope)
+            except ValueError as exc:
+                self._send_error_json(str(exc))
+                return
 
             info = _get_preset_figure_info(fig_name)
             script = info["script"]
@@ -183,8 +209,8 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
                 patched_yaml.write_text(yaml.safe_dump(patched_config), encoding="utf-8")
 
                 # 1. 运行 inventory 并计算位移
-                inv_before = _run_script_inventory(script, base_yaml_path)
-                inv_after = _run_script_inventory(script, patched_yaml)
+                inv_before = _run_scoped_plot(script, base_yaml_path, scope, geometry=True)
+                inv_after = _run_scoped_plot(script, patched_yaml, scope, geometry=True)
 
                 snap_map_before = {it["gid"]: it.get("snapshot", {}) for it in inv_before.get("items", [])}
                 snap_map_after = {it["gid"]: it.get("snapshot", {}) for it in inv_after.get("items", [])}
@@ -231,7 +257,7 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
                 }
 
                 # 3. 实时渲染新图 PNG
-                new_png_b64 = _render_script_png_base64(script, patched_yaml)
+                new_png_b64 = _render_script_png_base64(script, patched_yaml, scope)
 
                 # 4. 可选二分可行区间
                 feasible_intervals = []
@@ -289,6 +315,7 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
 
                 response_data = {
                     "figure": fig_name,
+                    "scope": scope,
                     "movements": movements,
                     "qa_delta": qa_delta,
                     "new_png": new_png_b64,

@@ -386,6 +386,8 @@
     let currentValues = {};
     let activeScope = "main";
     let activeFigure = "ftir";
+    let paramPaths = {};
+    let previewRequest = 0;
 
     // 页面初始化
     window.addEventListener("DOMContentLoaded", () => {
@@ -397,8 +399,9 @@
       document.getElementById("figure-select").value = figId;
       document.getElementById("controls-container").innerHTML = "<div style='color: #94a3b8; font-size: 0.85rem;'>正在加载参数清单...</div>";
       try {
-        const res = await fetch(`/api/params?figure=${figId}`);
+        const res = await fetch(`/api/params?figure=${encodeURIComponent(figId)}`);
         currentCatalog = await res.json();
+        if (!res.ok) throw new Error(currentCatalog.error);
         document.getElementById("header-script-info").innerText = currentCatalog.script;
 
         // 设置 scope 下拉列表
@@ -411,13 +414,25 @@
           opt.innerText = sc;
           scopeSelect.appendChild(opt);
         });
-        activeScope = scopes.includes("annotated") ? "annotated" : scopes[0];
+        activeScope = currentCatalog.scope;
         scopeSelect.value = activeScope;
 
         // 记录初始基线值
         baselineValues = {};
         currentValues = {};
         collectAllCurrentValues();
+        paramPaths = {};
+        for (const data of Object.values(currentCatalog.scopes)) {
+          for (const group of data.groups) {
+            for (const param of group.params) {
+              paramPaths[param.key] = param.path;
+              if (!(param.key in currentValues)) {
+                baselineValues[param.key] = structuredClone(param.当前值);
+                currentValues[param.key] = structuredClone(param.当前值);
+              }
+            }
+          }
+        }
 
         // 渲染图表
         if (currentCatalog.current_png) {
@@ -436,10 +451,11 @@
       loadFigureParams(figId);
     }
 
-    function changeScope(sc) {
+    async function changeScope(sc) {
       activeScope = sc;
       renderControls();
       updateYamlPatch();
+      await triggerTry(true);
     }
 
     function collectAllCurrentValues() {
@@ -593,15 +609,13 @@
         const base = baselineValues[k];
         if (JSON.stringify(val) !== JSON.stringify(base)) {
           changedCount++;
-          // 处理形如 shifts_mm.main.ha 或 peak_label_shifts_mm.main.gid
-          const parts = k.split(".");
-          if (parts.length === 1) {
-            patchObj[parts[0]] = val;
-          } else if (parts.length === 3) {
-            patchObj[parts[0]] = patchObj[parts[0]] || {};
-            patchObj[parts[0]][parts[1]] = patchObj[parts[0]][parts[1]] || {};
-            patchObj[parts[0]][parts[1]][parts[2]] = val;
+          const path = paramPaths[k];
+          if (!path) throw new Error(`参数没有 YAML 路径：${k}`);
+          let node = patchObj;
+          for (const part of path.slice(0, -1)) {
+            node = node[part] ??= {};
           }
+          node[path[path.length - 1]] = val;
         }
       }
 
@@ -638,14 +652,16 @@
     }
 
     // 触发后端 figpact try
-    async function triggerTry() {
+    async function triggerTry(allowUnchanged = false) {
       const patchYaml = updateYamlPatch();
-      if (!patchYaml) {
+      if (!patchYaml && !allowUnchanged) {
         alert("未修改任何参数，无需试算！");
         return;
       }
       const mask = document.getElementById("loading-mask");
       const btn = document.getElementById("run-try-btn");
+      const request = ++previewRequest;
+      const figure = activeFigure, scope = activeScope;
       mask.style.display = "flex";
       btn.disabled = true;
 
@@ -654,12 +670,13 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            figure: activeFigure,
+            figure, scope,
             patch_yaml: patchYaml,
             bisection: false // 保持即时响应
           })
         });
         const data = await res.json();
+        if (request !== previewRequest || figure !== activeFigure || scope !== activeScope) return;
         if (data.error) {
           alert("试算报错: " + data.error);
           return;
@@ -668,7 +685,7 @@
         // 更新新 PNG
         if (data.new_png) {
           document.getElementById("figure-img").src = "data:image/png;base64," + data.new_png;
-          document.getElementById("img-caption").innerText = `Try 即时渲染 · ${data.figure} · ${data.qa_delta.status_text}`;
+          document.getElementById("img-caption").innerText = `Try 渲染 · ${data.figure} [${data.scope}] · ${data.qa_delta.status_text}`;
         }
 
         // 渲染 QA 与位移

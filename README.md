@@ -39,6 +39,10 @@ figpact inspect <gid> --script <py> [--config <yaml>]
 查看新预览、毫米位移与 QA 差异。服务仅监听本机，同端口本机来源可访问，
 外站 Origin 请求在执行绘图前返回 403。
 
+Scope 切换会重新预览所选版本，未保存值跨 scope 保留；对照图保留上下两格，
+位移只作用于参数指定的那一格。请求中的无效 scope 会被拒绝。参数目录的
+`path` 是实际 YAML 路径段，含点号的完整 GID 是一个键，不能按点号拆开。
+
 试算使用临时发布目录，不修改正式输出；即使 QA 不通过，仍可查看候选预览。
 界面目前不自动保存配置或导出正式图：点击“复制 Patch”，将对应改动合并到
 该图 YAML，再运行 `python -m figpact render --script <py> --config <yaml> --strict`。

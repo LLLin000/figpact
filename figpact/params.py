@@ -98,6 +98,7 @@ def export_params_catalog(script_path: Path, config_path: Optional[Path] = None)
             step = 1 if p_type == "int" else (0.05 if "anchor" in key or "width" in key or "pt" in key else 0.1)
             param_list.append({
                 "key": key,
+                "path": [key],
                 "中文名": cname,
                 "所属可见对象分组": g_title,
                 "类型": p_type,
@@ -122,6 +123,7 @@ def export_params_catalog(script_path: Path, config_path: Optional[Path] = None)
             val = bool(cur_cfg.get(bk, False))
             bool_list.append({
                 "key": bk,
+                "path": [bk],
                 "中文名": "标注显示ppm后缀" if bk == "show_ppm" else bk,
                 "所属可见对象分组": "开关 (Booleans)",
                 "类型": "bool",
@@ -159,6 +161,7 @@ def export_params_catalog(script_path: Path, config_path: Optional[Path] = None)
             cur_val = sc_shifts.get(sid, 0.0)
             shift_params.append({
                 "key": f"shifts_mm.{sc}.{sid}",
+                "path": ["shifts_mm", sc, sid],
                 "中文名": f"层位移 ({sid})" if sample_ids else f"曲线位移 ({sid})",
                 "所属可见对象分组": "位移 (Shifts)",
                 "类型": "float",
@@ -184,6 +187,7 @@ def export_params_catalog(script_path: Path, config_path: Optional[Path] = None)
             cur_pair = sc_peak_shifts.get(short_gid, [0.0, 0.0])
             shift_params.append({
                 "key": f"peak_label_shifts_mm.{sc}.{short_gid}",
+                "path": ["peak_label_shifts_mm", sc, short_gid],
                 "中文名": f"标注微调 {short_gid} ({_grp})",
                 "所属可见对象分组": "标注位移 (Peak Label Shifts)",
                 "类型": "[dx,dy]",
