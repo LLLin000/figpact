@@ -7,6 +7,17 @@ from pathlib import Path
 from typing import Optional
 from figpact.qa import signature
 
+#: 试算沙箱开关。设了它 = 这一次只许写沙箱，正式输出一个字节都不许动。
+#: 发布目标由**引擎**持有：任何走 `publish()` 的脚本都被自动改道，
+#: 不必逐脚本去改调用点。`figpact try` 就是靠它跑试算的。
+PROBE_ENV = "FIGPACT_PROBE_DIR"
+
+
+def probe_dir() -> Optional[Path]:
+    """当前试算沙箱目录；没设 `FIGPACT_PROBE_DIR` 时返回 None（= 正式输出）。"""
+    val = os.environ.get(PROBE_ENV, "").strip()
+    return Path(val) if val else None
+
 
 def staging_dir(prefix: str = "figpact-") -> Path:
     """创建临时暂存目录。"""
@@ -14,9 +25,12 @@ def staging_dir(prefix: str = "figpact-") -> Path:
 
 
 def publish(staging: Path | str, target: Path | str) -> list[str]:
-    """将暂存目录下的产物原子替换到目标目录（先写临时文件再 os.replace）。"""
+    """将暂存目录下的产物原子替换到目标目录（先写临时文件再 os.replace）。
+
+    试算模式下 `target` 被沙箱目录顶掉 —— 这是 try 不会覆盖正式输出的底线。
+    """
     src_dir = Path(staging)
-    dst_dir = Path(target)
+    dst_dir = probe_dir() or Path(target)
     dst_dir.mkdir(parents=True, exist_ok=True)
 
     written: list[str] = []

@@ -246,11 +246,20 @@ def _cli(argv: list[str]) -> argparse.Namespace:
     ap.add_argument("--inventory", action="store_true", help="打印可见图元清单 JSON 并退出")
     ap.add_argument("--check-effect", action="store_true", help="在清点中执行参数生效扰动检查")
     ap.add_argument("--strict", action="store_true", help="严格模式（有阻断项则退出码非零，不发布正式输出）")
+    ap.add_argument("--probe", default=None,
+                    help="试算沙箱目录：给定时产物只写这里，正式输出目录一个字节都不动")
     return ap.parse_args(argv)
 
 
 ARGS = _cli(sys.argv[1:])
 CONFIG_PATH = pathlib.Path(ARGS.config).expanduser().resolve() if ARGS.config else ROOT / "nmr.yaml"
+
+#: **试算隔离**：`--probe <dir>` 或环境变量 `FIGPACT_PROBE_DIR`（`figpact try` 会设）一旦生效，
+#: 下面所有 savefig 都落到一次性沙箱里——这个脚本不走 publish()，直接写盘。
+PROBE_DIR = (pathlib.Path(ARGS.probe).expanduser().resolve() if ARGS.probe
+             else fp_publish.probe_dir())
+OUT_DIR = PROBE_DIR or ROOT
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # 尝试加载 figpact shifts_mm 配置
 SHIFTS_CONFIG = {}
@@ -307,15 +316,15 @@ if ARGS.inventory:
     sys.exit(0)
 
 # 导出 2x2 总图
-out_2x2 = ROOT / "Fig2_NMR_Combined_2x2.png"
+out_2x2 = OUT_DIR / "Fig2_NMR_Combined_2x2.png"
 fs.qa_report(fig2x2, "NMR 2×2 组合图")
 blockers_2x2 = fp_qa.blocking_problems(fig2x2)
 all_blockers = [f"[2x2] {b}" for b in blockers_2x2]
 
 if not ARGS.strict or not all_blockers:
     fig2x2.savefig(out_2x2, dpi=DPI, bbox_inches="tight")
-    fig2x2.savefig(ROOT / "Fig2_NMR_Combined_2x2.pdf", bbox_inches="tight")
-    fig2x2.savefig(ROOT / "Fig2_NMR_Combined_2x2.svg", bbox_inches="tight")
+    fig2x2.savefig(OUT_DIR / "Fig2_NMR_Combined_2x2.pdf", bbox_inches="tight")
+    fig2x2.savefig(OUT_DIR / "Fig2_NMR_Combined_2x2.svg", bbox_inches="tight")
     print("已生成 2x2 复合总图:", out_2x2)
 # ==============================================================================
 # 4. 同时导出 4 张独立的 SI 附录图 (Figure S1 ~ S4，各自独立作用域 si_s1 ~ si_s4)
@@ -357,7 +366,7 @@ for i, cfg in enumerate(configs):
     for b in blockers_si:
         all_blockers.append(f"[{si_scope}] {b}")
     if not ARGS.strict or not blockers_si:
-        fig_si.savefig(ROOT / si_name, dpi=300, bbox_inches="tight")
+        fig_si.savefig(OUT_DIR / si_name, dpi=300, bbox_inches="tight")
         print("已生成独立 SI 图件:", si_name)
     plt.close(fig_si)
 
@@ -369,4 +378,4 @@ if all_blockers:
         print("\n[严格模式] 存在未豁免阻断项，拒绝发布，退出码 1！")
         sys.exit(1)
 
-print("全部出版级核磁套图生成完毕！")
+print(f"全部出版级核磁套图生成完毕！（输出目录：{OUT_DIR}）")

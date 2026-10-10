@@ -2,8 +2,11 @@
 import argparse
 import importlib.util
 import json
+import os
+import shutil
 import subprocess
 import sys
+import tempfile
 for _stream in (sys.stdout, sys.stderr):
     try:
         _stream.reconfigure(encoding="utf-8", errors="replace")
@@ -242,9 +245,33 @@ def _run_script_inventory(script: Path, cfg_path: Path) -> dict:
     return {}
 
 
-def _run_script_strict(script: Path, cfg_path: Path) -> tuple[int, list[str]]:
-    cmd = [sys.executable, "-X", "utf8", str(script), "--config", str(cfg_path), "--strict"]
-    res = subprocess.run(cmd, cwd=str(script.parent), capture_output=True, text=True, encoding="utf-8")
+def _run_script_strict(script: Path, cfg_path: Path, probe_dir: Optional[Path] = None) -> tuple[int, list[str]]:
+    """跑 `--strict`。**永远是试算**：产物只许落进 probe_dir。
+
+    隔离归这条共享路径管，不归调用方管 —— 谁调它（`figpact try`、GUI 的试算面板）
+    都拿不到「试算把正式输出覆盖了」这个结果：
+      ① 设 `FIGPACT_PROBE_DIR`，凡走 `figpact.publish.publish()` 的脚本自动改道；
+      ② 脚本自己支持 `--probe <dir>` 的再显式传一遍（直接 savefig 的脚本靠它）。
+    没给 probe_dir 就自建一个临时目录，跑完删掉。
+    """
+    own_tmp = None
+    if probe_dir is None:
+        own_tmp = tempfile.mkdtemp(prefix="figpact-probe-")
+        probe_dir = Path(own_tmp)
+    try:
+        cmd = [sys.executable, "-X", "utf8", str(script), "--config", str(cfg_path), "--strict"]
+        try:
+            src = script.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            src = ""
+        if '"--probe"' in src or "'--probe'" in src:
+            cmd.extend(["--probe", str(probe_dir)])
+        env = {**os.environ, "FIGPACT_PROBE_DIR": str(probe_dir)}
+        res = subprocess.run(cmd, cwd=str(script.parent), capture_output=True, text=True,
+                             encoding="utf-8", env=env)
+    finally:
+        if own_tmp:
+            shutil.rmtree(own_tmp, ignore_errors=True)
     qa_lines = []
     for line in (res.stdout + "\n" + res.stderr).splitlines():
         l = line.strip()
@@ -255,7 +282,6 @@ def _run_script_strict(script: Path, cfg_path: Path) -> tuple[int, list[str]]:
 
 def cmd_try(args: argparse.Namespace) -> int:
     """把 patch/--set 在内存中合并到当前配置，试算位移、QA 差异与参数可行区间。"""
-    import tempfile
     from figpact.qa import signature
 
     script = Path(args.script).expanduser().resolve()
@@ -292,6 +318,9 @@ def cmd_try(args: argparse.Namespace) -> int:
         td = Path(tmp_dir)
         base_yaml = td / "base.yaml"
         patched_yaml = td / "patched.yaml"
+        # 试算沙箱：四条路径（基线/候选/异常/二分）全部只许写这里，
+        # examples 里的正式输出由 hash 前后比对把关（见 commit 里的验收脚本）。
+        probe = td / "probe"
 
         base_yaml.write_text(yaml.safe_dump(base_config), encoding="utf-8")
         patched_yaml.write_text(yaml.safe_dump(patched_config), encoding="utf-8")
@@ -301,8 +330,8 @@ def cmd_try(args: argparse.Namespace) -> int:
         inv_after = _run_script_inventory(script, patched_yaml)
 
         # 2. 运行 baseline 与 try 的 strict 检查
-        code_before, qa_before = _run_script_strict(script, base_yaml)
-        code_after, qa_after = _run_script_strict(script, patched_yaml)
+        code_before, qa_before = _run_script_strict(script, base_yaml, probe)
+        code_after, qa_after = _run_script_strict(script, patched_yaml, probe)
 
         # 计算对象位移 (mm)
         print("=== 1. 对象位移 (Movement Delta) ===")
@@ -382,7 +411,7 @@ def cmd_try(args: argparse.Namespace) -> int:
                 _set_key_path(c_test, p_key, v_test)
                 cand_yaml = td / "cand.yaml"
                 cand_yaml.write_text(yaml.safe_dump(c_test), encoding="utf-8")
-                c_ret, _ = _run_script_strict(script, cand_yaml)
+                c_ret, _ = _run_script_strict(script, cand_yaml, probe)
                 return c_ret == 0
 
             # 二分找边界：以基线为锚点分别向两侧探索

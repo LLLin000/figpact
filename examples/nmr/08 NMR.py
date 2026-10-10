@@ -132,6 +132,8 @@ def _cli(argv: list[str]) -> argparse.Namespace:
                     help="在清点中执行参数生效扰动检查")
     ap.add_argument("--inspect", default=None,
                     help="检查指定 gid 的图元信息")
+    ap.add_argument("--probe", default=None,
+                    help="试算沙箱目录：给定时产物只写这里，正式输出目录一个字节都不动")
     return ap.parse_args(argv)
 
 
@@ -302,12 +304,17 @@ PEAK_LABEL_SHIFTS = CONFIG["peak_label_shifts_mm"]
 SHOW_PPM = CONFIG["show_ppm"]
 SHIFTS_MM = CONFIG["shifts_mm"]
 STRICT = ARGS.strict
+#: **试算隔离**：`--probe <dir>` 或环境变量 `FIGPACT_PROBE_DIR`（`figpact try` 会设）
+#: 一旦生效，OUT_DIR 就是一次性的沙箱，正式输出目录一个字节都不动。
+PROBE_DIR = (pathlib.Path(ARGS.probe).expanduser().resolve() if ARGS.probe
+             else fp_publish.probe_dir())
+OUT_DIR = PROBE_DIR or ROOT
 STAGING = pathlib.Path(tempfile.mkdtemp(prefix="nmr-stage-"))
 #: 存量缺陷基线。**这是 NMR 逼出来的规范补充**：
 #: FTIR 的存量问题（字形下限、贴边）本来就在非阻断集合里，所以不需要基线；
 #: NMR 的存量问题恰好落在阻断集合里（标签重叠、文字压线），没有基线的话
 #: `--strict` 永远是红的，门就废了。基线让门只对**回归**报警，不对旧账报警。
-EXEMPT_PATH = ROOT / "qa_exemptions.json"
+EXEMPT_PATH = OUT_DIR / "qa_exemptions.json"
 
 
 def _signature(problem: str) -> str:
@@ -1033,6 +1040,7 @@ if not _blockers:
 elif not _new:
     print("[验收] 无**未豁免**阻断项；但有 "
           f"{len(_exempted)} 条人工豁免（上面逐条列了理由）——不等于图已经干净")
-_written = fp_publish.publish(STAGING, ROOT)
+_written = fp_publish.publish(STAGING, OUT_DIR)
 shutil.rmtree(STAGING, ignore_errors=True)
-print(f"已发布 {len(_written)} 个文件到 {ROOT}")
+_where = f"试算沙箱 {OUT_DIR}" if PROBE_DIR else f"正式输出 {OUT_DIR}"
+print(f"已写出 {len(_written)} 个文件到{_where}")

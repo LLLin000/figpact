@@ -134,6 +134,8 @@ def _cli(argv: list[str]) -> argparse.Namespace:
                     help="在清点中执行参数生效扰动检查")
     ap.add_argument("--inspect", default=None,
                     help="检查指定 gid 的图元信息")
+    ap.add_argument("--probe", default=None,
+                    help="试算沙箱目录：给定时产物只写这里，正式输出目录一个字节都不动")
     return ap.parse_args(argv)
 
 
@@ -290,12 +292,16 @@ LEGEND_ANCHOR_X = CONFIG["legend_anchor_x"]
 # `--strict`：存在**阻断项**时退出码非零，且**不覆盖**已存在的正式输出。
 # 默认不加 = 预览模式：照常发布，但把阻断项打在 stdout 上。
 STRICT = ARGS.strict
-#: 出图先写这里，最后一步才发布到 ROOT。`--strict` 检出阻断项时，
-#: 项目目录里原有的正式输出一个字节都不动。
+#: 出图先写 STAGING，最后一步才发布到 OUT_DIR。
+#: **试算隔离**：`--probe <dir>` 或环境变量 `FIGPACT_PROBE_DIR`（`figpact try` 会设）
+#: 一旦生效，OUT_DIR 就是一次性的沙箱，正式输出目录没人碰。
+PROBE_DIR = (Path(ARGS.probe).expanduser().resolve() if ARGS.probe
+             else fp_publish.probe_dir())
+OUT_DIR = PROBE_DIR or ROOT
 #: 人工豁免。**阻断项不许记进豁免**——那是"违规却报告成功"。
 #: 豁免是人签的字：每条必须带非空 reason，strict 输出会逐条列出理由，
 #: 并且**永远不会**在存在阻断项时打印「无阻断项 ✓」。
-EXEMPT_PATH = ROOT / "qa_exemptions.json"
+EXEMPT_PATH = OUT_DIR / "qa_exemptions.json"
 
 
 def _signature(problem: str) -> str:
@@ -669,9 +675,10 @@ def make_figure():
     elif not new_blockers:
         print(f"[验收] 无**未豁免**阻断项；但有 {len(exempted)} 条人工豁免"
               f"（上面逐条列了理由）——不等于图已经干净")
-    written = fp_publish.publish(STAGING, ROOT)
+    written = fp_publish.publish(STAGING, OUT_DIR)
     shutil.rmtree(STAGING, ignore_errors=True)
-    print(f"已发布 {len(written)} 个文件到 {ROOT}")
+    where = f"试算沙箱 {OUT_DIR}" if PROBE_DIR else f"正式输出 {OUT_DIR}"
+    print(f"已写出 {len(written)} 个文件到{where}")
 
 
 if __name__ == "__main__":
