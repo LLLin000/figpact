@@ -1,0 +1,29 @@
+# 原生 NMR 夹具配置：字段与 tests/fixtures/native_nmr.SCHEMA 一一对应，缺一个就报错。
+# 所有长度都是**物理毫米**：坐标框位置由四条外边距算出来，不是"看起来差不多"。
+schema_version: 1
+canvas_w_mm: 100.0
+canvas_h_mm: 72.0
+render_dpi: 300
+axes_left_mm: 24.0
+axes_right_mm: 6.0
+axes_bottom_mm: 16.0
+axes_top_mm: 12.0
+axis_font_pt: 7.5
+tick_font_pt: 6.5
+peak_font_pt: 6.0
+line_width: 0.8
+# 峰位引导线线宽（pt）：引导线是科学标记，不是装饰。
+guide_lw_pt: 0.5
+# 归属标签在数据锚点 (ppm, 峰高) 之上再抬多少毫米（真实毫米显示位移）。
+peak_label_lift_mm: 2.5
+# 受保护的积分窗口（ppm）：与 fixture_data.nmr_windows_ppm() 必须**逐值一致**。
+# 值是 ppm ± 0.06 的浮点结果，故意写成能往返的 repr —— 差一个 ULP 都算改了窗口。
+peak_windows_ppm:
+  "7.26": [7.2, 7.319999999999999]
+  "3.91": [3.85, 3.97]
+  "2.02": [1.96, 2.08]
+  "1.18": [1.1199999999999999, 1.24]
+# 逐 scope、逐峰的纯显示位移（mm）：作用在该峰"引导线 + 窗口 + 标签"整个集合上。
+peak_shifts_mm:
+  main: {"7.26": 0.0, "3.91": 0.0, "2.02": 0.0, "1.18": 0.0}
+  annotated: {"7.26": 0.0, "3.91": 0.0, "2.02": 0.0, "1.18": 0.0}

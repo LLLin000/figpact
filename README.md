@@ -76,5 +76,25 @@ QA 差异和人工豁免按 `(rule_id, scope, object_ids)` 区分，测量数字
 诊断的身份；未知诊断保留完整原文，不能人工豁免。旧文本签名记录不再用于放行，
 需要重新审核后记录规则、对象和理由。
 
+## 可公开复现的排版基线
+
+`tests/fixtures/native_ftir.py`、`native_nmr.py`、`native_panels.py` 和
+`native_mixed.py` 使用固定种子的合成数据，无需仪器原始文件；另有无效绑定、
+科学载荷暗改与真实碰撞的负例。各夹具支持 `--strict --probe <沙箱目录>`，
+独立检查所有声明版本并导出 PNG、PDF、SVG、TIFF。
+
+```powershell
+python -X utf8 tests/fixtures/native_panels.py --strict --probe "$env:TEMP/figpact-panels"
+python -X utf8 tests/benchmarks/bench_vnext.py --lanes cold_preview warm_preview warm_qa --repeat 7 --json "$env:TEMP/figpact-baseline.json"
+```
+
+计时分开记录冷启动、重建出图、已构图 PNG 编码与 QA；PNG 编码时间不代表完整
+预览或 Agent 任务耗时。科学检查保护实际绘制的数组、峰位、归属、原图像素、
+裁剪范围、长宽比和比例尺含义，正式图与配置不被试算修改。
+
+毫米位移可核对实际 renderer 的坐标；字体包围盒仍受 DPI 和栅格化影响，
+不能宣称任意精度。移动图像时保护的是原图数组及科学窗口，不承诺不同画布下
+重采样后的屏幕像素逐字节相同。
+
 ## 数据文件说明
 `examples/*/` 数据目录下的 PDF 与 PNG 文件（例如 `examples/ftir/2084_1788253487778_26083154776/26083154776/*.pdf` 为科学指南针测试机构导出的对照报告，`examples/nmr/核磁原始数据/*/pdata/1/thumb.png` 为 Bruker TopSpin 仪器采集生成的原始缩略图）均为仪器原始产物与输入数据，不是 render 导出的渲染产物。render 产生的所有构建产物均通过 `.gitignore` 排除，不进入版本跟踪。

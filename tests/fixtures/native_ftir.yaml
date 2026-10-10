@@ -1,0 +1,39 @@
+# 原生 FTIR 夹具配置：字段与 tests/fixtures/native_ftir.SCHEMA 一一对应，缺一个就报错。
+# 所有长度都是**物理毫米**：坐标框位置由四条外边距算出来，不是"看起来差不多"。
+schema_version: 1
+canvas_w_mm: 100.0
+canvas_h_mm: 72.0
+render_dpi: 300
+axes_left_mm: 24.0
+axes_right_mm: 6.0
+axes_bottom_mm: 16.0
+axes_top_mm: 12.0
+axis_font_pt: 7.5
+tick_font_pt: 6.5
+label_font_pt: 6.0
+line_width: 0.8
+# b、c 两条曲线整体抬升多少毫米（a 不动）：真实毫米显示位移。
+curve_gap_mm: 1.5
+# 带位标签在数据锚点之上再抬多少毫米。
+band_label_lift_mm: 1.2
+# 受保护的显示窗口（带位，cm⁻¹）：与 fixture_data 里的科学窗口必须逐值一致。
+band_limits_cm1:
+  oh: [3200.0, 3550.0]
+  coo_cc: [1580.0, 1680.0]
+  coc: [1000.0, 1100.0]
+  zn_o: [400.0, 560.0]
+# 对照图（compare_raw 上格 / compare_processed 下格共享一张图与一份产物名）。
+# 12 + 2×20 + 10 + 10 = 72 mm：正好等于画布高度；10 mm 的中间空隙放得下
+# 上格的刻度文字和下格的格标题（6 mm 时两者会真的重叠，QA 会当场抓到）。
+compare_left_mm: 24.0
+compare_right_mm: 6.0
+compare_bottom_mm: 12.0
+compare_top_mm: 10.0
+compare_panel_h_mm: 20.0
+compare_gap_mm: 10.0
+# 逐 scope、逐曲线的纯显示位移（mm）。对照图只画曲线 a，所以只声明 a。
+shifts_mm:
+  main: {a: 0.0, b: 0.0, c: 0.0}
+  annotated: {a: 0.0, b: 0.0, c: 0.0}
+  compare_raw: {a: 0.0}
+  compare_processed: {a: 0.0}

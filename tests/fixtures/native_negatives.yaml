@@ -1,0 +1,27 @@
+# 原生"负例"夹具配置：字段与 tests/fixtures/native_negatives.SCHEMA 一一对应。
+# 这个夹具**故意**带缺陷（见模块 docstring 与 DEFECTS），永远不可发布：
+#   - unused_knob 声明了却从不被读（NO_EFFECT）；
+#   - xlabel_font_pt 声明了却从不被读（NO_EFFECT），而 axis_font_pt 连未声明的 xlabel 一起改
+#     （EFFECT_MISMATCH）。
+# 其余数字本身都是正经的物理毫米/磅值，缺陷不在数值上。
+schema_version: 1
+canvas_w_mm: 110.0
+canvas_h_mm: 72.0
+render_dpi: 300
+axes_left_mm: 24.0
+axes_right_mm: 6.0
+axes_bottom_mm: 16.0
+axes_top_mm: 12.0
+axis_font_pt: 7.5
+xlabel_font_pt: 7.5
+tick_font_pt: 6.5
+label_font_pt: 6.0
+line_width: 0.8
+# 峰位标签在数据锚点之上再抬多少毫米。
+# 注意锚点是**插值**出的峰高，最靠近峰顶的采样点可能比它高出零点几个数据单位
+# （窄峰一个采样步就是 1.2 px），所以这里要留得比"看起来够"更宽。
+label_lift_mm: 2.5
+# 未使用旋钮：契约说它会移动注释文本，构建器从不读它。
+unused_knob: 0.0
+# 受保护的积分窗口半宽（ppm）：与 fixture_data.NMR_WINDOW_PPM 必须逐值一致，否则拒绝构建。
+window_ppm: 0.06

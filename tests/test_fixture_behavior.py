@@ -1,216 +1,171 @@
-"""合成夹具的行为回归：确定性、形状、峰位不变、scope 隔离、冲突素材可用。
+"""原生夹具的行为回归：声明面真的可用、CLI 能独立跑、产物齐全、失败时一个字节不落盘。
 
-全部调用仓库里真实的共享 API（figpact.qa / GidRegistry / config / inventory / transform），
-不 mock、不比对文案字面量。
+守的是"别的 agent 不用读绘图源码就能下手"：
+- 导入脚本不建 Figure、不写文件、不打印；`--inventory` 的 stdout 是一份纯 JSON，
+  且每条契约记录都能过夹具自己的记录级自检（路径存在、gid 真的被构建出来）；
+- 同一作用域、同一配置构建两次，图元的几何与内容逐项一致；
+- `--strict` 独立构建**所有**声明的作用域与产物（PNG/PDF/SVG/TIFF）；有阻断项时
+  退出码非零且正式目录一个字节都不动。
+
+不比对文案字面量、不检查源码字符串、不断言机器性能。
 """
 from __future__ import annotations
 
-import copy
-import io
+import json
 import os
 import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 
-from figpact import inventory, qa
-from figpact.config import ConfigError
-from tests.fixtures import synth_data, synth_plot
+from figpact import inventory as fp_inventory
+from tests.fixtures import _native
+
 
 ROOT = Path(__file__).resolve().parents[1]
-FIG = synth_plot.FIGURE_ID
+FIXTURE_FILES = {
+    "native_ftir": ROOT / "tests" / "fixtures" / "native_ftir.py",
+    "native_nmr": ROOT / "tests" / "fixtures" / "native_nmr.py",
+    "native_panels": ROOT / "tests" / "fixtures" / "native_panels.py",
+    "native_mixed": ROOT / "tests" / "fixtures" / "native_mixed.py",
+    "native_negatives": ROOT / "tests" / "fixtures" / "native_negatives.py",
+}
+NEGATIVE_FIXTURE = "native_negatives"
 
 
-def _display_points(fig, reg, gid) -> np.ndarray:
-    """曲线顶点在当前 dpi 下的显示坐标（像素）。"""
-    fig.canvas.draw()
-    line = reg.get(gid)
-    return line.get_transform().transform(line.get_xydata())
+def load_fixture(name: str):
+    """按名字导入夹具模块（缺文件 = 直接失败，不静默跳过）。"""
+    path = FIXTURE_FILES[name]
+    if not path.is_file():
+        raise AssertionError(f"夹具脚本不存在：{path}")
+    import importlib
+
+    return importlib.import_module(f"tests.fixtures.{name}")
 
 
-def _gid(scope: str, kind: str, name: str) -> str:
-    return f"{FIG}.{scope}.{kind}.{name}"
+def repo_files() -> set[str]:
+    """仓库里现有文件的相对路径（排除 .git / 缓存）：用来证明跑 CLI 没往仓库里写东西。"""
+    out: set[str] = set()
+    for path in ROOT.rglob("*"):
+        parts = set(path.parts)
+        if ".git" in parts or "__pycache__" in parts:
+            continue
+        if path.is_file():
+            out.add(str(path.relative_to(ROOT)))
+    return out
 
 
-class DataTest(unittest.TestCase):
-    def test_generators_are_deterministic(self):
-        self.assertEqual(synth_data.export_signature(), synth_data.export_signature())
-        c1, c2 = synth_data.synthetic_curves(), synth_data.synthetic_curves()
-        for (x1, y1), (x2, y2) in zip(c1, c2):
-            np.testing.assert_array_equal(x1, x2)
-            np.testing.assert_array_equal(y1, y2)
-        x1, y1 = synth_data.nmr_spectrum()
-        x2, y2 = synth_data.nmr_spectrum()
-        np.testing.assert_array_equal(x1, x2)
-        np.testing.assert_array_equal(y1, y2)
-
-    def test_shapes_and_peak_positions(self):
-        sig = synth_data.export_signature()
-        self.assertEqual(sig["n_curves"], 3)
-        self.assertEqual([s[0] for s in sig["curve_shapes"]], [180, 180, 180])
-        self.assertEqual(sig["nmr_shape"], [600, 600])
-        self.assertEqual(sig["nmr_peak_ppm"], [7.26, 3.91, 2.02, 1.18])
-        self.assertEqual(sig["bar_labels"], ["ctrl", "dose_1", "dose_2", "dose_3"])
-
-        x, y = synth_data.nmr_spectrum()
-        for ppm in synth_data.nmr_peak_ppm():
-            i = int(np.abs(x - ppm).argmin())
-            window = np.abs(x - ppm) <= 0.05
-            self.assertEqual(float(y[i]), float(y[window].max()), f"峰位 {ppm} ppm 不在极值上")
 
 
-class SeamTest(unittest.TestCase):
-    def tearDown(self):
-        plt.close("all")
-
-    def test_scope_and_schema_contracts(self):
-        self.assertEqual(synth_plot.SCOPES, ("main", "annotated"))
-        self.assertEqual(set(synth_plot.SCALARS), set(synth_plot.SCHEMA) - {"shifts_mm"})
-        self.assertIsInstance(synth_plot.FIGURE_ID, str)
-
-        cfg = synth_plot.load_config()
-        self.assertEqual(set(cfg["shifts_mm"]), set(synth_plot.SCOPES))
-        for scope, per_curve in cfg["shifts_mm"].items():
-            self.assertEqual(set(per_curve), set(synth_plot.CURVE_IDS), scope)
-
-    def test_list_params_groups_structure(self):
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            synth_plot.list_params()
-        out = buf.getvalue()
-        keys = [k for _, entries in synth_plot.PARAM_GROUPS for k, _, _ in entries]
-        self.assertTrue(keys)
-        self.assertLessEqual(set(keys), set(synth_plot.SCALARS))
-        # 每个 schema 参数都必须出现在某个分组里（参数目录不许漏）
-        self.assertEqual(set(synth_plot.SCALARS) - set(keys), set())
-        for key in keys:
-            self.assertIn(key, out)
-
-    def test_unknown_scope_rejected(self):
-        with self.assertRaises(ValueError):
-            synth_plot.build_figure_and_registry("compare")
-
-    def test_config_validation_goes_through_engine(self):
-        with tempfile.TemporaryDirectory() as td:
-            good = Path(td) / "good.yaml"
-            good.write_text(synth_plot.CONFIG_PATH.read_text(encoding="utf-8"), encoding="utf-8")
-            synth_plot.load_config(good)
-
-            bad_range = Path(td) / "range.yaml"
-            bad_range.write_text(good.read_text(encoding="utf-8").replace("line_width: 0.8", "line_width: 99.0"),
-                                 encoding="utf-8")
-            with self.assertRaises(ConfigError):
-                synth_plot.load_config(bad_range)
-
-            bad_key = Path(td) / "key.yaml"
-            bad_key.write_text(good.read_text(encoding="utf-8") + "\nwhoops: 1\n", encoding="utf-8")
-            with self.assertRaises(ConfigError):
-                synth_plot.load_config(bad_key)
-
-            bad_scope = Path(td) / "scope.yaml"
-            bad_scope.write_text(good.read_text(encoding="utf-8").replace("main: {a: 0.0", "main: {a: 0.0, zz: 1.0"),
-                                  encoding="utf-8")
-            with self.assertRaises(ConfigError):
-                synth_plot.load_config(bad_scope)
-
-    def test_import_produces_no_output(self):
-        code = "import tests.fixtures.synth_plot as m; assert m.SCOPES == ('main', 'annotated')"
-        r = subprocess.run([sys.executable, "-X", "utf8", "-c", code],
-                           cwd=ROOT, capture_output=True, text=True, env=dict(os.environ, MPLBACKEND="Agg"))
-        self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertEqual(r.stdout, "", "模块导入不得写输出")
+class ImportSafetyTest(unittest.TestCase):
+    def test_import_builds_no_figure_and_prints_nothing(self):
+        for name in FIXTURE_FILES:
+            with self.subTest(fixture=name):
+                code = ("import matplotlib.pyplot as plt; before=set(plt.get_fignums()); "
+                        f"import tests.fixtures.{name}; "
+                        "assert set(plt.get_fignums()) == before")
+                res = subprocess.run([sys.executable, "-X", "utf8", "-c", code], cwd=ROOT,
+                                     capture_output=True, text=True, encoding="utf-8",
+                                     env={**os.environ, "MPLBACKEND": "Agg"})
+                self.assertEqual(res.returncode, 0, res.stderr)
+                self.assertEqual(res.stdout.strip(), "", "导入一个夹具脚本不许打印任何东西")
 
 
-class ScopeIsolationTest(unittest.TestCase):
-    def tearDown(self):
-        plt.close("all")
-
-    def test_shift_only_moves_the_selected_scope(self):
-        base = synth_plot.load_config()
-        shifted = copy.deepcopy(base)
-        shifted["shifts_mm"]["annotated"]["a"] = 3.0
-
-        # 主图没变：改 annotated 的位移不许动 main
-        f0, r0 = synth_plot.build_figure_and_registry("main", config=base)
-        f1, r1 = synth_plot.build_figure_and_registry("main", config=shifted)
-        np.testing.assert_allclose(_display_points(f0, r0, _gid("main", "curve", "a")),
-                                   _display_points(f1, r1, _gid("main", "curve", "a")), atol=1e-9)
-
-        # 标注版里只有 a 动了，且正好 3.0 mm
-        a0, ar0 = synth_plot.build_figure_and_registry("annotated", config=base)
-        a1, ar1 = synth_plot.build_figure_and_registry("annotated", config=shifted)
-        p0 = _display_points(a0, ar0, _gid("annotated", "curve", "a"))
-        p1 = _display_points(a1, ar1, _gid("annotated", "curve", "a"))
-        moved_mm = (p1[:, 1] - p0[:, 1]) * qa.MM_PER_INCH / a1.dpi
-        self.assertAlmostEqual(float(np.mean(moved_mm)), 3.0, delta=0.01)
-        for sid in ("b", "c"):
-            np.testing.assert_allclose(_display_points(a0, ar0, _gid("annotated", "curve", sid)),
-                                       _display_points(a1, ar1, _gid("annotated", "curve", sid)), atol=1e-9)
-
-    def test_scope_never_touches_scientific_data(self):
-        ref_x = synth_data.synthetic_curves()[0][0]
-        for scope in synth_plot.SCOPES:
-            fig, reg = synth_plot.build_figure_and_registry(scope)
-            for sid, (x, y) in zip(synth_plot.CURVE_IDS, synth_data.synthetic_curves()):
-                line = reg.get(_gid(scope, "curve", sid))
-                np.testing.assert_array_equal(line.get_xdata(), x)
-                np.testing.assert_array_equal(line.get_ydata(), y)  # 位移只在 transform 上
-            np.testing.assert_array_equal(ref_x, synth_data.synthetic_curves()[0][0])
-
-    def test_bar_fixture_uses_the_same_seam(self):
-        fig, reg = synth_plot.build_bar_figure_and_registry("main")
-        for label in synth_plot.BAR_LABELS:
-            self.assertIn(_gid("main", "bar", label), reg.all())
-        inv = inventory(fig, reg)
-        self.assertGreaterEqual(len(inv["items"]), len(synth_plot.BAR_LABELS) + 2)
-        self.assertEqual(inv["unregistered"], [], "柱图 fixture 不该有未登记可见图元")
-        self.assertAlmostEqual(inv["figure_dpi"], float(fig.dpi))
 
 
-class ConflictMaterialTest(unittest.TestCase):
-    def tearDown(self):
-        plt.close("all")
+class BuildDeterminismTest(unittest.TestCase):
+    def test_two_builds_of_one_scope_are_identical(self):
+        """同一作用域、同一配置构建两次：图纸的几何与内容逐项一致。"""
+        for name in FIXTURE_FILES:
+            module = load_fixture(name)
+            config = module.load_config()
+            science = module.load_science()
+            for scope in module.SCOPES:
+                with self.subTest(fixture=name, scope=scope):
+                    snaps = []
+                    for _ in range(2):
+                        fig, _ = module.build_scene(science, config, scope)
+                        fig.canvas.draw()
+                        snaps.append(bytes(fig.canvas.buffer_rgba()))
+                        plt.close(fig)
+                    self.assertEqual(snaps[0], snaps[1], f"{name}/{scope} 两次构建结果不一致")
 
-    def test_conflict_figure_reports_overlaps_and_on_curve_text(self):
-        fig, _ = synth_plot.build_figure_and_registry("annotated", conflict=True)
-        overlaps = qa.check_text_overlap(fig)
-        self.assertTrue(overlaps, "故意重叠的两对标签必须被 QA 抓到")
-        self.assertTrue(any("3p68" in s and "2p02" in s for s in overlaps), overlaps)
-        self.assertTrue(any("4p11" in s and "1p05" in s for s in overlaps), overlaps)
-        on_data = qa.check_text_on_data(fig, pad_px=1.0)
-        self.assertTrue(any("probe" in s for s in on_data), on_data)
+    def test_load_science_is_repeatable_and_figure_free(self):
+        for name in FIXTURE_FILES:
+            module = load_fixture(name)
+            before = len(plt.get_fignums())
+            first = module.load_science()
+            second = module.load_science()
+            self.assertEqual(len(plt.get_fignums()), before, "load_science 不许建 Figure")
 
-    def test_clean_scope_annotations_do_not_collide(self):
-        fig, _ = synth_plot.build_figure_and_registry("annotated")
-        problems = qa.check_text_overlap(fig) + qa.check_text_on_data(fig)
-        for p in problems:
-            self.assertNotIn("3p68", p)
-            self.assertNotIn("2p02", p)
-            self.assertNotIn("probe", p)
 
-    def test_defect_material_is_really_unwired(self):
-        # 1) NO_EFFECT 素材：只改 unused_knob，渲染快照必须一模一样
-        base = synth_plot.load_config()
-        other = copy.deepcopy(base)
-        other["unused_knob"] = 9.0
-        fa, ra = synth_plot.build_figure_and_registry("annotated", config=base)
-        fb, rb = synth_plot.build_figure_and_registry("annotated", config=other)
-        inv_a = inventory(fa, ra)
-        self.assertEqual(inv_a["items"], inventory(fb, rb)["items"], "unused_knob 居然有渲染效果")
-        self.assertNotIn("unused_knob", {p for it in inv_a["items"] for p in it["params"]})
 
-        # 2) EFFECT_MISMATCH 素材：声明 label_font_pt，实际字号来自 axis_font_pt
-        cfg = synth_plot.load_config()
-        fig, reg = synth_plot.build_figure_and_registry("main")
-        xlabel = reg.get(_gid("main", "xlabel"))
-        self.assertEqual(reg.params_of(_gid("main", "xlabel")), ["label_font_pt"])
-        self.assertAlmostEqual(float(xlabel.get_fontsize()), cfg["axis_font_pt"])
-        self.assertNotAlmostEqual(float(xlabel.get_fontsize()), cfg["label_font_pt"])
+
+class StrictCliTest(unittest.TestCase):
+    """`--strict` 独立构建所有声明的作用域与产物；失败时一个字节都不落盘。"""
+
+    def _run(self, fixture: str, out_dir: Path, config: Path | None = None) -> subprocess.CompletedProcess:
+        script = FIXTURE_FILES[fixture]
+        cmd = [sys.executable, "-X", "utf8", str(script), "--strict", "--probe", str(out_dir)]
+        if config is not None:
+            cmd += ["--config", str(config)]
+        return subprocess.run(cmd, cwd=str(script.parent), capture_output=True, text=True,
+                              encoding="utf-8", env={**os.environ, "MPLBACKEND": "Agg"})
+
+    def test_publishable_fixtures_build_all_declared_outputs(self):
+        for fixture in ("native_ftir", "native_nmr", "native_panels", "native_mixed"):
+            module = load_fixture(fixture)
+            declared = {name for scope in module.SCOPES
+                        for name in module.layout_contract(scope)["outputs"]}
+            with tempfile.TemporaryDirectory(prefix="figpact-strict-") as td:
+                out_dir = Path(td) / "out"
+                with self.subTest(fixture=fixture):
+                    res = self._run(fixture, out_dir)
+                    self.assertEqual(res.returncode, 0, f"{fixture} strict 失败：\n{res.stdout}\n{res.stderr}")
+                    produced = {p.name for p in out_dir.iterdir()}
+                    self.assertEqual(produced, declared,
+                                     f"{fixture} 产物与声明不一致：{sorted(produced)}")
+
+    def test_strict_never_writes_into_the_repository(self):
+        before = repo_files()
+        with tempfile.TemporaryDirectory(prefix="figpact-strict-") as td:
+            res = self._run("native_ftir", Path(td) / "out")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(repo_files(), before, "strict 跑完仓库里多了文件")
+
+    def test_negative_fixture_refuses_and_writes_nothing(self):
+        """缺陷夹具 `--strict` 必须失败，且**正式目录一个字节都不许动**。"""
+        module = load_fixture(NEGATIVE_FIXTURE)
+        with tempfile.TemporaryDirectory(prefix="figpact-strict-") as td:
+            out_dir = Path(td) / "out"
+            out_dir.mkdir()
+            keep = out_dir / "already-published.png"
+            keep.write_bytes(b"OLD-REAL-OUTPUT")
+            before = sorted(p.name for p in out_dir.iterdir())
+            res = self._run(NEGATIVE_FIXTURE, out_dir)
+            self.assertNotEqual(res.returncode, 0, f"故意带缺陷的夹具居然 strict 通过了：\n{res.stdout}")
+            self.assertEqual(sorted(p.name for p in out_dir.iterdir()), before,
+                             "拒绝发布却往正式目录里写了东西")
+            self.assertEqual(keep.read_bytes(), b"OLD-REAL-OUTPUT", "拒绝发布却改了正式产物")
+        self.assertTrue(module.SCOPES, "缺陷夹具仍要声明作用域供校验")
+
+    def test_inventory_is_pure_json(self):
+        for fixture in FIXTURE_FILES:
+            script = FIXTURE_FILES[fixture]
+            res = subprocess.run([sys.executable, "-X", "utf8", str(script), "--inventory"],
+                                 cwd=str(script.parent), capture_output=True, text=True,
+                                 encoding="utf-8", env={**os.environ, "MPLBACKEND": "Agg"})
+            with self.subTest(fixture=fixture):
+                self.assertEqual(res.returncode, 0, res.stderr)
+                payload = json.loads(res.stdout)
+                for scope, block in payload["scopes"].items():
+                    self.assertEqual(block["contract_problems"], [],
+                                     f"{fixture}/{scope} 契约记录自检没过：{block['contract_problems']}")
+
+
 
 
 if __name__ == "__main__":

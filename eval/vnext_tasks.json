@@ -1,0 +1,584 @@
+{
+  "schema": "figpact.vnext.tasks/1",
+  "fixture_root": "tests/fixtures",
+  "baseline": {
+    "semantics": "每条任务都从夹具自己的默认 YAML（下面的 config 字段）出发；读取方必须把它复制到临时目录再用，绝不原地改仓库里的文件。",
+    "reset": "逐条独立：上一条任务的目标/候选/累积状态一律不带到下一条；候选永远由「基线 + 本条 operations」重新导出。"
+  },
+  "measurement_semantics": {
+    "unit": "mm",
+    "coordinate_reference": "canvas_bottom_left",
+    "kinds": {
+      "translate": "候选构建相对本任务基线构建，对象 bounds_mm 在声明轴上的下边缘之差（axis=y 取 bounds_mm[1]，axis=x 取 bounds_mm[0]），带符号。",
+      "bounds": "对象包围盒在声明轴上的**尺寸**（quantity=size：x → x1-x0，y → y1-y0），绝对值；quantity=min/max/center 时分别取边缘坐标/中心线坐标。",
+      "relation": "在候选构建上调用 geometry.measure_relation(关系声明里的 kind, 对应 nodes, axis, anchor, method)，取回 value_mm；关系声明取自同一作用域契约里的同名 relation_id。",
+      "text": "文字**锚点**经其 transform 换算到画布的毫米位移（数学几何，不是墨迹包围盒）。",
+      "refusal": "不发布：期望的引擎状态/诊断规则；候选配置必须等于基线配置，且不得产生任何新产物。",
+      "config_error": "改动后的配置必须被 load_config 拒绝（声明范围 / LOCKED_SCIENCE 复核 / 纵横比或装得下的硬校验），构建都不该开始。"
+    },
+    "tolerance_basis": {
+      "vector_geometry": "折线/文字锚点经 transform 得到的数学几何（毫米），容差 1e-6 mm。",
+      "axes_rect_geometry": "由毫米外边距与面板尺寸直接算出的轴对齐外框，容差 1e-6 mm。",
+      "envelope_geometry": "轴对齐包围盒的间距/尺寸，容差 1e-6 mm。",
+      "text_anchor_geometry": "文字锚点经其 transform 换算到画布的毫米位移（数学几何，不是墨迹），容差 1e-6 mm。",
+      "text_rasterization": "文字墨迹的光栅化包围盒，容差 0.05 mm（字体度量 + 抗锯齿），只在必须量文字墨迹时使用。"
+    }
+  },
+  "record_outcome": "本文件只写意图 + 操作 + 期望。实际结果、诊断、耗时由运行器在跑完之后另写，不存在预填的成功/结果字段。",
+  "invariants": {
+    "ftir.curve_arrays": {"fixture": "native_ftir", "description": "三条曲线的绘图数组逐字节等于受保护数组（同一条严格递减波数网格）"},
+    "ftir.processing_chain": {"fixture": "native_ftir", "description": "「处理后」对照格只有声明的 5 点滑动平均，x 网格与点数不变"},
+    "ftir.band_windows": {"fixture": "native_ftir", "description": "带位窗口（cm⁻¹）与带位文本不变"},
+    "ftir.view_windows": {"fixture": "native_ftir", "description": "xlim/ylim 显示的物理窗口不变"},
+    "ftir.stack_order": {"fixture": "native_ftir", "description": "曲线上下顺序与堆叠台阶的声明一致"},
+    "nmr.spectrum_arrays": {"fixture": "native_nmr", "description": "谱线绘图数组逐字节等于受保护数组"},
+    "nmr.peak_ppm_guides": {"fixture": "native_nmr", "description": "每根峰位引导线的 x 数据就是它的峰位 ppm"},
+    "nmr.windows_unchanged": {"fixture": "native_nmr", "description": "每个峰的积分窗口（ppm）与受保护窗口一致"},
+    "nmr.assignments_unchanged": {"fixture": "native_nmr", "description": "归属文本一字不改"},
+    "nmr.view_windows": {"fixture": "native_nmr", "description": "xlim/ylim 显示的物理窗口不变"},
+    "panels.pixels_unchanged": {"fixture": "native_panels", "description": "四张显微图的像素数组逐字节等于受保护数组"},
+    "panels.crop_window_unchanged": {"fixture": "native_panels", "description": "每张图的裁切窗口与显示窗口（µm）不变"},
+    "panels.aspect_unchanged": {"fixture": "native_panels", "description": "面板框纵横比仍等于画幅比例 1.3，显微图没有被拉伸"},
+    "panels.scale_bar_meaning": {"fixture": "native_panels", "description": "比例尺代表的物理长度（µm）不变：显示长度 = µm/视野宽 × 面板宽"},
+    "panels.panel_order": {"fixture": "native_panels", "description": "面板顺序不变：a 左下、b 右下、c 左上、d 右上"},
+    "mixed.curve_arrays": {"fixture": "native_mixed", "description": "曲线绘图数组逐字节等于受保护数组"},
+    "mixed.view_windows": {"fixture": "native_mixed", "description": "曲线的 xlim/ylim 与带位窗口不变"},
+    "mixed.image_pixels": {"fixture": "native_mixed", "description": "显微图像素字节不变"},
+    "mixed.image_crop": {"fixture": "native_mixed", "description": "显微图 extent（裁切窗口，µm）不变"},
+    "mixed.scale_bar_meaning": {"fixture": "native_mixed", "description": "比例尺代表的物理长度（µm）不变"},
+    "mixed.panel_gap_order": {"fixture": "native_mixed", "description": "曲线面板在左、图像面板在右，且两面板的纵向对齐关系不变"},
+    "negatives.science_payload": {"fixture": "native_negatives", "description": "故意保留的缺陷：main 格的曲线是受保护数组的 0.05% 改写（QA 干净但科学面必须被拒）"},
+    "negatives.view_windows": {"fixture": "native_negatives", "description": "显示窗口（ppm/a.u.）不变"},
+    "negatives.protected_text": {"fixture": "native_negatives", "description": "受保护文本（轴标题、注释文本）一字不改"}
+  },
+  "groups": ["ftir", "nmr", "panels", "mixed", "negative-effects", "impossible-space", "locked-science", "contradictory"],
+  "tasks": [
+    {
+      "id": "ftir-shift-curve-b-2mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "intent": "把曲线 b 整体上移 2.0 mm 的纯显示位移：谱线本身一个字节都不许动。",
+      "operations": [{"operation": "set_parameter", "path": ["shifts_mm", "main", "b"], "value": 2.0}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [{"kind": "translate", "objects": ["fig_ftir_native.main.curve.b"], "axis": "y", "value_mm": 2.0, "tolerance_mm": 1e-06, "basis": "vector_geometry"}],
+        "science_invariants": ["ftir.curve_arrays", "ftir.band_windows", "ftir.view_windows"]
+      }
+    },
+    {
+      "id": "ftir-stack-step-raise-1p5mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "intent": "把堆叠台阶从 1.5 mm 抬到 3.0 mm：b、c 两条曲线一起上移 1.5 mm，a 不动。",
+      "operations": [{"operation": "set_parameter", "path": ["curve_gap_mm"], "value": 3.0}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "translate", "objects": ["fig_ftir_native.main.curve.b"], "axis": "y", "value_mm": 1.5, "tolerance_mm": 1e-06, "basis": "vector_geometry"},
+          {"kind": "translate", "objects": ["fig_ftir_native.main.curve.c"], "axis": "y", "value_mm": 1.5, "tolerance_mm": 1e-06, "basis": "vector_geometry"},
+          {"kind": "translate", "objects": ["fig_ftir_native.main.curve.a"], "axis": "y", "value_mm": 0.0, "tolerance_mm": 1e-06, "basis": "vector_geometry"}
+        ],
+        "science_invariants": ["ftir.curve_arrays", "ftir.stack_order", "ftir.view_windows"]
+      }
+    },
+    {
+      "id": "ftir-band-label-lift-1p5mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "intent": "带位标签上抬从 1.2 mm 加到 2.7 mm：四个标签各走 1.5 mm 的毫米显示位移。",
+      "operations": [{"operation": "set_parameter", "path": ["band_label_lift_mm"], "value": 2.7}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "translate", "objects": ["fig_ftir_native.main.band_label.oh"], "axis": "y", "value_mm": 1.5, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"},
+          {"kind": "translate", "objects": ["fig_ftir_native.main.band_label.coo_cc"], "axis": "y", "value_mm": 1.5, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"},
+          {"kind": "translate", "objects": ["fig_ftir_native.main.band_label.coc"], "axis": "y", "value_mm": 1.5, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"},
+          {"kind": "translate", "objects": ["fig_ftir_native.main.band_label.zn_o"], "axis": "y", "value_mm": 1.5, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"}
+        ],
+        "science_invariants": ["ftir.curve_arrays", "ftir.band_windows"]
+      }
+    },
+    {
+      "id": "ftir-compare-raw-shift-2p5mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "compare_raw",
+      "intent": "对照图上格（原始）整体上移 2.5 mm；下格（处理后）不许跟着动。",
+      "operations": [{"operation": "set_parameter", "path": ["shifts_mm", "compare_raw", "a"], "value": 2.5}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "translate", "objects": ["fig_ftir_native.compare_raw.curve.a"], "axis": "y", "value_mm": 2.5, "tolerance_mm": 1e-06, "basis": "vector_geometry"},
+          {"kind": "translate", "objects": ["fig_ftir_native.compare_processed.curve.a"], "axis": "y", "value_mm": 0.0, "tolerance_mm": 1e-06, "basis": "vector_geometry"}
+        ],
+        "science_invariants": ["ftir.curve_arrays", "ftir.view_windows"]
+      },
+      "notes": "两个 compare_* 作用域共享一份产物名（发布按名字去重），但各自只授权自己那格的路径与对象。"
+    },
+    {
+      "id": "ftir-compare-processed-shift-3mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "compare_processed",
+      "intent": "对照图下格（处理后）整体上移 3.0 mm；处理链本身不许变。",
+      "operations": [{"operation": "set_parameter", "path": ["shifts_mm", "compare_processed", "a"], "value": 3.0}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [{"kind": "translate", "objects": ["fig_ftir_native.compare_processed.curve.a"], "axis": "y", "value_mm": 3.0, "tolerance_mm": 1e-06, "basis": "vector_geometry"}],
+        "science_invariants": ["ftir.curve_arrays", "ftir.processing_chain", "ftir.view_windows"]
+      }
+    },
+    {
+      "id": "nmr-peak-shift-2p5mm",
+      "group": "nmr",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "intent": "把 7.26 ppm 那组峰（引导线 + 积分窗口 + 归属标签）整体上移 2.5 mm，其它峰不动。",
+      "operations": [{"operation": "set_parameter", "path": ["peak_shifts_mm", "main", "7.26"], "value": 2.5}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "translate", "objects": ["fig_nmr_native.main.peak_guide.7.26"], "axis": "y", "value_mm": 2.5, "tolerance_mm": 1e-06, "basis": "vector_geometry"},
+          {"kind": "translate", "objects": ["fig_nmr_native.main.peak_window.7.26"], "axis": "y", "value_mm": 2.5, "tolerance_mm": 1e-06, "basis": "envelope_geometry"},
+          {"kind": "translate", "objects": ["fig_nmr_native.main.peak_label.7.26"], "axis": "y", "value_mm": 2.5, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"},
+          {"kind": "translate", "objects": ["fig_nmr_native.main.peak_guide.3.91"], "axis": "y", "value_mm": 0.0, "tolerance_mm": 1e-06, "basis": "vector_geometry"}
+        ],
+        "science_invariants": ["nmr.spectrum_arrays", "nmr.peak_ppm_guides", "nmr.windows_unchanged", "nmr.assignments_unchanged"]
+      }
+    },
+    {
+      "id": "nmr-peak-label-lift-1mm",
+      "group": "nmr",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "intent": "归属标签上抬从 2.5 mm 加到 3.5 mm：四个标签各走 1.0 mm。",
+      "operations": [{"operation": "set_parameter", "path": ["peak_label_lift_mm"], "value": 3.5}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "translate", "objects": ["fig_nmr_native.main.peak_label.7.26"], "axis": "y", "value_mm": 1.0, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"},
+          {"kind": "translate", "objects": ["fig_nmr_native.main.peak_label.1.18"], "axis": "y", "value_mm": 1.0, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"}
+        ],
+        "science_invariants": ["nmr.spectrum_arrays", "nmr.assignments_unchanged"]
+      }
+    },
+    {
+      "id": "nmr-margin-left-30mm",
+      "group": "nmr",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "intent": "把坐标框左外边距从 24 mm 改成 30 mm：量出来的左净空必须正好是 30 mm。",
+      "operations": [{"operation": "set_parameter", "path": ["axes_left_mm"], "value": 30.0}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [{"kind": "relation", "relation_id": "nmr.margin_left", "objects": ["fig_nmr_native.main.canvas", "fig_nmr_native.main.axes"], "axis": "x", "value_mm": 30.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"}],
+        "science_invariants": ["nmr.spectrum_arrays", "nmr.view_windows"]
+      }
+    },
+    {
+      "id": "nmr-peak-shift-9mm-refused",
+      "group": "nmr",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "intent": "要求 9 mm 的峰位整体位移：超出 ±6 mm 的显示位移上限，配置层就该拒。",
+      "operations": [{"operation": "set_parameter", "path": ["peak_shifts_mm", "main", "3.91"], "value": 9.0}],
+      "expected": {
+        "status": "CONFIG_ERROR",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["nmr.spectrum_arrays", "nmr.peak_ppm_guides"],
+        "refusal": {"rule": "SHIFT_LIMIT_EXCEEDED", "why": "load_config 对每个峰位移硬校验 ±6 mm；超限直接拒绝，构建都不开始。"}
+      }
+    },
+    {
+      "id": "panels-gap-x-8mm",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "intent": "把两列之间的横向间距从 6 mm 调到 8 mm（画布同时加宽 2 mm 以保持右边距），右列整体右移 2 mm。",
+      "operations": [
+        {"operation": "set_parameter", "path": ["gap_x_mm"], "value": 8.0},
+        {"operation": "set_parameter", "path": ["canvas_w_mm"], "value": 90.4}
+      ],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "relation", "relation_id": "panels.gap_x_bottom", "objects": ["fig_panels_native.main.panel.a", "fig_panels_native.main.panel.b"], "axis": "x", "value_mm": 8.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "relation", "relation_id": "panels.gap_x_top", "objects": ["fig_panels_native.main.panel.c", "fig_panels_native.main.panel.d"], "axis": "x", "value_mm": 8.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "translate", "objects": ["fig_panels_native.main.panel.b"], "axis": "x", "value_mm": 2.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "translate", "objects": ["fig_panels_native.main.panel.a"], "axis": "x", "value_mm": 0.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"}
+        ],
+        "science_invariants": ["panels.pixels_unchanged", "panels.crop_window_unchanged", "panels.aspect_unchanged", "panels.scale_bar_meaning"]
+      }
+    },
+    {
+      "id": "panels-resize-equal-39x30",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "intent": "四块面板一起放大到 39×30 mm（保持 1.3 画幅比例），画布同步加到 104×86 mm。",
+      "operations": [
+        {"operation": "set_parameter", "path": ["panel_w_mm"], "value": 39.0},
+        {"operation": "set_parameter", "path": ["panel_h_mm"], "value": 30.0},
+        {"operation": "set_parameter", "path": ["canvas_w_mm"], "value": 104.0},
+        {"operation": "set_parameter", "path": ["canvas_h_mm"], "value": 86.0}
+      ],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "bounds", "quantity": "size", "objects": ["fig_panels_native.main.panel.a"], "axis": "x", "value_mm": 39.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "bounds", "quantity": "size", "objects": ["fig_panels_native.main.panel.d"], "axis": "y", "value_mm": 30.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "relation", "relation_id": "panels.equal_width", "objects": ["fig_panels_native.main.panel.a", "fig_panels_native.main.panel.b", "fig_panels_native.main.panel.c", "fig_panels_native.main.panel.d"], "axis": "x", "value_mm": 0.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "relation", "relation_id": "panels.equal_height", "objects": ["fig_panels_native.main.panel.a", "fig_panels_native.main.panel.b", "fig_panels_native.main.panel.c", "fig_panels_native.main.panel.d"], "axis": "y", "value_mm": 0.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"}
+        ],
+        "science_invariants": ["panels.pixels_unchanged", "panels.aspect_unchanged", "panels.scale_bar_meaning"]
+      },
+      "notes": "若只改 panel_w_mm 不动 panel_h_mm，画面比例会离开 1.3：那是拉伸显微图，load_config 会拒（见 locked-science 组）。"
+    },
+    {
+      "id": "panels-letter-inset-y-3p5mm",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "intent": "面板字母离上边框的内缩从 2 mm 加到 3.5 mm：四个字母在画面上各下移 1.5 mm（声明里 scale = -1）。",
+      "operations": [{"operation": "set_parameter", "path": ["letter_inset_y_mm"], "value": 3.5}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "translate", "objects": ["fig_panels_native.main.letter.a"], "axis": "y", "value_mm": -1.5, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"},
+          {"kind": "translate", "objects": ["fig_panels_native.main.letter.d"], "axis": "y", "value_mm": -1.5, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"}
+        ],
+        "science_invariants": ["panels.pixels_unchanged", "panels.panel_order", "panels.scale_bar_meaning"]
+      }
+    },
+    {
+      "id": "panels-letter-inset-x-3mm",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "intent": "面板字母离左边框的内缩从 2 mm 加到 3 mm：四个字母各右移 1 mm。",
+      "operations": [{"operation": "set_parameter", "path": ["letter_inset_x_mm"], "value": 3.0}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [{"kind": "translate", "objects": ["fig_panels_native.main.letter.b"], "axis": "x", "value_mm": 1.0, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"}],
+        "science_invariants": ["panels.pixels_unchanged", "panels.panel_order"]
+      }
+    },
+    {
+      "id": "panels-canvas-widen-100mm",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "intent": "画布加宽到 100 mm（面板网格与四条外边距不变，多余的是右侧预留带）。",
+      "operations": [{"operation": "set_parameter", "path": ["canvas_w_mm"], "value": 100.0}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "bounds", "quantity": "size", "objects": ["fig_panels_native.main.canvas"], "axis": "x", "value_mm": 100.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "bounds", "quantity": "size", "objects": ["fig_panels_native.main.panel.a"], "axis": "x", "value_mm": 31.2, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "relation", "relation_id": "panels.contain_x", "objects": ["fig_panels_native.main.canvas", "fig_panels_native.main.panel.a", "fig_panels_native.main.panel.b", "fig_panels_native.main.panel.c", "fig_panels_native.main.panel.d"], "axis": "x", "value_mm": 0.0, "tolerance_mm": 1e-06, "basis": "envelope_geometry"}
+        ],
+        "science_invariants": ["panels.pixels_unchanged", "panels.crop_window_unchanged", "panels.aspect_unchanged"]
+      }
+    },
+    {
+      "id": "mixed-panel-gap-9mm",
+      "group": "mixed",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "intent": "曲线面板与显微图面板的间距从 6 mm 调到 9 mm：整个图像面板集合（含图像、比例尺、字母）作为刚体右移 3 mm。",
+      "operations": [{"operation": "set_parameter", "path": ["panel_gap_mm"], "value": 9.0}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "relation", "relation_id": "mixed.panel_gap", "objects": ["fig_mixed_native.main.curve_panel", "fig_mixed_native.main.image_panel"], "axis": "x", "value_mm": 9.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "translate", "objects": ["fig_mixed_native.main.image_panel"], "axis": "x", "value_mm": 3.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "translate", "objects": ["fig_mixed_native.main.scale_bar"], "axis": "x", "value_mm": 3.0, "tolerance_mm": 1e-06, "basis": "vector_geometry"},
+          {"kind": "translate", "objects": ["fig_mixed_native.main.letter.image"], "axis": "x", "value_mm": 3.0, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"}
+        ],
+        "science_invariants": ["mixed.image_pixels", "mixed.image_crop", "mixed.scale_bar_meaning", "mixed.curve_arrays"]
+      }
+    },
+    {
+      "id": "mixed-curve-lift-2p5mm",
+      "group": "mixed",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "intent": "曲线整体上移 2.5 mm：显微图像素、裁切窗口与比例尺都不许跟着动。",
+      "operations": [{"operation": "set_parameter", "path": ["curve_lift_mm"], "value": 2.5}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "translate", "objects": ["fig_mixed_native.main.curve.a"], "axis": "y", "value_mm": 2.5, "tolerance_mm": 1e-06, "basis": "vector_geometry"},
+          {"kind": "translate", "objects": ["fig_mixed_native.main.image"], "axis": "y", "value_mm": 0.0, "tolerance_mm": 1e-06, "basis": "envelope_geometry"}
+        ],
+        "science_invariants": ["mixed.curve_arrays", "mixed.view_windows", "mixed.image_pixels", "mixed.image_crop"]
+      }
+    },
+    {
+      "id": "mixed-widen-curve-panel-60mm",
+      "group": "mixed",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "intent": "曲线面板从 56 mm 加宽到 60 mm（图像面板宽度被视野比例锁死，画布仍装得下）。",
+      "operations": [{"operation": "set_parameter", "path": ["curve_panel_w_mm"], "value": 60.0}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "bounds", "quantity": "size", "objects": ["fig_mixed_native.main.curve_panel"], "axis": "x", "value_mm": 60.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"},
+          {"kind": "bounds", "quantity": "size", "objects": ["fig_mixed_native.main.image_panel"], "axis": "x", "value_mm": 52.0, "tolerance_mm": 1e-06, "basis": "axes_rect_geometry"}
+        ],
+        "science_invariants": ["mixed.curve_arrays", "mixed.image_pixels", "mixed.image_crop", "mixed.scale_bar_meaning"]
+      }
+    },
+    {
+      "id": "mixed-letter-inset-y-2p5mm",
+      "group": "mixed",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "intent": "面板字母上内缩从 1.0 mm 加到 2.5 mm：两个字母各下移 1.5 mm（声明里 scale = -1）。",
+      "operations": [{"operation": "set_parameter", "path": ["letter_inset_y_mm"], "value": 2.5}],
+      "expected": {
+        "status": "OK",
+        "verification": "GEOMETRY_CHECKED",
+        "measurements": [
+          {"kind": "translate", "objects": ["fig_mixed_native.main.letter.curve"], "axis": "y", "value_mm": -1.5, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"},
+          {"kind": "translate", "objects": ["fig_mixed_native.main.letter.image"], "axis": "y", "value_mm": -1.5, "tolerance_mm": 1e-06, "basis": "text_anchor_geometry"}
+        ],
+        "science_invariants": ["mixed.curve_arrays", "mixed.image_pixels", "mixed.panel_gap_order"]
+      }
+    },
+    {
+      "id": "space-ftir-curve-gap-9mm",
+      "group": "impossible-space",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "intent": "要 9 mm 的堆叠台阶：三条曲线在坐标框里放不下，声明范围（0–4 mm）就该拒。",
+      "operations": [{"operation": "set_parameter", "path": ["curve_gap_mm"], "value": 9.0}],
+      "expected": {
+        "status": "CONFIG_ERROR",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["ftir.curve_arrays", "ftir.stack_order"],
+        "refusal": {"rule": "OUT_OF_DECLARED_RANGE", "why": "curve_gap_mm 的声明范围是 0–4 mm；越界由 load_config 拒绝。"}
+      }
+    },
+    {
+      "id": "space-panels-gap-y-20mm",
+      "group": "impossible-space",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "intent": "纵向间距要到 20 mm：2×24 mm 面板 + 20 mm 间距 + 上下外边距超出 74 mm 画布，没有空间。",
+      "operations": [{"operation": "set_parameter", "path": ["gap_y_mm"], "value": 20.0}],
+      "expected": {
+        "status": "CONFIG_ERROR",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["panels.pixels_unchanged", "panels.panel_order"],
+        "refusal": {"rule": "GRID_EXCEEDS_CANVAS", "why": "面板网格 + 四条外边距必须装得进画布；load_config 用硬校验拒绝。"}
+      }
+    },
+    {
+      "id": "space-mixed-curve-panel-80mm",
+      "group": "impossible-space",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "intent": "曲线面板要 80 mm 宽：20 + 80 + 6 + 52 + 12 = 170 mm > 152 mm 画布，contain 关系不可能成立。",
+      "operations": [{"operation": "set_parameter", "path": ["curve_panel_w_mm"], "value": 80.0}],
+      "expected": {
+        "status": "CONFIG_ERROR",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["mixed.curve_arrays", "mixed.image_pixels"],
+        "refusal": {"rule": "BAND_EXCEEDS_CANVAS", "why": "load_config 校验「面板带 + 两个预留带 ≤ 画布宽度」，超了直接拒。"}
+      }
+    },
+    {
+      "id": "space-ftir-canvas-h-40mm",
+      "group": "impossible-space",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "compare_raw",
+      "intent": "把画布高度压到 40 mm：对照图两格 + 间距 + 上下外边距需要 72 mm，上格会被推出画布。",
+      "operations": [{"operation": "set_parameter", "path": ["canvas_h_mm"], "value": 40.0}],
+      "expected": {
+        "status": "CONFIG_ERROR",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["ftir.curve_arrays", "ftir.view_windows"],
+        "refusal": {"rule": "COMPARE_PAIR_EXCEEDS_CANVAS", "why": "load_config 校验 下边距 + 2×格高 + 间距 + 上边距 ≤ 画布高度。"}
+      }
+    },
+    {
+      "id": "locked-ftir-band-window",
+      "group": "locked-science",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "intent": "想把 O–H 带位窗口从 3200–3550 改成 3100–3650：显示窗口就是科学窗口，不是排版旋钮。",
+      "operations": [{"operation": "set_parameter", "path": ["band_limits_cm1", "oh"], "value": [3100.0, 3650.0]}],
+      "expected": {
+        "status": "CONFIG_ERROR",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["ftir.band_windows", "ftir.view_windows"],
+        "refusal": {"rule": "LOCKED_SCIENCE", "why": "band_limits_cm1 声明为 LOCKED_SCIENCE，load_config 逐值比对受保护窗口。"}
+      }
+    },
+    {
+      "id": "locked-panels-scale-bar",
+      "group": "locked-science",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "intent": "想把比例尺代表的物理长度从 10 µm 改成 20 µm：比例尺语义是受保护的科学含义。",
+      "operations": [{"operation": "set_parameter", "path": ["scale_bar_um"], "value": 20.0}],
+      "expected": {
+        "status": "CONFIG_ERROR",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["panels.scale_bar_meaning", "panels.crop_window_unchanged"],
+        "refusal": {"rule": "LOCKED_SCIENCE", "why": "scale_bar_um 声明为 LOCKED_SCIENCE，load_config 与受保护 µm 语义逐值比对。"}
+      }
+    },
+    {
+      "id": "locked-nmr-peak-window",
+      "group": "locked-science",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "intent": "想把 7.26 ppm 的积分窗口从 ±0.06 改成 ±0.25：窗口一变，归属说的就不是同一件事了。",
+      "operations": [{"operation": "set_parameter", "path": ["peak_windows_ppm", "7.26"], "value": [7.01, 7.51]}],
+      "expected": {
+        "status": "CONFIG_ERROR",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["nmr.windows_unchanged", "nmr.view_windows"],
+        "refusal": {"rule": "LOCKED_SCIENCE", "why": "peak_windows_ppm 声明为 LOCKED_SCIENCE，load_config 与受保护窗口逐值比对。"}
+      }
+    },
+    {
+      "id": "contradictory-panels-gap",
+      "group": "contradictory",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "intent": "同一批里既要求把 gap_x_bottom 关系设成 8 mm，又把 gap_x_mm 设成 4 mm：两个目标互相矛盾，必须整体拒绝。",
+      "operations": [
+        {"operation": "set_relation", "relation_id": "panels.gap_x_bottom", "target_mm": 8.0},
+        {"operation": "set_parameter", "path": ["gap_x_mm"], "value": 4.0}
+      ],
+      "expected": {
+        "status": "REFUSED",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["panels.pixels_unchanged", "panels.panel_order"],
+        "refusal": {"rule": "CONTRADICTORY_REQUESTS", "why": "同一批次里关系目标与参数目标指向不同的间距值；原子批次不许各改一半。"}
+      }
+    },
+    {
+      "id": "contradictory-ftir-foreign-scope-path",
+      "group": "contradictory",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "compare_processed",
+      "intent": "在 compare_processed 的授权下改动 compare_raw 那格的位移路径：这条路径不属于本作用域，必须拒绝。",
+      "operations": [{"operation": "set_parameter", "path": ["shifts_mm", "compare_raw", "a"], "value": 2.0}],
+      "expected": {
+        "status": "REFUSED",
+        "verification": null,
+        "measurements": [],
+        "science_invariants": ["ftir.curve_arrays", "ftir.processing_chain"],
+        "refusal": {"rule": "PATH_NOT_DECLARED_IN_SCOPE", "why": "作用域只授权自己声明过的精确路径；另一格的路径不在 compare_processed 的契约里。"}
+      }
+    },
+    {
+      "id": "effects-negatives-unused-knob",
+      "group": "negative-effects",
+      "fixture": "tests/fixtures/native_negatives.py",
+      "config": "tests/fixtures/native_negatives.yaml",
+      "scope": "main",
+      "intent": "unused_knob 在契约里被声明成会移动注释文本，但构建器从不读它：效果校验必须报 NO_EFFECT。",
+      "operations": [],
+      "expected": {
+        "status": "DIAGNOSED",
+        "verification": "EFFECTS_CHECKED",
+        "measurements": [],
+        "effects": [{"rule": "NO_EFFECT", "parameter": ["unused_knob"]}],
+        "science_invariants": ["negatives.view_windows", "negatives.protected_text"]
+      }
+    },
+    {
+      "id": "effects-negatives-xlabel-font-unused",
+      "group": "negative-effects",
+      "fixture": "tests/fixtures/native_negatives.py",
+      "config": "tests/fixtures/native_negatives.yaml",
+      "scope": "main",
+      "intent": "xlabel_font_pt 被声明成控制 xlabel（objects 指到它），但字号实际来自 axis_font_pt：扰动它必须报 NO_EFFECT。",
+      "operations": [],
+      "expected": {
+        "status": "DIAGNOSED",
+        "verification": "EFFECTS_CHECKED",
+        "measurements": [],
+        "effects": [{"rule": "NO_EFFECT", "parameter": ["xlabel_font_pt"]}],
+        "science_invariants": ["negatives.protected_text", "negatives.view_windows"]
+      }
+    },
+    {
+      "id": "effects-negatives-axis-font-mismatch",
+      "group": "negative-effects",
+      "fixture": "tests/fixtures/native_negatives.py",
+      "config": "tests/fixtures/native_negatives.yaml",
+      "scope": "main",
+      "intent": "axis_font_pt 声明只影响 ylabel，实际连未声明的 xlabel 一起改：扰动它必须报 EFFECT_MISMATCH。",
+      "operations": [],
+      "expected": {
+        "status": "DIAGNOSED",
+        "verification": "EFFECTS_CHECKED",
+        "measurements": [],
+        "effects": [{"rule": "EFFECT_MISMATCH", "parameter": ["axis_font_pt"]}],
+        "science_invariants": ["negatives.protected_text", "negatives.view_windows"]
+      }
+    }
+  ]
+}
