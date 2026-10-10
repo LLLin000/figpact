@@ -17,7 +17,14 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.parent))
 import figure_style as fs
-from figpact import GidRegistry, load_config as fp_load_config, apply_display_shift as fp_apply_display_shift, inventory as fp_inventory
+from figpact import (
+    GidRegistry,
+    load_config as fp_load_config,
+    apply_display_shift as fp_apply_display_shift,
+    inventory as fp_inventory,
+    qa as fp_qa,
+    publish as fp_publish,
+)
 import argparse
 import json
 
@@ -232,6 +239,7 @@ def _cli(argv: list[str]) -> argparse.Namespace:
     ap.add_argument("--config", default=None, help="配置文件 YAML 路径")
     ap.add_argument("--inventory", action="store_true", help="打印可见图元清单 JSON 并退出")
     ap.add_argument("--check-effect", action="store_true", help="在清点中执行参数生效扰动检查")
+    ap.add_argument("--strict", action="store_true", help="严格模式（有阻断项则退出码非零，不发布正式输出）")
     return ap.parse_args(argv)
 
 
@@ -295,11 +303,14 @@ if ARGS.inventory:
 # 导出 2x2 总图
 out_2x2 = ROOT / "Fig2_NMR_Combined_2x2.png"
 fs.qa_report(fig2x2, "NMR 2×2 组合图")
-fig2x2.savefig(out_2x2, dpi=DPI, bbox_inches="tight")
-fig2x2.savefig(ROOT / "Fig2_NMR_Combined_2x2.pdf", bbox_inches="tight")
-fig2x2.savefig(ROOT / "Fig2_NMR_Combined_2x2.svg", bbox_inches="tight")
-print("已生成 2x2 复合总图:", out_2x2)
+blockers_2x2 = fp_qa.blocking_problems(fig2x2)
+all_blockers = [f"[2x2] {b}" for b in blockers_2x2]
 
+if not ARGS.strict or not all_blockers:
+    fig2x2.savefig(out_2x2, dpi=DPI, bbox_inches="tight")
+    fig2x2.savefig(ROOT / "Fig2_NMR_Combined_2x2.pdf", bbox_inches="tight")
+    fig2x2.savefig(ROOT / "Fig2_NMR_Combined_2x2.svg", bbox_inches="tight")
+    print("已生成 2x2 复合总图:", out_2x2)
 # ==============================================================================
 # 4. 同时导出 4 张独立的 SI 附录图 (Figure S1 ~ S4，各自独立作用域 si_s1 ~ si_s4)
 # ==============================================================================
@@ -336,8 +347,20 @@ for i, cfg in enumerate(configs):
     
     si_name = f"Fig_S{i+1}_{cfg['rel'].replace('/', '_')}_NMR.png"
     fs.qa_report(fig_si, f"NMR SI {cfg['rel']}")
-    fig_si.savefig(ROOT / si_name, dpi=300, bbox_inches="tight")
+    blockers_si = fp_qa.blocking_problems(fig_si)
+    for b in blockers_si:
+        all_blockers.append(f"[{si_scope}] {b}")
+    if not ARGS.strict or not blockers_si:
+        fig_si.savefig(ROOT / si_name, dpi=300, bbox_inches="tight")
+        print("已生成独立 SI 图件:", si_name)
     plt.close(fig_si)
-    print("已生成独立 SI 图件:", si_name)
+
+if all_blockers:
+    print(f"\n[验收] 发现 {len(all_blockers)} 项阻断问题：")
+    for b in all_blockers:
+        print(f"  • {b}")
+    if ARGS.strict:
+        print("\n[严格模式] 存在未豁免阻断项，拒绝发布，退出码 1！")
+        sys.exit(1)
 
 print("全部出版级核磁套图生成完毕！")
