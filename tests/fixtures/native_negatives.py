@@ -555,13 +555,13 @@ def _relations(scope: str) -> list[dict]:
                          controlled_by=[["canvas_w_mm"], ["axes_left_mm"], ["axes_right_mm"]]),
         _native.relation("negatives.contain_y", "contain", [canvas, axes_node], axis="y",
                          controlled_by=[["canvas_h_mm"], ["axes_bottom_mm"], ["axes_top_mm"]]),
-        _native.relation("negatives.margin_left", "gap", [canvas, axes_node], axis="x",
+        _native.relation("negatives.margin_left", "align", [canvas, axes_node], axis="x",
                          anchor="left", controlled_by=[["axes_left_mm"]], move=[axes_node]),
-        _native.relation("negatives.margin_right", "gap", [canvas, axes_node], axis="x",
+        _native.relation("negatives.margin_right", "align", [canvas, axes_node], axis="x",
                          anchor="right", controlled_by=[["axes_right_mm"]], move=[axes_node]),
-        _native.relation("negatives.margin_bottom", "gap", [canvas, axes_node], axis="y",
+        _native.relation("negatives.margin_bottom", "align", [canvas, axes_node], axis="y",
                          anchor="bottom", controlled_by=[["axes_bottom_mm"]], move=[axes_node]),
-        _native.relation("negatives.margin_top", "gap", [canvas, axes_node], axis="y",
+        _native.relation("negatives.margin_top", "align", [canvas, axes_node], axis="y",
                          anchor="top", controlled_by=[["axes_top_mm"]], move=[axes_node]),
         # 只测量、不接受编辑：两个标签之间的净空由数据里的峰位决定，
         # YAML 里没有任何旋钮管它 → 编辑请求必须回 UNSUPPORTED_RELATION，不许猜一个参数。

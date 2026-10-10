@@ -422,18 +422,20 @@ def _nodes(scope: str) -> dict:
                                            label="画布"),
     }
     for pid in PANEL_IDS:
-        nodes[gid(scope, "panel", pid)] = _native.node(
-            gid(scope, "panel", pid), type_name="Axes", parent=root, editable=False,
+        # 图像/比例尺/字母是**那块面板**的子对象：挂到 root 会让 Panel→后代的依赖闭包断掉。
+        panel = gid(scope, "panel", pid)
+        nodes[panel] = _native.node(
+            panel, type_name="Axes", parent=root, editable=False,
             science_policy="LOCKED_SCIENCE", label=f"面板 {pid}(列{PANEL_GRID[pid][0]},行{PANEL_GRID[pid][1]})")
         nodes[gid(scope, "image", pid)] = _native.node(
-            gid(scope, "image", pid), type_name="AxesImage", parent=root, editable=False,
+            gid(scope, "image", pid), type_name="AxesImage", parent=panel, editable=False,
             science_policy="LOCKED_SCIENCE", label=f"显微图 {pid}（{field_um(pid)[0]:g} µm 视野）")
         nodes[gid(scope, "scale_bar", pid)] = _native.node(
-            gid(scope, "scale_bar", pid), type_name="Line2D", parent=root, editable=False,
+            gid(scope, "scale_bar", pid), type_name="Line2D", parent=panel, editable=False,
             science_policy="LAYOUT", label=f"比例尺 {pid}（{SCALE_BAR_UM:g} µm）")
         if has_letters(scope):
             nodes[gid(scope, "letter", pid)] = _native.node(
-                gid(scope, "letter", pid), type_name="Text", parent=root, editable=False,
+                gid(scope, "letter", pid), type_name="Text", parent=panel, editable=False,
                 science_policy="LOCKED_SCIENCE", label=LETTER_TEXT[pid])
     return nodes
 
@@ -587,9 +589,10 @@ def layout_contract(scope: str) -> dict:
     ]
     if has_letters(scope):
         for pid in PANEL_IDS:
-            # 字母顶边距面板顶边就是 letter_inset_y_mm：这条关系把"内缩"绑在真实测量上。
+            # 字母顶边距面板顶边就是 letter_inset_y_mm：字母在面板**里面**，
+            # 包络间隙只会读出"重叠了多少毫米"（负值）；同侧锚点展幅才是真实的内缩量。
             relations.append(_native.relation(
-                f"panels.letter_gap.{pid}", "gap",
+                f"panels.letter_gap.{pid}", "align",
                 [gid(scope, "panel", pid), gid(scope, "letter", pid)], axis="y", anchor="top",
                 controlled_by=[["letter_inset_y_mm"]], move=[gid(scope, "letter", pid)]))
 

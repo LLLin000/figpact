@@ -167,12 +167,14 @@ def param(key: str, path: list, *, unit: str, mutability: str, scopes: list[str]
 def expect(kind: str, *, objects: list[str], axis: str | None = None,
            preserve: list[str] | None = None) -> dict:
     """`expected` 子记录：打算发生的效果 + 必须守住的东西。"""
-    return {
+    record = {
         "kind": kind,
         "objects": list(objects),
-        "axis": axis,
         "preserve": list(preserve or ()),
     }
+    if axis is not None:
+        record["axis"] = axis
+    return record
 
 
 def node(gid: str, *, type_name: str, parent: str | None, editable: bool,
@@ -229,11 +231,13 @@ def relation(rid: str, kind: str, objects: list[str], *, axis: str, anchor: str 
         "kind": kind,
         "objects": list(objects),
         "axis": axis,
-        "anchor": anchor,
-        "method": method,
         "controlled_by": [list(p) for p in (controlled_by or ())],
         "move": list(move or ()),
     }
+    if anchor is not None:
+        record["anchor"] = anchor
+    if method is not None:
+        record["method"] = method
     if target_mm is not None:
         record["target_mm"] = float(target_mm)
     return record
@@ -285,6 +289,7 @@ def validate_contract(contract: dict, *, config: dict | None = None,
                 problems.append(f"参数 {key}：路径 {path} 在 {config_name} 里不存在（{exc}）")
 
     group_ids = {g.get("id") for g in contract.get("groups", ())}
+    parent_ids = group_ids | set(contract.get("nodes", {}))
     for record in contract.get("nodes", {}).items() if isinstance(contract.get("nodes"), dict) else ():
         gid, meta = record
         if known is not None and gid not in known:
@@ -294,11 +299,11 @@ def validate_contract(contract: dict, *, config: dict | None = None,
         if not isinstance(meta.get("editable"), bool):
             problems.append(f"节点 {gid}：editable 必须是 bool")
         parent = meta.get("parent")
-        if parent is not None and group_ids and parent not in group_ids:
-            problems.append(f"节点 {gid}：parent {parent!r} 不是已声明的组")
+        if parent is not None and parent not in parent_ids:
+            problems.append(f"节点 {gid}：parent {parent!r} 不是已声明的节点或组")
 
     for grp in contract.get("groups", ()):
-        if grp.get("parent") is not None and grp.get("parent") not in group_ids:
+        if grp.get("parent") is not None and grp.get("parent") not in parent_ids:
             problems.append(f"组 {grp.get('id')}：parent {grp.get('parent')!r} 未声明")
         if known is not None and not set(grp.get("members") or ()) <= known:
             missing = sorted(set(grp.get("members") or ()) - known)

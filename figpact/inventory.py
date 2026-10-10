@@ -45,16 +45,39 @@ def _snapshot_artist(art: Any, fig: matplotlib.figure.Figure) -> dict[str, Any]:
     return snap
 
 
+def _unsupported_effects(registry: GidRegistry) -> dict[str, dict[str, Any]]:
+    """参数生效性的**如实**结果：这里没有真实的 builder/config 重建上下文。
+
+    以前这里临时改 Artist 属性再比渲染快照 —— 那证明的是「改 Artist 会变」，
+    不是「改 YAML 会有这个效果」，对 NO_EFFECT / EFFECT_MISMATCH 都会给出相反的答案。
+    真实效果必须走一次真实重建：`figpact.effects.check_effects(script, config, scope)`。
+    """
+    param_to_gids: dict[str, list[str]] = {}
+    for gid in registry.all():
+        for key in registry.params_of(gid):
+            param_to_gids.setdefault(key, []).append(gid)
+    return {
+        key: {
+            "status": "UNSUPPORTED",
+            "bound_gids_count": len(gids),
+            "reason": "无真实重建上下文（未用 YAML 扰动 + 完整重建测量），不给出效果结论",
+            "validator": "figpact.effects.check_effects(script, config, scope)",
+        }
+        for key, gids in param_to_gids.items()
+    }
+
+
 def inventory(
     fig: matplotlib.figure.Figure,
     registry: GidRegistry,
     *,
     check_effect: bool = False,
 ) -> dict[str, Any]:
-    """遍历所有可见 Text / Line / Legend / Axes，逐条清点并统计 unregistered / unbound。
-    
-    若 check_effect=True，则对可编辑绑定参数进行无污染的微小扰动测试，
-    验证对应 gid 渲染确实发生变化，若无变化则标记 NO_EFFECT。
+    """遍历所有可见 Text / Line / Legend / Axes / Image / Patch / Collection / 自定义
+    Artist，逐条清点并统计 unregistered / unbound。
+
+    `check_effect=True` 只报告参数绑定的存在性与「未验证」状态 —— 没有真实重建
+    上下文就**不给效果结论**（见 `_unsupported_effects`），更不冒充已证实的效应。
     """
     try:
         fig.canvas.draw()
@@ -87,107 +110,8 @@ def inventory(
         items.append(item_entry)
 
     param_effects: dict[str, dict[str, Any]] = {}
-
     if check_effect:
-        # 收集所有已绑定的参数与其涉及的 gids
-        param_to_gids: dict[str, list[str]] = {}
-        for it in items:
-            for p in it["params"]:
-                param_to_gids.setdefault(p, []).append(it["gid"])
-
-        for p, gids in param_to_gids.items():
-            # 对每个参数做微小可回滚扰动
-            # 针对不同参数类型应用临时扰动并测验 snapshot 变化
-            affected = False
-            tested_gids = []
-            for gid in gids:
-                art = registry.get(gid)
-                if art is None:
-                    continue
-                tested_gids.append(gid)
-                s0 = _snapshot_artist(art, fig)
-
-                # 执行扰动并立即回滚
-                if "font" in p:
-                    if hasattr(art, "get_fontsize") and hasattr(art, "set_fontsize"):
-                        orig = art.get_fontsize()
-                        art.set_fontsize(orig + 1.0)
-                        try:
-                            fig.canvas.draw()
-                        except Exception:
-                            pass
-                        s1 = _snapshot_artist(art, fig)
-                        art.set_fontsize(orig)
-                        try:
-                            fig.canvas.draw()
-                        except Exception:
-                            pass
-                        if s1 != s0:
-                            affected = True
-                            break
-                    elif hasattr(art, "get_texts"):
-                        texts = art.get_texts()
-                        if texts:
-                            t0 = texts[0]
-                            orig = t0.get_fontsize()
-                            for t in texts:
-                                t.set_fontsize(orig + 1.5)
-                            try:
-                                fig.canvas.draw()
-                            except Exception:
-                                pass
-                            s1 = _snapshot_artist(art, fig)
-                            for t in texts:
-                                t.set_fontsize(orig)
-                            try:
-                                fig.canvas.draw()
-                            except Exception:
-                                pass
-                            if s1 != s0:
-                                affected = True
-                                break
-                elif "line_width" in p:
-                    if hasattr(art, "get_linewidth") and hasattr(art, "set_linewidth"):
-                        orig = art.get_linewidth()
-                        art.set_linewidth(orig + 0.5)
-                        try:
-                            fig.canvas.draw()
-                        except Exception:
-                            pass
-                        s1 = _snapshot_artist(art, fig)
-                        art.set_linewidth(orig)
-                        try:
-                            fig.canvas.draw()
-                        except Exception:
-                            pass
-                        if s1 != s0:
-                            affected = True
-                            break
-                elif "shift" in p or "gap" in p or "lift" in p or "margin" in p or "headroom" in p or "dx" in p:
-                    # 测试位移微调通道
-                    try:
-                        registry.apply_shift(gid, dx_mm=0.2, dy_mm=0.2)
-                        fig.canvas.draw()
-                        s1 = _snapshot_artist(art, fig)
-                        registry.apply_shift(gid, dx_mm=-0.2, dy_mm=-0.2)
-                        fig.canvas.draw()
-                        if s1 != s0:
-                            affected = True
-                            break
-                    except Exception:
-                        pass
-                else:
-                    # 其它参数（如 legend_cols, legend_anchor_x, etc.）
-                    # 只要图元存在且已绑定到对应视觉容器即视为具备效应通道
-                    affected = True
-                    break
-
-            # 如果扰动未探测到变化且 tested_gids 不为空
-            status = "VERIFIED" if affected else "NO_EFFECT"
-            param_effects[p] = {
-                "status": status,
-                "bound_gids_count": len(gids),
-            }
+        param_effects = _unsupported_effects(registry)
 
     unreg = registry.unregistered(fig)
     unb = registry.unbound()

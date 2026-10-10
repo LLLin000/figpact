@@ -416,6 +416,10 @@ def _image_set(scope: str) -> list[str]:
 def _nodes(scope: str) -> dict:
     """节点元数据：type / parent / editable / science_policy。未声明的默认锁死。"""
     root = gid(scope, "root")
+    # 图元挂在**真正拥有它们的面板**下：图像/比例尺/字母属于图像面板，
+    # 曲线/带位/轴标题/字母属于曲线面板。挂到 root 会把 Panel→后代的依赖闭包抹平。
+    cur_panel = gid(scope, "curve_panel")
+    img_panel = gid(scope, "image_panel")
     nodes: dict[str, dict] = {
         gid(scope, "canvas"): _native.node(gid(scope, "canvas"), type_name="Figure", parent=None,
                                            editable=True, science_policy="LOCKED_SCIENCE",
@@ -427,29 +431,31 @@ def _nodes(scope: str) -> dict:
             gid(scope, "image_panel"), type_name="Axes", parent=root, editable=True,
             science_policy="LOCKED_SCIENCE", label="显微图面板"),
         gid(scope, "image"): _native.node(
-            gid(scope, "image"), type_name="AxesImage", parent=root, editable=False,
+            gid(scope, "image"), type_name="AxesImage", parent=img_panel, editable=False,
             science_policy="LOCKED_SCIENCE", label=f"显微图像素 {IMAGE_ID}"),
         gid(scope, "scale_bar"): _native.node(
-            gid(scope, "scale_bar"), type_name="Line2D", parent=root, editable=False,
+            gid(scope, "scale_bar"), type_name="Line2D", parent=img_panel, editable=False,
             science_policy="LAYOUT", label=f"比例尺 {fixture_data.SCALE_BAR_UM:g} µm"),
         gid(scope, "curve", CURVE_ID): _native.node(
-            gid(scope, "curve", CURVE_ID), type_name="Line2D", parent=root, editable=True,
+            gid(scope, "curve", CURVE_ID), type_name="Line2D", parent=cur_panel, editable=True,
             science_policy="LOCKED_SCIENCE", label=f"曲线 {CURVE_ID}"),
-        gid(scope, "xlabel"): _native.node(gid(scope, "xlabel"), type_name="Text", parent=root,
+        gid(scope, "xlabel"): _native.node(gid(scope, "xlabel"), type_name="Text",
+                                            parent=cur_panel,
                                             editable=False, science_policy="LOCKED_SCIENCE",
                                             label=XLABEL),
-        gid(scope, "ylabel"): _native.node(gid(scope, "ylabel"), type_name="Text", parent=root,
+        gid(scope, "ylabel"): _native.node(gid(scope, "ylabel"), type_name="Text",
+                                            parent=cur_panel,
                                             editable=False, science_policy="LOCKED_SCIENCE",
                                             label=YLABEL),
     }
     for bid in BAND_IDS:
         nodes[gid(scope, "band", bid)] = _native.node(
-            gid(scope, "band", bid), type_name="Rectangle", parent=root, editable=False,
+            gid(scope, "band", bid), type_name="Rectangle", parent=cur_panel, editable=False,
             science_policy="LOCKED_SCIENCE", label=f"带位窗口 {bid}")
     if scope == "main":
-        for panel in PANEL_IDS:
+        for panel, host in (("curve", cur_panel), ("image", img_panel)):
             nodes[gid(scope, "letter", panel)] = _native.node(
-                gid(scope, "letter", panel), type_name="Text", parent=root, editable=True,
+                gid(scope, "letter", panel), type_name="Text", parent=host, editable=True,
                 science_policy="LOCKED_SCIENCE", label=f"面板字母 {LETTER_TEXT[panel]}")
     return nodes
 
@@ -629,8 +635,10 @@ def _relations(scope: str) -> list[dict]:
     if scope == "main":
         for panel, host in (("curve", cur_panel), ("image", img_panel)):
             letter = gid(scope, "letter", panel)
+            # 字母在面板**里面**：x 向左内缩量要用同侧锚点展幅量，不是包络间隙
+            # （嵌套包络的 gap 只会读出重叠量，负值）。
             relations.append(_native.relation(
-                f"mixed.letter_gap.{panel}", "gap", [letter, host], axis="x", anchor="left",
+                f"mixed.letter_gap.{panel}", "align", [letter, host], axis="x", anchor="left",
                 controlled_by=[["letter_inset_x_mm"]], move=[letter]))
             relations.append(_native.relation(
                 f"mixed.letter_align.{panel}", "align", [letter, host], axis="y", anchor="top",

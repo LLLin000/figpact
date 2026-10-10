@@ -430,23 +430,29 @@ def _nodes(scope: str) -> dict:
             gid(scope, "axes"): _native.node(gid(scope, "axes"), type_name="Axes", parent=root,
                                              editable=False, science_policy="LOCKED_SCIENCE",
                                              label="对照图本格坐标框"),
-            gid(scope, "ylabel"): _native.node(gid(scope, "ylabel"), type_name="Text", parent=root,
+            gid(scope, "ylabel"): _native.node(gid(scope, "ylabel"), type_name="Text",
+                                               parent=gid(scope, "axes"),
                                                editable=False, science_policy="LOCKED_SCIENCE",
                                                label=YLABEL),
-            gid(scope, "title"): _native.node(gid(scope, "title"), type_name="Text", parent=root,
+            gid(scope, "title"): _native.node(gid(scope, "title"), type_name="Text",
+                                              parent=gid(scope, "axes"),
                                               editable=False, science_policy="LOCKED_SCIENCE",
                                               label=_scope_title(scope)),
             gid(scope, "curve", ACTIVE_CURVES[scope][0]): _native.node(
-                gid(scope, "curve", ACTIVE_CURVES[scope][0]), type_name="Line2D", parent=root,
+                gid(scope, "curve", ACTIVE_CURVES[scope][0]), type_name="Line2D",
+                parent=gid(scope, "axes"),
                 editable=False, science_policy="LOCKED_SCIENCE",
                 label=("原始" if scope == COMPARE_TOP_SCOPE else "处理后") + f"曲线 {ACTIVE_CURVES[scope][0]}"),
         }
         if scope != COMPARE_TOP_SCOPE:
             # 上格没有 xlabel：两格共用的横轴说明画在下格（见 _axis_texts）。
             node_map[gid(scope, "xlabel")] = _native.node(
-                gid(scope, "xlabel"), type_name="Text", parent=root, editable=False,
-                science_policy="LOCKED_SCIENCE", label=XLABEL)
+                gid(scope, "xlabel"), type_name="Text", parent=gid(scope, "axes"),
+                editable=False, science_policy="LOCKED_SCIENCE", label=XLABEL)
         return node_map
+    # 图元挂在**真正拥有它们的坐标框**下：曲线/带位/标签/轴标题都是这个 Axes 的子对象。
+    # 挂到 root 会把四块面板/一整格的父子关系抹平，Panel→后代的依赖闭包就断了。
+    own_panel = gid(scope, "axes")
     nodes: dict[str, dict] = {
         gid(scope, "canvas"): _native.node(gid(scope, "canvas"), type_name="Figure", parent=None,
                                            editable=False, science_policy="LOCKED_SCIENCE",
@@ -454,23 +460,25 @@ def _nodes(scope: str) -> dict:
         gid(scope, "axes"): _native.node(gid(scope, "axes"), type_name="Axes", parent=root,
                                          editable=False, science_policy="LOCKED_SCIENCE",
                                          label="坐标框"),
-        gid(scope, "xlabel"): _native.node(gid(scope, "xlabel"), type_name="Text", parent=root,
-                                            editable=False, science_policy="LOCKED_SCIENCE",
-                                            label=XLABEL),
-        gid(scope, "ylabel"): _native.node(gid(scope, "ylabel"), type_name="Text", parent=root,
-                                            editable=False, science_policy="LOCKED_SCIENCE",
-                                            label=YLABEL),
+        gid(scope, "xlabel"): _native.node(gid(scope, "xlabel"), type_name="Text",
+                                           parent=own_panel,
+                                           editable=False, science_policy="LOCKED_SCIENCE",
+                                           label=XLABEL),
+        gid(scope, "ylabel"): _native.node(gid(scope, "ylabel"), type_name="Text",
+                                           parent=own_panel,
+                                           editable=False, science_policy="LOCKED_SCIENCE",
+                                           label=YLABEL),
     }
     for sid in CURVE_IDS:
         nodes[gid(scope, "curve", sid)] = _native.node(
-            gid(scope, "curve", sid), type_name="Line2D", parent=root, editable=False,
+            gid(scope, "curve", sid), type_name="Line2D", parent=own_panel, editable=False,
             science_policy="LOCKED_SCIENCE", label=f"曲线 {sid}")
     for bid in BAND_IDS:
         nodes[gid(scope, "band", bid)] = _native.node(
-            gid(scope, "band", bid), type_name="Rectangle", parent=root, editable=False,
+            gid(scope, "band", bid), type_name="Rectangle", parent=own_panel, editable=False,
             science_policy="LOCKED_SCIENCE", label=f"带位窗口 {bid}")
         nodes[gid(scope, "band_label", bid)] = _native.node(
-            gid(scope, "band_label", bid), type_name="Text", parent=root, editable=False,
+            gid(scope, "band_label", bid), type_name="Text", parent=own_panel, editable=False,
             science_policy="LOCKED_SCIENCE", label=fixture_data.FTIR_BAND_TEXT[bid])
     return nodes
 
@@ -567,15 +575,23 @@ def _single_contract(scope: str) -> dict:
                          controlled_by=[["canvas_w_mm"], ["axes_left_mm"], ["axes_right_mm"]]),
         _native.relation("ftir.contain_y", "contain", [canvas_node, axes_node], axis="y",
                          controlled_by=[["canvas_h_mm"], ["axes_bottom_mm"], ["axes_top_mm"]]),
-        _native.relation(f"ftir.margin_left", "gap", [canvas_node, axes_node], axis="x",
+        # 外边距是**容器内缩**：坐标框在画布里，不是画布旁边的邻居对象。
+        # gap 量的是两个包络的带符号边到边间隙 —— 嵌套对象上它永远是负的
+        # （画布包络包住坐标框包络），既不等于 axes_left_mm，也不是"净空"。
+        # 锚点展幅（align + 对应 anchor）量的才是**同侧边的真实偏移**：
+        # left = axes_left_mm，right = axes_right_mm，以此类推。
+        _native.relation(f"ftir.margin_left", "align", [canvas_node, axes_node], axis="x",
                          anchor="left", controlled_by=[["axes_left_mm"]], move=[axes_node]),
-        _native.relation("ftir.margin_right", "gap", [canvas_node, axes_node], axis="x",
+        _native.relation("ftir.margin_right", "align", [canvas_node, axes_node], axis="x",
                          anchor="right", controlled_by=[["axes_right_mm"]], move=[axes_node]),
-        _native.relation("ftir.margin_bottom", "gap", [canvas_node, axes_node], axis="y",
+        _native.relation("ftir.margin_bottom", "align", [canvas_node, axes_node], axis="y",
                          anchor="bottom", controlled_by=[["axes_bottom_mm"]], move=[axes_node]),
-        _native.relation("ftir.margin_top", "gap", [canvas_node, axes_node], axis="y",
+        _native.relation("ftir.margin_top", "align", [canvas_node, axes_node], axis="y",
                          anchor="top", controlled_by=[["axes_top_mm"]], move=[axes_node]),
-        _native.relation("ftir.stack_gap", "gap", [cur[0], cur[1]], axis="y",
+        # 台阶量的是**基线抬升**：b/c 相对 a 整体平移 curve_gap_mm（纯显示位移）。
+        # 两条曲线的 y 包络本来就是重叠的，包络间隙在这里只会读出重叠量；
+        # method="baseline" 量的是折线首顶点的显示距离（数学精确），那才是这个旋钮的物理量。
+        _native.relation("ftir.stack_gap", "gap", [cur[0], cur[1]], axis="y", method="baseline",
                          controlled_by=[["curve_gap_mm"]], move=cur[1:]),
     ]
     for bid in BAND_IDS:
@@ -675,9 +691,10 @@ def _compare_contract(scope: str) -> dict:
         _native.relation("compare.contain_y", "contain", [canvas, own_axes], axis="y",
                          controlled_by=[["canvas_h_mm"], ["compare_bottom_mm"], ["compare_top_mm"],
                                         ["compare_panel_h_mm"], ["compare_gap_mm"]]),
-        _native.relation("compare.margin_left", "gap", [canvas, own_axes], axis="x", anchor="left",
+        # 同 ftir.margin_*：这是画布→本格坐标框的**内缩**，不是两个邻居对象的净空。
+        _native.relation("compare.margin_left", "align", [canvas, own_axes], axis="x", anchor="left",
                          controlled_by=[["compare_left_mm"]], move=[own_axes]),
-        _native.relation("compare.margin_right", "gap", [canvas, own_axes], axis="x", anchor="right",
+        _native.relation("compare.margin_right", "align", [canvas, own_axes], axis="x", anchor="right",
                          controlled_by=[["compare_right_mm"]], move=[own_axes]),
         _native.relation("compare.equal_panel_height", "equal_size", both_axes, axis="y",
                          controlled_by=[["compare_panel_h_mm"]]),
@@ -686,11 +703,11 @@ def _compare_contract(scope: str) -> dict:
     ]
     if scope == COMPARE_TOP_SCOPE:
         relations.append(_native.relation(
-            "compare.margin_top", "gap", [canvas, own_axes], axis="y", anchor="top",
+            "compare.margin_top", "align", [canvas, own_axes], axis="y", anchor="top",
             controlled_by=[["compare_top_mm"]], move=[own_axes]))
     else:
         relations.append(_native.relation(
-            "compare.margin_bottom", "gap", [canvas, own_axes], axis="y", anchor="bottom",
+            "compare.margin_bottom", "align", [canvas, own_axes], axis="y", anchor="bottom",
             controlled_by=[["compare_bottom_mm"]], move=[own_axes]))
 
     return _native.contract_record(

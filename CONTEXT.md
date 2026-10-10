@@ -40,6 +40,14 @@ _Avoid_: baseline pitch, nearest distance
 The minimum distance between explicitly identified displayed shapes. Envelope clearance and local curve clearance are distinct measurements.
 _Avoid_: gap without a measurement definition
 
+**Measurement Tolerance**:
+The maximum deviation an author permits for a stated layout requirement. Meeting this tolerance does not establish the physical accuracy of the measurement.
+_Avoid_: calibrated accuracy
+
+**Measurement Uncertainty**:
+The established uncertainty of a measurement under its actual rendering conditions. An unknown uncertainty remains unknown; extra decimal places do not reduce it.
+_Avoid_: requested tolerance, mathematical exactness
+
 **Decorative Guide**:
 Auxiliary visual geometry connecting or orienting objects, rather than a measured scientific trace. Layout freedom does not authorize moving protected scientific anchors.
 _Avoid_: scientific curve, editable signal

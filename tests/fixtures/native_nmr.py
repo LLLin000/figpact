@@ -355,7 +355,10 @@ def build_figure_and_registry(scope: str, *, config: dict | None = None):
 def _nodes(scope: str) -> dict:
     """节点元数据：type / parent / editable / science_policy。未声明的默认锁死。"""
     root = gid(scope, "root")
-    text_group = gid(scope, "text")
+    # 图元挂在实际拥有它们的坐标框下：谱线/峰位引导线/积分窗口/归属标签都是这个 Axes 的子对象。
+    # 挂到 root 或语义分组上会把坐标框的父子关系抹平（Panel→后代的依赖闭包就断了）；
+    # 语义分组（curves/guides/aspects/text）仍然在契约里声明为**集合**。
+    own_panel = gid(scope, "axes")
     nodes: dict[str, dict] = {
         gid(scope, "canvas"): _native.node(gid(scope, "canvas"), type_name="Figure", parent=None,
                                            editable=False, science_policy="LOCKED_SCIENCE",
@@ -364,24 +367,26 @@ def _nodes(scope: str) -> dict:
                                          editable=False, science_policy="LOCKED_SCIENCE",
                                          label="坐标框"),
         gid(scope, "spectrum"): _native.node(gid(scope, "spectrum"), type_name="Line2D",
-                                             parent=gid(scope, "curves"), editable=False,
+                                             parent=own_panel, editable=False,
                                              science_policy="LOCKED_SCIENCE", label="谱线"),
-        gid(scope, "xlabel"): _native.node(gid(scope, "xlabel"), type_name="Text", parent=text_group,
+        gid(scope, "xlabel"): _native.node(gid(scope, "xlabel"), type_name="Text",
+                                            parent=own_panel,
                                             editable=False, science_policy="LOCKED_SCIENCE",
                                             label=XLABEL),
-        gid(scope, "ylabel"): _native.node(gid(scope, "ylabel"), type_name="Text", parent=text_group,
+        gid(scope, "ylabel"): _native.node(gid(scope, "ylabel"), type_name="Text",
+                                            parent=own_panel,
                                             editable=False, science_policy="LOCKED_SCIENCE",
                                             label=YLABEL),
     }
     for key in PEAK_KEYS:
         nodes[gid(scope, "peak_guide", key)] = _native.node(
-            gid(scope, "peak_guide", key), type_name="Line2D", parent=gid(scope, "guides"),
+            gid(scope, "peak_guide", key), type_name="Line2D", parent=own_panel,
             editable=False, science_policy="LOCKED_SCIENCE", label=f"峰位引导线 {key} ppm")
         nodes[gid(scope, "peak_window", key)] = _native.node(
-            gid(scope, "peak_window", key), type_name="Rectangle", parent=gid(scope, "aspects"),
+            gid(scope, "peak_window", key), type_name="Rectangle", parent=own_panel,
             editable=False, science_policy="LOCKED_SCIENCE", label=f"积分窗口 {key} ppm")
         nodes[gid(scope, "peak_label", key)] = _native.node(
-            gid(scope, "peak_label", key), type_name="Text", parent=text_group, editable=False,
+            gid(scope, "peak_label", key), type_name="Text", parent=own_panel, editable=False,
             science_policy="LOCKED_SCIENCE", label=fixture_data.nmr_assignments()[key])
     return nodes
 
@@ -473,13 +478,15 @@ def layout_contract(scope: str) -> dict:
                          controlled_by=[["canvas_w_mm"], ["axes_left_mm"], ["axes_right_mm"]]),
         _native.relation("nmr.contain_y", "contain", [canvas_node, axes_node], axis="y",
                          controlled_by=[["canvas_h_mm"], ["axes_bottom_mm"], ["axes_top_mm"]]),
-        _native.relation("nmr.margin_left", "gap", [canvas_node, axes_node], axis="x",
+        # 外边距是**容器内缩**（坐标框在画布里），不是邻居对象的净空：
+        # 嵌套包络上的 gap 只会读出重叠量（负值），锚点展幅才是真实同侧边偏移。
+        _native.relation("nmr.margin_left", "align", [canvas_node, axes_node], axis="x",
                          anchor="left", controlled_by=[["axes_left_mm"]], move=[axes_node]),
-        _native.relation("nmr.margin_right", "gap", [canvas_node, axes_node], axis="x",
+        _native.relation("nmr.margin_right", "align", [canvas_node, axes_node], axis="x",
                          anchor="right", controlled_by=[["axes_right_mm"]], move=[axes_node]),
-        _native.relation("nmr.margin_bottom", "gap", [canvas_node, axes_node], axis="y",
+        _native.relation("nmr.margin_bottom", "align", [canvas_node, axes_node], axis="y",
                          anchor="bottom", controlled_by=[["axes_bottom_mm"]], move=[axes_node]),
-        _native.relation("nmr.margin_top", "gap", [canvas_node, axes_node], axis="y",
+        _native.relation("nmr.margin_top", "align", [canvas_node, axes_node], axis="y",
                          anchor="top", controlled_by=[["axes_top_mm"]], move=[axes_node]),
     ]
     for key in PEAK_KEYS:

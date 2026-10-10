@@ -1,6 +1,6 @@
 # figpact (figure + pact)
 
-科研出版图的参数契约与质量保障引擎。
+面向 Agent 的科研图几何测量、排版契约与严格出版验收引擎。
 
 ## 核心设计
 1. **参数契约**：排版参数在 YAML 集中管理，数据与绘图逻辑在 Python 脚本。
@@ -95,6 +95,30 @@ python -X utf8 tests/benchmarks/bench_vnext.py --lanes cold_preview warm_preview
 毫米位移可核对实际 renderer 的坐标；字体包围盒仍受 DPI 和栅格化影响，
 不能宣称任意精度。移动图像时保护的是原图数组及科学窗口，不承诺不同画布下
 重采样后的屏幕像素逐字节相同。
+
+## 查询场景与物理几何
+
+```python
+from figpact import scene
+from tests.fixtures import native_panels as plot
+
+scope = "main"
+fig, registry = plot.build_scene(plot.load_science(), plot.load_config(), scope)
+snapshot = scene.snapshot(fig, registry, scope=scope, revision="baseline",
+                          contract=plot.layout_contract(scope))
+panels = scene.inspect(snapshot, type="panel")
+```
+
+快照给出稳定 ID、实际父节点、毫米边界、锚点、关系与精确 YAML 路径段；
+`inspect` 可按 ID、名称、语义类型或 scope 查询邻居、关系和可控参数。
+同一个已登记面板只有一个身份，未登记可见对象仍列入风险诊断。
+
+六类测量为对齐、带符号包络间距、形状净距、容纳、等尺寸与均匀分布。
+原点统一为画布左下角。曲线采用实际显示线段，不把整条曲线的矩形包络当轮廓；
+文字包络、中心线与可见笔迹模型分别注明方法和局限。
+快照记录 DPI、renderer、字体环境及 revision；允差是要求，不是测量精度。
+96/300/600 DPI 实测四面板间距均为 6.000 mm、编号上内距均为 2.000 mm；
+没有进行物理标定，因此不确定度保持未知。
 
 ## 数据文件说明
 `examples/*/` 数据目录下的 PDF 与 PNG 文件（例如 `examples/ftir/2084_1788253487778_26083154776/26083154776/*.pdf` 为科学指南针测试机构导出的对照报告，`examples/nmr/核磁原始数据/*/pdata/1/thumb.png` 为 Bruker TopSpin 仪器采集生成的原始缩略图）均为仪器原始产物与输入数据，不是 render 导出的渲染产物。render 产生的所有构建产物均通过 `.gitignore` 排除，不进入版本跟踪。
