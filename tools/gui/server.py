@@ -98,7 +98,28 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT_DIR / "tools" / "gui"), **kwargs)
 
+    def _origin_allowed(self) -> bool:
+        """只接受本机来源。这个服务能执行本地绘图脚本，不能对任意网页开放。
+
+        没带 Origin 的请求（curl / 同源导航 / 文件直开）放行——它们不是浏览器
+        的跨站请求；带了 Origin 的必须是本机同端口，否则拒。
+        """
+        origin = self.headers.get("Origin")
+        if not origin:
+            return True
+        port = self.server.server_address[1]
+        return origin in {f"http://127.0.0.1:{port}", f"http://localhost:{port}"}
+
+    def _reject_foreign_origin(self) -> bool:
+        """返回 True 表示已拒绝并回过响应，调用方直接 return。"""
+        if self._origin_allowed():
+            return False
+        self._send_error_json("来源不被允许：本服务只接受 127.0.0.1 的本机页面", 403)
+        return True
+
     def do_GET(self):
+        if self._reject_foreign_origin():
+            return
         url_parts = urllib.parse.urlparse(self.path)
         path = url_parts.path
         query = urllib.parse.parse_qs(url_parts.query)
@@ -124,6 +145,8 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self):
+        if self._reject_foreign_origin():
+            return
         url_parts = urllib.parse.urlparse(self.path)
         path = url_parts.path
 
@@ -281,7 +304,10 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "*")
+        # 不回显 `*`：只把请求方自己的 Origin 回显给它（闸门已保证是本机）
+        _origin = self.headers.get("Origin")
+        if _origin:
+            self.send_header("Access-Control-Allow-Origin", _origin)
         self.end_headers()
         self.wfile.write(body)
 
@@ -299,7 +325,7 @@ def main():
     parser.add_argument("--port", type=int, default=8000, help="监听端口 (默认 8000)")
     args = parser.parse_args()
 
-    addr = ("", args.port)
+    addr = ("127.0.0.1", args.port)  # 只监听本机：这个服务能执行本地绘图脚本
     with socketserver.TCPServer(addr, FigpactGuiHandler) as httpd:
         print(f"[figpact GUI 原型服务已启动]")
         print(f"  地址: http://127.0.0.1:{args.port}")
