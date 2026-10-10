@@ -1,0 +1,1085 @@
+{
+  "schema": "figpact.vnext.blind-tasks/1",
+  "purpose": "vNext 盲测（30 题）的**意图输入**：只写题目、当前状态的可见物理量、目标对象与保护范围，供真实受试 Agent 在 A/B/C 三种条件下作答。结果、耗时、候选产物一律由真实试验事后记录，本文件不含任何预填结果。",
+  "not_acceptance_corpus": "本文件不是 eval/vnext_tasks.json 的替代品：它只有题目意图，没有逐条改动与期望字段，不能被当作验收语料喂给 eval/run_vnext_tasks.py --tasks。判定键只在 corpus 里。",
+  "source": {
+    "corpus": "eval/vnext_tasks.json",
+    "corpus_schema": "figpact.vnext.tasks/1",
+    "runner": "eval/run_vnext_tasks.py",
+    "runner_agent_schema": "figpact.vnext.agent-trials/2",
+    "fixture_root": "tests/fixtures",
+    "mapping": "cases[].id 与 corpus tasks[].id 一对一；cases[].fixture / config / scope 与 corpus 记录逐字相同；物理/科学意图逐条对应。",
+    "excluded_on_purpose": [
+      "逐条改动记录（改哪个参数、改到什么值、改哪个配置路径）",
+      "参数路径与 YAML 键名",
+      "期望状态、验证等级、拒绝规则的实现 id",
+      "不变量与关系的实现 id（语料里那些带点前缀的断言名）",
+      "期望测量值、容差、测量基底——那些是判定键，只留在 corpus 里"
+    ],
+    "prompt_scope": "下发受试 Agent 的内容只取 case.task + case.baseline_visible + case.targets + protocol arms 里该臂的条件；case.id、case.group 与 fixture/config/scope 只给评测者（id 与 group 会暴露题型），绝不下发给受试者。"
+  },
+  "protocol": {
+    "reading_order": [
+      "1) 先读 baseline_visible，把当前状态的可见物理量认清（必要时用当前全量预览/几何测量复核）。",
+      "2) 再读 task，把要求理解成一个**物理毫米目标**，不是某个配置数字。",
+      "3) 最后按自己所属的臂（A/B/C）动手，并遵守 common_safety 与 protected_science。"
+    ],
+    "trial_isolation": "逐题独立：每题从夹具自己的默认 YAML（case.config）出发，复制到本题的临时目录再改，绝不原地改仓库文件；上题的目标/候选/累积状态不带到下题；候选永远由「基线 + 本题目标」重新导出。",
+    "arms": {
+      "A": {
+        "name": "可改候选 Python（candidate_script）",
+        "channel": "候选取图脚本 = 夹具 .py 的副本（在本题临时目录里）；同时产出候选 YAML。",
+        "may": [
+          "读原始夹具 .py 与原始 YAML",
+          "改候选脚本里的构建/排版代码（毫米/磅物理量，不许拍脑袋换算）",
+          "产出候选 YAML"
+        ],
+        "must_not": [
+          "改原始夹具 .py / .yaml（只读）",
+          "改科学载荷：绘图数组、图像像素、积分/带位窗口、归属与注释文本、比例尺物理长度、显示窗口"
+        ],
+        "authority": "原始夹具脚本 + 原始 YAML 是科学与目标的**唯一权威**；候选脚本相对它的每一处偏离都必须能被解释成纯排版改动。",
+        "raw_source_paths": "A 拿到**真实路径**清单：候选脚本、候选 YAML、原始脚本（只读权威）、原始 YAML（只读权威）——见 protocol.arm_handouts。",
+        "record": "changed=\"python\"；必须交候选脚本的**真实副本路径**；另交候选 YAML 与源码指纹（可选）。只给 YAML 不给候选脚本不算 A 的证据。"
+      },
+      "B": {
+        "name": "只能改 YAML + 当前全量预览",
+        "channel": "候选 YAML = 夹具 YAML 的副本（在本题临时目录里）。",
+        "may": [
+          "改候选 YAML 里的排版数值",
+          "看由冻结原始脚本整图渲染出来的全量预览",
+          "使用冻结的当前 Skill；按需只读原始绘图脚本、参数说明与现有 inventory"
+        ],
+        "must_not": [
+          "修改原始或候选绘图脚本，或调用新 Scene/Geometry 会话接口",
+          "碰科学载荷"
+        ],
+        "cost": "每次候选反馈使用旧全量预览入口；源码和现有 inventory 允许只读，不刻意削弱当前工作流程。",
+        "raw_source_paths": "B 拿到候选 YAML、原始 YAML、原始绘图脚本（只读）、冻结的当前 Skill 和全量预览 PNG 的真实路径。",
+        "record": "changed=\"yaml\"；只交候选 YAML。如果这次动手改的是 Python，那就不是 B 的记录。"
+      },
+      "C": {
+        "name": "只能走场景/几何操作",
+        "channel": "只通过场景会话的五个操作：snapshot / inspect / try_layout / render_preview / commit（真实入口：figpact agent --script … --config … --scope …）。",
+        "may": [
+          "snapshot 量当前几何（毫米，画布左下原点）",
+          "inspect 查声明、对象、关系与可选路径",
+          "try_layout 提交一批绝对目标（原子：失败不改状态）",
+          "render_preview 看候选 PNG",
+          "commit draft 写出候选 YAML"
+        ],
+        "must_not": [
+          "读完整绘图脚本源码（C 的输入里没有脚本源码，也不许去找）",
+          "改绘图脚本",
+          "执行 publication commit（严格发布由评测者/父流程负责）"
+        ],
+        "raw_source_paths": "C 不读完整绘图源码；路径可仅用于调用实际会话入口或保存草稿，不用于阅读源码/YAML或改文件。",
+        "record": "changed=\"yaml\"；交 draft 写出的候选 YAML；candidate_script 必须为空（C 不改 Python）。"
+      }
+    },
+    "arm_handouts": {
+      "trial_dir": "每题的临时目录 <trial_root>/<case.id>/，里面的候选文件从 case.fixture / case.config 复制而来：candidate_script.py（A 用）、candidate.yaml（A/B/C 用）、preview_full.png（B/C 用的当前状态全量预览，由冻结的原始脚本渲染）。",
+      "A": "下发真实路径：<trial_dir>/candidate_script.py、<trial_dir>/candidate.yaml、原始脚本（case.fixture，只读权威）、原始 YAML（case.config，只读权威）。",
+      "B": "下发候选 YAML、原始 YAML、原始绘图脚本（只读）、冻结的当前 Skill 和全量预览 PNG 的真实路径；不得改 Python 或调用新接口。",
+      "C": "下发意图、实际基线、保护范围、scope 与五操作会话；路径仅用于实际接口调用，不能读取完整绘图源码。",
+      "why": "A 可以修改候选 Python；B 保留当前流程能读取的源码与 inventory，只改 YAML；C 不读完整脚本，仅通过结构化场景接口完成同一目标。"
+    },
+    "common_safety": [
+      "只写本题临时目录；原始夹具文件、其它仓库文件一律不碰。",
+      "科学载荷逐字节不变：绘图数组、图像像素、积分/带位窗口、归属与注释文本、比例尺代表的物理长度、xlim/ylim 显示的物理窗口。",
+      "不许伪造：状态、验证等级、实测毫米数、耗时。拿不到的实测就写「测不到」并说明，绝不填 0 或估计值当结果。",
+      "不许拿「配置文件里的数字变了」当「物理位移达成了」：位移必须量出来（几何测量或前后全量预览对比的毫米差）。",
+      "请求越界、被锁定、自相矛盾或不在授权范围内时：明确说出「做不了」与依据，不许静默 no-op、不许夹带别的改动、不许交一张看起来完成了的图。",
+      "改动必须可独立重建复核：候选 YAML（A 另加候选脚本）都要真实落盘，能被第三方从基线与目标重建出同一张图。",
+      "本协议不要求受试者产出任何额外报告文件；回执原文由评测者记录。"
+    ],
+    "pitch_vs_lift": {
+      "visible_measured_baseline": "「可见实测基线」= 当前状态下量得到的物理毫米量（曲线之间的堆叠台阶、面板缝宽、字母内缩、标签在锚点之上的上抬）。它落在画面上，用几何测量或全量预览就能看见。",
+      "yaml_display_lift": "配置里那些毫米数只是**叠在场景上的显示位移声明**：它们决定画出来的位移，但它们本身不是目标。",
+      "rule": "目标达成的证据是「候选相对当前基线的**实测物理位移** = case.task 里给的毫米数」（带符号、带轴），而不是「某个配置数字被改成某个值」。写题与判题都按这条：baseline_visible 给的是实测基线，task 给的是实测目标。",
+      "sign_convention": "轴向右为正、向上为正（画布左下原点）。任务里写明「下移」就是负位移，写明「右移」就是正位移。"
+    },
+    "baseline_remeasure": "本文件画布与 Panel 边界来自当前 12 scope 的实际 renderer 测量；物理间距不是配置值。测量未标定，不凭小数位数声称任意精度。",
+    "deliverable": {
+      "general": "把候选产物（A：候选脚本 + 候选 YAML；B/C：候选 YAML）连同你对这次请求的判断一起交出。",
+      "when_impossible": "如果请求按声明/物理不可能、或与本次授权的范围冲突：交出明确的拒绝或诊断（按你能拿到的证据说清「哪条声明、实测是什么、为什么做不了」），不要交候选。",
+      "no_extra_files": "不需要额外报告文件；说明放在回执里即可。"
+    },
+    "trial_record": {
+      "why": "只有真实的受试记录才能进报告；被评测者独立重建复核通过才算成功。",
+      "runner_consumed_fields": "实际记录使用 figpact.vnext.agent-trials/2：task_id、arm、agent、attempt、真实 started_at/finished_at/wall_seconds、原始请求/应答；独立重建读取 candidate_config/candidate_script/source_fingerprint/diagnostic_only。缺失证据和失败尝试不能被丢弃。",
+      "required_per_trial_fields": {
+        "task_id": "corpus 里的原 id（本文件 case.id）",
+        "arm": "A / B / C",
+        "agent": "真实受试者标识（模型/会话/子代理名）",
+        "attempt": "第几次尝试（同一题同一臂的序号）",
+        "started_at": "ISO 时间戳，真实开始时刻",
+        "finished_at": "ISO 时间戳，真实结束时刻",
+        "wall_seconds": "真实墙钟秒数（含受试者的推理与工具往返）",
+        "finished": "布尔：这次尝试是否跑完",
+        "failure": "失败原因字符串，成功时 null",
+        "attempted_changes": "这一次真实提交的改动次数（不是猜的、不是预设的）",
+        "raw_request": "真实下发给受试者的原文，不加工、不补写",
+        "raw_response": "受试者真实回执原文，不加工、不摘要替代",
+        "changed": "\"python\"（A 改了脚本）或 \"yaml\"（只动配置/场景）",
+        "candidate_config": "候选 YAML 的真实路径",
+        "candidate_script": "A：候选脚本真实路径；B/C：null",
+        "source_fingerprint": "可选：候选脚本的源码指纹（声明了就必须与实测一致）"
+      },
+      "honesty": [
+        "绝不用编造的耗时、预填的成功/失败、事后补写的「原始请求/回执」。",
+        "绝不把 backend 计时（确定性 YAML/进程重跑）、warm 预检、或自动生成的确定性操作当成一次 Agent 试验。",
+        "绝不把同一份回执重放两次当成两次尝试，也不拿确定性语料重放冒充真实 Agent 试跑。",
+        "同一题的多次尝试各自独立记录，不许把前一次的结论当成后一次的输入。"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "ftir-shift-curve-b-2mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "task": "把主图里的曲线 b 单独整体上移 2.0 mm（纯显示位移）。三条谱线的数据一个字节都不许动——这次只动显示位置，不动曲线本身。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_ftir_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "三条谱线自下而上为 a、b、c。1.5 mm 是额外显示抬升声明，不是实际谱线台阶；单条显示位移允许 ±6 mm，额外抬升声明范围 0–4 mm。",
+        "当前实际测得的谱线台阶 = 5.894487737169008 mm（baseline）。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_ftir_native.main.curve.b",
+          "type": "Line2D"
+        }
+      ],
+      "protected_science": [
+        "三条曲线的绘图数组逐字节等于受保护数组（同一条严格递减波数网格）。",
+        "带位窗口（cm⁻¹）与带位文本不变。",
+        "xlim/ylim 显示的物理窗口不变。"
+      ]
+    },
+    {
+      "id": "ftir-stack-step-raise-1p5mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "task": "把主图 b、c 两条谱线各整体上移 1.5 mm，a 不动；数据不变。这里改的是额外显示抬升，不要求两段实际谱线台阶都变成某个配置数字。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_ftir_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "三条谱线自下而上为 a、b、c。1.5 mm 是额外显示抬升声明，不是实际谱线台阶；单条显示位移允许 ±6 mm，额外抬升声明范围 0–4 mm。",
+        "当前实际测得的谱线台阶 = 5.894487737169008 mm（baseline）。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_ftir_native.main.curve.a",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_ftir_native.main.curve.b",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_ftir_native.main.curve.c",
+          "type": "Line2D"
+        }
+      ],
+      "protected_science": [
+        "三条曲线的绘图数组逐字节等于受保护数组（同一条严格递减波数网格）。",
+        "曲线上下顺序与堆叠台阶的声明一致。",
+        "xlim/ylim 显示的物理窗口不变。"
+      ]
+    },
+    {
+      "id": "ftir-band-label-lift-1p5mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "task": "把四个带位标签各整体上移 1.5 mm；带位文本、峰锚点和带位窗口一字不改。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_ftir_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "三条谱线自下而上为 a、b、c。1.5 mm 是额外显示抬升声明，不是实际谱线台阶；单条显示位移允许 ±6 mm，额外抬升声明范围 0–4 mm。",
+        "当前实际测得的谱线台阶 = 5.894487737169008 mm（baseline）。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_ftir_native.main.band_label.oh",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_ftir_native.main.band_label.coo_cc",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_ftir_native.main.band_label.coc",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_ftir_native.main.band_label.zn_o",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "三条曲线的绘图数组逐字节等于受保护数组（同一条严格递减波数网格）。",
+        "带位窗口（cm⁻¹）与带位文本不变。"
+      ]
+    },
+    {
+      "id": "ftir-compare-raw-shift-2p5mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "compare_raw",
+      "task": "对照图是一张两格图：上格 = 原始，下格 = 处理后。把**上格**里那条曲线整体上移 2.5 mm；下格不许跟着动。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_ftir_native.compare_raw.axes 的实际边界 [左, 下, 右, 上] = [24, 42, 94, 62] mm。",
+        "fig_ftir_native.compare_processed.axes 的实际边界 [左, 下, 右, 上] = [24, 12, 94, 32] mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_ftir_native.compare_raw.curve.a",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_ftir_native.compare_processed.curve.a",
+          "type": "Line2D"
+        }
+      ],
+      "protected_science": [
+        "三条曲线的绘图数组逐字节等于受保护数组（同一条严格递减波数网格）。",
+        "xlim/ylim 显示的物理窗口不变。"
+      ]
+    },
+    {
+      "id": "ftir-compare-processed-shift-3mm",
+      "group": "ftir",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "compare_processed",
+      "task": "对照图是一张两格图：上格 = 原始，下格 = 处理后。把**下格**里那条曲线整体上移 3.0 mm；「处理后」那条 5 点滑动平均的处理链本身不许变。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_ftir_native.compare_raw.axes 的实际边界 [左, 下, 右, 上] = [24, 42, 94, 62] mm。",
+        "fig_ftir_native.compare_processed.axes 的实际边界 [左, 下, 右, 上] = [24, 12, 94, 32] mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_ftir_native.compare_processed.curve.a",
+          "type": "Line2D"
+        }
+      ],
+      "protected_science": [
+        "三条曲线的绘图数组逐字节等于受保护数组（同一条严格递减波数网格）。",
+        "「处理后」对照格只有声明的 5 点滑动平均，x 网格与点数不变。",
+        "xlim/ylim 显示的物理窗口不变。"
+      ]
+    },
+    {
+      "id": "nmr-peak-shift-2p5mm",
+      "group": "nmr",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "task": "把 7.26 ppm 那组峰（峰位引导线 + 积分窗口 + 归属标签）整体上移 2.5 mm；其它三个峰（3.91 / 2.02 / 1.18 ppm）保持不动。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_nmr_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "峰位 7.26、3.91、2.02、1.18 ppm；每峰显示位移范围 ±6 mm。7.26 峰的积分窗口 7.20–7.32 ppm，科学窗口不可编辑。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_nmr_native.main.peak_guide.7.26",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_nmr_native.main.peak_window.7.26",
+          "type": "Rectangle"
+        },
+        {
+          "gid": "fig_nmr_native.main.peak_label.7.26",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_nmr_native.main.peak_guide.3.91",
+          "type": "Line2D"
+        }
+      ],
+      "protected_science": [
+        "谱线绘图数组逐字节等于受保护数组。",
+        "每根峰位引导线的 x 数据就是它的峰位 ppm。",
+        "每个峰的积分窗口（ppm）与受保护窗口一致。",
+        "归属文本一字不改。"
+      ]
+    },
+    {
+      "id": "nmr-peak-label-lift-1mm",
+      "group": "nmr",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "task": "把四个归属标签各整体上移 1.0 mm；归属文本与峰锚点不变。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_nmr_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "峰位 7.26、3.91、2.02、1.18 ppm；每峰显示位移范围 ±6 mm。7.26 峰的积分窗口 7.20–7.32 ppm，科学窗口不可编辑。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_nmr_native.main.peak_label.7.26",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_nmr_native.main.peak_label.3.91",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_nmr_native.main.peak_label.2.02",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_nmr_native.main.peak_label.1.18",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "谱线绘图数组逐字节等于受保护数组。",
+        "归属文本一字不改。"
+      ]
+    },
+    {
+      "id": "nmr-margin-left-30mm",
+      "group": "nmr",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "task": "把坐标框左外边距从当前实测的 24.0 mm 改成 30.0 mm：坐标框左边框到画布左边界的净空必须正好是 30.0 mm。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_nmr_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "峰位 7.26、3.91、2.02、1.18 ppm；每峰显示位移范围 ±6 mm。7.26 峰的积分窗口 7.20–7.32 ppm，科学窗口不可编辑。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_nmr_native.main.canvas",
+          "type": "Figure"
+        },
+        {
+          "gid": "fig_nmr_native.main.axes",
+          "type": "Axes"
+        }
+      ],
+      "protected_science": [
+        "谱线绘图数组逐字节等于受保护数组。",
+        "xlim/ylim 显示的物理窗口不变。"
+      ]
+    },
+    {
+      "id": "nmr-peak-shift-9mm-refused",
+      "group": "nmr",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "task": "用户要求把 3.91 ppm 那组峰整体上移 9.0 mm。请先核实这个请求在当前声明与物理约束下能不能执行；不能执行就明确拒绝并说清依据——绝不许静默夹紧到一个上限，也不许交一张看起来做到了的图。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_nmr_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "峰位 7.26、3.91、2.02、1.18 ppm；每峰显示位移范围 ±6 mm。7.26 峰的积分窗口 7.20–7.32 ppm，科学窗口不可编辑。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_nmr_native.main.peak_guide.3.91",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_nmr_native.main.peak_window.3.91",
+          "type": "Rectangle"
+        },
+        {
+          "gid": "fig_nmr_native.main.peak_label.3.91",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "谱线绘图数组逐字节等于受保护数组。",
+        "每根峰位引导线的 x 数据就是它的峰位 ppm。"
+      ]
+    },
+    {
+      "id": "panels-gap-x-8mm",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "task": "把两列面板之间的横向间距从当前实测的 6.0 mm 调到 8.0 mm，同时把画布加宽 2.0 mm 以保持右侧净空不变：右列两块面板整体右移 2.0 mm，左列不动。",
+      "baseline_visible": [
+        "实际渲染画布 88.4 × 74 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_panels_native.main.panel.a 的实际边界 [左, 下, 右, 上] = [10, 10, 41.2, 34] mm。",
+        "fig_panels_native.main.panel.b 的实际边界 [左, 下, 右, 上] = [47.2, 10, 78.4, 34] mm。",
+        "fig_panels_native.main.panel.c 的实际边界 [左, 下, 右, 上] = [10, 40, 41.2, 64] mm。",
+        "fig_panels_native.main.panel.d 的实际边界 [左, 下, 右, 上] = [47.2, 40, 78.4, 64] mm。",
+        "面板顺序 a 左下、b 右下、c 左上、d 右上；图像长宽比 1.3；比例尺代表 10 µm；只读最小外侧预留为 10 mm，实际空白以边界差为准。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_panels_native.main.panel.a",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.b",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.c",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.d",
+          "type": "Axes"
+        }
+      ],
+      "protected_science": [
+        "四张显微图的像素数组逐字节等于受保护数组。",
+        "每张图的裁切窗口与显示窗口（µm）不变。",
+        "面板框纵横比仍等于画幅比例 1.3，显微图没有被拉伸。",
+        "比例尺代表的物理长度（µm）不变：显示长度 = µm / 视野宽 × 面板宽。"
+      ]
+    },
+    {
+      "id": "panels-resize-equal-39x30",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "task": "四块面板一起放大到 39 × 30 mm（保持 1.3 的显微画幅比例，显微图绝不许被拉伸），画布同步加大到 104 × 86 mm。四块面板的尺寸必须完全相同。",
+      "baseline_visible": [
+        "实际渲染画布 88.4 × 74 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_panels_native.main.panel.a 的实际边界 [左, 下, 右, 上] = [10, 10, 41.2, 34] mm。",
+        "fig_panels_native.main.panel.b 的实际边界 [左, 下, 右, 上] = [47.2, 10, 78.4, 34] mm。",
+        "fig_panels_native.main.panel.c 的实际边界 [左, 下, 右, 上] = [10, 40, 41.2, 64] mm。",
+        "fig_panels_native.main.panel.d 的实际边界 [左, 下, 右, 上] = [47.2, 40, 78.4, 64] mm。",
+        "面板顺序 a 左下、b 右下、c 左上、d 右上；图像长宽比 1.3；比例尺代表 10 µm；只读最小外侧预留为 10 mm，实际空白以边界差为准。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_panels_native.main.panel.a",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.b",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.c",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.d",
+          "type": "Axes"
+        }
+      ],
+      "protected_science": [
+        "四张显微图的像素数组逐字节等于受保护数组。",
+        "面板框纵横比仍等于画幅比例 1.3，显微图没有被拉伸。",
+        "比例尺代表的物理长度（µm）不变：显示长度 = µm / 视野宽 × 面板宽。"
+      ]
+    },
+    {
+      "id": "panels-letter-inset-y-3p5mm",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "task": "面板字母距面板上边框的纵向内缩从当前实测的 2.0 mm 增加到 3.5 mm：四个字母（a / b / c / d）在画面上各**下移** 1.5 mm。",
+      "baseline_visible": [
+        "实际渲染画布 88.4 × 74 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_panels_native.main.panel.a 的实际边界 [左, 下, 右, 上] = [10, 10, 41.2, 34] mm。",
+        "fig_panels_native.main.panel.b 的实际边界 [左, 下, 右, 上] = [47.2, 10, 78.4, 34] mm。",
+        "fig_panels_native.main.panel.c 的实际边界 [左, 下, 右, 上] = [10, 40, 41.2, 64] mm。",
+        "fig_panels_native.main.panel.d 的实际边界 [左, 下, 右, 上] = [47.2, 40, 78.4, 64] mm。",
+        "面板顺序 a 左下、b 右下、c 左上、d 右上；图像长宽比 1.3；比例尺代表 10 µm；只读最小外侧预留为 10 mm，实际空白以边界差为准。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_panels_native.main.letter.a",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_panels_native.main.letter.b",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_panels_native.main.letter.c",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_panels_native.main.letter.d",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "四张显微图的像素数组逐字节等于受保护数组。",
+        "面板顺序不变：a 左下、b 右下、c 左上、d 右上。",
+        "比例尺代表的物理长度（µm）不变：显示长度 = µm / 视野宽 × 面板宽。"
+      ]
+    },
+    {
+      "id": "panels-letter-inset-x-3mm",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "task": "面板字母距面板左边框的横向内缩从当前实测的 2.0 mm 增加到 3.0 mm：四个字母各**右移** 1.0 mm。",
+      "baseline_visible": [
+        "实际渲染画布 88.4 × 74 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_panels_native.main.panel.a 的实际边界 [左, 下, 右, 上] = [10, 10, 41.2, 34] mm。",
+        "fig_panels_native.main.panel.b 的实际边界 [左, 下, 右, 上] = [47.2, 10, 78.4, 34] mm。",
+        "fig_panels_native.main.panel.c 的实际边界 [左, 下, 右, 上] = [10, 40, 41.2, 64] mm。",
+        "fig_panels_native.main.panel.d 的实际边界 [左, 下, 右, 上] = [47.2, 40, 78.4, 64] mm。",
+        "面板顺序 a 左下、b 右下、c 左上、d 右上；图像长宽比 1.3；比例尺代表 10 µm；只读最小外侧预留为 10 mm，实际空白以边界差为准。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_panels_native.main.letter.a",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_panels_native.main.letter.b",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_panels_native.main.letter.c",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_panels_native.main.letter.d",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "四张显微图的像素数组逐字节等于受保护数组。",
+        "面板顺序不变：a 左下、b 右下、c 左上、d 右上。"
+      ]
+    },
+    {
+      "id": "panels-canvas-widen-100mm",
+      "group": "panels",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "task": "把画布加宽到 100.0 mm；四块面板的尺寸、位置和栅格间距全部不变，多出的 11.6 mm 留在右侧。左下外侧空白不变，右侧实际空白从 10.0 mm 增至 21.6 mm；只读最小预留要求不变。",
+      "baseline_visible": [
+        "实际渲染画布 88.4 × 74 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_panels_native.main.panel.a 的实际边界 [左, 下, 右, 上] = [10, 10, 41.2, 34] mm。",
+        "fig_panels_native.main.panel.b 的实际边界 [左, 下, 右, 上] = [47.2, 10, 78.4, 34] mm。",
+        "fig_panels_native.main.panel.c 的实际边界 [左, 下, 右, 上] = [10, 40, 41.2, 64] mm。",
+        "fig_panels_native.main.panel.d 的实际边界 [左, 下, 右, 上] = [47.2, 40, 78.4, 64] mm。",
+        "面板顺序 a 左下、b 右下、c 左上、d 右上；图像长宽比 1.3；比例尺代表 10 µm；只读最小外侧预留为 10 mm，实际空白以边界差为准。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_panels_native.main.canvas",
+          "type": "Figure"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.a",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.b",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.c",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.d",
+          "type": "Axes"
+        }
+      ],
+      "protected_science": [
+        "四张显微图的像素数组逐字节等于受保护数组。",
+        "每张图的裁切窗口与显示窗口（µm）不变。",
+        "面板框纵横比仍等于画幅比例 1.3，显微图没有被拉伸。"
+      ]
+    },
+    {
+      "id": "mixed-panel-gap-9mm",
+      "group": "mixed",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "task": "曲线面板与显微图面板之间的间距从当前实测的 6.0 mm 调到 9.0 mm：整个图像面板集合（显微图、比例尺、面板字母）作为刚体右移 3.0 mm；曲线面板不动。",
+      "baseline_visible": [
+        "实际渲染画布 152 × 70 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_mixed_native.main.curve_panel 的实际边界 [左, 下, 右, 上] = [20, 14, 76, 54] mm。",
+        "fig_mixed_native.main.image_panel 的实际边界 [左, 下, 右, 上] = [82, 14, 134, 54] mm。",
+        "曲线面板在左、显微图面板在右；图像长宽比 1.3，比例尺代表 10 µm；右侧声明最少预留 12 mm，基线实际空白为 18 mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_mixed_native.main.curve_panel",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_mixed_native.main.image_panel",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_mixed_native.main.scale_bar",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_mixed_native.main.letter.image",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "显微图像素字节不变。",
+        "显微图 extent（裁切窗口，µm）不变。",
+        "比例尺代表的物理长度（µm）不变。",
+        "曲线绘图数组逐字节等于受保护数组。"
+      ]
+    },
+    {
+      "id": "mixed-curve-lift-2p5mm",
+      "group": "mixed",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "task": "把曲线整体上移 2.5 mm：显微图像素、显微图裁切窗口与比例尺都不许跟着动。",
+      "baseline_visible": [
+        "实际渲染画布 152 × 70 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_mixed_native.main.curve_panel 的实际边界 [左, 下, 右, 上] = [20, 14, 76, 54] mm。",
+        "fig_mixed_native.main.image_panel 的实际边界 [左, 下, 右, 上] = [82, 14, 134, 54] mm。",
+        "曲线面板在左、显微图面板在右；图像长宽比 1.3，比例尺代表 10 µm；右侧声明最少预留 12 mm，基线实际空白为 18 mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_mixed_native.main.curve.a",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_mixed_native.main.image",
+          "type": "AxesImage"
+        }
+      ],
+      "protected_science": [
+        "曲线绘图数组逐字节等于受保护数组。",
+        "曲线的 xlim/ylim 与带位窗口不变。",
+        "显微图像素字节不变。",
+        "显微图 extent（裁切窗口，µm）不变。"
+      ]
+    },
+    {
+      "id": "mixed-widen-curve-panel-60mm",
+      "group": "mixed",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "task": "把曲线面板从当前实测的 56.0 mm 加宽到 60.0 mm；显微图面板宽度被视野纵横比锁死（1.3 × 40 = 52.0 mm），不许跟着变；画布必须仍然装得下整条面板带。",
+      "baseline_visible": [
+        "实际渲染画布 152 × 70 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_mixed_native.main.curve_panel 的实际边界 [左, 下, 右, 上] = [20, 14, 76, 54] mm。",
+        "fig_mixed_native.main.image_panel 的实际边界 [左, 下, 右, 上] = [82, 14, 134, 54] mm。",
+        "曲线面板在左、显微图面板在右；图像长宽比 1.3，比例尺代表 10 µm；右侧声明最少预留 12 mm，基线实际空白为 18 mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_mixed_native.main.curve_panel",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_mixed_native.main.image_panel",
+          "type": "Axes"
+        }
+      ],
+      "protected_science": [
+        "曲线绘图数组逐字节等于受保护数组。",
+        "显微图像素字节不变。",
+        "显微图 extent（裁切窗口，µm）不变。",
+        "比例尺代表的物理长度（µm）不变。"
+      ]
+    },
+    {
+      "id": "mixed-letter-inset-y-2p5mm",
+      "group": "mixed",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "task": "两个面板字母距面板上边框的纵向内缩从当前实测的 1.0 mm 增加到 2.5 mm：两个字母在画面上各**下移** 1.5 mm。",
+      "baseline_visible": [
+        "实际渲染画布 152 × 70 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_mixed_native.main.curve_panel 的实际边界 [左, 下, 右, 上] = [20, 14, 76, 54] mm。",
+        "fig_mixed_native.main.image_panel 的实际边界 [左, 下, 右, 上] = [82, 14, 134, 54] mm。",
+        "曲线面板在左、显微图面板在右；图像长宽比 1.3，比例尺代表 10 µm；右侧声明最少预留 12 mm，基线实际空白为 18 mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_mixed_native.main.letter.curve",
+          "type": "Text"
+        },
+        {
+          "gid": "fig_mixed_native.main.letter.image",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "曲线绘图数组逐字节等于受保护数组。",
+        "显微图像素字节不变。",
+        "曲线面板在左、图像面板在右，且两面板的纵向对齐关系不变。"
+      ]
+    },
+    {
+      "id": "space-ftir-curve-gap-9mm",
+      "group": "impossible-space",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "task": "用户要求把主图谱线的额外显示抬升声明设为 9.0 mm（该声明当前 1.5 mm，允许 0–4 mm；它不是实际谱线台阶）。请核实能否执行；不能就明确拒绝，不夹紧，不改授权范围，不交假成功候选。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_ftir_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "三条谱线自下而上为 a、b、c。1.5 mm 是额外显示抬升声明，不是实际谱线台阶；单条显示位移允许 ±6 mm，额外抬升声明范围 0–4 mm。",
+        "当前实际测得的谱线台阶 = 5.894487737169008 mm（baseline）。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_ftir_native.main.curve.a",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_ftir_native.main.curve.b",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_ftir_native.main.curve.c",
+          "type": "Line2D"
+        }
+      ],
+      "protected_science": [
+        "三条曲线的绘图数组逐字节等于受保护数组（同一条严格递减波数网格）。",
+        "曲线上下顺序与堆叠台阶的声明一致。"
+      ]
+    },
+    {
+      "id": "space-panels-gap-y-20mm",
+      "group": "impossible-space",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "task": "用户要求把纵向间距做到 20.0 mm。请先核实这个要求能不能做（可按需用到：画布 88.4 × 74.0 mm、面板各 31.2 × 24.0 mm、上下外边距净空各 10.0 mm）；不能做就明确拒绝并说明依据，不要交一张装不下的图。",
+      "baseline_visible": [
+        "实际渲染画布 88.4 × 74 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_panels_native.main.panel.a 的实际边界 [左, 下, 右, 上] = [10, 10, 41.2, 34] mm。",
+        "fig_panels_native.main.panel.b 的实际边界 [左, 下, 右, 上] = [47.2, 10, 78.4, 34] mm。",
+        "fig_panels_native.main.panel.c 的实际边界 [左, 下, 右, 上] = [10, 40, 41.2, 64] mm。",
+        "fig_panels_native.main.panel.d 的实际边界 [左, 下, 右, 上] = [47.2, 40, 78.4, 64] mm。",
+        "面板顺序 a 左下、b 右下、c 左上、d 右上；图像长宽比 1.3；比例尺代表 10 µm；只读最小外侧预留为 10 mm，实际空白以边界差为准。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_panels_native.main.panel.a",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.b",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.c",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.d",
+          "type": "Axes"
+        }
+      ],
+      "protected_science": [
+        "四张显微图的像素数组逐字节等于受保护数组。",
+        "面板顺序不变：a 左下、b 右下、c 左上、d 右上。"
+      ]
+    },
+    {
+      "id": "space-mixed-curve-panel-80mm",
+      "group": "impossible-space",
+      "fixture": "tests/fixtures/native_mixed.py",
+      "config": "tests/fixtures/native_mixed.yaml",
+      "scope": "main",
+      "task": "用户要求把曲线面板做成 80.0 mm 宽（画布宽 152.0 mm 与显微图面板宽度都不许跟着改）。请先核实这个要求能不能做；不能做就明确拒绝并说明依据。",
+      "baseline_visible": [
+        "实际渲染画布 152 × 70 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_mixed_native.main.curve_panel 的实际边界 [左, 下, 右, 上] = [20, 14, 76, 54] mm。",
+        "fig_mixed_native.main.image_panel 的实际边界 [左, 下, 右, 上] = [82, 14, 134, 54] mm。",
+        "曲线面板在左、显微图面板在右；图像长宽比 1.3，比例尺代表 10 µm；右侧声明最少预留 12 mm，基线实际空白为 18 mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_mixed_native.main.curve_panel",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_mixed_native.main.image_panel",
+          "type": "Axes"
+        }
+      ],
+      "protected_science": [
+        "曲线绘图数组逐字节等于受保护数组。",
+        "显微图像素字节不变。"
+      ]
+    },
+    {
+      "id": "space-ftir-canvas-h-40mm",
+      "group": "impossible-space",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "compare_raw",
+      "task": "用户要求把画布高度压到 40.0 mm。请先核实这个要求能不能做（对比图两格与格间距、外边距的量都要算进去）；不能做就明确拒绝并说明依据，不要交一张把某一格挤出画布的候选。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_ftir_native.compare_raw.axes 的实际边界 [左, 下, 右, 上] = [24, 42, 94, 62] mm。",
+        "fig_ftir_native.compare_processed.axes 的实际边界 [左, 下, 右, 上] = [24, 12, 94, 32] mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_ftir_native.compare_raw.canvas",
+          "type": "Figure"
+        },
+        {
+          "gid": "fig_ftir_native.compare_raw.axes",
+          "type": "Axes"
+        }
+      ],
+      "protected_science": [
+        "三条曲线的绘图数组逐字节等于受保护数组（同一条严格递减波数网格）。",
+        "xlim/ylim 显示的物理窗口不变。"
+      ]
+    },
+    {
+      "id": "locked-ftir-band-window",
+      "group": "locked-science",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "main",
+      "task": "用户想把 O–H 科学带位窗口从 3200–3550 cm⁻¹ 改成 3100–3650 cm⁻¹。请核实本次排版权限是否允许；不允许就明确拒绝，不修改科学窗口或交候选。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_ftir_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "三条谱线自下而上为 a、b、c。1.5 mm 是额外显示抬升声明，不是实际谱线台阶；单条显示位移允许 ±6 mm，额外抬升声明范围 0–4 mm。",
+        "当前实际测得的谱线台阶 = 5.894487737169008 mm（baseline）。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_ftir_native.main.band.oh",
+          "type": "Rectangle"
+        },
+        {
+          "gid": "fig_ftir_native.main.band_label.oh",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "带位窗口（cm⁻¹）与带位文本不变。",
+        "xlim/ylim 显示的物理窗口不变。"
+      ]
+    },
+    {
+      "id": "locked-panels-scale-bar",
+      "group": "locked-science",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "task": "用户想把比例尺代表的物理长度从现在的 10 µm 改成 20 µm。比例尺的显示长度 = µm / 视野宽 × 面板宽，它说的是「这一段代表多少 µm」这种科学含义：请先核实能不能改；不允许就明确拒绝并说明依据。",
+      "baseline_visible": [
+        "实际渲染画布 88.4 × 74 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_panels_native.main.panel.a 的实际边界 [左, 下, 右, 上] = [10, 10, 41.2, 34] mm。",
+        "fig_panels_native.main.panel.b 的实际边界 [左, 下, 右, 上] = [47.2, 10, 78.4, 34] mm。",
+        "fig_panels_native.main.panel.c 的实际边界 [左, 下, 右, 上] = [10, 40, 41.2, 64] mm。",
+        "fig_panels_native.main.panel.d 的实际边界 [左, 下, 右, 上] = [47.2, 40, 78.4, 64] mm。",
+        "面板顺序 a 左下、b 右下、c 左上、d 右上；图像长宽比 1.3；比例尺代表 10 µm；只读最小外侧预留为 10 mm，实际空白以边界差为准。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_panels_native.main.scale_bar.a",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_panels_native.main.scale_bar.b",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_panels_native.main.scale_bar.c",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_panels_native.main.scale_bar.d",
+          "type": "Line2D"
+        }
+      ],
+      "protected_science": [
+        "比例尺代表的物理长度（µm）不变：显示长度 = µm / 视野宽 × 面板宽。",
+        "每张图的裁切窗口与显示窗口（µm）不变。"
+      ]
+    },
+    {
+      "id": "locked-nmr-peak-window",
+      "group": "locked-science",
+      "fixture": "tests/fixtures/native_nmr.py",
+      "config": "tests/fixtures/native_nmr.yaml",
+      "scope": "main",
+      "task": "用户想把 7.26 ppm 那组峰的积分窗口从现在的 ±0.06 ppm（7.20–7.32）改成 ±0.25 ppm（7.01–7.51）。请先核实这个改动是否在允许的范围内；不允许就明确拒绝并说明依据，不要照样改。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_nmr_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 94, 60] mm。",
+        "峰位 7.26、3.91、2.02、1.18 ppm；每峰显示位移范围 ±6 mm。7.26 峰的积分窗口 7.20–7.32 ppm，科学窗口不可编辑。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_nmr_native.main.peak_window.7.26",
+          "type": "Rectangle"
+        }
+      ],
+      "protected_science": [
+        "每个峰的积分窗口（ppm）与受保护窗口一致。",
+        "xlim/ylim 显示的物理窗口不变。"
+      ]
+    },
+    {
+      "id": "contradictory-panels-gap",
+      "group": "contradictory",
+      "fixture": "tests/fixtures/native_panels.py",
+      "config": "tests/fixtures/native_panels.yaml",
+      "scope": "main",
+      "task": "同一批改动里同时要求两件事：(1) 两列面板之间的横向净距目标做成 8.0 mm；(2) 面板之间的缝宽本身设成 4.0 mm。请把这一批当**原子**处理：要么给出一个自洽的候选，要么整体拒绝并说明原因——不许只改一半，也不许静默挑一个执行。",
+      "baseline_visible": [
+        "实际渲染画布 88.4 × 74 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_panels_native.main.panel.a 的实际边界 [左, 下, 右, 上] = [10, 10, 41.2, 34] mm。",
+        "fig_panels_native.main.panel.b 的实际边界 [左, 下, 右, 上] = [47.2, 10, 78.4, 34] mm。",
+        "fig_panels_native.main.panel.c 的实际边界 [左, 下, 右, 上] = [10, 40, 41.2, 64] mm。",
+        "fig_panels_native.main.panel.d 的实际边界 [左, 下, 右, 上] = [47.2, 40, 78.4, 64] mm。",
+        "面板顺序 a 左下、b 右下、c 左上、d 右上；图像长宽比 1.3；比例尺代表 10 µm；只读最小外侧预留为 10 mm，实际空白以边界差为准。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_panels_native.main.panel.a",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.b",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.c",
+          "type": "Axes"
+        },
+        {
+          "gid": "fig_panels_native.main.panel.d",
+          "type": "Axes"
+        }
+      ],
+      "protected_science": [
+        "四张显微图的像素数组逐字节等于受保护数组。",
+        "面板顺序不变：a 左下、b 右下、c 左上、d 右上。"
+      ]
+    },
+    {
+      "id": "contradictory-ftir-foreign-scope-path",
+      "group": "contradictory",
+      "fixture": "tests/fixtures/native_ftir.py",
+      "config": "tests/fixtures/native_ftir.yaml",
+      "scope": "compare_processed",
+      "task": "本次编辑授权的作用域是 compare_processed（对照图下格，处理后）。用户要求在**上格**（compare_raw，原始）那条曲线上加 2.0 mm 的显示位移。请按要求处理：如果这不在你的授权范围里，就明确拒绝并说明边界——绝不许绕过作用域去改上格，也不要顺手改下格来顶数。",
+      "baseline_visible": [
+        "实际渲染画布 100 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_ftir_native.compare_raw.axes 的实际边界 [左, 下, 右, 上] = [24, 42, 94, 62] mm。",
+        "fig_ftir_native.compare_processed.axes 的实际边界 [左, 下, 右, 上] = [24, 12, 94, 32] mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_ftir_native.compare_raw.curve.a",
+          "type": "Line2D"
+        },
+        {
+          "gid": "fig_ftir_native.compare_processed.curve.a",
+          "type": "Line2D"
+        }
+      ],
+      "protected_science": [
+        "三条曲线的绘图数组逐字节等于受保护数组（同一条严格递减波数网格）。",
+        "「处理后」对照格只有声明的 5 点滑动平均，x 网格与点数不变。"
+      ]
+    },
+    {
+      "id": "effects-negatives-unused-knob",
+      "group": "negative-effects",
+      "fixture": "tests/fixtures/native_negatives.py",
+      "config": "tests/fixtures/native_negatives.yaml",
+      "scope": "main",
+      "task": "这是一个负例夹具，本次只做诊断、不发布。契约里有一个可编辑控制被声明成沿 y 方向平移注释文本（注释图元 fig_negatives_native.main.note）；用户想用它把注释文本挪走。请真扰动 + 真重建去核实这条声明：如果它实际什么都没动，就如实报出「是哪个控制、声明说它会做什么、实测是什么」，不要交一张什么都没变的图当成功。",
+      "baseline_visible": [
+        "实际渲染画布 110 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_negatives_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 104, 60] mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_negatives_native.main.note",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "显示窗口（ppm / a.u.）不变。",
+        "受保护文本（轴标题、注释文本）一字不改。"
+      ]
+    },
+    {
+      "id": "effects-negatives-xlabel-font-unused",
+      "group": "negative-effects",
+      "fixture": "tests/fixtures/native_negatives.py",
+      "config": "tests/fixtures/native_negatives.yaml",
+      "scope": "main",
+      "task": "这是一个负例夹具，本次只做诊断、不发布。契约里有一个可编辑控制被声明成专门管 x 轴标题（图元 fig_negatives_native.main.xlabel）；用户要求用这个控制改 x 轴标题的字号。请真扰动 + 真重建去核实：声明的效果与实测是否一致？不一致就如实诊断（哪个控制、声明说动什么、实测动了什么），别把「配置里改了个数字」当成改动生效。",
+      "baseline_visible": [
+        "实际渲染画布 110 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_negatives_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 104, 60] mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_negatives_native.main.xlabel",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "受保护文本（轴标题、注释文本）一字不改。",
+        "显示窗口（ppm / a.u.）不变。"
+      ]
+    },
+    {
+      "id": "effects-negatives-axis-font-mismatch",
+      "group": "negative-effects",
+      "fixture": "tests/fixtures/native_negatives.py",
+      "config": "tests/fixtures/native_negatives.yaml",
+      "scope": "main",
+      "task": "这是一个负例夹具，本次只做诊断、不发布。契约里有一个可编辑控制被声明成只管 y 轴标题（图元 fig_negatives_native.main.ylabel）；用户要求用它调 y 轴标题的字号。请真扰动 + 真重建去核实它的**实际作用范围**：如果它连带改了声明之外的可见图元，如实报出偏差；不要默认声明是对的。",
+      "baseline_visible": [
+        "实际渲染画布 110 × 72 mm；测量 DPI 300；画布左下为原点，右和上为正。",
+        "fig_negatives_native.main.axes 的实际边界 [左, 下, 右, 上] = [24, 16, 104, 60] mm。"
+      ],
+      "targets": [
+        {
+          "gid": "fig_negatives_native.main.ylabel",
+          "type": "Text"
+        }
+      ],
+      "protected_science": [
+        "受保护文本（轴标题、注释文本）一字不改。",
+        "显示窗口（ppm / a.u.）不变。"
+      ]
+    }
+  ]
+}
