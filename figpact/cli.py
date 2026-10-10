@@ -4,6 +4,12 @@ import importlib.util
 import json
 import subprocess
 import sys
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 from pathlib import Path
 from typing import Optional
 import yaml
