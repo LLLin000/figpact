@@ -196,6 +196,11 @@ def inventory(
         "items": items,
         "unregistered": unreg,
         "unbound": unb,
+        # 测量元数据：`items` 里的 bbox 是**当前 renderer 的显示像素**，换算成 mm
+        # 必须用这一份 dpi。调用方（try / GUI 后端）以前写死 300 dpi，而图是
+        # figure.dpi=120 → 报出来的位移被缩到 40%。别再从别处猜 dpi。
+        "figure_dpi": float(fig.dpi),
+        "figure_size_mm": [fig.get_figwidth() * 25.4, fig.get_figheight() * 25.4],
     }
     if check_effect:
         res["param_effects"] = param_effects

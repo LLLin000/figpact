@@ -309,8 +309,16 @@ def cmd_try(args: argparse.Namespace) -> int:
         snap_map_before = {it["gid"]: it.get("snapshot", {}) for it in inv_before.get("items", [])}
         snap_map_after = {it["gid"]: it.get("snapshot", {}) for it in inv_after.get("items", [])}
         moved_count = 0
-        # 获取 dpi 用于像素转毫米
-        px_per_mm = 300.0 / 25.4  # 标准 dpi
+        # 换算必须用**测量时的真实 dpi**：bbox 来自 inventory 那次渲染的显示像素。
+        # 以前写死 300 dpi，而图是 figure.dpi=120 → 位移被缩到 40%（-0.5mm 报成 -0.20）。
+        # 现在读 inventory 一并返回的 figure_dpi；两边不一致时按测量元数据为准。
+        dpi_before = float(inv_before.get("figure_dpi") or 0) or None
+        dpi_after = float(inv_after.get("figure_dpi") or 0) or None
+        if dpi_before and dpi_after and abs(dpi_before - dpi_after) > 1e-6:
+            print(f"[warn] 两次 inventory 的 dpi 不一致（{dpi_before} vs {dpi_after}），按前者换算")
+        measure_dpi = dpi_before or dpi_after or 300.0
+        px_per_mm = measure_dpi / 25.4
+        print(f"[测量] bbox 取自 figure.dpi={measure_dpi:g}（换算 {px_per_mm:.3f} px/mm）")
         for gid, s_after in snap_map_after.items():
             s_before = snap_map_before.get(gid)
             if not s_before:

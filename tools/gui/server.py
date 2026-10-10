@@ -166,7 +166,7 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
                 snap_map_before = {it["gid"]: it.get("snapshot", {}) for it in inv_before.get("items", [])}
                 snap_map_after = {it["gid"]: it.get("snapshot", {}) for it in inv_after.get("items", [])}
                 movements = []
-                px_per_mm = 300.0 / 25.4
+                px_per_mm = float(inv_before.get("figure_dpi") or 300.0) / 25.4
 
                 for gid, s_after in snap_map_after.items():
                     s_before = snap_map_before.get(gid)
