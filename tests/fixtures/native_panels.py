@@ -483,6 +483,9 @@ def layout_contract(scope: str) -> dict:
     c_panel = _gids_where(scope, col=0, row=1)
 
     parameters = [
+        # 画布尺寸的**完整受影响集合 = 只有画布**：四块面板的 mm 矩形是画布毫米里的
+        # 绝对量（margin_left + 列 × (panel_w + gap_x)），画布变大只是多出空白，
+        # 面板一个毫米都不动 —— 这里没有"跟着动的坐标框"，别把画布参数一律摊到面板上。
         _native.param("canvas_w_mm", ["canvas_w_mm"], unit="mm", mutability="EDITABLE",
                       scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis="x",
                       minimum=SCALARS["canvas_w_mm"][1], maximum=SCALARS["canvas_w_mm"][2],
@@ -491,27 +494,35 @@ def layout_contract(scope: str) -> dict:
                       scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis="y",
                       minimum=SCALARS["canvas_h_mm"][1], maximum=SCALARS["canvas_h_mm"][2],
                       expected=_native.expect("resize", objects=[canvas], axis="y", preserve=keep)),
+        # dpi 是**测量条件**：只改渲染栅格，不改毫米几何；真实可测效果只有画布的
+        # renderer_dpi 样式（面板的毫米矩形不随 dpi 变，见 science invariants）。
         _native.param("render_dpi", ["render_dpi"], unit="dpi", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=[canvas] + panels, operation="rebuild", axis=None,
+                      scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis=None,
                       minimum=SCALARS["render_dpi"][1], maximum=SCALARS["render_dpi"][2],
                       expected=_native.expect("style", objects=[canvas], preserve=keep)),
-        # 左/下留白是栅格的**锚点**：改它整块栅格平移，四块面板一起动（完整受影响集）。
+        # 左/下留白是栅格的**锚点**：改它整块栅格平移（四块面板 dx/dy = ±Δ、尺寸不变），
+        # 方向就是旋钮方向，所以是纯显示位移 scale = +1；面板后代跟着走属于闭包。
         _native.param("margin_left_mm", ["margin_left_mm"], unit="mm", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=panels, operation="rebuild", axis="x",
+                      scopes=list(SCOPES), objects=panels, operation="translate", axis="x", scale=1.0,
                       minimum=SCALARS["margin_left_mm"][1], maximum=SCALARS["margin_left_mm"][2],
-                      expected=_native.expect("resize", objects=panels, axis="x", preserve=keep)),
+                      expected=_native.expect("translate", objects=panels, axis="x", preserve=keep)),
         _native.param("margin_bottom_mm", ["margin_bottom_mm"], unit="mm", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=panels, operation="rebuild", axis="y",
+                      scopes=list(SCOPES), objects=panels, operation="translate", axis="y", scale=1.0,
                       minimum=SCALARS["margin_bottom_mm"][1], maximum=SCALARS["margin_bottom_mm"][2],
-                      expected=_native.expect("resize", objects=panels, axis="y", preserve=keep)),
-        # 右/上留白是**派生量**：画布比栅格多出来的净空，只做校验、不移动任何图元。
-        # 声明成 EDITABLE 会撒谎（改它什么都不动），所以是 DERIVED。
-        _native.param("margin_right_mm", ["margin_right_mm"], unit="mm", mutability="DERIVED",
+                      expected=_native.expect("translate", objects=panels, axis="y", preserve=keep)),
+        # 右/上留白是**只读校验闸**：栅格之外还剩多少净空（画布 - 栅格），
+        # 只参与"装不装得下"的校验、不移动任何图元。声明成 EDITABLE 会撒谎
+        # （改它什么都不动），它是校验性的只读量、不是几何旋钮 —— 用 FIXED_STYLE 表示。
+        _native.param("margin_right_mm", ["margin_right_mm"], unit="mm", mutability="FIXED_STYLE",
                       scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis="x",
                       expected=_native.expect("resize", objects=[canvas], axis="x", preserve=keep)),
-        _native.param("margin_top_mm", ["margin_top_mm"], unit="mm", mutability="DERIVED",
+        _native.param("margin_top_mm", ["margin_top_mm"], unit="mm", mutability="FIXED_STYLE",
                       scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis="y",
                       expected=_native.expect("resize", objects=[canvas], axis="y", preserve=keep)),
+        # 面板宽/高是**真实几何旋钮**（四块面板同步 +1 mm），但受画幅比例硬闸约束：
+        # panel_w_mm 必须恒等于 1.3 × panel_h_mm，单独改一个会被 _check_aspect 拒绝
+        # （显微图不许被拉伸）。这是**联合边界**而不是"没有绑定"：
+        # 成对改就有效果，所以这里保留 EDITABLE + 真实量级/方向（scale = +1）。
         _native.param("panel_w_mm", ["panel_w_mm"], unit="mm", mutability="EDITABLE",
                       scopes=list(SCOPES), objects=panels, operation="resize", axis="x",
                       minimum=SCALARS["panel_w_mm"][1], maximum=SCALARS["panel_w_mm"][2],

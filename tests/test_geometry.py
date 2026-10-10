@@ -36,6 +36,15 @@ def runs_node(node_id, runs, bounds=None, **extra):
 
 
 class SixKindsTest(unittest.TestCase):
+    def test_dense_curve_to_single_segment_keeps_positive_clearance(self):
+        x = np.linspace(0.0, 100.0, 34_415)
+        dense = polyline("dense", zip(x, np.zeros_like(x)))
+        above = polyline("above", [(0.0, 1.25), (100.0, 1.25)])
+        result = geometry.measure_relation("clearance", [dense, above])
+        self.assertEqual(result["status"], "OK")
+        self.assertAlmostEqual(result["value_mm"], 1.25, places=12)
+        self.assertFalse(result["intersects"])
+
     def test_align_reports_anchor_spread_and_requires_anchor(self):
         a, b, c = node("a", (0, 0, 4, 2)), node("b", (10, 0, 14, 2)), node("c", (20, 1, 24, 3))
         res = geometry.measure_relation("align", [a, b, c], axis="y", anchor="bottom")

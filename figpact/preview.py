@@ -1,11 +1,11 @@
-"""A scoped review renders once. It is not a full publication check."""
+"""A scoped review renders once. It is not a full publication check.
+
+GUI 面保持兼容：`preview(script=, config=, scope=, patch=, mode=)`、`revision(script, config)`、
+`load_plot(script, config)` 的名字与返回结构不变。渲染本体走 `FigureSession`，
+原生脚本（load_science/build_scene）与旧脚本（build_figure_and_registry）同一套路径。
+"""
 from __future__ import annotations
 
-import base64
-from contextlib import redirect_stdout
-import hashlib
-import importlib.util
-import io
 import json
 from pathlib import Path
 import subprocess
@@ -15,67 +15,17 @@ import time
 
 import yaml
 
+from figpact.session import FigureSession, load_module, source_revision
+
 
 def revision(script, config) -> str:
-    """Invalidate previews when configuration, source, or instrument inputs change."""
-    script, config = Path(script).resolve(), Path(config).resolve()
-    h = hashlib.sha256(config.read_bytes())
-    roots = (script.parent, Path(__file__).parent)
-    for root in roots:
-        for p in sorted(root.rglob('*')):
-            if not p.is_file() or '__pycache__' in p.parts:
-                continue
-            if p.suffix.lower() in {'.png', '.pdf', '.svg', '.tif', '.tiff', '.md', '.json', '.pyc'}:
-                continue
-            stat = p.stat()
-            h.update(f'{p}:{stat.st_size}:{stat.st_mtime_ns}'.encode('utf8'))
-    return h.hexdigest()
+    """配置、脚本或其目录内数据源变化的合指纹（GUI 用它判断候选是否过期）。"""
+    return source_revision(script, config)
 
 
 def load_plot(script, config):
-    """Import definitions only; the Figure is constructed by the caller."""
-    import matplotlib
-    matplotlib.use('Agg')
-    script, config = Path(script).resolve(), Path(config).resolve()
-    sys.path.insert(0, str(script.parent))
-    sys.path.insert(0, str(Path(__file__).parent.parent))
-    sys.modules.pop('figure_style', None)
-    spec = importlib.util.spec_from_file_location('figpact_plot', script)
-    mod = importlib.util.module_from_spec(spec)
-    argv = sys.argv
-    sys.argv = [str(script), '--config', str(config), '--inventory']
-    try:
-        with redirect_stdout(io.StringIO()):
-            spec.loader.exec_module(mod)
-    finally:
-        sys.argv = argv
-    return mod
-
-
-def render_loaded(mod, scope):
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
-    from figpact.inventory import inventory
-    from figpact.qa import blocking_problems
-    if scope not in mod.SCOPES:
-        raise ValueError(f'未知 scope: {scope}')
-    fig = None
-    try:
-        with redirect_stdout(io.StringIO()):
-            fig, reg = mod.build_figure_and_registry(scope)
-            check = getattr(mod, 'preview_qa', getattr(mod, 'blocking_problems', blocking_problems))
-            qa = list(check(fig, scope) if hasattr(mod, 'preview_qa') else check(fig))
-            inv = inventory(fig, reg)
-            buf = io.BytesIO()
-            with mpl.rc_context({'savefig.bbox': None}):
-                fig.savefig(buf, format='png', dpi=fig.dpi, bbox_inches=None)
-        return {'scope': scope, 'png': base64.b64encode(buf.getvalue()).decode('ascii'),
-                'inventory': inv, 'qa': qa, 'qa_kind': 'preview_qa',
-                'relations': getattr(fig, '_figpact_relations', []),
-                'space': getattr(fig, '_figpact_space', [])}
-    finally:
-        if fig is not None:
-            plt.close(fig)
+    """只导入定义，不建 Figure（GUI 用它做配置校验）。"""
+    return load_module(script, config)
 
 
 def render_once(script, config, scope, patch=None):
@@ -88,8 +38,10 @@ def render_once(script, config, scope, patch=None):
             candidate = Path(td) / 'candidate.yaml'
             candidate.write_text(yaml.safe_dump(data), encoding='utf8')
             config = candidate
-        mod = load_plot(script, config)
-        return render_loaded(mod, scope)
+        with FigureSession(script, config, scope) as session:
+            payload = session.render_preview()
+        return {key: payload[key] for key in
+                ('scope', 'png', 'inventory', 'qa', 'qa_kind', 'relations', 'space')}
 
 
 def preview(*, script, config, scope, patch=None, mode='review'):

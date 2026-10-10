@@ -484,6 +484,8 @@ def _parameters(scope: str) -> list[dict]:
             "mixed.image_crop", "mixed.scale_bar_meaning"]
 
     parameters = [
+        # 画布尺寸的**完整受影响集合 = 只有画布**：两个面板的 mm 矩形是画布毫米里的
+        # 绝对量（margin_left + 面板宽 + gap…），画布变大只是多出空白，面板不动。
         _native.param("canvas_w_mm", ["canvas_w_mm"], unit="mm", mutability="EDITABLE",
                       scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis="x",
                       minimum=SCALARS["canvas_w_mm"][1], maximum=SCALARS["canvas_w_mm"][2],
@@ -494,28 +496,32 @@ def _parameters(scope: str) -> list[dict]:
                       minimum=SCALARS["canvas_h_mm"][1], maximum=SCALARS["canvas_h_mm"][2],
                       expected=_native.expect("resize", objects=[canvas], axis="y",
                                               preserve=keep)),
+        # 保持本图原有只读渲染条件；测量记录真实 DPI，不新增编辑旋钮。
         _native.param("render_dpi", ["render_dpi"], unit="dpi", mutability="FIXED_STYLE",
                       scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis=None,
                       minimum=SCALARS["render_dpi"][1], maximum=SCALARS["render_dpi"][2],
                       expected=_native.expect("style", objects=[canvas], preserve=keep)),
+        # 左/下边距是面板带的**锚点**：改它两个面板整体平移（dx/dy = ±Δ、尺寸不变），
+        # 方向就是旋钮方向 → 纯显示位移 scale = +1；面板后代跟着走属于闭包。
         _native.param("margin_left_mm", ["margin_left_mm"], unit="mm", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=panels, operation="rebuild", axis="x",
+                      scopes=list(SCOPES), objects=panels, operation="translate", axis="x", scale=1.0,
                       minimum=SCALARS["margin_left_mm"][1], maximum=SCALARS["margin_left_mm"][2],
-                      expected=_native.expect("resize", objects=panels, axis="x", preserve=keep)),
+                      expected=_native.expect("translate", objects=panels, axis="x", preserve=keep)),
         _native.param("margin_bottom_mm", ["margin_bottom_mm"], unit="mm", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=panels, operation="rebuild", axis="y",
+                      scopes=list(SCOPES), objects=panels, operation="translate", axis="y", scale=1.0,
                       minimum=SCALARS["margin_bottom_mm"][1],
                       maximum=SCALARS["margin_bottom_mm"][2],
-                      expected=_native.expect("resize", objects=panels, axis="y",
+                      expected=_native.expect("translate", objects=panels, axis="y",
                                               preserve=keep)),
-        # 上/右两条预留带只负责 containment 的余量：面板贴左边距/下边距排布，
-        # 改它们不会移动任何面板 —— 声明成 EDITABLE 就会变成一个没有效果的旋钮。
-        _native.param("margin_top_mm", ["margin_top_mm"], unit="mm", mutability="DERIVED",
+        # 上/右两条预留带是**只读校验闸**：面板贴左边距/下边距排布，改它们不会移动任何
+        # 面板，只参与"面板带 + 预留带装不装得下画布"的校验 —— 用 FIXED_STYLE 表示
+        # "只读、不动几何"，不是几何旋钮、也不是派生量。
+        _native.param("margin_top_mm", ["margin_top_mm"], unit="mm", mutability="FIXED_STYLE",
                       scopes=list(SCOPES), objects=[canvas], operation="resize", axis="y",
                       minimum=SCALARS["margin_top_mm"][1], maximum=SCALARS["margin_top_mm"][2],
                       expected=_native.expect("resize", objects=[canvas], axis="y",
                                               preserve=keep)),
-        _native.param("margin_right_mm", ["margin_right_mm"], unit="mm", mutability="DERIVED",
+        _native.param("margin_right_mm", ["margin_right_mm"], unit="mm", mutability="FIXED_STYLE",
                       scopes=list(SCOPES), objects=[canvas], operation="resize", axis="x",
                       minimum=SCALARS["margin_right_mm"][1],
                       maximum=SCALARS["margin_right_mm"][2],
@@ -528,11 +534,14 @@ def _parameters(scope: str) -> list[dict]:
                       minimum=SCALARS["panel_h_mm"][1], maximum=SCALARS["panel_h_mm"][2],
                       expected=_native.expect("resize", objects=panels, axis="y",
                                               preserve=keep + ["mixed.panel_gap_order"])),
+        # 曲线面板宽度：受影响的完整集合是**两个面板**（两个面板是相邻的：曲线面板变宽
+        # Δ，图像面板整体右移 Δ，它自己的宽度不变），但**主目标是曲线面板**——
+        # 量级核对只落在主目标上（图像面板是被推着走的邻居，不是尺寸变化的被控对象）。
         _native.param("curve_panel_w_mm", ["curve_panel_w_mm"], unit="mm", mutability="EDITABLE",
                       scopes=list(SCOPES), objects=panels, operation="rebuild", axis="x",
                       minimum=SCALARS["curve_panel_w_mm"][1],
                       maximum=SCALARS["curve_panel_w_mm"][2],
-                      expected=_native.expect("resize", objects=panels, axis="x",
+                      expected=_native.expect("resize", objects=[cur_panel], axis="x",
                                               preserve=keep)),
         _native.param("image_panel_w_mm", ["image_panel_w_mm"], unit="mm", mutability="DERIVED",
                       scopes=list(SCOPES), objects=[img_panel, image, scale_bar],

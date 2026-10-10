@@ -60,6 +60,22 @@ _Avoid_: unrestricted manipulation, measurement mode
 An explicit connection between an allowed layout control and the objects and relationships it actually affects.
 _Avoid_: measurement prerequisite, guessed control
 
+**Binding Proof**:
+Observed agreement between an allowed control change and its declared effects, with protected scientific content preserved. A rejected trial or an unchanged configuration is not evidence that a binding works.
+_Avoid_: guessed effect, publication approval
+
+**Coupled Controls**:
+Layout controls that must change together to preserve a shared constraint, such as an image's aspect ratio. Failure of an isolated change does not make a valid combined change unsupported.
+_Avoid_: independently editable dimensions
+
+**Reconstruction Field**:
+A protected record needed to reproduce a figure's meaning or reference state. It may be inspected but is not a layout freedom.
+_Avoid_: editable parameter
+
+**Display Lift**:
+An additional permitted display displacement applied to an object. Its declared amount is not the resulting gap, clearance, or baseline pitch.
+_Avoid_: measured spacing
+
 **Decorative Guide**:
 Auxiliary visual geometry connecting or orienting objects, rather than a measured scientific trace. Layout freedom does not authorize moving protected scientific anchors.
 _Avoid_: scientific curve, editable signal

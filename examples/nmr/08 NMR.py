@@ -137,7 +137,9 @@ def _cli(argv: list[str]) -> argparse.Namespace:
     return ap.parse_args(argv)
 
 
-ARGS = _cli(sys.argv[1:])
+#: CLI 只在 `python "08 NMR.py" …` 时解析。作为模块被 native runtime 导入时
+#: **不碰调用方的 argv**（worker 的协议参数不该被 argparse 拒掉），也不输出、不落盘。
+ARGS = _cli(sys.argv[1:]) if __name__ == "__main__" else _cli([])
 CONFIG_PATH = pathlib.Path(ARGS.config).expanduser() if ARGS.config else ROOT / "nmr.yaml"
 
 
@@ -145,35 +147,77 @@ SCHEMA = {**SCALARS, "show_ppm": (bool,), "shifts_mm": (dict,), "peak_label_shif
           "pitch_mm": (dict,), "group_y_mm": (dict,), "layout_reference": (dict,)}
 
 
-def _load_label_shifts(path, raw) -> dict:
+def _load_label_shifts(name: str, raw) -> dict:
     if raw is None:
         return {}
     if not isinstance(raw, dict):
-        raise ConfigError(f"{path.name}：peak_label_shifts_mm 必须是字典映射")
+        raise ConfigError(f"{name}：peak_label_shifts_mm 必须是字典映射")
     if unknown := sorted(set(raw) - set(SCOPES)):
-        raise ConfigError(f"{path.name}：peak_label_shifts_mm 里有未知作用域 {unknown}；可用：{list(SCOPES)}")
+        raise ConfigError(f"{name}：peak_label_shifts_mm 里有未知作用域 {unknown}；可用：{list(SCOPES)}")
     out: dict = {}
     for scope, per_label in raw.items():
         if per_label is None:
             continue
         if not isinstance(per_label, dict):
-            raise ConfigError(f"{path.name}：peak_label_shifts_mm.{scope} 必须是 `标注gid: [dx, dy]` 映射")
+            raise ConfigError(f"{name}：peak_label_shifts_mm.{scope} 必须是 `标注gid: [dx, dy]` 映射")
+        prefix = f"{FIGURE_ID}.{scope}."
         for gid, pair in per_label.items():
             if not (isinstance(pair, (list, tuple)) and len(pair) == 2):
-                raise ConfigError(f"{path.name}：peak_label_shifts_mm.{scope}.{gid} 必须是 [dx, dy] 两个数字")
+                raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{gid} 必须是 [dx, dy] 两个数字")
             dx, dy = pair[0], pair[1]
             if isinstance(dx, bool) or not isinstance(dx, (int, float)) or not math.isfinite(dx):
-                raise ConfigError(f"{path.name}：peak_label_shifts_mm.{scope}.{gid}[0] 必须是有效数字")
+                raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{gid}[0] 必须是有效数字")
             if isinstance(dy, bool) or not isinstance(dy, (int, float)) or not math.isfinite(dy):
-                raise ConfigError(f"{path.name}：peak_label_shifts_mm.{scope}.{gid}[1] 必须是有效数字")
+                raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{gid}[1] 必须是有效数字")
             dx_f, dy_f = float(dx), float(dy)
             if abs(dx_f) > SHIFT_LIMIT_MM or abs(dy_f) > SHIFT_LIMIT_MM:
-                raise ConfigError(f"{path.name}：peak_label_shifts_mm.{scope}.{gid} 超出 ±{SHIFT_LIMIT_MM} mm")
-            out[f"{FIGURE_ID}.{scope}.{gid}"] = (dx_f, dy_f)
+                raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{gid} 超出 ±{SHIFT_LIMIT_MM} mm")
+            # YAML 里写短名（`peak.vancho.9p83`，见 make_figure 迁移写出口）；已带前缀的
+            # 说明这份映射标准化过了（prepare_config 幂等），不再叠第二层前缀。
+            out[gid if gid.startswith(prefix) else prefix + gid] = (dx_f, dy_f)
     return out
 
 
+def prepare_config(config: dict, *, label: str | None = None) -> dict:
+    """把任意来源的配置映射标准化成**构建路径能直接消费**的形态。
+
+    **纯映射变换**：不读 YAML、不碰 Bruker 数据、不画图，输入映射不被修改（返回新字典）。
+    legacy 装载（`load_config_nmr`）与 native 构建（`build_scene` 收到的候选配置）
+    **共用这一份**：`shifts_mm` 缺失 / 为 `{}` / 只写部分作用域或样品，一律补 0.0
+    （「不写 = 不动」，而不是让 `SHIFTS_MM[scope][sid]` 抛 KeyError），
+    `peak_label_shifts_mm` 的短名在这里补成完整 gid。对已标准化的映射幂等，
+    所以 native 恒等重建与「基线已标准化、候选再标准化一次」都成立。
+    """
+    name = label or CONFIG_PATH.name
+    cfg = dict(config)
+    raw_shifts = cfg.get("shifts_mm") or {}
+    if not isinstance(raw_shifts, dict):
+        raise ConfigError(f"{name}：shifts_mm 必须是字典映射")
+    if unknown := sorted(set(raw_shifts) - set(SCOPES)):
+        raise ConfigError(f"{name}：shifts_mm 里有未知作用域 {unknown}；可用：{list(SCOPES)}")
+
+    cfg["peak_label_shifts_mm"] = _load_label_shifts(name, cfg.get("peak_label_shifts_mm"))
+    cfg["shifts_mm"] = {scope: {sid: 0.0 for sid in SAMPLE_IDS} for scope in SCOPES}
+    for scope, per_sample in raw_shifts.items():
+        if per_sample is None:
+            continue
+        if not isinstance(per_sample, dict):
+            raise ConfigError(f"{name}：shifts_mm.{scope} 必须是 `样品id: 毫米` 映射")
+        if unknown := sorted(set(per_sample) - set(SAMPLE_IDS)):
+            raise ConfigError(f"{name}：shifts_mm.{scope} 里有未知样品 {unknown}；可用：{list(SAMPLE_IDS)}")
+        for sid, value in per_sample.items():
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+                raise ConfigError(f"{name}：shifts_mm.{scope}.{sid} 必须是有效数字")
+            mm = float(value)
+            if abs(mm) > SHIFT_LIMIT_MM:
+                sug = min(max(mm, -SHIFT_LIMIT_MM), SHIFT_LIMIT_MM)
+                raise ConfigError(f"{name}：shifts_mm.{scope}.{sid} = {mm} 超出 ±{SHIFT_LIMIT_MM} mm；建议改成 {sug}")
+            cfg["shifts_mm"][scope][sid] = mm
+    return cfg
+
+
 def load_config_nmr(path: pathlib.Path) -> dict:
+    """读 YAML（含 schema 1 迁移与布局校验）→ `prepare_config` 标准化位移映射。"""
     if ARGS.migrate_config:
         legacy = {**SCHEMA, "schema_version": (int, 1, 1), "layer_gap": (float, 0, 200),
                   "top_headroom": (float, 0, 400), "label_lift": (float, 0, 60)}
@@ -191,30 +235,7 @@ def load_config_nmr(path: pathlib.Path) -> dict:
         cfg = fp_load_config(path, SCHEMA)
     validate_layout(cfg, scopes=SCOPES, ids=SAMPLE_IDS[1:], parameter="pitch_mm",
                     reference_fields=("pitch_data", "headroom_data", "axis_bottom_data", "units_per_mm"))
-    raw_shifts = cfg.get("shifts_mm") or {}
-    if not isinstance(raw_shifts, dict):
-        raise ConfigError(f"{path.name}：shifts_mm 必须是字典映射")
-    if unknown := sorted(set(raw_shifts) - set(SCOPES)):
-        raise ConfigError(f"{path.name}：shifts_mm 里有未知作用域 {unknown}；可用：{list(SCOPES)}")
-
-    cfg["peak_label_shifts_mm"] = _load_label_shifts(path, cfg.get("peak_label_shifts_mm"))
-    cfg["shifts_mm"] = {scope: {sid: 0.0 for sid in SAMPLE_IDS} for scope in SCOPES}
-    for scope, per_sample in raw_shifts.items():
-        if per_sample is None:
-            continue
-        if not isinstance(per_sample, dict):
-            raise ConfigError(f"{path.name}：shifts_mm.{scope} 必须是 `样品id: 毫米` 映射")
-        if unknown := sorted(set(per_sample) - set(SAMPLE_IDS)):
-            raise ConfigError(f"{path.name}：shifts_mm.{scope} 里有未知样品 {unknown}；可用：{list(SAMPLE_IDS)}")
-        for sid, value in per_sample.items():
-            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-                raise ConfigError(f"{path.name}：shifts_mm.{scope}.{sid} 必须是有效数字")
-            mm = float(value)
-            if abs(mm) > SHIFT_LIMIT_MM:
-                sug = min(max(mm, -SHIFT_LIMIT_MM), SHIFT_LIMIT_MM)
-                raise ConfigError(f"{path.name}：shifts_mm.{scope}.{sid} = {mm} 超出 ±{SHIFT_LIMIT_MM} mm；建议改成 {sug}")
-            cfg["shifts_mm"][scope][sid] = mm
-    return cfg
+    return prepare_config(cfg, label=path.name)
 
 
 CONFIG = load_config_nmr(CONFIG_PATH)
@@ -281,26 +302,54 @@ def list_params() -> None:
 
 
 
-CANVAS = (CONFIG["canvas_w_mm"], CONFIG["canvas_h_mm"])
-Y_OFFSET_STEP = CONFIG["layout_reference"]["main"]["pitch_data"]
-Y_MAX_EXPAND = CONFIG["layout_reference"]["main"]["headroom_data"]
-LABEL_LIFT = CONFIG["label_lift_mm"] * CONFIG["layout_reference"]["main"]["units_per_mm"]
-LINEWIDTH = CONFIG["line_width"]
-FONTSIZE_PEAK = CONFIG["peak_font_pt"]
-FONTSIZE_LEGEND = CONFIG["legend_font_pt"]
-FONTSIZE_NOTE = CONFIG["note_font_pt"]
-FONTSIZE_AXIS = CONFIG["axis_font_pt"]
-FONTSIZE_TICK = CONFIG["tick_font_pt"]
-LEGEND_COLS = CONFIG["legend_cols"]
-LEGEND_ANCHOR_X = CONFIG["legend_anchor_x"]
-LABEL_MIN_GAP_MM = CONFIG["label_min_gap_mm"]
-LABEL_MAX_DX_MM = CONFIG["label_max_dx_mm"]
-LABEL_LANES = CONFIG["label_lanes"]
-PEAK_LABEL_SHIFTS = CONFIG["peak_label_shifts_mm"]
-#: 标注里要不要带 ppm 后缀。**只改显示格式，不改归属文字**——
-#: 归属始终是模板里的 `group_name`（Ar–OCH₃ 等），ppm 是算法检测出来的补充信息。
-SHOW_PPM = CONFIG["show_ppm"]
-SHIFTS_MM = CONFIG["shifts_mm"]
+#: 当前生效的配置。legacy 导入 = nmr.yaml；native = build_scene 收到的候选配置。
+_CFG: dict = {}
+#: 受保护的科研载荷缓存（load_science 只定标一次；warm 布局不再读 Bruker 数据）。
+_SCIENCE: dict | None = None
+#: legacy CLI 的定标核对行是否已经打过（native 路径静默，不打）。
+_DATA_REPORTED = False
+#: 纯布局图元（基线虚线、峰标注引线）：几何是排版，不是科研数据，故不进科学指纹。
+#: 谱线、峰标注文字、轴文字、图例仍然受保护。由构建路径**自己登记**，不另抄一份清单。
+_LAYOUT_GIDS: set[str] = set()
+
+
+def _apply_config(cfg: dict) -> None:
+    """把配置里的排版全局量装进模块。
+
+    **这是布局全局量的唯一初始化路径**：legacy 导入与 native
+    `build_scene(science, config, scope)` 都只走这里，不存在第二处「又把 YAML
+    读进另一套全局」的分歧约定。
+    """
+    global _CFG, CANVAS, Y_OFFSET_STEP, Y_MAX_EXPAND, LABEL_LIFT, LINEWIDTH
+    global FONTSIZE_PEAK, FONTSIZE_LEGEND, FONTSIZE_NOTE, FONTSIZE_AXIS, FONTSIZE_TICK
+    global LEGEND_COLS, LEGEND_ANCHOR_X, LABEL_MIN_GAP_MM, LABEL_MAX_DX_MM, LABEL_LANES
+    global PEAK_LABEL_SHIFTS, SHOW_PPM, SHIFTS_MM
+    _CFG = cfg
+    ref = cfg["layout_reference"]["main"]
+    CANVAS = (cfg["canvas_w_mm"], cfg["canvas_h_mm"])
+    Y_OFFSET_STEP = ref["pitch_data"]
+    Y_MAX_EXPAND = ref["headroom_data"]
+    LABEL_LIFT = cfg["label_lift_mm"] * ref["units_per_mm"]
+    LINEWIDTH = cfg["line_width"]
+    FONTSIZE_PEAK = cfg["peak_font_pt"]
+    FONTSIZE_LEGEND = cfg["legend_font_pt"]
+    FONTSIZE_NOTE = cfg["note_font_pt"]
+    FONTSIZE_AXIS = cfg["axis_font_pt"]
+    FONTSIZE_TICK = cfg["tick_font_pt"]
+    LEGEND_COLS = cfg["legend_cols"]
+    LEGEND_ANCHOR_X = cfg["legend_anchor_x"]
+    LABEL_MIN_GAP_MM = cfg["label_min_gap_mm"]
+    LABEL_MAX_DX_MM = cfg["label_max_dx_mm"]
+    LABEL_LANES = cfg["label_lanes"]
+    PEAK_LABEL_SHIFTS = cfg["peak_label_shifts_mm"]
+    #: 标注里要不要带 ppm 后缀。**只改显示格式，不改归属文字**——
+    #: 归属始终是模板里的 `group_name`（Ar–OCH₃ 等），ppm 是算法检测出来的补充信息。
+    SHOW_PPM = cfg["show_ppm"]
+    SHIFTS_MM = cfg["shifts_mm"]
+
+
+_apply_config(CONFIG)
+
 STRICT = ARGS.strict
 #: **试算隔离**：`--probe <dir>` 或环境变量 `FIGPACT_PROBE_DIR`（`figpact try` 会设）
 #: 一旦生效，OUT_DIR 就是一次性的沙箱，正式输出目录一个字节都不动。
@@ -443,7 +492,7 @@ def report_shift_bounds(fig, name: str) -> None:
 
 
 # ===== 1. 数据读取、化学位移严格定标与真实溶质归一化 =====
-def load_and_calibrate_spectrum(rel_path, solv_name, ref_ppm, search_ppm, win_w):
+def load_and_calibrate_spectrum(rel_path, solv_name, ref_ppm, search_ppm, win_w, *, verbose=True):
     p = DATA_ROOT / pathlib.Path(rel_path) / "pdata" / "1"
     dic, data = ng.bruker.read_pdata(str(p))
     udic = ng.bruker.guess_udic(dic, data)
@@ -475,19 +524,53 @@ def load_and_calibrate_spectrum(rel_path, solv_name, ref_ppm, search_ppm, win_w)
     is_truncated = np.max(spec_norm[solv_mask]) > max_cap
     spec_norm[solv_mask] = np.clip(spec_norm[solv_mask], -5, max_cap)
     
-    print(f"[{rel_path}] {solv_name:7s} 校准核对: 观测溶剂峰 = {obs_solv_ppm:.4f} ppm -> 标准参考值 = {ref_ppm:.4f} ppm (Δδ = {delta_shift:+.4f} ppm)")
+    if verbose:
+        print(f"[{rel_path}] {solv_name:7s} 校准核对: 观测溶剂峰 = {obs_solv_ppm:.4f} ppm -> 标准参考值 = {ref_ppm:.4f} ppm (Δδ = {delta_shift:+.4f} ppm)")
     return ppm_calib, spec_norm, is_truncated, ref_ppm
 
-CACHED = {}
+
+def load_science(*, verbose: bool = False) -> dict:
+    """受保护的科研载荷：读 Bruker pdata → 溶剂峰严格定标 → 溶质归一化 + 溶剂截顶。
+
+    只定标一次并缓存：warm 的纯布局试算**不再读磁盘**。不建 Figure。
+    `verbose=True` 只给 legacy CLI 打印可追溯的定标核对行；native 路径静默。
+    """
+    global _SCIENCE
+    if _SCIENCE is None:
+        _SCIENCE = {}
+        for rel, _, _, solv_name, ref_ppm, search_ppm, win_w, _ in SAMPLES_CONFIG:
+            _SCIENCE[rel] = load_and_calibrate_spectrum(
+                rel, solv_name, ref_ppm, search_ppm, win_w, verbose=verbose)
+    return _SCIENCE
+
+
+def science_inputs() -> list[str]:
+    """本图**实际读取**的科研输入文件（native worker 据此把源文件算进输入 revision）。
+
+    逐条列出 nmrglue `read_pdata` 真正读的文件：`pdata/1/procs`、`pdata/1/1r`
+    （`all_components=False` 时读实部）与样品目录的 `acqus`。同目录里的 `1i` /
+    `fid` / `pulseprogram` / `thumb.png` **没有被读**，所以不声明。
+    """
+    paths = []
+    for rel, *_ in SAMPLES_CONFIG:
+        sample = DATA_ROOT / pathlib.Path(rel)
+        paths.extend([str(sample / "pdata" / "1" / name) for name in ("procs", "1r")])
+        paths.append(str(sample / "acqus"))
+    return paths
 
 
 def prepare_data():
-    if not CACHED:
+    """legacy 入口：定标一次并把可追溯的核对行打出来。"""
+    global _DATA_REPORTED
+    first = not _DATA_REPORTED
+    if first:
         print("=" * 72)
         print("开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...")
-        for rel, _, _, solv_name, ref_ppm, search_ppm, win_w, _ in SAMPLES_CONFIG:
-            CACHED[rel] = load_and_calibrate_spectrum(rel, solv_name, ref_ppm, search_ppm, win_w)
+        _DATA_REPORTED = True
+    science = load_science(verbose=True)
+    if first:
         print("=" * 72)
+    return science
 
 # ===== 2. 特征峰标注模板 (ppm 动态由算法检测填入，杜绝手写偏差！) =====
 # 格式: (搜索目标近似ppm, 样品层0~3, 基团名称, dy垂直微调, ha水平对齐, 是否自动附加ppm数字, 局部搜索窗宽)
@@ -515,50 +598,55 @@ if ARGS.list_params:
     raise SystemExit(0)
 
 
-def _draw_spectra():
+def _draw_spectra(science: dict):
     global reg, artists_by_sample
     fig, ax = plt.subplots(figsize=fs.canvas_mm(*CANVAS))
     reg = GidRegistry()
+    ax.set_gid(_gid("panel"))
     fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
     ax.set_xlim(PPM_LEFT, PPM_RIGHT)
-    ref = CONFIG["layout_reference"]["main"]
+    ref = _CFG["layout_reference"]["main"]
     height_mm = ax.get_window_extent().height * 25.4 / fig.dpi
     ax.set_ylim(ref["axis_bottom_data"], ref["axis_bottom_data"] + ref["units_per_mm"] * height_mm)
     fig.canvas.draw()
     artists_by_sample = {}
     for idx, (rel, _, color, _, _, _, _, sid) in enumerate(SAMPLES_CONFIG):
-        ppm, spec, is_trunc, ref_solv_ppm = CACHED[rel]
+        ppm, spec, is_trunc, ref_solv_ppm = science[rel]
         offset = idx * Y_OFFSET_STEP
         mask = (ppm >= PPM_RIGHT) & (ppm <= PPM_LEFT)
         line, = ax.plot(ppm[mask], spec[mask] + offset, color=color, lw=LINEWIDTH, zorder=2)
-        curve_gid = f"{FIGURE_ID}.{SCOPE}.curve.{sid}"
+        curve_gid = _gid("curve", sid)
         line.set_gid(curve_gid)
         reg.register(line, curve_gid, params=["line_width", "pitch_mm", "group_y_mm", "shifts_mm"])
         artists_by_sample.setdefault(sid, []).append(line)
         base = ax.axhline(offset, color="#E2E2E2", lw=0.45, ls="--", zorder=1)
-        base_gid = f"{FIGURE_ID}.{SCOPE}.baseline.{sid}"
+        base_gid = _gid("baseline", sid)
         base.set_gid(base_gid)
         reg.register(base, base_gid, params=["pitch_mm", "group_y_mm", "shifts_mm"])
+        _LAYOUT_GIDS.add(base_gid)
         artists_by_sample.setdefault(sid, []).append(base)
         if is_trunc:
             brk = ax.text(ref_solv_ppm, offset + PEAK_MAX_NORM * 1.18 + 1.0, "//",
                           fontsize=FONTSIZE_NOTE, color=fs.c("SOLVENT"),
                           ha="center", va="bottom", weight="bold", zorder=5)
-            brk_gid = f"{FIGURE_ID}.{SCOPE}.break.{sid}"
+            brk_gid = _gid("break", sid)
             brk.set_gid(brk_gid)
             reg.register(brk, brk_gid, params=["note_font_pt", "shifts_mm"])
             artists_by_sample.setdefault(sid, []).append(brk)
-    handles = [Line2D([], [], color=color, lw=1.2, solid_capstyle="round",
-                      label=label.replace("\n", " "))
-               for _, label, color, *_ in reversed(SAMPLES_CONFIG)]
+    entries = [(s[7], s[1].replace("\n", " "), s[2]) for s in reversed(SAMPLES_CONFIG)]
+    handles = [Line2D([], [], color=color, lw=1.2, solid_capstyle="round", label=label)
+               for _, label, color in entries]
     legend = ax.legend(handles=handles, loc="upper right",
                        bbox_to_anchor=(LEGEND_ANCHOR_X, 0.98),
                        frameon=False, fontsize=FONTSIZE_LEGEND, ncol=LEGEND_COLS,
                        columnspacing=0.3, handlelength=0.5, handletextpad=0.2,
                        labelspacing=0.20, borderaxespad=0.15)
-    for text in legend.get_texts():
+    for (sid, _, _), text in zip(entries, legend.get_texts()):
         text.set_color(fs.c("TEXT"))
-    leg_gid = f"{FIGURE_ID}.{SCOPE}.legend"
+        if reg is not None:
+            # 图例里每行样品名也是**可见文字**，给它稳定身份（否则科学指纹只能按位置编号）。
+            reg.register(text, _gid("legend.text", sid), params=["legend_font_pt"])
+    leg_gid = _gid("legend")
     legend.set_gid(leg_gid)
     legend.set_zorder(7)
     reg.register(legend, leg_gid, params=["legend_font_pt", "legend_cols", "legend_anchor_x"])
@@ -906,7 +994,8 @@ def place_peak_labels(
 
         guide, = ax.plot([it["ppm"], text_data_x], [anchor_data_y, guide_end_y],
                          color=fs.c("GUIDE"), lw=0.55, zorder=3)
-        guide.set_gid(gid.replace(".peak.", ".guide."))
+        guide_gid = _guide_gid(gid)
+        guide.set_gid(guide_gid)
         artists_by_sample_dict.setdefault(sid, []).append(guide)
 
         lbl = ax.text(text_data_x, text_data_y, it["text"],
@@ -914,31 +1003,39 @@ def place_peak_labels(
                       color=trace_color, zorder=4)
         lbl.set_gid(gid)
         reg.register(lbl, gid, params=["peak_font_pt", "label_lift_mm", "label_min_gap_mm", "label_max_dx_mm", "pitch_mm", "group_y_mm"])
-        guide_gid = gid.replace(".peak.", ".guide.")
         reg.register(guide, guide_gid, params=["label_lift_mm", "label_max_dx_mm", "pitch_mm", "group_y_mm"])
+        _LAYOUT_GIDS.add(guide_gid)
         artists_by_sample_dict.setdefault(sid, []).append(lbl)
 
     return final_placed, remaining_unplaced
 
 
-def build_figure_and_registry(scope_target="main"):
+def _detect_peak(science: dict, sample_idx: int, approx_ppm: float, win_search: float):
+    """在定标后的真实谱线上找诊断峰极大值 → (exact_ppm, peak_y)。
+
+    标注文字与引线所指都来自这里；`science_manifest` 也用它声明锚点，
+    保证「引线指的」与「声明的」是同一个数。
+    """
+    rel = SAMPLES_CONFIG[sample_idx][0]
+    ppm, spec, _, _ = science[rel]
+    win = np.where(np.abs(ppm - approx_ppm) <= win_search)[0]
+    j = win[np.argmax(spec[win])] if len(win) else np.argmin(np.abs(ppm - approx_ppm))
+    return float(ppm[j]), float(min(spec[j], PEAK_MAX_NORM * 1.15))
+
+
+def _build(science: dict, scope_target: str):
+    """按 scope 建图。**legacy 与 native 共用这一份构建路径**（不存在第二套约定）。"""
     global PLACED_RECORDS, UNPLACED_GIDS
     if scope_target not in SCOPES:
         raise ValueError(f"未知 scope：{scope_target}")
-    prepare_data()
-    fig, ax = _draw_spectra()
+    fig, ax = _draw_spectra(science)
     labels_by_sample = {}
     for approx_ppm, sample_idx, group_name, _, _, auto_ppm, win_search in PEAK_LABELS_TEMPLATE:
-        rel = SAMPLES_CONFIG[sample_idx][0]
-        ppm, spec, _, _ = CACHED[rel]
-        win = np.where(np.abs(ppm - approx_ppm) <= win_search)[0]
-        j = win[np.argmax(spec[win])] if len(win) else np.argmin(np.abs(ppm - approx_ppm))
-        exact_ppm = ppm[j]
-        peak_y = min(spec[j], PEAK_MAX_NORM * 1.15)
+        exact_ppm, peak_y = _detect_peak(science, sample_idx, approx_ppm, win_search)
         text = f"{group_name} {exact_ppm:.2f}" if (auto_ppm and SHOW_PPM) else group_name
         sid = SAMPLES_CONFIG[sample_idx][7]
         labels_by_sample.setdefault(sample_idx, []).append(
-            (exact_ppm, text, peak_y, f"{FIGURE_ID}.{SCOPE}.peak.{sid}.{_gid_tag(approx_ppm)}"))
+            (exact_ppm, text, peak_y, _gid("peak", sid, _gid_tag(approx_ppm))))
     PLACED_RECORDS, UNPLACED_GIDS = place_peak_labels(
         ax, labels_by_sample, lanes=LABEL_LANES, min_gap_mm=LABEL_MIN_GAP_MM,
         max_dx_mm=LABEL_MAX_DX_MM, shifts_mm=PEAK_LABEL_SHIFTS,
@@ -950,30 +1047,331 @@ def build_figure_and_registry(scope_target="main"):
                   labelpad=3.5, weight="bold")
     ax.tick_params(length=2.5, width=0.6, labelsize=FONTSIZE_TICK, pad=2)
     for label, name in ((ax.xaxis.label, "xlabel"), (ax.yaxis.label, "ylabel")):
-        gid = f"{FIGURE_ID}.{SCOPE}.{name}"
+        gid = _gid(name)
         label.set_gid(gid)
         reg.register(label, gid, params=["axis_font_pt"])
     fs.strip_yticks(ax)
-    baselines = [reg.get(f"{FIGURE_ID}.{SCOPE}.baseline.{sid}") for sid in SAMPLE_IDS]
+    baselines = [reg.get(_gid("baseline", sid)) for sid in SAMPLE_IDS]
     if ARGS.migrate_config:
-        CONFIG["pitch_mm"]["main"] = {SAMPLE_IDS[i]: measure_relation("baseline_pitch", baselines[i-1], baselines[i])
-                                      for i in range(1, len(baselines))}
+        _CFG["pitch_mm"]["main"] = {SAMPLE_IDS[i]: measure_relation("baseline_pitch", baselines[i-1], baselines[i])
+                                    for i in range(1, len(baselines))}
     for i in range(1, len(baselines)):
         move = [art for sid in SAMPLE_IDS[i:] for art in artists_by_sample[sid]]
         set_relation_target(kind="baseline_pitch", object_a=baselines[i-1], object_b=baselines[i],
-                            target_mm=CONFIG["pitch_mm"]["main"][SAMPLE_IDS[i]], move=move)
+                            target_mm=_CFG["pitch_mm"]["main"][SAMPLE_IDS[i]], move=move)
     for sid, group in artists_by_sample.items():
         for artist in group:
             apply_display_shift(artist, SHIFTS_MM[SCOPE][sid])
     group = [art for arts in artists_by_sample.values() for art in arts]
     for art in group:
-        apply_display_shift(art, CONFIG["group_y_mm"]["main"])
+        apply_display_shift(art, _CFG["group_y_mm"]["main"])
     fig._figpact_relations = [
         {"scope": "main", "kind": "baseline_pitch", "upper": SAMPLE_IDS[i],
          "value_mm": measure_relation("baseline_pitch", baselines[i-1], baselines[i])}
         for i in range(1, len(baselines))]
     fig._figpact_space = [dict(scope="main", **v) for v in remaining_space(fig, group)]
     return fig, reg
+
+
+def build_figure_and_registry(scope_target="main"):
+    """legacy 入口：用模块基线配置建图（CLI / GUI / 清点继续走这里）。"""
+    _apply_config(CONFIG)
+    prepare_data()
+    return _build(load_science(), scope_target)
+
+
+def build_scene(science: dict, config: dict, scope: str):
+    """native 入口：候选配置 + 已缓存科研载荷 → (Figure, GidRegistry)。
+
+    候选配置先过 `prepare_config`（与 legacy 同一份标准化：缺 shifts_mm 补 0、
+    标注短名补全 gid），全部排版全局量再由 `_apply_config` 一次装好，因此同一
+    (science, config, scope) 永远得到同一张图；纯布局试算不重读 Bruker 数据、
+    不重跑定标。**传入的 config 不被修改**。
+    """
+    _apply_config(prepare_config(config))
+    return _build(science, scope)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# native 契约：给 agent / runtime 的显式声明（不改 legacy CLI 行为）
+# ──────────────────────────────────────────────────────────────────────────────
+#: 本图只出一张叠谱（SI 单谱在 NMR_generate_all.py 里），所以只有一个输出作用域。
+_OUTPUT_BASE = "Fig2_NMR_pure_stacked"
+_EXPORT_FORMATS = ("png", "pdf", "svg", "tiff")
+#: 每个峰标注模板项在本样品上的 gid tag（标注与引线共用同一段）。
+_PEAK_TAGS = {sid: tuple(_gid_tag(p) for p, i, *_ in PEAK_LABELS_TEMPLATE
+                         if SAMPLES_CONFIG[i][7] == sid)
+              for sid in SAMPLE_IDS}
+#: 基线场景缓存：契约的节点/角色取自**真正建出来的一张图**，不另抄一份 gid 清单。
+_BASELINE_SCENES: dict[str, tuple] = {}
+
+
+def _gid(kind: str, sid: str = "", tag: str = "") -> str:
+    """对象身份的唯一构造点：`fig2_nmr.main.<kind>[.<sid>[.<tag>]]`。
+
+    末段不带点（`3p91`），否则按点切分的读取方会切错。
+    """
+    parts = [FIGURE_ID, SCOPE, kind]
+    if sid:
+        parts.append(sid)
+    if tag:
+        parts.append(tag)
+    return ".".join(parts)
+
+
+def _guide_gid(peak_gid: str) -> str:
+    """引线 gid 由标注 gid 派生——身份规则只此一处。"""
+    return peak_gid.replace(".peak.", ".guide.")
+
+
+def _baseline_scene(scope: str):
+    """该 scope 的基线 (Figure, GidRegistry)，按 scope 缓存、只建一次。"""
+    if scope not in _BASELINE_SCENES:
+        _apply_config(CONFIG)
+        _BASELINE_SCENES[scope] = _build(load_science(), scope)
+    return _BASELINE_SCENES[scope]
+
+
+def _science_policy(gid: str) -> str:
+    """基线虚线与峰标注引线是**纯布局几何**；谱线、标注文字、轴文字、图例受保护。
+
+    由构建路径自己登记（`_LAYOUT_GIDS`），`layout_contract` 与 `science_manifest` 共用。
+    """
+    return "LAYOUT" if gid in _LAYOUT_GIDS else "LOCKED_SCIENCE"
+
+
+def _sample_gids(registered: dict, sid: str) -> list[str]:
+    """一个样品层的全部图元（谱线 + 基线 + 截顶标记 + 标注 + 引线），按注册表过滤。"""
+    gids = [_gid(kind, sid) for kind in ("curve", "baseline", "break")]
+    gids += [_gid(kind, sid, tag) for tag in _PEAK_TAGS[sid] for kind in ("peak", "guide")]
+    return [g for g in gids if g in registered]
+
+
+def _panel_id(ax, index: int) -> str:
+    """panel 身份：builder 设的 Axes gid；没有时才退回引擎的位置编号约定。"""
+    return ax.get_gid() or f"panel.{index}"
+
+
+def _scene_roles(fig, reg) -> tuple[dict[str, list[str]], dict[int, str]]:
+    """按语义角色分组注册图元，并给出「图元 → 所属 panel」的映射（按 artist 身份判定）。"""
+    roles = {"curves": [], "baselines": [], "guides": [], "peaks": [], "breaks": [],
+             "legends": [], "legend_texts": [], "axis_texts": []}
+    owner: dict[int, str] = {}
+    role: dict[int, str] = {}
+    for i, ax in enumerate(fig.axes):
+        pid = _panel_id(ax, i)
+        for txt in (ax.xaxis.label, ax.yaxis.label):
+            owner[id(txt)] = pid
+        legend = ax.get_legend()
+        if legend is not None:
+            owner[id(legend)] = pid
+            for txt in legend.get_texts():
+                owner[id(txt)] = pid
+                role[id(txt)] = "legend_texts"
+    for gid, art in reg.all().items():
+        kind = type(art).__name__
+        params = set(reg.params_of(gid))
+        if kind == "Legend":
+            roles["legends"].append(gid)
+        elif kind == "Text":
+            if id(art) in owner:
+                roles[role.get(id(art), "axis_texts")].append(gid)
+            elif "note_font_pt" in params:
+                roles["breaks"].append(gid)
+            else:
+                roles["peaks"].append(gid)
+        elif kind == "Line2D":
+            if gid in _LAYOUT_GIDS:
+                roles["baselines" if art.get_linestyle() == "--" else "guides"].append(gid)
+            else:
+                roles["curves"].append(gid)
+    return roles, owner
+
+
+def _decl_param(scope, key, path, unit, mutability, objects, *, operation=None, axis=None,
+                bounds=None, expected=None) -> dict:
+    """契约参数记录。`bounds` = (min, max)，取自 SCALARS / 关系上限，不另抄一份数字。"""
+    rec = {"key": key, "path": list(path), "unit": unit, "mutability": mutability,
+           "scopes": [scope], "objects": list(objects), "scale": 1.0}
+    if operation is not None:
+        rec["operation"] = operation
+    if axis is not None:
+        rec["axis"] = axis
+    if bounds is not None:
+        rec["min"], rec["max"] = bounds
+    if expected is not None:
+        rec["expected"] = expected
+    return rec
+
+
+def _editable(params: list, scope, key, path, unit, objects, **kw) -> None:
+    """只登记**在该 scope 真的有受影响图元**的可编辑参数；否则不声明（= 不支持）。"""
+    if objects:
+        params.append(_decl_param(scope, key, path, unit, "EDITABLE", objects, **kw))
+
+
+def layout_contract(scope: str) -> dict:
+    """该 scope 的显式布局契约：精确 YAML 路径、语义节点/分组、受影响集合、产物名。
+
+    节点 / 角色 / 所属 panel 取自基线场景（`_baseline_scene`）；逐样品的毫米操作声明为
+    **实际会动的那些图元**（整层或上方所有层），不声明不存在的 gid。
+    """
+    if scope not in SCOPES:
+        raise ValueError(f"未知作用域 {scope!r}；可用：{list(SCOPES)}")
+    fig, reg = _baseline_scene(scope)
+    registered = reg.all()
+    gids = sorted(registered)
+    roles, owner = _scene_roles(fig, reg)
+    panel_of = {}
+    for gid, art in registered.items():
+        if id(art) in owner:
+            panel_of[gid] = owner[id(art)]
+        else:
+            ax = getattr(art, "axes", None)
+            panel_of[gid] = (_panel_id(ax, fig.axes.index(ax)) if ax in fig.axes else "figure")
+
+    params: list[dict] = []
+    for key in ("canvas_w_mm", "canvas_h_mm"):
+        _editable(params, scope, key, [key], "mm", gids, operation="resize",
+                  bounds=SCALARS[key][1:], expected={"kind": "resize", "objects": gids})
+    legend_objects = roles["legends"] + roles["legend_texts"]
+    for key, unit in (("legend_font_pt", "pt"), ("legend_cols", "col"),
+                      ("legend_anchor_x", "ratio")):
+        _editable(params, scope, key, [key], unit, legend_objects, operation="rebuild",
+                  bounds=SCALARS[key][1:], expected={"kind": "style", "objects": legend_objects})
+    for key, unit, objects in (("axis_font_pt", "pt", roles["axis_texts"]),
+                               ("line_width", "pt", roles["curves"]),
+                               ("peak_font_pt", "pt", roles["peaks"]),
+                               ("note_font_pt", "pt", roles["breaks"]),
+                               ("label_lift_mm", "mm", roles["peaks"] + roles["guides"]),
+                               ("label_min_gap_mm", "mm", roles["peaks"] + roles["guides"]),
+                               ("label_max_dx_mm", "mm", roles["peaks"] + roles["guides"]),
+                               ("label_lanes", "lane", roles["peaks"] + roles["guides"])):
+        _editable(params, scope, key, [key], unit, objects, operation="rebuild",
+                  bounds=SCALARS[key][1:], expected={"kind": "style", "objects": objects})
+    # `show_ppm` 改的是**画出来的化学位移文字**（受保护科学内容），不是排版旋钮：
+    # 声明成 LOCKED_SCIENCE，免得它被当成可以随手开关的样式项。
+    params.append(_decl_param(scope, "show_ppm", ["show_ppm"], "bool", "LOCKED_SCIENCE", []))
+    # 逐样品的毫米操作：受影响集合是**实际会动的那些图元**。
+    relations: list[dict] = []
+    for i in range(1, len(SAMPLE_IDS)):
+        sid = SAMPLE_IDS[i]
+        moved = [g for s in SAMPLE_IDS[i:] for g in _sample_gids(registered, s)]
+        _editable(params, scope, f"pitch_mm.{scope}.{sid}", ["pitch_mm", scope, sid], "mm",
+                  moved, operation="translate", axis="y", bounds=(0.0, 100.0),
+                  expected={"kind": "translate", "objects": moved, "axis": "y",
+                            "preserve": [f"{scope}.pitch.{SAMPLE_IDS[k]}"
+                                         for k in range(1, i)]})
+        relations.append({
+            "id": f"{scope}.pitch.{sid}",
+            "kind": "gap",
+            "objects": [_gid("baseline", SAMPLE_IDS[i - 1]), _gid("baseline", sid)],
+            "axis": "y",
+            "method": "baseline",
+            "controlled_by": [["pitch_mm", scope, sid]],
+            "move": moved,
+        })
+    all_layers = [g for s in SAMPLE_IDS for g in _sample_gids(registered, s)]
+    _editable(params, scope, f"group_y_mm.{scope}", ["group_y_mm", scope], "mm", all_layers,
+              operation="translate", axis="y", bounds=(-100.0, 100.0),
+              expected={"kind": "translate", "objects": all_layers, "axis": "y",
+                        "preserve": [r["id"] for r in relations]})
+    for sid in SAMPLE_IDS:
+        own = _sample_gids(registered, sid)
+        _editable(params, scope, f"shifts_mm.{scope}.{sid}", ["shifts_mm", scope, sid], "mm",
+                  own, operation="translate", axis="y",
+                  bounds=(-SHIFT_LIMIT_MM, SHIFT_LIMIT_MM),
+                  expected={"kind": "translate", "objects": own, "axis": "y"})
+    # 逐标注微调是 [dx, dy] **两轴**毫米偏移并重画引线——不是单轴纯平移，故走 rebuild。
+    for gid in sorted(PEAK_LABEL_SHIFTS):
+        label = gid.removeprefix(f"{FIGURE_ID}.{scope}.")
+        objects = [g for g in (gid, _guide_gid(gid)) if g in registered]
+        _editable(params, scope, f"peak_label_shifts_mm.{scope}.{label}",
+                  ["peak_label_shifts_mm", scope, label], "mm", objects, operation="rebuild",
+                  bounds=(-SHIFT_LIMIT_MM, SHIFT_LIMIT_MM),
+                  expected={"kind": "style", "objects": objects})
+    # 只读重建字段：声明出来是为了它们**不被当成可编辑**（缺声明 = UNCLASSIFIED 失败关闭）。
+    params.append(_decl_param(scope, "schema_version", ["schema_version"], "int", "FIXED_STYLE", []))
+    params.append(_decl_param(scope, f"layout_reference.{scope}", ["layout_reference", scope],
+                              "record", "DERIVED", []))
+
+    editable = {gid for p in params if p["mutability"] == "EDITABLE" for gid in p["objects"]}
+    nodes = {gid: {"type": type(registered[gid]).__name__, "parent": panel_of[gid],
+                   "editable": gid in editable, "science_policy": _science_policy(gid)}
+             for gid in gids}
+    root = f"{FIGURE_ID}.{scope}"
+    groups = [{"id": root, "parent": None, "members": gids}]
+    panel_ids = sorted(set(panel_of.values()))
+    for pid in panel_ids:
+        groups.append({"id": pid, "parent": root,
+                       "members": sorted(g for g in gids if panel_of[g] == pid)})
+    parent_panel = panel_ids[0] if panel_ids else root
+    for sid in SAMPLE_IDS:
+        members = _sample_gids(registered, sid)
+        if members:
+            groups.append({"id": f"{FIGURE_ID}.{scope}.group.{sid}", "parent": parent_panel,
+                           "members": members})
+    for name, members in (("curves", roles["curves"]), ("peaks", roles["peaks"])):
+        if members:
+            groups.append({"id": f"{FIGURE_ID}.{scope}.group.{name}", "parent": parent_panel,
+                           "members": sorted(members)})
+    return {"parameters": params, "nodes": nodes, "groups": groups, "relations": relations,
+            "outputs": [f"{_OUTPUT_BASE}.{ext}" for ext in _EXPORT_FORMATS]}
+
+
+def science_manifest(science: dict) -> dict:
+    """JSONable 的科研来源 / 定标 / 受保护锚点声明（native runtime 与 capture_science 用）。
+
+    `nodes` 只列**点名豁免**的装饰几何：基线虚线与峰标注引线，两者都声明
+    `{"science_policy": "LAYOUT", "type": "guide"}`——引擎对原始 Line2D 的 x/y 一律保护，
+    只有显式 `type: "guide"` 的装饰线才不进科学指纹。其余默认 LOCKED_SCIENCE
+    （谱线、标注文字、轴文字、图例、图像像素永不豁免），与 `_science_policy` 一致。
+    峰锚点用与绘图同一个 `_detect_peak`，保证「引线指的」就是「声明的」。
+    """
+    _apply_config(CONFIG)
+    _baseline_scene(SCOPE)          # 纯布局图元的判定来自真实建出来的图
+    anchors = {}
+    for approx_ppm, sample_idx, group_name, _, _, _, win_search in PEAK_LABELS_TEMPLATE:
+        sid = SAMPLES_CONFIG[sample_idx][7]
+        ppm, peak_y = _detect_peak(science, sample_idx, approx_ppm, win_search)
+        anchors[_gid("peak", sid, _gid_tag(approx_ppm))] = {
+            "assignment": group_name, "exact_ppm": ppm,
+            "guide_anchor_data": [ppm, peak_y],
+            "guide_gid": _gid("guide", sid, _gid_tag(approx_ppm)),
+        }
+    return {
+        "nodes": {gid: {"science_policy": "LAYOUT", "type": "guide"}
+                  for gid in sorted(_LAYOUT_GIDS)},
+        "layout_viewports": {
+            _gid("panel"): {"axis": "y",
+                            "origin": CONFIG["layout_reference"]["main"]["axis_bottom_data"],
+                            "units_per_mm": CONFIG["layout_reference"]["main"]["units_per_mm"]},
+        },
+        "science": {
+            "figure_id": FIGURE_ID,
+            "source": {
+                "format": "Bruker pdata (1D 1H)",
+                "files": science_inputs(),
+                "samples": [{"id": sid, "dir": rel, "solvent": solv}
+                            for rel, _, _, solv, *_ in SAMPLES_CONFIG],
+            },
+            "processing": [
+                "narrow-window solvent referencing (CDCl3 7.26±0.03 / DMSO-d6 2.50±0.03 / D2O 4.79±0.05 ppm)",
+                "solute peak normalized to 22 a.u. outside the solvent window",
+                "solvent peak clipped at 26 a.u. and marked //",
+            ],
+            "scale_bars": [],
+            "protected": {
+                "display_window_ppm": [PPM_LEFT, PPM_RIGHT],
+                "peak_scale_a.u.": {"solute_max": PEAK_MAX_NORM, "solvent_clip": PEAK_MAX_NORM * 1.18},
+                "solvent_references": [{"sample": SAMPLES_CONFIG[i][7], "ref_ppm": ref,
+                                        "search_ppm": search, "window_ppm": win}
+                                       for i, (_, _, _, _, ref, search, win, _)
+                                       in enumerate(SAMPLES_CONFIG)],
+                "peak_anchors": anchors,
+            },
+        },
+    }
 
 
 def make_figure():

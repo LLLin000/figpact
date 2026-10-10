@@ -109,8 +109,8 @@ def _segments_intersect(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     rxs = r[..., 0] * s[..., 1] - r[..., 1] * s[..., 0]
     qpxr = qp[..., 0] * r[..., 1] - qp[..., 1] * r[..., 0]
     qpxs = qp[..., 0] * s[..., 1] - qp[..., 1] * s[..., 0]
-    rn = np.linalg.norm(r, axis=-1)[:, None]
-    sn = np.linalg.norm(s, axis=-1)[None, :]
+    rn = np.linalg.norm(r, axis=-1)
+    sn = np.linalg.norm(s, axis=-1)
     parallel = np.abs(rxs) <= _SEGMENT_EPS * rn * sn
     rxs_safe = np.where(parallel, 1.0, rxs)
     t = np.where(parallel, -1.0, qpxs / rxs_safe)

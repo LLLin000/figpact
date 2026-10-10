@@ -413,25 +413,34 @@ def layout_contract(scope: str) -> dict:
     text_nodes = labels + [gid(scope, "xlabel"), gid(scope, "ylabel")]
     keep = list(_PRESERVE)
 
+    # 画布尺寸的**完整受影响集合** = 画布 + 它里面的坐标框（画布动 → 坐标框 mm 矩形动，
+    # 坐标框的后代跟着动属于闭包）。画布与坐标框是同级对象（归属按作者声明），
+    # 所以坐标框要显式写进 objects；`expected.objects` 仍是主目标（画布）。
     parameters = [
         _native.param("canvas_w_mm", ["canvas_w_mm"], unit="mm", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=[canvas_node], operation="rebuild", axis="x",
+                      scopes=list(SCOPES), objects=[canvas_node, axes_node],
+                      operation="rebuild", axis="x",
                       minimum=SCALARS["canvas_w_mm"][1], maximum=SCALARS["canvas_w_mm"][2],
                       expected=_native.expect("resize", objects=[canvas_node], axis="x", preserve=keep)),
         _native.param("canvas_h_mm", ["canvas_h_mm"], unit="mm", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=[canvas_node], operation="rebuild", axis="y",
+                      scopes=list(SCOPES), objects=[canvas_node, axes_node],
+                      operation="rebuild", axis="y",
                       minimum=SCALARS["canvas_h_mm"][1], maximum=SCALARS["canvas_h_mm"][2],
                       expected=_native.expect("resize", objects=[canvas_node], axis="y", preserve=keep)),
+        # dpi 是**测量条件**：只改渲染栅格，不改毫米几何；真实可测效果只有画布的
+        # renderer_dpi 样式，所以受影响集合就是画布本身。
         _native.param("render_dpi", ["render_dpi"], unit="dpi", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=[canvas_node, axes_node], operation="rebuild",
+                      scopes=list(SCOPES), objects=[canvas_node], operation="rebuild",
                       axis=None, minimum=SCALARS["render_dpi"][1], maximum=SCALARS["render_dpi"][2],
                       expected=_native.expect("style", objects=[canvas_node], preserve=keep)),
     ]
+    # 外边距是**容器内缩**：外边距 +1 mm，坐标框那一侧缩进 1 mm，主目标的宽/高变小 Δ，
+    # 所以 scale = -1。坐标框里的谱线/引导线/窗口/标签跟着动是闭包的一部分。
     for key, axis in (("axes_left_mm", "x"), ("axes_right_mm", "x"),
                       ("axes_bottom_mm", "y"), ("axes_top_mm", "y")):
         parameters.append(_native.param(
             key, [key], unit="mm", mutability="EDITABLE", scopes=list(SCOPES),
-            objects=[axes_node], operation="rebuild", axis=axis,
+            objects=[axes_node], operation="rebuild", axis=axis, scale=-1.0,
             minimum=SCALARS[key][1], maximum=SCALARS[key][2],
             expected=_native.expect("resize", objects=[axes_node], axis=axis, preserve=keep)))
     for key in ("axis_font_pt", "tick_font_pt", "peak_font_pt", "line_width", "guide_lw_pt"):

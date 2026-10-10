@@ -514,27 +514,41 @@ def _single_contract(scope: str) -> dict:
     root = gid(scope, "root")
     keep_arrays = ["ftir.curve_arrays", "ftir.view_windows"]
 
+    # 画布尺寸的**完整受影响集合** = 画布 + 它里面的坐标框（+ 坐标框的后代闭包）：
+    # 坐标框 mm 矩形由「画布 mm - 四条外边距」算出，所以画布一动，坐标框的尺寸跟着动。
+    # `expected.objects` 仍是**主目标**（画布）：量级核对只落在主目标上，
+    # 而不是把闭包里每个跟随者都当成"被声明的独立作用对象"。
+    # 画布是 rootGroup 的兄弟而不是坐标框的祖先（归属关系按作者声明，不从包围盒猜），
+    # 所以坐标框必须显式写进受影响集合，不能靠闭包兜底。
     parameters = [
         _native.param("canvas_w_mm", ["canvas_w_mm"], unit="mm", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=[canvas_node], operation="rebuild", axis="x",
+                      scopes=list(SCOPES), objects=[canvas_node, axes_node],
+                      operation="rebuild", axis="x",
                       minimum=SCALARS["canvas_w_mm"][1], maximum=SCALARS["canvas_w_mm"][2],
                       expected=_native.expect("resize", objects=[canvas_node], axis="x",
                                               preserve=keep_arrays + ["ftir.band_windows"])),
         _native.param("canvas_h_mm", ["canvas_h_mm"], unit="mm", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=[canvas_node], operation="rebuild", axis="y",
+                      scopes=list(SCOPES), objects=[canvas_node, axes_node],
+                      operation="rebuild", axis="y",
                       minimum=SCALARS["canvas_h_mm"][1], maximum=SCALARS["canvas_h_mm"][2],
                       expected=_native.expect("resize", objects=[canvas_node], axis="y",
                                               preserve=keep_arrays + ["ftir.band_windows"])),
+        # dpi 是**测量条件**：它改的是渲染栅格，不改毫米几何。真实可测的效果只有
+        # 画布自己的 renderer_dpi 样式，所以受影响集合就是画布（坐标框不跟着变）。
         _native.param("render_dpi", ["render_dpi"], unit="dpi", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=[canvas_node, axes_node], operation="rebuild",
+                      scopes=list(SCOPES), objects=[canvas_node], operation="rebuild",
                       axis=None, minimum=SCALARS["render_dpi"][1], maximum=SCALARS["render_dpi"][2],
                       expected=_native.expect("style", objects=[canvas_node], preserve=["ftir.view_windows"])),
     ]
+    # 外边距是**容器内缩**：外边距 +1 mm，坐标框在画布里的那一侧缩进 1 mm，
+    # 所以主目标（坐标框）的宽/高是**变小** Δ —— scale = -1。
+    # 坐标框里的曲线/带位/标签跟着动是闭包的一部分（它们挂在坐标框下），
+    # 不需要在 objects 里逐个抄一遍。
     for key, axis in (("axes_left_mm", "x"), ("axes_right_mm", "x"),
                       ("axes_bottom_mm", "y"), ("axes_top_mm", "y")):
         parameters.append(_native.param(
             key, [key], unit="mm", mutability="EDITABLE", scopes=list(SCOPES),
-            objects=[axes_node], operation="rebuild", axis=axis,
+            objects=[axes_node], operation="rebuild", axis=axis, scale=-1.0,
             minimum=SCALARS[key][1], maximum=SCALARS[key][2],
             expected=_native.expect("resize", objects=[axes_node], axis=axis,
                                     preserve=keep_arrays + ["ftir.band_windows"])))
@@ -632,14 +646,26 @@ def _compare_contract(scope: str) -> dict:
     all_text.append(gid("compare_processed", "xlabel"))
     top_set = [gid(COMPARE_TOP_SCOPE, k) for k in ("axes", "ylabel", "title")]
     top_set.append(gid(COMPARE_TOP_SCOPE, "curve", ACTIVE_CURVES[COMPARE_TOP_SCOPE][0]))
+    # 共享布局参数一动，**两格**的注册图元都会动（同一张 Figure 上的兄弟格）。
+    # 但每个 `compare_*` 契约只声明本作用域自己的节点，兄弟格的成员不在闭包里 ——
+    # 受影响集合必须逐条写出来，否则兄弟格的曲线/标题会被当成"牵连了未声明对象"。
+    # `objects` 是完整受影响集合；`expected.objects` 仍是本格的主目标（量级只核对主目标）。
+    both_members = ([gid(COMPARE_TOP_SCOPE, k) for k in ("axes", "ylabel", "title")]
+                    + [gid("compare_processed", k) for k in ("axes", "ylabel", "title", "xlabel")]
+                    + [gid(s, "curve", ACTIVE_CURVES[s][0]) for s in COMPARE_SCOPES])
     keep = ["ftir.curve_arrays", "ftir.processing_chain", "ftir.view_windows"]
     root = gid(scope, "root")
 
     parameters = [
+        # 画布宽度：两格的宽度 = 画布宽 - 左右外边距，所以**两格里的注册图元都受影响**
+        # （两格的曲线/标题/轴标题都跟着动），加上画布本身 = 完整受影响集合。
         _native.param("canvas_w_mm", ["canvas_w_mm"], unit="mm", mutability="EDITABLE",
-                      scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis="x",
+                      scopes=list(SCOPES), objects=[canvas, *both_members],
+                      operation="rebuild", axis="x",
                       minimum=SCALARS["canvas_w_mm"][1], maximum=SCALARS["canvas_w_mm"][2],
                       expected=_native.expect("resize", objects=[canvas], axis="x", preserve=keep)),
+        # 画布高度：两格的 mm 矩形是**画布毫米里的绝对量**（y = compare_bottom_mm 起算、
+        # 高度 = compare_panel_h_mm），画布变高只是多出空白 —— 受影响集合只有画布。
         _native.param("canvas_h_mm", ["canvas_h_mm"], unit="mm", mutability="EDITABLE",
                       scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis="y",
                       minimum=SCALARS["canvas_h_mm"][1], maximum=SCALARS["canvas_h_mm"][2],
@@ -649,16 +675,35 @@ def _compare_contract(scope: str) -> dict:
                       minimum=SCALARS["render_dpi"][1], maximum=SCALARS["render_dpi"][2],
                       expected=_native.expect("style", objects=[canvas], preserve=["ftir.view_windows"])),
     ]
-    for key, axis in (("compare_left_mm", "x"), ("compare_right_mm", "x"),
-                      ("compare_bottom_mm", "y"), ("compare_top_mm", "y")):
+    # 左右外边距决定两格的宽度（= 画布宽 - 左 - 右）：外边距 +1 mm，两格各缩 1 mm，
+    # 所以主目标是两格坐标框、scale = -1（方向写进声明，不让调用方猜）；
+    # 完整受影响集合是两格里的注册图元（兄弟格的成员不在本契约的闭包里）。
+    for key, axis in (("compare_left_mm", "x"), ("compare_right_mm", "x")):
         parameters.append(_native.param(
             key, [key], unit="mm", mutability="EDITABLE", scopes=list(SCOPES),
-            objects=both_axes, operation="rebuild", axis=axis,
+            objects=both_members, operation="rebuild", axis=axis, scale=-1.0,
             minimum=SCALARS[key][1], maximum=SCALARS[key][2],
             expected=_native.expect("resize", objects=both_axes, axis=axis, preserve=keep)))
+    # 下外边距是**两格带子的 y 锚点**：格子的高度由 compare_panel_h_mm 决定，不由它决定。
+    # 所以它是一个纯毫米显示位移（两格一起上移 Δ），不是尺寸变化。
     parameters.append(_native.param(
+        "compare_bottom_mm", ["compare_bottom_mm"], unit="mm", mutability="EDITABLE",
+        scopes=list(SCOPES), objects=both_members, operation="translate", axis="y", scale=1.0,
+        minimum=SCALARS["compare_bottom_mm"][1], maximum=SCALARS["compare_bottom_mm"][2],
+        expected=_native.expect("translate", objects=both_axes, axis="y", preserve=keep)))
+    # 上外边距**不移动任何图元**：格子挂在 compare_bottom_mm 上、高度由 compare_panel_h_mm
+    # 决定，它只出现在"两格 + 间隙 + 上下外边距 <= 画布高度"的校验里。
+    # 校验性的只读闸，不是派生量、也不是受保护科学内容：声明成 FIXED_STYLE + 说明它不动几何。
+    parameters.append(_native.param(
+        "compare_top_mm", ["compare_top_mm"], unit="mm", mutability="FIXED_STYLE",
+        scopes=list(SCOPES), objects=[canvas], operation="rebuild", axis="y",
+        minimum=SCALARS["compare_top_mm"][1], maximum=SCALARS["compare_top_mm"][2],
+        expected=_native.expect("resize", objects=[canvas], axis="y", preserve=keep)))
+    parameters.append(_native.param(
+        # 每格高度就是它本身：两格同高（compare.equal_panel_height），+1 mm 两格各高 1 mm。
+        # 主目标是两格坐标框；完整受影响集合是两格里的注册图元。
         "compare_panel_h_mm", ["compare_panel_h_mm"], unit="mm", mutability="EDITABLE",
-        scopes=list(SCOPES), objects=both_axes, operation="rebuild", axis="y",
+        scopes=list(SCOPES), objects=both_members, operation="resize", axis="y",
         minimum=SCALARS["compare_panel_h_mm"][1], maximum=SCALARS["compare_panel_h_mm"][2],
         expected=_native.expect("resize", objects=both_axes, axis="y", preserve=keep)))
     parameters.append(_native.param(

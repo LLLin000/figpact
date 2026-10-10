@@ -138,7 +138,10 @@ def _cli(argv: list[str]) -> argparse.Namespace:
     return ap.parse_args(argv)
 
 
-ARGS = _cli(sys.argv[1:])
+#: CLI 只在 `python plot_ftir.py …` 时解析。作为模块被 native runtime 导入时
+#: **不碰调用方的 argv**（否则 worker 的协议参数会被 argparse 当场拒掉），
+#: 也不输出、不落盘——import 只建立函数与基线配置。
+ARGS = _cli(sys.argv[1:]) if __name__ == "__main__" else _cli([])
 CONFIG_PATH = Path(ARGS.config).expanduser() if ARGS.config else ROOT / "ftir.yaml"
 
 
@@ -146,8 +149,49 @@ SCHEMA = {**SCALARS, "shifts_mm": (dict,), "clearance_mm": (dict,),
           "group_y_mm": (dict,), "layout_reference": (dict,)}
 
 
+def prepare_config(config: dict, *, label: str | None = None) -> dict:
+    """把任意来源的配置映射标准化成**构建路径能直接消费**的形态。
+
+    **纯映射变换**：不读 YAML、不碰科研数据、不画图，输入映射不被修改（返回新字典）。
+    legacy 装载（`load_config_ftir`）与 native 构建（`build_scene` 收到的候选配置）
+    **共用这一份**，不存在第二套约定：YAML 里 `shifts_mm` 缺失 / 为 `{}` / 只写了部分
+    作用域或曲线，一律补 0.0——这就是「不写 = 不动」的定义，而不是让 draw_panel 里
+    的 `SHIFTS_MM[scope][sid]` 抛 KeyError。对已标准化的映射幂等（作用域与曲线齐全时
+    输出与输入等价），所以 native 恒等重建与「基线已标准化、候选再标准化一次」都成立。
+    """
+    name = label or CONFIG_PATH.name
+    cfg = dict(config)
+    raw_shifts = cfg.get("shifts_mm") or {}
+    if not isinstance(raw_shifts, dict):
+        raise ConfigError(f"{name}：shifts_mm 必须是字典映射")
+    if unknown := sorted(set(raw_shifts) - set(SCOPES)):
+        raise ConfigError(f"{name}：shifts_mm 里有未知作用域 {unknown}；可用：{list(SCOPES)}")
+
+    normalized_shifts = {scope: {sid: 0.0 for sid in CURVE_IDS} for scope in SCOPES}
+    for scope, per_curve in raw_shifts.items():
+        if per_curve is None:
+            continue
+        if not isinstance(per_curve, dict):
+            raise ConfigError(f"{name}：shifts_mm.{scope} 必须是 `曲线id: 毫米` 映射")
+        if unknown := sorted(set(per_curve) - set(CURVE_IDS)):
+            raise ConfigError(f"{name}：shifts_mm.{scope} 里有未知曲线 {unknown}；可用：{list(CURVE_IDS)}")
+        for sid, value in per_curve.items():
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ConfigError(f"{name}：shifts_mm.{scope}.{sid} 必须是数字")
+            val_f = float(value)
+            if not math.isfinite(val_f):
+                raise ConfigError(f"{name}：shifts_mm.{scope}.{sid} 不能是 NaN 或 Inf")
+            if abs(val_f) > SHIFT_LIMIT_MM:
+                sug = min(max(val_f, -SHIFT_LIMIT_MM), SHIFT_LIMIT_MM)
+                raise ConfigError(f"{name}：shifts_mm.{scope}.{sid} = {val_f} 超出 ±{SHIFT_LIMIT_MM} mm；建议改成 {sug}")
+            normalized_shifts[scope][sid] = val_f
+
+    cfg["shifts_mm"] = normalized_shifts
+    return cfg
+
+
 def load_config_ftir(path: Path) -> dict:
-    """使用 figpact 引擎校验配置并标准化 shifts_mm。"""
+    """读 YAML（含 schema 1 迁移与布局校验）→ `prepare_config` 标准化 shifts_mm。"""
     if ARGS.migrate_config:
         legacy = {**SCALARS, "schema_version": (int, 1, 1), "shifts_mm": (dict,),
                   "stack_gap": (float, 0, 80), "stack_gap_annotated": (float, 0, 80),
@@ -165,33 +209,7 @@ def load_config_ftir(path: Path) -> dict:
         validate_layout(cfg, scopes=SCOPES, ids=CURVE_IDS[1:], parameter="clearance_mm",
                         reference_fields=("gap_data", "lift_mm", "axis_bottom_data", "units_per_mm"))
 
-    raw_shifts = cfg.get("shifts_mm") or {}
-    if not isinstance(raw_shifts, dict):
-        raise ConfigError(f"{path.name}：shifts_mm 必须是字典映射")
-    if unknown := sorted(set(raw_shifts) - set(SCOPES)):
-        raise ConfigError(f"{path.name}：shifts_mm 里有未知作用域 {unknown}；可用：{list(SCOPES)}")
-
-    normalized_shifts = {scope: {sid: 0.0 for sid in CURVE_IDS} for scope in SCOPES}
-    for scope, per_curve in raw_shifts.items():
-        if per_curve is None:
-            continue
-        if not isinstance(per_curve, dict):
-            raise ConfigError(f"{path.name}：shifts_mm.{scope} 必须是 `曲线id: 毫米` 映射")
-        if unknown := sorted(set(per_curve) - set(CURVE_IDS)):
-            raise ConfigError(f"{path.name}：shifts_mm.{scope} 里有未知曲线 {unknown}；可用：{list(CURVE_IDS)}")
-        for sid, value in per_curve.items():
-            if isinstance(value, bool) or not isinstance(value, (int, float)):
-                raise ConfigError(f"{path.name}：shifts_mm.{scope}.{sid} 必须是数字")
-            val_f = float(value)
-            if not math.isfinite(val_f):
-                raise ConfigError(f"{path.name}：shifts_mm.{scope}.{sid} 不能是 NaN 或 Inf")
-            if abs(val_f) > SHIFT_LIMIT_MM:
-                sug = min(max(val_f, -SHIFT_LIMIT_MM), SHIFT_LIMIT_MM)
-                raise ConfigError(f"{path.name}：shifts_mm.{scope}.{sid} = {val_f} 超出 ±{SHIFT_LIMIT_MM} mm；建议改成 {sug}")
-            normalized_shifts[scope][sid] = val_f
-
-    cfg["shifts_mm"] = normalized_shifts
-    return cfg
+    return prepare_config(cfg, label=path.name)
 
 
 CONFIG = load_config_ftir(CONFIG_PATH)
@@ -254,34 +272,55 @@ if ARGS.list_params:
     raise SystemExit(0)
 
 
-# 归属标签与图例的字号是**同一份**：测量（_tier_geometry）与实际落字
-# （draw_bands）分开写死两个数，字号一改就会「量出来三层、画出来两层」。
-LABEL_FS = CONFIG["label_font_pt"]
-LEGEND_FS = CONFIG["legend_font_pt"]
-# 贴边框的归属标签（Zn–O 在 400–560，本来就挤在右框上）至少离框这么多；
-# QA 的“贴边”红线是 1.0 mm，取 1.5 留出余量。
-EDGE_MARGIN_MM = CONFIG["label_edge_margin_mm"]
-# 图例底 → 标签块顶的净空（mm）。标签块本身贴不到图例里，这个值只能小幅调。
-LABEL_GAP_TOP_MM = CONFIG["label_gap_top_mm"]
-# 标签块底（无标注版：图例底）→ 谱线顶的净空（mm）。**这里就是纵向空间的总闸**：
-# 它每收 1 mm，谱线组就长高 1 mm、整体上移 1 mm。下限 0.5 是因为
-# draw_bands 要求标签必须落在 ymax + 0.5 mm 之上。
-CURVE_GAP_MM = CONFIG["curve_gap_mm"]
-# 逐曲线显示位移（mm）：`{作用域: {曲线id: 毫米}}`，布局冻结后生效，见 apply_display_shift()
-SHIFTS_MM = CONFIG["shifts_mm"]
-# 图上每一类**可见文字与线**都要有入口：轴标题 / 刻度数字 / 小注 / 谱线线宽 / 图例列数与水平锚点。
-# 没进 YAML 的两类，理由写在这里，免得下一个人以为是漏了：
-#   * 坐标框与刻度线的线宽 → 由 `figure_style.apply()` 的全局 rcParams 定，
-#     必须与 NMR/XRD 一致，**按图暴露就等于允许三张图长不一样**；
-#   * 图例的**纵向**位置 → 纵向空间是按"图例占顶部 legend_h_mm"算的
-#     （reserved = legend_h + 净空 + 标签块 + 净空）。图例挪到下面，
-#     这套预留就跟实际不符，标签会被放到没有图例的地方。要支持得先改预留模型。
-AXIS_FS = CONFIG["axis_font_pt"]
-TICK_FS = CONFIG["tick_font_pt"]
-NOTE_FS = CONFIG["note_font_pt"]
-LINE_WIDTH = CONFIG["line_width"]
-LEGEND_COLS = CONFIG["legend_cols"]
-LEGEND_ANCHOR_X = CONFIG["legend_anchor_x"]
+#: 当前生效的配置。legacy 导入 = ftir.yaml；native = build_scene 收到的候选配置。
+_CFG: dict = {}
+#: 受保护的科研载荷缓存（load_science 只算一次；warm 布局不再读 CSV）。
+_SCIENCE: dict | None = None
+
+
+def _apply_config(cfg: dict) -> None:
+    """把配置里的排版全局量装进模块。
+
+    **这是布局全局量的唯一初始化路径**：legacy 导入与 native
+    `build_scene(science, config, scope)` 都只走这里，不存在第二处
+    「又把 YAML 读进另一套全局」的分歧约定。
+    """
+    global _CFG, LABEL_FS, LEGEND_FS, EDGE_MARGIN_MM, LABEL_GAP_TOP_MM, CURVE_GAP_MM
+    global SHIFTS_MM, AXIS_FS, TICK_FS, NOTE_FS, LINE_WIDTH, LEGEND_COLS, LEGEND_ANCHOR_X
+    global FTIR_CANVAS
+    _CFG = cfg
+    # 归属标签与图例的字号是**同一份**：测量（_tier_geometry）与实际落字
+    # （draw_bands）分开写死两个数，字号一改就会「量出来三层、画出来两层」。
+    LABEL_FS = cfg["label_font_pt"]
+    LEGEND_FS = cfg["legend_font_pt"]
+    # 贴边框的归属标签（Zn–O 在 400–560，本来就挤在右框上）至少离框这么多；
+    # QA 的“贴边”红线是 1.0 mm，取 1.5 留出余量。
+    EDGE_MARGIN_MM = cfg["label_edge_margin_mm"]
+    # 图例底 → 标签块顶的净空（mm）。标签块本身贴不到图例里，这个值只能小幅调。
+    LABEL_GAP_TOP_MM = cfg["label_gap_top_mm"]
+    # 标签块底（无标注版：图例底）→ 谱线顶的净空（mm）。**这里就是纵向空间的总闸**：
+    # 它每收 1 mm，谱线组就长高 1 mm、整体上移 1 mm。下限 0.5 是因为
+    # draw_bands 要求标签必须落在 ymax + 0.5 mm 之上。
+    CURVE_GAP_MM = cfg["curve_gap_mm"]
+    # 逐曲线显示位移（mm）：`{作用域: {曲线id: 毫米}}`，布局冻结后生效，见 apply_display_shift()
+    SHIFTS_MM = cfg["shifts_mm"]
+    # 图上每一类**可见文字与线**都要有入口：轴标题 / 刻度数字 / 小注 / 谱线线宽 / 图例列数与水平锚点。
+    # 没进 YAML 的两类，理由写在这里，免得下一个人以为是漏了：
+    #   * 坐标框与刻度线的线宽 → 由 `figure_style.apply()` 的全局 rcParams 定，
+    #     必须与 NMR/XRD 一致，**按图暴露就等于允许三张图长不一样**；
+    #   * 图例的**纵向**位置 → 纵向空间是按"图例占顶部 legend_h_mm"算的
+    #     （reserved = legend_h + 净空 + 标签块 + 净空）。图例挪到下面，
+    #     这套预留就跟实际不符，标签会被放到没有图例的地方。要支持得先改预留模型。
+    AXIS_FS = cfg["axis_font_pt"]
+    TICK_FS = cfg["tick_font_pt"]
+    NOTE_FS = cfg["note_font_pt"]
+    LINE_WIDTH = cfg["line_width"]
+    LEGEND_COLS = cfg["legend_cols"]
+    LEGEND_ANCHOR_X = cfg["legend_anchor_x"]
+    FTIR_CANVAS = (cfg["canvas_w_mm"], cfg["canvas_h_mm"])
+
+
+_apply_config(CONFIG)
 # `--strict`：存在**阻断项**时退出码非零，且**不覆盖**已存在的正式输出。
 # 默认不加 = 预览模式：照常发布，但把阻断项打在 stdout 上。
 STRICT = ARGS.strict
@@ -296,8 +335,6 @@ OUT_DIR = PROBE_DIR or ROOT
 #: 并且**永远不会**在存在阻断项时打印「无阻断项 ✓」。
 EXEMPT_PATH = OUT_DIR / "qa_exemptions.json"
 
-
-FTIR_CANVAS = (CONFIG["canvas_w_mm"], CONFIG["canvas_h_mm"])
 
 fs.apply()
 
@@ -352,13 +389,38 @@ def compute_offsets(spectra, gap: float) -> list[float]:
     return offsets
 
 
+def load_science() -> dict:
+    """受保护的科研载荷：读 CSV → 吸光度转透过率 → 逐谱等高归一化。
+
+    只算一次并缓存：warm 的纯布局试算**不再碰磁盘**。不建 Figure、不输出。
+    """
+    global _SCIENCE
+    if _SCIENCE is None:
+        _SCIENCE = {
+            "raw": normalize_spectra(absorbance_to_transmittance(load_spectra(processed=False))),
+            "processed": normalize_spectra(absorbance_to_transmittance(load_spectra(processed=True))),
+        }
+    return _SCIENCE
+
+
+def science_inputs() -> list[str]:
+    """本图**实际读取**的科研输入文件（native worker 据此把源文件算进输入 revision）。
+
+    这些是数据源，不是产物：即使扩展名与产物相同，也不该被「.png/.json 一律当输出」
+    的规则排除。
+    """
+    names = [f"{n}.CSV" for n, _, _, _ in SAMPLES] + [f"{n}-处理后.CSV" for n, _, _, _ in SAMPLES]
+    return [str(DATA_DIR / name) for name in names]
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # 绘制
 # ──────────────────────────────────────────────────────────────────────────────
 def add_legend(fig, ax, scope: str, reg: GidRegistry | None = None):
     """框内右上角；长样品名仅换行，不删文字。"""
+    entries = [(sid, label, color) for _, label, color, sid in reversed(SAMPLES)]
     handles = [Line2D([], [], color=color, lw=1.2, solid_capstyle="round", label=label)
-               for _, label, color, _ in reversed(SAMPLES)]
+               for _, label, color in entries]
     legend = ax.legend(
         handles=handles,
         loc="upper right",
@@ -373,8 +435,12 @@ def add_legend(fig, ax, scope: str, reg: GidRegistry | None = None):
         borderaxespad=0.1,
         borderpad=0.1,
     )
-    for t in legend.get_texts():
+    for (sid, _, _), t in zip(entries, legend.get_texts()):
         t.set_color(fs.c("TEXT"))
+        if reg is not None:
+            # 图例里每行样品名也是**可见文字**，给它稳定身份（否则科学指纹只能按位置编号）。
+            text_gid = f"{FIGURE_ID}.{scope}.legend.text.{sid}"
+            reg.register(t, text_gid, params=["legend_font_pt"])
     leg_gid = f"{FIGURE_ID}.{scope}.legend"
     legend.set_gid(leg_gid)
     legend.set_zorder(6)
@@ -464,7 +530,7 @@ def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg:
     global CURVES
     if scope not in SCOPES:
         raise ValueError(f"未知作用域 {scope!r}；可用：{list(SCOPES)}")
-    reference = CONFIG["layout_reference"][scope]
+    reference = _CFG["layout_reference"][scope]
     offsets = compute_offsets(spectra, gap=reference["gap_data"])
     CURVES = [(np.asarray(x, dtype=float), np.asarray(y + o, dtype=float))
               for (x, y), o in zip(spectra, offsets)]
@@ -518,17 +584,20 @@ def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg:
         ax.yaxis.label.set_gid(y_gid)
         reg.register(ax.yaxis.label, y_gid, params=["axis_font_pt"])
     if processed:
-        ax.set_title("Vendor-processed spectra · qualitative reference only",
-                     loc="left", fontsize=NOTE_FS, weight="bold", pad=4)
+        # `loc="left"` 的可见文字挂在 `ax._left_title` 上；`ax.title` 是空的中心标题。
+        # 注册 `set_title()` 的返回值，才不会出现「gid 绑着一个看不见的空 Text，
+        # 真正画出来的那行字却没人认领」。
+        title = ax.set_title("Vendor-processed spectra · qualitative reference only",
+                             loc="left", fontsize=NOTE_FS, weight="bold", pad=4)
         if reg is not None:
             t_gid = f"{FIGURE_ID}.{scope}.title"
-            ax.title.set_gid(t_gid)
-            reg.register(ax.title, t_gid, params=["note_font_pt"])
+            title.set_gid(t_gid)
+            reg.register(title, t_gid, params=["note_font_pt"])
     ax.grid(False)
     if reference["units_per_mm"] is None:
         reference["axis_bottom_data"] = float(ax.get_ylim()[0])
         reference["units_per_mm"] = float(np.diff(ax.get_ylim())[0] / axes_h_mm)
-        CONFIG["clearance_mm"][scope] = {
+        _CFG["clearance_mm"][scope] = {
             sid: measure_relation("vertical_clearance", lines[i-1][0], line)
             for i, (line, sid) in enumerate(lines) if i}
     else:
@@ -536,13 +605,13 @@ def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg:
         ax.set_ylim(bottom, bottom + reference["units_per_mm"] * axes_h_mm)
     for i in range(1, len(lines)):
         set_relation_target(kind="vertical_clearance", object_a=lines[i-1][0], object_b=lines[i][0],
-                            target_mm=CONFIG["clearance_mm"][scope][lines[i][1]],
+                            target_mm=_CFG["clearance_mm"][scope][lines[i][1]],
                             move=[line for line, _ in lines[i:]])
     for line, sid in lines:
         apply_display_shift(line, dy_mm=SHIFTS_MM[scope][sid])
     group = [line for line, _ in lines] + [t for t in ax.texts if ".band." in (t.get_gid() or "")]
     for art in group:
-        apply_display_shift(art, dy_mm=CONFIG["group_y_mm"][scope])
+        apply_display_shift(art, dy_mm=_CFG["group_y_mm"][scope])
     relations = getattr(fig, "_figpact_relations", [])
     relations.extend({"scope": scope, "kind": "vertical_clearance", "upper": lines[i][1],
                       "value_mm": measure_relation("vertical_clearance", lines[i-1][0], lines[i][0])}
@@ -564,21 +633,27 @@ def add_xlabel(ax, scope: str | None = None, reg: GidRegistry | None = None):
         reg.register(lbl, gid, params=["axis_font_pt"])
 
 
-def build_figure_and_registry(scope_target: str = "annotated"):
-    """构造 Figure 与 GidRegistry，用于绘图或清点。"""
+def _panel_gid(scope: str) -> str:
+    """panel（Axes）的身份：作用域限定，`panel.0` 这类位置编号在多作用域下会撞名。"""
+    return f"{FIGURE_ID}.{scope}.panel"
+
+
+def _build(science: dict, scope_target: str):
+    """按 scope 建图。**legacy 与 native 共用这一份构建路径**（不存在第二套约定）。"""
     reg = GidRegistry()
-    raw = normalize_spectra(absorbance_to_transmittance(load_spectra(processed=False)))
-    proc = normalize_spectra(absorbance_to_transmittance(load_spectra(processed=True)))
+    raw, proc = science["raw"], science["processed"]
 
     if scope_target == "main":
         fig, ax = plt.subplots(figsize=fs.canvas_mm(*FTIR_CANVAS))
         fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
+        ax.set_gid(_panel_gid("main"))
         draw_panel(ax, raw, scope="main", processed=False, annotate=False, reg=reg)
         add_xlabel(ax, scope="main", reg=reg)
         return fig, reg
     elif scope_target == "annotated":
         fig, ax = plt.subplots(figsize=fs.canvas_mm(*FTIR_CANVAS))
         fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
+        ax.set_gid(_panel_gid("annotated"))
         draw_panel(ax, raw, scope="annotated", processed=False, annotate=True, reg=reg)
         add_xlabel(ax, scope="annotated", reg=reg)
         return fig, reg
@@ -586,12 +661,294 @@ def build_figure_and_registry(scope_target: str = "annotated"):
         fig, axes = plt.subplots(2, 1, figsize=fs.canvas("SQ2"), sharex=True,
                                  gridspec_kw={"hspace": 0.20})
         fig.subplots_adjust(left=0.135, right=0.985, top=0.975, bottom=0.075)
+        axes[0].set_gid(_panel_gid("compare_raw"))
+        axes[1].set_gid(_panel_gid("compare_processed"))
         draw_panel(axes[0], raw, scope="compare_raw", processed=False, annotate=False, reg=reg)
         draw_panel(axes[1], proc, scope="compare_processed", processed=True, annotate=False, reg=reg)
         add_xlabel(axes[1], scope="compare_processed", reg=reg)
         return fig, reg
     else:
         raise ValueError(f"未知 scope_target: {scope_target}")
+
+
+def build_figure_and_registry(scope_target: str = "annotated"):
+    """legacy 入口：用模块基线配置建图（CLI / GUI / 清点继续走这里）。"""
+    _apply_config(CONFIG)
+    return _build(load_science(), scope_target)
+
+
+def build_scene(science: dict, config: dict, scope: str):
+    """native 入口：候选配置 + 已缓存科研载荷 → (Figure, GidRegistry)。
+
+    候选配置先过 `prepare_config`（与 legacy 同一份标准化：缺 shifts_mm 补 0），
+    全部排版全局量再由 `_apply_config` 一次装好，因此同一 (science, config, scope)
+    永远得到同一张图；纯布局试算不重读 CSV、不重算谱线。**传入的 config 不被修改**。
+    """
+    _apply_config(prepare_config(config))
+    return _build(science, scope)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# native 契约：给 agent / runtime 的显式声明（不改 legacy CLI 行为）
+# ──────────────────────────────────────────────────────────────────────────────
+#: 每个 scope 的产物基名。compare_raw / compare_processed 是**两个独立作用域共享
+#: 同一张两格对照图**——作用域是布局/校验的归属范围，不是文件名。
+_OUTPUT_BASE = {
+    "main": "Fig2_FTIR_transmittance_stacked",
+    "annotated": "Fig2_FTIR_transmittance_stacked_annotated",
+    "compare_raw": "Fig2_FTIR_transmittance_raw_processed",
+    "compare_processed": "Fig2_FTIR_transmittance_raw_processed",
+}
+_EXPORT_FORMATS = ("png", "pdf", "svg", "tiff")
+
+
+#: 基线场景缓存：契约里的节点、类型、所属 panel 全部取自**真正建出来的一张图**，
+#: 不另抄一份「应该有哪些 gid」的清单——那种清单必然与绘图代码漂移。
+_BASELINE_SCENES: dict[str, tuple] = {}
+
+
+def _baseline_scene(scope: str):
+    """该 scope 的基线 (Figure, GidRegistry)，按 scope 缓存、只建一次。"""
+    if scope not in _BASELINE_SCENES:
+        _apply_config(CONFIG)
+        _BASELINE_SCENES[scope] = _build(load_science(), scope)
+    return _BASELINE_SCENES[scope]
+
+
+def _science_policy(gid: str) -> str:
+    """FTIR 没有纯布局图元：谱线、归属文字、轴文字、图例全部参与科学指纹。
+
+    `layout_contract` 与 `science_manifest` 共用这一个判据，避免两处各写一套。
+    """
+    return "LOCKED_SCIENCE"
+
+
+def _panel_id(ax, index: int) -> str:
+    """panel 身份：builder 设的 Axes gid；没有时才退回引擎的位置编号约定。"""
+    return ax.get_gid() or f"panel.{index}"
+
+
+def _scene_roles(fig, reg) -> tuple[dict[str, list[str]], dict[int, str]]:
+    """按语义角色分组注册图元，并给出「图元 → 所属 panel」的映射。
+
+    角色与归属都按 **artist 身份**判定，不靠切 gid 字符串：轴标题/轴标签的
+    `.axes` 是 None、`loc="left"` 的标题挂在 `_left_title` 上，按 `.axes` 猜会猜错。
+    """
+    roles = {"lines": [], "legends": [], "legend_texts": [], "axis_texts": [], "titles": [],
+             "band_labels": []}
+    owner: dict[int, str] = {}
+    role: dict[int, str] = {}
+    for i, ax in enumerate(fig.axes):
+        pid = _panel_id(ax, i)
+        for txt, name in ((ax.xaxis.label, "axis_texts"), (ax.yaxis.label, "axis_texts"),
+                          (ax.title, "titles"), (ax._left_title, "titles"),
+                          (ax._right_title, "titles")):
+            if txt is None:
+                continue
+            owner[id(txt)] = pid
+            role[id(txt)] = name
+        legend = ax.get_legend()
+        if legend is not None:
+            owner[id(legend)] = pid
+            for txt in legend.get_texts():
+                owner[id(txt)] = pid
+                role[id(txt)] = "legend_texts"
+    for gid, art in reg.all().items():
+        kind = type(art).__name__
+        if kind == "Line2D":
+            roles["lines"].append(gid)
+        elif kind == "Legend":
+            roles["legends"].append(gid)
+        elif kind == "Text":
+            roles[role.get(id(art), "band_labels")].append(gid)
+    return roles, owner
+
+
+def _decl_param(scope, key, path, unit, mutability, objects, *, operation=None, axis=None,
+                bounds=None, expected=None) -> dict:
+    """契约参数记录。`bounds` = (min, max)，取自 SCALARS / 关系上限，不另抄一份数字。"""
+    rec = {"key": key, "path": list(path), "unit": unit, "mutability": mutability,
+           "scopes": [scope], "objects": list(objects), "scale": 1.0}
+    if operation is not None:
+        rec["operation"] = operation
+    if axis is not None:
+        rec["axis"] = axis
+    if bounds is not None:
+        rec["min"], rec["max"] = bounds
+    if expected is not None:
+        rec["expected"] = expected
+    return rec
+
+
+def _editable(params: list, scope, key, path, unit, objects, **kw) -> None:
+    """只登记**在该 scope 真的有受影响图元**的可编辑参数；否则不声明（= 不支持）。"""
+    if objects:
+        params.append(_decl_param(scope, key, path, unit, "EDITABLE", objects, **kw))
+
+
+def _panel_map(fig, reg, owner: dict[int, str]) -> dict[str, str]:
+    """`{gid: panel_id}`：轴标签/图例/标题走 owner 规则，其余按 artist 的 Axes 归属。"""
+    result = {}
+    for gid, art in reg.all().items():
+        if id(art) in owner:
+            result[gid] = owner[id(art)]
+        else:
+            ax = getattr(art, "axes", None)
+            result[gid] = _panel_id(ax, fig.axes.index(ax)) if ax in fig.axes else "figure"
+    return result
+
+
+def _panel_scopes(scope: str, panel_of: dict[str, str]) -> dict[str, str]:
+    """`{panel_id: 该 panel 所属作用域}`：从配置里逐作用域的曲线 gid 反查，不切 gid 字符串。"""
+    registered = _baseline_scene(scope)[1].all()
+    result: dict[str, str] = {}
+    for s in SCOPES:
+        for sid in CONFIG["shifts_mm"][s]:
+            gid = f"{FIGURE_ID}.{s}.curve.{sid}"
+            if gid in registered:
+                result.setdefault(panel_of[gid], s)
+    return result
+
+
+def layout_contract(scope: str) -> dict:
+    """该 scope 的显式布局契约：精确 YAML 路径、语义节点/分组、受影响集合、产物名。
+
+    节点 / 类型 / 所属 panel 取自基线场景（`_baseline_scene`）；全局样式参数声明为
+    **该 scene 内全部实际受影响的节点**，逐作用域参数只声明本作用域 panel 的节点——
+    对照版两格同图，但改 `compare_raw` 的路径不会动 `compare_processed`。
+    """
+    if scope not in SCOPES:
+        raise ValueError(f"未知作用域 {scope!r}；可用：{list(SCOPES)}")
+    fig, reg = _baseline_scene(scope)
+    registered = reg.all()
+    gids = sorted(registered)
+    roles, owner = _scene_roles(fig, reg)
+    panel_of = _panel_map(fig, reg, owner)
+    # 本作用域的曲线 id 取自**配置**（load_config 已归一化成 {scope: {sid: 0.0}}），
+    # 再按注册表过滤——不猜字符串，也不会声明不存在的 gid。
+    curve_ids = list(CONFIG["shifts_mm"][scope])
+    own = [(sid, f"{FIGURE_ID}.{scope}.curve.{sid}") for sid in curve_ids
+           if f"{FIGURE_ID}.{scope}.curve.{sid}" in registered]
+    own_panel = panel_of.get(own[0][1]) if own else _panel_gid(scope)
+    own_bands = sorted(g for g in roles["band_labels"] if panel_of[g] == own_panel)
+
+    params: list[dict] = []
+    for key in ("canvas_w_mm", "canvas_h_mm"):
+        _editable(params, scope, key, [key], "mm", gids, operation="resize",
+                  bounds=SCALARS[key][1:], expected={"kind": "resize", "objects": gids})
+    legend_objects = roles["legends"] + roles["legend_texts"]
+    for key, unit in (("legend_font_pt", "pt"), ("legend_cols", "col"),
+                      ("legend_anchor_x", "ratio")):
+        _editable(params, scope, key, [key], unit, legend_objects, operation="rebuild",
+                  bounds=SCALARS[key][1:], expected={"kind": "style", "objects": legend_objects})
+    for key in ("axis_font_pt", "line_width", "label_font_pt", "note_font_pt"):
+        objects = {"axis_font_pt": roles["axis_texts"], "line_width": roles["lines"],
+                   "label_font_pt": roles["band_labels"],
+                   "note_font_pt": roles["titles"]}[key]
+        _editable(params, scope, key, [key], "pt", objects, operation="rebuild",
+                  bounds=SCALARS[key][1:], expected={"kind": "style", "objects": objects})
+    for key in ("label_edge_margin_mm", "label_gap_top_mm", "curve_gap_mm"):
+        _editable(params, scope, key, [key], "mm", roles["band_labels"], operation="rebuild",
+                  bounds=SCALARS[key][1:],
+                  expected={"kind": "style", "objects": roles["band_labels"]})
+    # 逐作用域的毫米操作：路径精确到曲线 id，受影响集合是**实际会动的那些曲线**。
+    relations: list[dict] = []
+    for i in range(1, len(own)):
+        sid = own[i][0]
+        moved = [gid for _, gid in own[i:]]
+        _editable(params, scope, f"clearance_mm.{scope}.{sid}", ["clearance_mm", scope, sid],
+                  "mm", moved, operation="translate", axis="y", bounds=(0.0, 100.0),
+                  expected={"kind": "translate", "objects": moved, "axis": "y",
+                            "preserve": [f"{scope}.clearance.{own[k][0]}" for k in range(1, i)]})
+        relations.append({
+            "id": f"{scope}.clearance.{sid}",
+            "kind": "gap",
+            "objects": [own[i - 1][1], own[i][1]],
+            "axis": "y",
+            "method": "envelope_edge",
+            "controlled_by": [["clearance_mm", scope, sid]],
+            "move": moved,
+        })
+    group_objects = [gid for _, gid in own] + own_bands
+    _editable(params, scope, f"group_y_mm.{scope}", ["group_y_mm", scope], "mm",
+              group_objects, operation="translate", axis="y", bounds=(-100.0, 100.0),
+              expected={"kind": "translate", "objects": group_objects, "axis": "y",
+                        "preserve": [r["id"] for r in relations]})
+    for sid, gid in own:
+        _editable(params, scope, f"shifts_mm.{scope}.{sid}", ["shifts_mm", scope, sid], "mm",
+                  [gid], operation="translate", axis="y",
+                  bounds=(-SHIFT_LIMIT_MM, SHIFT_LIMIT_MM),
+                  expected={"kind": "translate", "objects": [gid], "axis": "y"})
+    # 只读重建字段：声明出来是为了它们**不被当成可编辑**（缺声明 = UNCLASSIFIED 失败关闭）。
+    params.append(_decl_param(scope, "schema_version", ["schema_version"], "int", "FIXED_STYLE", []))
+    params.append(_decl_param(scope, f"layout_reference.{scope}", ["layout_reference", scope],
+                              "record", "DERIVED", []))
+
+    editable = {gid for p in params if p["mutability"] == "EDITABLE" for gid in p["objects"]}
+    nodes = {gid: {"type": type(registered[gid]).__name__, "parent": panel_of[gid],
+                   "editable": gid in editable, "science_policy": _science_policy(gid)}
+             for gid in gids}
+    panel_scope = _panel_scopes(scope, panel_of)
+    root = f"{FIGURE_ID}.{scope}"
+    groups = [{"id": root, "parent": None, "members": gids}]
+    for pid in sorted(set(panel_of.values())):
+        groups.append({"id": pid, "parent": root,
+                       "members": sorted(g for g in gids if panel_of[g] == pid)})
+    for pid, ps in sorted(panel_scope.items()):
+        groups.append({"id": f"{FIGURE_ID}.{ps}.group.curves", "parent": pid,
+                       "members": [f"{FIGURE_ID}.{ps}.curve.{sid}" for sid in CONFIG["shifts_mm"][ps]
+                                   if f"{FIGURE_ID}.{ps}.curve.{sid}" in registered]})
+    for pid in sorted({panel_of[g] for g in roles["band_labels"]}):
+        groups.append({"id": f"{FIGURE_ID}.{panel_scope.get(pid, pid)}.group.bands",
+                       "parent": pid,
+                       "members": sorted(g for g in roles["band_labels"] if panel_of[g] == pid)})
+    return {"parameters": params, "nodes": nodes, "groups": groups, "relations": relations,
+            "outputs": [f"{_OUTPUT_BASE[scope]}.{ext}" for ext in _EXPORT_FORMATS]}
+
+
+def science_manifest(science: dict) -> dict:
+    """JSONable 的科研来源 / 处理 / 受保护锚点声明（native runtime 与 capture_science 用）。
+
+    `nodes` 只列**点名豁免**的装饰几何，且必须写 `type: "guide"`：引擎对原始 Line2D 的
+    x/y 一律保护，科研谱线、图像像素、集合段**永远**不能靠 `LAYOUT` 豁免。
+    FTIR 这张图没有任何引导线/基线这类装饰线（谱线、归属文字、轴文字、图例全部参与
+    科学指纹），所以这里是空表；未列出的 gid 默认 LOCKED_SCIENCE，与 `_science_policy` 一致。
+    """
+    troughs = {}
+    for (_, _, _, sid), (x, y) in zip(SAMPLES, science["raw"]):
+        troughs[sid] = {"deepest_trough_cm1": float(x[int(np.argmin(y))]),
+                        "display_scale": {"baseline": 100.0, "trough_depth": 55.0}}
+    # 定性 y 轴的**冻结视口**：原点与「数据单位/mm」都来自只读的 layout_reference，
+    # 因此画布变高只加余量、不改信号物理标尺。x 窗口不在其中（它锁死在 4000→400 cm⁻¹）。
+    viewports = {}
+    for s in SCOPES:
+        fig_s, reg_s = _baseline_scene(s)
+        _roles_s, owner_s = _scene_roles(fig_s, reg_s)
+        for panel_id, panel_scope in _panel_scopes(s, _panel_map(fig_s, reg_s, owner_s)).items():
+            ref = CONFIG["layout_reference"][panel_scope]
+            viewports[panel_id] = {"axis": "y", "origin": ref["axis_bottom_data"],
+                                   "units_per_mm": ref["units_per_mm"]}
+    return {
+        "nodes": {},
+        "layout_viewports": viewports,
+        "science": {
+            "figure_id": FIGURE_ID,
+            "source": {
+                "instrument_output": "absorbance CSV",
+                "files": [f"{n}.CSV" for n, _, _, _ in SAMPLES],
+                "processed_files": [f"{n}-处理后.CSV" for n, _, _, _ in SAMPLES],
+                "wavenumber_window_cm1": [400, 4000],
+            },
+            "processing": ["T(%) = 100 × 10^(−A)",
+                           "per-spectrum equal-depth normalization: baseline 100, trough 100−55"],
+            "scale_bars": [],
+            "protected": {
+                "display_window_cm1": [4000, 400],
+                "assignment_windows_cm1": [[lo, hi, text] for lo, hi, text, _ in BANDS],
+                "troughs": troughs,
+            },
+        },
+    }
 
 
 def make_figure():
@@ -631,15 +988,10 @@ def make_figure():
     print(f"[配置] {CONFIG_PATH.name}: 画布 {FTIR_CANVAS[0]}×{FTIR_CANVAS[1]} mm · "
           f"标签 {LABEL_FS} pt · 图例 {LEGEND_FS} pt · 间距见 clearance_mm"
           + (f" · 位移 {active}" if active else ""))
-    raw = normalize_spectra(absorbance_to_transmittance(load_spectra(processed=False)))
-    proc = normalize_spectra(absorbance_to_transmittance(load_spectra(processed=True)))
     blockers: list[str] = []
 
     # ① 主图（干净版）
-    fig, ax = plt.subplots(figsize=fs.canvas_mm(*FTIR_CANVAS))
-    fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
-    draw_panel(ax, raw, scope="main", processed=False, annotate=False)
-    add_xlabel(ax, scope="main")
+    fig, _reg = build_figure_and_registry("main")
     fs.export(fig, STAGING / "Fig2_FTIR_transmittance_stacked")
     fs.qa_report(fig, "FTIR 主图")
     report_shift_bounds(fig, "FTIR 主图")
@@ -647,10 +999,7 @@ def make_figure():
     plt.close(fig)
 
     # ② 归属标注版
-    fig, ax = plt.subplots(figsize=fs.canvas_mm(*FTIR_CANVAS))
-    fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
-    draw_panel(ax, raw, scope="annotated", processed=False, annotate=True)
-    add_xlabel(ax, scope="annotated")
+    fig, _reg = build_figure_and_registry("annotated")
     fs.export(fig, STAGING / "Fig2_FTIR_transmittance_stacked_annotated")
     fs.qa_report(fig, "FTIR 归属标注版")
     report_shift_bounds(fig, "FTIR 归属标注版")
@@ -658,12 +1007,7 @@ def make_figure():
     plt.close(fig)
 
     # ③ 原始 / 供应商处理 对照版：SQ2（上下两格，SI 用）
-    fig, axes = plt.subplots(2, 1, figsize=fs.canvas("SQ2"), sharex=True,
-                             gridspec_kw={"hspace": 0.20})
-    fig.subplots_adjust(left=0.135, right=0.985, top=0.975, bottom=0.075)
-    draw_panel(axes[0], raw, scope="compare_raw", processed=False, annotate=False)
-    draw_panel(axes[1], proc, scope="compare_processed", processed=True, annotate=False)
-    add_xlabel(axes[1], scope="compare_processed")
+    fig, _reg = build_figure_and_registry("compare_raw")
     fs.export(fig, STAGING / "Fig2_FTIR_transmittance_raw_processed")
     fs.qa_report(fig, "FTIR 原始/处理对照")
     report_shift_bounds(fig, "FTIR 原始/处理对照")
