@@ -30,5 +30,19 @@ figpact inventory --script <py> [--config <yaml>] [--check-effect]
 figpact inspect <gid> --script <py> [--config <yaml>]
 ```
 
+## 本地调参预览
+在仓库根目录运行 `python -X utf8 tools/gui/server.py --port 8731`，打开
+`http://127.0.0.1:8731`。选择 FTIR 或 NMR，调整控件，点击“所见即所得 (Try)”
+查看新预览、毫米位移与 QA 差异。服务仅监听本机，同端口本机来源可访问，
+外站 Origin 请求在执行绘图前返回 403。
+
+试算使用临时发布目录，不修改正式输出；即使 QA 不通过，仍可查看候选预览。
+界面目前不自动保存配置或导出正式图：点击“复制 Patch”，将对应改动合并到
+该图 YAML，再运行 `python -m figpact render --script <py> --config <yaml> --strict`。
+不要把完整 YAML 替换成仅包含改动的 Patch。QA 阻断时不发布正式图。
+
+inventory 返回测量时的 `figure_dpi` 与 `figure_size_mm`；CLI 与 GUI 的 bbox 位移
+按该 renderer 的 DPI 换算，不能使用 PNG/TIFF 导出的 DPI。
+
 ## 数据文件说明
 `examples/*/` 数据目录下的 PDF 与 PNG 文件（例如 `examples/ftir/2084_1788253487778_26083154776/26083154776/*.pdf` 为科学指南针测试机构导出的对照报告，`examples/nmr/核磁原始数据/*/pdata/1/thumb.png` 为 Bruker TopSpin 仪器采集生成的原始缩略图）均为仪器原始产物与输入数据，不是 render 导出的渲染产物。render 产生的所有构建产物均通过 `.gitignore` 排除，不进入版本跟踪。

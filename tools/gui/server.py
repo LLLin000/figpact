@@ -32,7 +32,7 @@ from figpact.cli import (
     _run_script_strict,
 )
 from figpact.params import export_params_catalog
-from figpact.qa import signature
+from figpact.qa import diagnose, diagnostic_key
 
 
 def _render_script_png_base64(script_path: Path, config_path: Path) -> Optional[str]:
@@ -216,8 +216,8 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
                 code_before, qa_before = _run_script_strict(script, base_yaml_path)
                 code_after, qa_after = _run_script_strict(script, patched_yaml)
 
-                sig_before = {signature(q): q for q in qa_before}
-                sig_after = {signature(q): q for q in qa_after}
+                sig_before = {diagnostic_key(diagnose(q)): q for q in qa_before}
+                sig_after = {diagnostic_key(diagnose(q)): q for q in qa_after}
 
                 added_sigs = sorted(set(sig_after.keys()) - set(sig_before.keys()))
                 removed_sigs = sorted(set(sig_before.keys()) - set(sig_after.keys()))
