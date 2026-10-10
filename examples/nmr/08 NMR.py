@@ -128,6 +128,8 @@ def _cli(argv: list[str]) -> argparse.Namespace:
     ap.add_argument("--reason", default="", help="人工豁免的理由（写进 qa_exemptions.json）")
     ap.add_argument("--inventory", action="store_true",
                     help="打印当前图表可见图元清单 (JSON 格式)，供 figpact inventory 消费")
+    ap.add_argument("--check-effect", action="store_true",
+                    help="在清点中执行参数生效扰动检查")
     ap.add_argument("--inspect", default=None,
                     help="检查指定 gid 的图元信息")
     return ap.parse_args(argv)
@@ -220,21 +222,62 @@ def load_config_nmr(path: pathlib.Path) -> dict:
 CONFIG = load_config_nmr(CONFIG_PATH)
 
 def list_params() -> None:
-    """人类手调用的清单：每个参数当前值 + 允许范围，以及所有可位移 gid。"""
-    print(f"配置文件：{CONFIG_PATH}")
-    print(f"{'参数':<26}{'当前值':>10}   允许范围")
-    for key, (typ, lo, hi) in SCALARS.items():
-        print(f"  {key:<24}{CONFIG[key]!s:>10}   [{lo}, {hi}]")
-    for key in BOOL_KEYS:
-        print(f"  {key:<24}{str(CONFIG[key]):>10}   true / false")
-    print("\n可位移 gid —— shifts_mm（整层：谱线+基线+//+该层标注+引线）")
-    for sid in SAMPLE_IDS:
-        print(f"  {sid:<12} 例：shifts_mm: {{main: {{{sid}: 0.0}}}}")
-    print("\n可位移 gid —— peak_label_shifts_mm（单个标注，[dx 向右, dy 向上] mm）")
+    """人类与模型调参专用的结构化清单：按可见对象分组，含单位、范围与调大效果。"""
+    print(f"配置文件：{CONFIG_PATH}\n")
+    groups = [
+        ("画布 (Canvas)", [
+            ("canvas_w_mm", "画布物理宽度", "mm", SCALARS["canvas_w_mm"][1:], "面板物理宽度增加，字号保持不变"),
+            ("canvas_h_mm", "画布物理高度", "mm", SCALARS["canvas_h_mm"][1:], "面板物理高度增加，垂直排版空间更充裕"),
+        ]),
+        ("坐标轴与刻度 (Axes & Ticks)", [
+            ("axis_font_pt", "坐标轴标题字号", "pt", SCALARS["axis_font_pt"][1:], "轴标题变大；过大可能与刻度数字挤在一起"),
+            ("tick_font_pt", "刻度数字字号", "pt", SCALARS["tick_font_pt"][1:], "刻度数字变大，刻度行高变大"),
+            ("note_font_pt", "溶剂截顶标记字号", "pt", SCALARS["note_font_pt"][1:], "// 溶剂截顶标记变大"),
+        ]),
+        ("图例 (Legend)", [
+            ("legend_font_pt", "图例字号", "pt", SCALARS["legend_font_pt"][1:], "图例框变高变大（NMR顶部空间为常数，不自动压缩谱线）"),
+            ("legend_cols", "图例列数", "列", SCALARS["legend_cols"][1:], "列数变多则图例变宽变扁，横向更宽纵向更扁"),
+            ("legend_anchor_x", "图例水平锚点", "比率", SCALARS["legend_anchor_x"][1:], "图例向右靠（1.0最右，太小向左靠会压住y轴标题）"),
+        ]),
+        ("系列/谱线 (Curves/Series)", [
+            ("line_width", "谱线线宽", "pt", SCALARS["line_width"][1:], "所有谱线变粗，仅影响观感不改布局"),
+            ("layer_gap", "谱层基线间距", "a.u.", SCALARS["layer_gap"][1:], "四层谱线基线垂直间距拉开，防层间粘连"),
+            ("top_headroom", "顶部预留空间", "a.u.", SCALARS["top_headroom"][1:], "顶部留白增加，缓解图例与顶层谱线/标注拥挤"),
+        ]),
+        ("标注 (Annotations)", [
+            ("peak_font_pt", "峰标注字号", "pt", SCALARS["peak_font_pt"][1:], "基团诊断峰文字变大；调小可缓解近峰文字重叠"),
+            ("label_lift", "标注离峰顶净空", "a.u.", SCALARS["label_lift"][1:], "峰标注整体往上抬高，拉长引线并远离峰尖"),
+            ("label_min_gap_mm", "标注最小水平净空", "mm", SCALARS["label_min_gap_mm"][1:], "相邻标注横向更稀疏避让，防文字交叠粘连"),
+            ("label_max_dx_mm", "标注避让最大横移", "mm", SCALARS["label_max_dx_mm"][1:], "允许标注向两侧平移寻找避让空位的最大窗口"),
+            ("label_lanes", "标注避让最大层数", "层", SCALARS["label_lanes"][1:], "允许使用的阶梯避让层数（1-5），调多纵向分层更充裕"),
+        ]),
+    ]
+
+    for grp_name, params in groups:
+        print(f"=== {grp_name} ===")
+        print(f"  {'key':<24}{'中文名':<16}{'当前值':>8} {'单位':<5} {'允许范围':<14} 调大会怎样")
+        for key, cname, unit, (lo, hi), desc in params:
+            val_str = str(CONFIG[key])
+            rng_str = f"[{lo}, {hi}]"
+            print(f"  {key:<24}{cname:<16}{val_str:>8} {unit:<5} {rng_str:<14} {desc}")
+        print()
+
+    print("=== 开关 (Booleans) ===")
+    print(f"  {'key':<24}{'中文名':<16}{'当前值':>8} 切换效果")
+    print(f"  {'show_ppm':<24}{'标注显示ppm后缀':<16}{str(CONFIG['show_ppm']):>8} 设为 true 标注带 ppm 数值（更宽），false 只显示基团名（窄约 40%）\n")
+
+    print("=== 位移 (Shifts) ===")
+    print("1. 整层位移 key: shifts_mm.main.<样品id> (单位 mm，范围 [-10.0, 10.0]，正数向上)")
+    print("   调大会怎样: 该样品整组图元（谱线+基线+//+标注+引线）纯显示整体上移，不动科研数据")
+    print("   可用样品 id: " + "、".join(SAMPLE_IDS))
+    print("   使用示例: shifts_mm: { main: { vancho: 1.0 } }")
+    print("2. 逐标注微调 key: peak_label_shifts_mm.main.<标注gid> (单位 [dx, dy] mm，范围 ±10.0，dx向右，dy向上)")
+    print("   调大会怎样: 仅该峰标注独立微移（dx 向右，dy 向上），引线自动跟随重新连接")
+    print("   可用标注 gid:")
     for _ppm, _idx, _grp, *_ in PEAK_LABELS_TEMPLATE:
         _sid = SAMPLES_CONFIG[_idx][7]
-        print(f"  peak.{_sid}.{_gid_tag(_ppm):<12} {_grp}")
-    print("\n把上面任一行取消注释填进 yaml 即可；位移后的位置照样过碰撞检查。")
+        print(f"     peak.{_sid}.{_gid_tag(_ppm):<12} ({_grp})")
+    print("   使用示例: peak_label_shifts_mm: { main: { peak.vancho.3p91: [0.5, 1.0] } }")
 
 
 
@@ -886,7 +929,7 @@ for _sid, _group in artists_by_sample.items():
             apply_display_shift(_artist, _dy)
 
 if ARGS.inventory:
-    inv = fp_inventory(fig, reg)
+    inv = fp_inventory(fig, reg, check_effect=ARGS.check_effect)
     print(json.dumps(inv, ensure_ascii=False, indent=2))
     plt.close(fig)
     sys.exit(0)

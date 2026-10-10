@@ -130,6 +130,8 @@ def _cli(argv: list[str]) -> argparse.Namespace:
     ap.add_argument("--reason", default="", help="人工豁免的理由（写进 qa_exemptions.json）")
     ap.add_argument("--inventory", action="store_true",
                     help="打印当前图表可见图元清单 (JSON 格式)，供 figpact inventory 消费")
+    ap.add_argument("--check-effect", action="store_true",
+                    help="在清点中执行参数生效扰动检查")
     ap.add_argument("--inspect", default=None,
                     help="检查指定 gid 的图元信息")
     return ap.parse_args(argv)
@@ -197,15 +199,53 @@ def load_config_ftir(path: Path) -> dict:
 CONFIG = load_config_ftir(CONFIG_PATH)
 
 def list_params() -> None:
-    """人类手调用的清单：每个参数当前值 + 允许范围，以及所有可位移 gid。"""
-    print(f"配置文件：{CONFIG_PATH}")
-    print(f"{'参数':<26}{'当前值':>10}   允许范围")
-    for key, (typ, lo, hi) in SCALARS.items():
-        print(f"  {key:<24}{CONFIG[key]!s:>10}   [{lo}, {hi}]")
-    print("\n可位移 gid —— shifts_mm.<作用域>.<曲线>（只动那一条，不动数据）")
+    """人类与模型调参专用的结构化清单：按可见对象分组，含单位、范围与调大效果。"""
+    print(f"配置文件：{CONFIG_PATH}\n")
+    groups = [
+        ("画布 (Canvas)", [
+            ("canvas_w_mm", "画布物理宽度", "mm", SCALARS["canvas_w_mm"][1:], "面板物理宽度增加，字号保持不变"),
+            ("canvas_h_mm", "画布物理高度", "mm", SCALARS["canvas_h_mm"][1:], "面板物理高度增加，垂直排版空间更充裕"),
+        ]),
+        ("坐标轴与刻度 (Axes & Ticks)", [
+            ("axis_font_pt", "坐标轴标题字号", "pt", SCALARS["axis_font_pt"][1:], "轴标题变大；过大可能与刻度数字挤在一起"),
+            ("tick_font_pt", "刻度数字字号", "pt", SCALARS["tick_font_pt"][1:], "刻度文字变大，行高变大"),
+            ("note_font_pt", "对照版小注字号", "pt", SCALARS["note_font_pt"][1:], "raw/processed 对照版左上角说明文字变大"),
+        ]),
+        ("图例 (Legend)", [
+            ("legend_font_pt", "图例字号", "pt", SCALARS["legend_font_pt"][1:], "图例框变高，顶部预留变多，谱线整体下移"),
+            ("legend_cols", "图例列数", "列", SCALARS["legend_cols"][1:], "列数变多则图例变宽变扁，纵向占用高度减小"),
+            ("legend_anchor_x", "图例水平锚点", "比率", SCALARS["legend_anchor_x"][1:], "图例向右靠（1.0最右，太小向左靠会压住y轴标题）"),
+        ]),
+        ("系列/谱线 (Curves/Series)", [
+            ("line_width", "谱线线宽", "pt", SCALARS["line_width"][1:], "所有谱线变粗，仅影响观感不改布局"),
+            ("stack_gap", "主图谱线间距", "a.u.", SCALARS["stack_gap"][1:], "相邻谱线白缝变大，但曲线幅度相对压缩（跷跷板）"),
+            ("stack_gap_annotated", "标注版谱线间距", "a.u.", SCALARS["stack_gap_annotated"][1:], "标注版相邻谱线间距变大，纵向舒展"),
+            ("stack_lift_annotated_mm", "标注版整体上移", "mm", SCALARS["stack_lift_annotated_mm"][1:], "标注版曲线和标签一起上移，底部留白变大"),
+        ]),
+        ("标注 (Annotations)", [
+            ("label_font_pt", "官能团标签字号", "pt", SCALARS["label_font_pt"][1:], "标签变大，标签块总高度可能增加并压缩曲线空间"),
+            ("curve_gap_mm", "曲线与标签净空(总闸)", "mm", SCALARS["curve_gap_mm"][1:], "标签块底与谱线顶拉开；调小则谱线组长高并整体上移"),
+            ("label_gap_top_mm", "图例与标签净空", "mm", SCALARS["label_gap_top_mm"][1:], "图例底与标签块顶拉开，标签块整体下移"),
+            ("label_edge_margin_mm", "标签距左右框边距", "mm", SCALARS["label_edge_margin_mm"][1:], "Zn-O 等贴边标签向内缩进避开左右边框"),
+        ]),
+    ]
+
+    for grp_name, params in groups:
+        print(f"=== {grp_name} ===")
+        print(f"  {'key':<24}{'中文名':<16}{'当前值':>8} {'单位':<5} {'允许范围':<14} 调大会怎样")
+        for key, cname, unit, (lo, hi), desc in params:
+            val_str = str(CONFIG[key])
+            rng_str = f"[{lo}, {hi}]"
+            print(f"  {key:<24}{cname:<16}{val_str:>8} {unit:<5} {rng_str:<14} {desc}")
+        print()
+
+    print("=== 位移 (Shifts) ===")
+    print("  可位移参数 key: shifts_mm.<作用域>.<曲线id> (单位 mm，范围 [-10.0, 10.0]，正数向上)")
+    print("  调大会怎样: 仅该条曲线纯显示向上平移指定毫米，不动科研数据与其他曲线")
+    print("  可用作用域与曲线 id:")
     for scope in SCOPES:
-        print(f"  [{scope}] " + "、".join(f"{sid}" for sid in CURVE_IDS))
-    print("\n把上面任一条填进 yaml 即可；位移后的位置照样过碰撞检查。")
+        print(f"    [{scope}] " + "、".join(f"{sid}" for sid in CURVE_IDS))
+    print("  使用方式: 在 yaml 中配置 shifts_mm: { <scope>: { <sid>: 1.0 } }")
 
 
 if ARGS.list_params:
@@ -546,7 +586,7 @@ def make_figure():
     # 如果是 --inventory，构建代表性主图 (annotated 版)，清点并以 JSON 输出
     if ARGS.inventory:
         fig, reg = build_figure_and_registry("annotated")
-        inv = fp_inventory(fig, reg)
+        inv = fp_inventory(fig, reg, check_effect=ARGS.check_effect)
         print(json.dumps(inv, ensure_ascii=False, indent=2))
         plt.close(fig)
         return
