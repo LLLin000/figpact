@@ -29,3 +29,6 @@ figpact inventory --script <py> [--config <yaml>] [--check-effect]
 # 检查特定 gid 图元的几何与绑定详情
 figpact inspect <gid> --script <py> [--config <yaml>]
 ```
+
+## 数据文件说明
+`examples/*/` 数据目录下的 PDF 与 PNG 文件（例如 `examples/ftir/2084_1788253487778_26083154776/26083154776/*.pdf` 为科学指南针测试机构导出的对照报告，`examples/nmr/核磁原始数据/*/pdata/1/thumb.png` 为 Bruker TopSpin 仪器采集生成的原始缩略图）均为仪器原始产物与输入数据，不是 render 导出的渲染产物。render 产生的所有构建产物均通过 `.gitignore` 排除，不进入版本跟踪。
