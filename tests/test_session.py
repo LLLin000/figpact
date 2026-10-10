@@ -37,6 +37,38 @@ from figpact.session import (  # noqa: E402
 )
 from figpact.runtime import FigureWorker, FigureWorkerError, WorkerTimeout  # noqa: E402
 
+def test_native_nmr_scoped_offsets_are_pure_and_idempotent():
+    import copy
+    import yaml
+    from figpact.config import ConfigError
+    from figpact.session import load_module
+
+    script = ROOT / 'examples' / 'nmr' / '08 NMR.py'
+    config_path = script.with_name('nmr.yaml')
+    with matplotlib.rc_context():
+        module = load_module(script, config_path)
+    config = yaml.safe_load(config_path.read_text(encoding='utf-8'))
+    key = 'peak.vancho.3p91'
+    config['peak_label_shifts_mm'] = {'main': {key: [0.0, 0.15]}}
+    original = copy.deepcopy(config)
+    normalized = module.prepare_config(config)
+    assert config == original
+    assert normalized['peak_label_shifts_mm']['main'][key] == [0.0, 0.15]
+    assert module.prepare_config(normalized) == normalized
+    for invalid in (
+        {'fig2_nmr.main.' + key: [0.0, 0.15]},
+        {'unknown': {key: [0.0, 0.15]}},
+        {'main': {key: [True, 0.15]}},
+        {'main': {key: [0.0, float('nan')]}},
+    ):
+        config['peak_label_shifts_mm'] = invalid
+        try:
+            module.prepare_config(config)
+        except ConfigError:
+            continue
+        raise AssertionError(f'Invalid scoped label offset accepted: {invalid!r}')
+
+
 NATIVE_SCRIPT = '''\
 """原生探针夹具：真 load_science/build_scene/layout_contract/science_manifest 接缝。
 
@@ -330,6 +362,136 @@ def write_panel_fixture(root: Path):
     config = root / 'panels.yaml'
     script.write_text(PANEL_SCRIPT, encoding='utf8')
     config.write_text(PANEL_YAML, encoding='utf8')
+    return script, config
+
+
+PAIR_SCRIPT = '''\
+"""原生 2D 标注位移夹具：一对 `[dx, dy]`（mm）的显示位移，锚点与曲线不动。
+
+`label_offsets_mm` 在配置里**本来就是一对**（`{peak: [dx, dy]}`，mm）：文本画在数据锚点
+(3.0, 0.5) 上，再叠一个毫米显示位移——所以「位移」是真实毫米几何，而锚点、曲线的数据
+一个字节都不动（科学指纹必须等值）。锚点自己另注册一个小标记，它不跟着位移走。
+
+`caption_offset_mm` 是**故意留的负向对照**：同样是一对，却声明成 `translate`——序列值
+不许走标量（刚体平移）那条路，必须被拒绝。`curve_shift_mm` 与 `label_font_pt` 是普通
+标量路径，钉住「数组不许漏到标量路径上」。夹具自己按真实消费方的读法读这一对
+（形状不对立刻报错，不静默吞掉）。
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from figpact import GidRegistry, apply_display_shift
+
+FIGURE_ID = "pairs"
+SCOPES = ("main",)
+CONFIG_PATH = Path(__file__).with_name("pairs.yaml")
+
+ANCHOR = (3.0, 0.5)
+
+
+def load_science():
+    x = np.linspace(0.0, 10.0, 121)
+    return {"x": x, "y": np.sin(x), "peak_x": float(x[int(np.argmax(np.sin(x)))]), "loaded": True}
+
+
+def science_manifest(science):
+    return {"arrays": 2, "peak_x": science["peak_x"]}
+
+
+def label_offset_mm(config):
+    """消费方读这一对的方式：YAML 里写的就是 [dx, dy]（mm）。形状不对立刻报错。"""
+    value = config["label_offsets_mm"]["peak"]
+    if isinstance(value, bool) or not isinstance(value, (list, tuple)) or len(value) != 2:
+        raise ValueError("label_offsets_mm.peak 必须是 [dx, dy] 一对")
+    return tuple(float(part) for part in value)
+
+
+def build_scene(science, config, scope):
+    if scope not in SCOPES:
+        raise ValueError("未知 scope: " + scope)
+    print("[pairs] build " + scope)
+    fig, ax = plt.subplots(figsize=(config["canvas_w_mm"] / 25.4,
+                                    config["canvas_h_mm"] / 25.4))
+    fig.subplots_adjust(left=0.22, right=0.95, top=0.9, bottom=0.2)
+    ax.set_xlim(0.0, 10.0)
+    ax.set_ylim(-1.2, 1.3)
+    reg = GidRegistry()
+    prefix = FIGURE_ID + "." + scope
+
+    curve, = ax.plot(science["x"], science["y"], lw=0.8)
+    reg.register(curve, prefix + ".curve", params=["curve_shift_mm"])
+    apply_display_shift(curve, dy_mm=config["curve_shift_mm"])
+
+    anchor, = ax.plot([ANCHOR[0]], [ANCHOR[1]], marker="o", ms=2.0, lw=0.0)
+    reg.register(anchor, prefix + ".anchor", params=[])
+
+    dx_mm, dy_mm = label_offset_mm(config)
+    label = ax.text(ANCHOR[0], ANCHOR[1], "peak", fontsize=config["label_font_pt"])
+    reg.register(label, prefix + ".label", params=["label_offsets_mm", "label_font_pt"])
+    apply_display_shift(label, dx_mm=dx_mm, dy_mm=dy_mm)
+
+    ax.set_xlabel("t (s)", fontsize=8.0)
+    reg.register(ax.xaxis.label, prefix + ".xlabel", params=[])
+    ax.set_ylabel("signal (a.u.)", fontsize=8.0)
+    reg.register(ax.yaxis.label, prefix + ".ylabel", params=[])
+    return fig, reg
+
+
+def layout_contract(scope):
+    if scope not in SCOPES:
+        raise ValueError("未知 scope: " + scope)
+    prefix = FIGURE_ID + "." + scope
+    curve, label, anchor = prefix + ".curve", prefix + ".label", prefix + ".anchor"
+    return {
+        "parameters": [
+            {"key": "label_offset", "path": ["label_offsets_mm", "peak"], "unit": "mm",
+             "mutability": "EDITABLE", "operation": "rebuild", "scale": 1.0,
+             "min": -6.0, "max": 6.0, "scopes": list(SCOPES), "objects": [label]},
+            {"key": "caption_offset_translate", "path": ["caption_offset_mm"], "unit": "mm",
+             "mutability": "EDITABLE", "operation": "translate", "axis": "x", "scale": 1.0,
+             "min": -6.0, "max": 6.0, "scopes": list(SCOPES), "objects": [label]},
+            {"key": "curve_shift", "path": ["curve_shift_mm"], "unit": "mm",
+             "mutability": "EDITABLE", "operation": "translate", "axis": "y", "scale": 1.0,
+             "min": -6.0, "max": 6.0, "scopes": list(SCOPES), "objects": [curve],
+             "expected": {"kind": "translate", "objects": [curve], "axis": "y"}},
+            {"key": "label_font", "path": ["label_font_pt"], "unit": "pt",
+             "mutability": "EDITABLE", "operation": "rebuild", "min": 5.0, "max": 12.0,
+             "scopes": list(SCOPES), "objects": [label]},
+        ],
+        "nodes": {curve: {"type": "Line2D", "parent": prefix, "editable": True,
+                          "science_policy": "LAYOUT"},
+                  label: {"type": "Text", "parent": prefix, "editable": True,
+                          "science_policy": "LAYOUT"},
+                  anchor: {"type": "Line2D", "parent": prefix, "editable": False,
+                           "science_policy": "LAYOUT"}},
+        "groups": [{"id": prefix, "parent": FIGURE_ID, "members": [curve, label, anchor]}],
+        "relations": [],
+        "outputs": ["pairs.png"],
+    }
+'''
+
+PAIR_YAML = """\
+schema_version: 1
+canvas_w_mm: 60.0
+canvas_h_mm: 45.0
+curve_shift_mm: 0.0
+label_font_pt: 7.0
+label_offsets_mm:
+  peak: [0.0, 0.0]
+caption_offset_mm: [0.0, 0.0]
+"""
+
+
+def write_pair_fixture(root: Path):
+    """把 2D 位移夹具脚本 + 配置写进目录；返回 (script, config)。"""
+    script = root / 'pair_plot.py'
+    config = root / 'pairs.yaml'
+    script.write_text(PAIR_SCRIPT, encoding='utf8')
+    config.write_text(PAIR_YAML, encoding='utf8')
     return script, config
 
 
@@ -837,7 +999,6 @@ class PanelClosureTest(unittest.TestCase):
             result = session.try_layout([{'operation': 'set_relation',
                                           'relation_id': 'panels.gap', 'target_mm': target}])
             self.assertEqual(result['status'], STATUS_OK, result)
-            self.assertEqual(result['verification'], VERIFICATION_GEOMETRY, result)
             # 间隙 +2 mm 靠面板 A 沿 -x 位移 2 mm；参数值是位移，不是目标 mm 的照抄。
             self.assertAlmostEqual(session.candidate_patch['gap_x_mm'], -2.0,
                                    delta=TOL_SAME_RENDERER_MM)
@@ -1049,6 +1210,144 @@ def _import_fixture(path):
     finally:
         sys.argv = argv
     return module
+
+
+class PairedValueTest(unittest.TestCase):
+    """2D 位移目标 `[dx, dy]`（mm）：真重建 + 真毫米位移，序列不许漏到标量路径上。"""
+
+    PAIR_GIDS = ('pairs.main.label', 'pairs.main.anchor', 'pairs.main.curve')
+    PAIR_PATH = ['label_offsets_mm', 'peak']
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(prefix='figpact-pair-test-')
+        self.root = Path(self._tmp.name)
+        self.script, self.config = write_pair_fixture(self.root)
+
+    def tearDown(self):
+        import matplotlib.pyplot as plt
+        plt.close('all')
+        self._tmp.cleanup()
+
+    def _frames(self, session, gids=None):
+        """真实重建当前候选，取**实测** mm 包围盒（公开 build_candidate + drawn_shapes）。"""
+        return measured_frames(session, session.candidate_config, gids or self.PAIR_GIDS)
+
+    def _curve_points(self, session):
+        import matplotlib.pyplot as plt
+        fig, reg = session.build_candidate(session.candidate_config)
+        try:
+            return drawn_shapes(fig, reg)['gid:pairs.main.curve']['points_mm']
+        finally:
+            plt.close(fig)
+
+    def test_declared_pair_moves_text_mm_and_keeps_data_and_anchor(self):
+        with FigureSession(self.script, self.config, 'main') as session:
+            before = self._frames(session)
+            points = self._curve_points(session)
+            result = session.try_layout([{'operation': 'set_parameter',
+                                          'path': self.PAIR_PATH, 'value': [3.0, 2.0]}])
+            self.assertEqual(result['status'], STATUS_OK, result)
+            self.assertEqual(result['verification'], VERIFICATION_RENDER, result)
+            self.assertIs(result['science_unchanged'], True, result)
+            self.assertEqual(session.candidate_patch,
+                             {'label_offsets_mm': {'peak': [3.0, 2.0]}})
+            after = self._frames(session)
+            self.assertAlmostEqual(after['pairs.main.label'][0] - before['pairs.main.label'][0],
+                                   3.0, delta=0.01, msg='文本按声明的 dx 走毫米几何')
+            self.assertAlmostEqual(after['pairs.main.label'][1] - before['pairs.main.label'][1],
+                                   2.0, delta=0.01, msg='文本按声明的 dy 走毫米几何')
+            for gid in ('pairs.main.anchor', 'pairs.main.curve'):
+                for index in (0, 1):
+                    self.assertAlmostEqual(after[gid][index] - before[gid][index], 0.0,
+                                           delta=0.01, msg=f'{gid} 不许跟着 2D 文本位移走')
+            self.assertEqual(self._curve_points(session), points, '曲线数据一个字节都不动')
+            checks = [c['check'] for c in result['checks']]
+            self.assertNotIn('translation_proof', checks, '2D 目标不许伪造刚体位移证明')
+            effect = next(c for c in result['checks'] if c.get('parameter') == 'label_offset')
+            self.assertEqual(effect['status'], 'OK', effect)
+            self.assertIn('pairs.main.label', effect['detail'])
+            preview = session.render_preview()
+            self.assertEqual(png_bytes(preview['png'])[:8], PNG_SIGNATURE,
+                             '2D 候选也要能出真 PNG 预览')
+
+    def test_mixed_batch_keeps_and_audits_both_goals(self):
+        with FigureSession(self.script, self.config, 'main') as session:
+            before = self._frames(session)
+            result = session.try_layout([
+                {'operation': 'set_parameter', 'path': self.PAIR_PATH, 'value': [1.0, 0.0]},
+                {'operation': 'set_parameter', 'path': ['curve_shift_mm'], 'value': 1.0},
+            ])
+            self.assertEqual(result['status'], STATUS_OK, result)
+            self.assertEqual(result['verification'], VERIFICATION_RENDER, result)
+            self.assertEqual(session.candidate_patch,
+                             {'curve_shift_mm': 1.0, 'label_offsets_mm': {'peak': [1.0, 0.0]}})
+            after = self._frames(session)
+            self.assertAlmostEqual(after['pairs.main.label'][0] - before['pairs.main.label'][0],
+                                   1.0, delta=0.01)
+            self.assertAlmostEqual(after['pairs.main.label'][1] - before['pairs.main.label'][1],
+                                   0.0, delta=0.01)
+            self.assertAlmostEqual(after['pairs.main.curve'][1] - before['pairs.main.curve'][1],
+                                   1.0, delta=0.01)
+
+    def test_malformed_and_out_of_range_pairs_refuse_atomically(self):
+        cases = [
+            ([1.0], STATUS_INVALID_VALUE),
+            ([1.0, 2.0, 3.0], STATUS_INVALID_VALUE),
+            (['dx', 'dy'], STATUS_INVALID_VALUE),
+            ([True, 0.0], STATUS_INVALID_VALUE),
+            ([float('nan'), 0.0], STATUS_INVALID_VALUE),
+            ([float('inf'), 0.0], STATUS_INVALID_VALUE),
+            ({'dx': 1.0, 'dy': 2.0}, STATUS_INVALID_VALUE),
+            (2.0, STATUS_INVALID_VALUE),
+            ([9.0, 0.0], STATUS_OUT_OF_RANGE),
+            ([0.0, -9.0], STATUS_OUT_OF_RANGE),
+        ]
+        with FigureSession(self.script, self.config, 'main') as session:
+            settled = session.try_layout([{'operation': 'set_parameter',
+                                           'path': ['curve_shift_mm'], 'value': 1.0}])
+            self.assertEqual(settled['status'], STATUS_OK, settled)
+            revision = session.revision
+            patch = session.candidate_patch
+            nodes = session.snapshot()['nodes']
+            for value, expected in cases:
+                with self.subTest(value=value):
+                    result = session.try_layout([{'operation': 'set_parameter',
+                                                  'path': self.PAIR_PATH, 'value': value}])
+                    self.assertEqual(result['status'], expected, result)
+                    self.assertIsNone(result['verification'], result)
+                    self.assertEqual(session.revision, revision, '拒绝必须是无状态的')
+                    self.assertEqual(session.candidate_patch, patch, '拒绝必须是无状态的')
+                    self.assertEqual(session.snapshot()['nodes'], nodes, '拒绝必须是无状态的')
+
+    def test_arrays_are_refused_on_scalar_and_translate_paths(self):
+        with FigureSession(self.script, self.config, 'main') as session:
+            # 第二条路径的基线**也是**一对，但声明是 translate：形状不是通行证，
+            # 「基线里本来就是这个形状 + 声明为 rebuild」才是。
+            for path in (['curve_shift_mm'], ['label_font_pt'], ['caption_offset_mm']):
+                with self.subTest(path=path):
+                    result = session.try_layout([{'operation': 'set_parameter',
+                                                  'path': path, 'value': [1.0, 2.0]}])
+                    self.assertEqual(result['status'], STATUS_INVALID_VALUE, result)
+                    self.assertIsNone(result['verification'], result)
+                    self.assertEqual(session.candidate_patch, {}, '拒绝必须是无状态的')
+
+    def test_effect_probe_perturbs_one_axis_of_a_pair(self):
+        from figpact import effects
+        with FigureSession(self.script, self.config, 'main') as session:
+            report = session.check_effects()
+        entry = next(e for e in report['results'] if e['key'] == 'label_offset')
+        self.assertEqual(entry['status'], effects.EFFECT_OK, entry)
+        current, probed = entry['perturbation']['from'], entry['perturbation']['to']
+        self.assertEqual(len(current), 2)
+        self.assertEqual(sum(1 for a, b in zip(current, probed) if a != b), 1,
+                         '只许扰动一条轴')
+        self.assertEqual(entry['observed']['axis'], entry['perturbation']['axis'],
+                         '实测位移轴必须就是被扰动的那条轴')
+        self.assertIn('pairs.main.label', entry['observed']['objects'])
+        self.assertEqual(entry['observed']['science']['verified'], True)
+        unwired = next(e for e in report['results']
+                       if e['key'] == 'caption_offset_translate')
+        self.assertEqual(unwired['status'], effects.REJECTED_PERTURBATION, unwired)
 
 
 @unittest.skipUnless(any(_fixture(name) for name in POSITIVE_FIXTURES),

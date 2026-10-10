@@ -24,7 +24,7 @@ import yaml
 
 from figpact.session import (
     DERIVED, EDITABLE, FIXED_STYLE, LOCKED_SCIENCE, STATUS_OK, UNCLASSIFIED,
-    FigureSession, _finite, _owned_keys, drawn_shapes, get_path, set_path, shape_delta,
+    FigureSession, _finite, _owned_keys, _pair_of, drawn_shapes, get_path, set_path, shape_delta,
 )
 from figpact.units import MM_PER_INCH
 
@@ -75,6 +75,21 @@ def probe_value(record, current):
             return None
         return float(candidate)
     return None
+
+
+def _pair_perturbation(record, pair):
+    """2D 参数只扰动**一条轴**：返回 `(probe, axis, delta)`，两轴都扰不动返回三个 None。
+
+    同时改两个分量会把「哪条轴真的接线了」混成一个数，所以这里挑第一条能给出有界
+    扰动的轴，另一分量**原样保留**；结论只覆盖被扰动的那条轴（轴与增量都进报告）。
+    """
+    for index, axis in ((0, 'x'), (1, 'y')):
+        moved = probe_value(record, pair[index])
+        if moved is not None and moved != pair[index]:
+            probe = list(pair)
+            probe[index] = moved
+            return probe, axis, moved - pair[index]
+    return None, None, None
 
 
 def _style_changes(before, after, gids):
@@ -133,7 +148,7 @@ def _observed_axis(changes):
 
 
 def _matches_declaration(record, changes, styles, observed_axis, delta_value=None, closure=(),
-                         owned_keys=()):
+                         owned_keys=(), pair_axis=None):
     """逐条对照声明；返回 (status, diagnostics)。
 
     「响应」既包括毫米几何变化，也包括样式变化；translate 声明还要核对**物理量**
@@ -142,6 +157,10 @@ def _matches_declaration(record, changes, styles, observed_axis, delta_value=Non
 
     `closure` 是声明对象的后代闭包（面板里的图像/比例尺/文字等）：它们跟着父对象动是
     声明的一部分，不算「牵连了未声明对象」；闭包内、声明外的东西同样要跟着动（刚体）。
+
+    `pair_axis` 是**2D 位移对**（`[dx, dy]`，只扰动了一条轴的探针）被扰动的那条轴：
+    这时位置变化就是声明本身（不该按 `expected.kind == "style"` 读成「只有位置动了」），
+    但被扰动轴的物理量、方向与轴一致性照旧要核对。
     """
     diagnostics = []
     expected = record.get('expected') or {}
@@ -164,7 +183,7 @@ def _matches_declaration(record, changes, styles, observed_axis, delta_value=Non
     if missing:
         diagnostics.append(f'声明的作用对象没有全部响应：{missing}')
     kind = expected.get('kind') or record.get('operation')
-    declared_axis = expected.get('axis') or record.get('axis')
+    declared_axis = pair_axis or expected.get('axis') or record.get('axis')
     if kind == 'resize' and declared_axis in ('x', 'y'):
         cross = ('dy_mm', 'dh_mm') if declared_axis == 'x' else ('dx_mm', 'dw_mm')
         if any(abs(entry[field]) > entry['tol_mm'] for entry in changes.values() for field in cross):
@@ -173,7 +192,8 @@ def _matches_declaration(record, changes, styles, observed_axis, delta_value=Non
         diagnostics.append(f'轴不符：声明 {declared_axis}，实测 {observed_axis}')
     if kind == 'translate' and observed_axis == 'size':
         diagnostics.append('声明是平移，实测却是尺寸变化')
-    if kind in ('resize', 'style') and observed_axis in ('x', 'y') and not styles:
+    if pair_axis is None and kind in ('resize', 'style') and observed_axis in ('x', 'y') \
+            and not styles:
         diagnostics.append(f'声明是 {kind}，实测只有位置平移')
     if styles and kind == 'translate' and not changes:
         diagnostics.append('声明是平移，实测只有样式变化')
@@ -183,6 +203,11 @@ def _matches_declaration(record, changes, styles, observed_axis, delta_value=Non
     if kind == 'resize' and declared_axis in ('x', 'y') and delta_value:
         diagnostics.extend(_magnitude_checks(record, changes, declared_set,
                                             declared_axis, delta_value, kind='resize'))
+    if pair_axis and delta_value:
+        # 2D 位移对：只扰动了一条轴，结论只覆盖那条轴；被扰动轴的物理量（单位 × 标尺）
+        # 与轴一致性照旧要核对，`expected.kind` 是 style 也不许把位置变化当成缺陷。
+        diagnostics.extend(_magnitude_checks(record, changes, declared_set | closure_set,
+                                            pair_axis, delta_value))
     if diagnostics:
         return EFFECT_MISMATCH, diagnostics
     return EFFECT_OK, [f'实测作用于 {sorted(seen_set)}，轴 {observed_axis or "size"}']
@@ -301,23 +326,48 @@ def _check_one(session, record, index, base_config, base_shapes, base_styles, tm
                      diagnostics=[f'声明为 {mutability}，不可编辑，不做扰动'])
         return entry
     try:
-        current = _finite(get_path(base_config, path), f'{list(path)} 的当前值')
-    except (KeyError, ValueError) as error:
+        raw_current = get_path(base_config, path)
+    except KeyError as error:
         entry.update(status=REJECTED_DANGLING_PATH,
                      diagnostics=[f'配置里没有这个精确路径：{error}'])
         return entry
+    axis = None
+    pair = _pair_of(raw_current)
+    if pair is not None:
+        # 配置里本来就是一对 [dx, dy]：只有声明为 rebuild（真实重建）才谈这个形状。
+        if record.get('operation') != 'rebuild':
+            entry.update(status=REJECTED_PERTURBATION,
+                         diagnostics=[f'配置里是一对 [dx, dy]，但声明不是 rebuild：序列值只允许'
+                                      f'出现在声明为 2D 位移（rebuild）的参数上'])
+            return entry
+        probe, axis, delta_value = _pair_perturbation(record, pair)
+        if probe is None:
+            entry.update(status=REJECTED_UNBOUNDED_PROBE,
+                         diagnostics=[f'两条轴都得不到有界扰动（当前 {pair}，'
+                                      f'区间 [{record.get("min")}, {record.get("max")}]）'])
+            return entry
+        current = list(pair)
+    else:
+        try:
+            current = _finite(raw_current, f'{list(path)} 的当前值')
+        except ValueError as error:
+            entry.update(status=REJECTED_DANGLING_PATH,
+                         diagnostics=[f'配置里没有这个精确路径：{error}'])
+            return entry
+        probe = probe_value(record, current)
+        if probe is None or probe == current:
+            entry.update(status=REJECTED_UNBOUNDED_PROBE,
+                         diagnostics=[f'无法在声明区间内给出有界扰动（当前 {current}，'
+                                      f'区间 [{record.get("min")}, {record.get("max")}]）'])
+            return entry
+        delta_value = probe - current
     entry['current'] = current
-    probe = probe_value(record, current)
-    if probe is None or probe == current:
-        entry.update(status=REJECTED_UNBOUNDED_PROBE,
-                     diagnostics=[f'无法在声明区间内给出有界扰动（当前 {current}，'
-                                  f'区间 [{record.get("min")}, {record.get("max")}]）'])
-        return entry
     candidates = [probe]
-    opposite = 2.0 * current - probe
-    if ((record.get('min') is None or opposite >= float(record['min']))
-            and (record.get('max') is None or opposite <= float(record['max']))):
-        candidates.append(opposite)
+    if axis is None:
+        opposite = 2.0 * current - probe
+        if ((record.get('min') is None or opposite >= float(record['min']))
+                and (record.get('max') is None or opposite <= float(record['max']))):
+            candidates.append(opposite)
     rejected = []
     yaml_path = Path(tmpdir) / f'perturb-{index:03d}-{str(key).replace("/", "_")[:40]}.yaml'
     for probe in candidates:
@@ -327,6 +377,8 @@ def _check_one(session, record, index, base_config, base_shapes, base_styles, tm
         yaml_path.write_text(yaml_text, encoding='utf8')
         entry.update(perturbation={'from': current, 'to': probe},
                      yaml=str(yaml_path), yaml_text=yaml_text)
+        if axis is not None:
+            entry['perturbation']['axis'] = axis
         try:
             with redirect_stdout(io.StringIO()):
                 fig, reg = session.build_from_yaml(yaml_path)
@@ -382,8 +434,12 @@ def _check_one(session, record, index, base_config, base_shapes, base_styles, tm
     closure = session.owned_closure(record.get('objects') or [])
     owned_keys = _owned_keys(base_shapes, closure) | _owned_keys(after_shapes, closure)
     status, notes = _matches_declaration(record, geometry, styles, observed_axis,
-                                         delta_value=probe - current,
-                                         closure=closure, owned_keys=owned_keys)
+                                         delta_value=delta_value,
+                                         closure=closure, owned_keys=owned_keys,
+                                         pair_axis=axis)
+    if axis is not None:
+        notes = list(notes) + [f'2D 参数只扰动 {axis} 轴（另一分量保持原值）：'
+                               f'本条结论只覆盖被扰动的那条轴']
     entry.update(status=status, diagnostics=notes,
                  science_unchanged=science_ok,
                  science_notes=[] if science_ok else list(map(str, science_notes)))

@@ -356,6 +356,25 @@ def _finite(value, what: str) -> float:
     return num
 
 
+def _pair_of(value):
+    """把值读成 `[dx, dy]` 这对有限数字；不是这个形状返回 None。
+
+    这是 2D 布局目标**唯一**允许的序列形状：恰好两个分量、每个都是有限数字
+    （bool 不算数字、NaN/Inf 不算）。嵌套序列、映射、任意长度一律不是。
+    """
+    if isinstance(value, (str, bytes, dict)) or not isinstance(value, (list, tuple)):
+        return None
+    if len(value) != 2:
+        return None
+    out = []
+    for index, item in enumerate(value):
+        try:
+            out.append(_finite(item, f'第 {index} 个分量'))
+        except ValueError:
+            return None
+    return out
+
+
 def _json_native(value):
     """报告里只放 JSON 原生标量。
 
@@ -1341,10 +1360,12 @@ class FigureSession:
             if op == 'set_parameter':
                 try:
                     path = _norm_path(raw.get('path'))
-                    value = _finite(raw.get('value'), f'{list(path)} 的值')
                 except ValueError as error:
                     return None, self._fail(STATUS_INVALID_VALUE, str(error))
                 rec, status = self._param_of_path(path)
+                value, failure = self._normalize_value(rec or {}, path, raw.get('value'))
+                if failure is not None:
+                    return None, failure
                 if rec is None:
                     return None, self._fail(status, self._path_reason(status, path), path=list(path))
                 failure = self._check_parameter(rec, path, value)
@@ -1396,6 +1417,47 @@ class FigureSession:
             return None, self._fail(STATUS_INVALID_VALUE, f'未知操作 {op!r}', raw=repr(raw))
         return resolved, None
 
+    def _pair_target(self, rec, path) -> bool:
+        """这个参数是不是**已经声明了的 2D 位移**（值本身是一对 `[dx, dy]`）。
+
+        两个判据都来自既有事实，不新造科学标签、也不看未知键：**当前归一化的基线**
+        在这条精确路径上本来就是一对有限数字（作者写在 YAML 里的形状），且声明的
+        `operation` 是 `rebuild`（真实重建）。普通标量路径永远拿不到序列值的通行证。
+        """
+        if rec.get('operation') != 'rebuild':
+            return False
+        try:
+            return _pair_of(get_path(self._base_config, path)) is not None
+        except (KeyError, ValueError):
+            return False
+
+    def _normalize_value(self, rec, path, raw):
+        """操作值 → 存储值；失败返回 `(None, failure)`。
+
+        **声明了的 2D 位移**（基线里本来就是一对、operation 是 rebuild）只收一对
+        `[dx, dy]`：逐分量有限（`_pair_of` 负责）、逐分量用同一条声明区间。
+        普通标量路径只收有限数字，报错文案不变。其余形状一律 INVALID_VALUE——
+        序列不许漏到标量路径上，标量也不许打进 2D 路径。
+        """
+        if self._pair_target(rec, path):
+            pair = _pair_of(raw)
+            if pair is None:
+                return None, self._fail(
+                    STATUS_INVALID_VALUE,
+                    f'{list(path)} 声明为 2D 位移（基线里就是一对 [dx, dy]），'
+                    f'目标必须是恰好两个有限数字，得到 {raw!r}', path=list(path))
+            for index, comp in enumerate(pair):
+                if not self._in_range(rec, comp):
+                    return None, self._fail(
+                        STATUS_OUT_OF_RANGE,
+                        f'{list(path)} = {raw!r} 的第 {index} 个分量 {comp} 超出声明范围 '
+                        f'[{rec.get("min")}, {rec.get("max")}]', path=list(path))
+            return pair, None
+        try:
+            return _finite(raw, f'{list(path)} 的值'), None
+        except ValueError as error:
+            return None, self._fail(STATUS_INVALID_VALUE, str(error), path=list(path))
+
     def _check_parameter(self, rec, path, value):
         """单个参数目标的可编辑性/类型/区间检查；通过返回 None。"""
         kind = self._param_mutability(rec)
@@ -1429,6 +1491,9 @@ class FigureSession:
         return f'{list(path)} 未在布局契约里声明'
 
     def _in_range(self, rec, value):
+        if isinstance(value, (list, tuple)):
+            # 2D 目标：**每个分量**都用同一条声明区间（作者不必为 dx/dy 各写一套）。
+            return all(self._in_range(rec, comp) for comp in value)
         lo, hi = rec.get('min'), rec.get('max')
         if lo is None and hi is None:
             return True
@@ -2176,14 +2241,34 @@ class FigureSession:
             key = rec.get('key') or str(list(path))
             declared = [gid for gid in (rec.get('objects') or []) if gid]
             try:
-                base_value = _finite(get_path(self._base_config, path), f'{list(path)} 的基线值')
-            except (KeyError, ValueError) as error:
+                base_raw = get_path(self._base_config, path)
+            except KeyError as error:
                 return self._refuse(STATUS_EFFECT_MISMATCH,
                                     f'{key}: 基线配置里读不到目标：{error}'), checks, diagnostics
-            if float(value) == base_value:
-                checks.append({'check': 'declared_effect', 'parameter': key, 'status': 'OK',
-                               'detail': '目标等于基线的当前值，没有需要观测的变化'})
-                continue
+            pair = _pair_of(value)
+            if pair is not None:
+                # 2D 位移目标：只有**两边都是同一形状**（一对有限数字）才谈得上比较；
+                # 基线不是这个形状就是声明与配置不自洽，明确拒绝而不是硬算。
+                base_pair = _pair_of(base_raw)
+                if base_pair is None:
+                    return self._refuse(
+                        STATUS_EFFECT_MISMATCH,
+                        f'{key}: 目标是 2D 位移对，但基线配置里 {list(path)} = {base_raw!r} '
+                        f'不是一对数字（声明与配置不自洽）'), checks, diagnostics
+                if base_pair == pair:
+                    checks.append({'check': 'declared_effect', 'parameter': key, 'status': 'OK',
+                                   'detail': '目标等于基线的当前值，没有需要观测的变化'})
+                    continue
+            else:
+                try:
+                    base_value = _finite(base_raw, f'{list(path)} 的基线值')
+                except ValueError as error:
+                    return self._refuse(STATUS_EFFECT_MISMATCH,
+                                        f'{key}: 基线配置里读不到目标：{error}'), checks, diagnostics
+                if float(value) == base_value:
+                    checks.append({'check': 'declared_effect', 'parameter': key, 'status': 'OK',
+                                   'detail': '目标等于基线的当前值，没有需要观测的变化'})
+                    continue
             if rec.get('operation') == 'translate':
                 refused, translate_checks, translate_notes = self._audit_translation(
                     goal, key, declared, shapes, tol, observed_something,

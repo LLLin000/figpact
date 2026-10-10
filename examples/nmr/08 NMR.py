@@ -63,6 +63,25 @@ def _gid_tag(ppm: float) -> str:
     """3.91 → `3p91`：gid 的最后一段不能带点，否则按点切分的读取方会切错。"""
     return f"{ppm:.2f}".replace(".", "p")
 
+
+def _gid(kind: str, sid: str = "", tag: str = "") -> str:
+    """对象身份的唯一构造点：`fig2_nmr.main.<kind>[.<sid>[.<tag>]]`。
+
+    末段不带点（`3p91`），否则按点切分的读取方会切错。
+    """
+    parts = [FIGURE_ID, SCOPE, kind]
+    if sid:
+        parts.append(sid)
+    if tag:
+        parts.append(tag)
+    return ".".join(parts)
+
+
+def _guide_gid(peak_gid: str) -> str:
+    """引线 gid 由标注 gid 派生——身份规则只此一处。"""
+    return peak_gid.replace(".peak.", ".guide.")
+
+
 fs.apply()
 DPI = 600
 
@@ -76,6 +95,45 @@ SAMPLES_CONFIG = [
 ]
 SAMPLE_IDS = tuple(sid for *_, sid in SAMPLES_CONFIG)
 RELATION_PARAMS = {"pitch_mm": ("baseline_pitch", SAMPLE_IDS[1:])}
+
+# ===== 特征峰标注模板 (ppm 动态由算法检测填入，杜绝手写偏差！) =====
+# 主图只标"能区分合成步骤"的诊断峰；完整归属见 SI 的 Fig_S1–Fig_S4 单谱
+# 格式: (搜索目标近似ppm, 样品层 0~3, 基团名称, dy保留位, ha对齐, 自动附加ppm, 局部搜索窗宽)
+PEAK_LABELS_TEMPLATE = [
+    # --- 第 0 层: Van-CHO (2) ---
+    (9.83, 0, "–CHO", 0, "center", True, 0.12),          # 醛基：下一步应消失
+    (3.91, 0, "Ar–OCH$_3$", 0, "center", True, 0.08),
+    (3.68, 0, "–COOCH$_3$", 0, "center", True, 0.08),    # 甲酯：胺解后应消失
+
+    # --- 第 1 层: Van-OH (3) ---
+    (4.62, 1, "–CH$_2$OH", 0, "center", True, 0.12),     # 苄醇：证明选择性还原
+
+    # --- 第 2 层: Van-NH$_2$ (4) ---
+    (3.03, 2, "–CH$_2$NH$_2$", 0, "center", True, 0.10), # 端胺：证明胺解成功
+
+    # --- 第 3 层: HAMA（终产物）---
+    (6.18, 3, "=CH$_2$ (MA)", 0, "center", True, 0.10),  # 甲基丙烯酰双键
+    (2.02, 3, "–COCH$_3$ (HA)", 0, "center", True, 0.10),# HA 骨架乙酰基内标
+]
+
+
+def _peak_label_gids() -> list[str]:
+    """模板里每个诊断峰在本样品上的**完整稳定 id**（`fig2_nmr.main.peak.<sid>.<tag>`）。
+
+    它是作者已知的峰模板，不是"新建的科研标注"：`new scientific label` 永远不在这里面。
+    """
+    return [_gid("peak", SAMPLES_CONFIG[idx][7], _gid_tag(ppm))
+            for ppm, idx, *_ in PEAK_LABELS_TEMPLATE]
+
+
+def _peak_label_keys() -> list[str]:
+    """同样的峰在**配置里**的键：作用域内的短名 `peak.<sid>.<tag>` 一串。
+
+    `nmr.yaml` 的 `peak_label_shifts_mm.main` 下就是这么写的，JSON 操作面的路径段也是它。
+    完整 gid 只在 `_apply_config` 那一处派生给图元消费方（身份拼法只此一处）。
+    """
+    return [gid.removeprefix(f"{FIGURE_ID}.{SCOPE}.") for gid in _peak_label_gids()]
+
 
 # 谱图显示窗（ppm）。**不进 YAML**：这是"这张图回答什么问题"的一部分，
 # 不是排版——改窗宽会藏掉峰。与 FTIR 的 xlim(4000→400) 同一性质。
@@ -147,35 +205,70 @@ SCHEMA = {**SCALARS, "show_ppm": (bool,), "shifts_mm": (dict,), "peak_label_shif
           "pitch_mm": (dict,), "group_y_mm": (dict,), "layout_reference": (dict,)}
 
 
+def _label_pair(name: str, scope: str, label: str, pair) -> list:
+    """校验一个 `[dx, dy]` 并归一成两个有限数字的列表（`dx` 向右、`dy` 向上，各 ±10 mm）。"""
+    if not (isinstance(pair, (list, tuple)) and len(pair) == 2):
+        raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{label} 必须是 [dx, dy] 两个数字")
+    dx, dy = pair[0], pair[1]
+    if isinstance(dx, bool) or not isinstance(dx, (int, float)) or not math.isfinite(dx):
+        raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{label}[0] 必须是有效数字")
+    if isinstance(dy, bool) or not isinstance(dy, (int, float)) or not math.isfinite(dy):
+        raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{label}[1] 必须是有效数字")
+    dx_f, dy_f = float(dx), float(dy)
+    if abs(dx_f) > SHIFT_LIMIT_MM or abs(dy_f) > SHIFT_LIMIT_MM:
+        raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{label} 超出 ±{SHIFT_LIMIT_MM} mm")
+    return [dx_f, dy_f]
+
+
+def _scope_of_gid(gid: str) -> str | None:
+    """`fig2_nmr.main.peak.vancho.3p91` → `main`；不带本图前缀的一律 None（不猜）。"""
+    return next((sc for sc in SCOPES if gid.startswith(f"{FIGURE_ID}.{sc}.")), None)
+
+
 def _load_label_shifts(name: str, raw) -> dict:
+    """把 `peak_label_shifts_mm` 归一成**作用域嵌套的规范形态**：
+    `{main: {"peak.<sid>.<tag>": [dx, dy]}}`。
+
+    原始 YAML 和归一化结果都使用同一个作用域嵌套形态，
+    所以反复执行 `prepare_config` 不改变配置结构或数值。
+
+    规范形态**保持 YAML 的样子**（作用域 → 短名）：完整 gid 只在 `_apply_config` 一处派生，
+    不给同一个量留下两套钥匙。作用域写错、值形不对、越界一律报错，不静默吞掉。
+    """
     if raw is None:
         return {}
     if not isinstance(raw, dict):
         raise ConfigError(f"{name}：peak_label_shifts_mm 必须是字典映射")
-    if unknown := sorted(set(raw) - set(SCOPES)):
-        raise ConfigError(f"{name}：peak_label_shifts_mm 里有未知作用域 {unknown}；可用：{list(SCOPES)}")
-    out: dict = {}
-    for scope, per_label in raw.items():
-        if per_label is None:
-            continue
-        if not isinstance(per_label, dict):
-            raise ConfigError(f"{name}：peak_label_shifts_mm.{scope} 必须是 `标注gid: [dx, dy]` 映射")
-        prefix = f"{FIGURE_ID}.{scope}."
-        for gid, pair in per_label.items():
-            if not (isinstance(pair, (list, tuple)) and len(pair) == 2):
-                raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{gid} 必须是 [dx, dy] 两个数字")
-            dx, dy = pair[0], pair[1]
-            if isinstance(dx, bool) or not isinstance(dx, (int, float)) or not math.isfinite(dx):
-                raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{gid}[0] 必须是有效数字")
-            if isinstance(dy, bool) or not isinstance(dy, (int, float)) or not math.isfinite(dy):
-                raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{gid}[1] 必须是有效数字")
-            dx_f, dy_f = float(dx), float(dy)
-            if abs(dx_f) > SHIFT_LIMIT_MM or abs(dy_f) > SHIFT_LIMIT_MM:
-                raise ConfigError(f"{name}：peak_label_shifts_mm.{scope}.{gid} 超出 ±{SHIFT_LIMIT_MM} mm")
-            # YAML 里写短名（`peak.vancho.9p83`，见 make_figure 迁移写出口）；已带前缀的
-            # 说明这份映射标准化过了（prepare_config 幂等），不再叠第二层前缀。
-            out[gid if gid.startswith(prefix) else prefix + gid] = (dx_f, dy_f)
+    out: dict[str, dict] = {}
+    for key, value in raw.items():
+        if key in SCOPES:
+            if value is None:
+                continue
+            if not isinstance(value, dict):
+                raise ConfigError(f"{name}：peak_label_shifts_mm.{key} 必须是 `标注gid: [dx, dy]` 映射")
+            for label, pair in value.items():
+                if not isinstance(label, str):
+                    raise ConfigError(f"{name}：peak_label_shifts_mm.{key} 的标注键必须是字符串")
+                if label.startswith(f"{FIGURE_ID}.") and _scope_of_gid(label) != key:
+                    raise ConfigError(f"{name}：peak_label_shifts_mm.{key} 里的 {label!r} "
+                                      f"不是本作用域 {key} 下的标注（前缀/作用域对不上）")
+                out.setdefault(key, {})[label.removeprefix(f"{FIGURE_ID}.{key}.")] = \
+                    _label_pair(name, key, label, pair)
+        else:
+            raise ConfigError(f"{name}：peak_label_shifts_mm 里有未知作用域 {key!r}；"
+                              f"可用：{list(SCOPES)}")
     return out
+
+
+def _peak_shifts_by_gid(per_scope: dict) -> dict:
+    """规范形态 → **图元身份拼法**的扁平视图（`fig2_nmr.main.peak.vancho.9p83` → [dx, dy]）。
+
+    这是「配置键」与「图元 gid」之间唯一的换算点：避让引擎、QA、契约都拿图元 gid 说话，
+    配置里存的是短名。换算只此一处，不在别处再拼一次前缀。
+    """
+    return {f"{FIGURE_ID}.{scope}.{label}": pair
+            for scope, per_label in per_scope.items()
+            for label, pair in per_label.items()}
 
 
 def prepare_config(config: dict, *, label: str | None = None) -> dict:
@@ -185,18 +278,28 @@ def prepare_config(config: dict, *, label: str | None = None) -> dict:
     legacy 装载（`load_config_nmr`）与 native 构建（`build_scene` 收到的候选配置）
     **共用这一份**：`shifts_mm` 缺失 / 为 `{}` / 只写部分作用域或样品，一律补 0.0
     （「不写 = 不动」，而不是让 `SHIFTS_MM[scope][sid]` 抛 KeyError），
-    `peak_label_shifts_mm` 的短名在这里补成完整 gid。对已标准化的映射幂等，
-    所以 native 恒等重建与「基线已标准化、候选再标准化一次」都成立。
+    `peak_label_shifts_mm` 同样补全：**模板里每个诊断峰都带一个 `[0.0, 0.0]`**，
+    所以 YAML 写 `{}` 时这些路径依然存在，`set_parameter` 的路径解析不是悬空引用；
+    用户写了的条目覆盖默认值。规范形态**保持 YAML 的样子**（`main` → 短名 →
+    `[dx, dy]`），完整 gid 只由 `_apply_config` 派生给图元消费方。
+    补的是**零值**（不动），不是新增标记、也不改排布：`_requested_peak_shifts` 把
+    「零 = 没要求」贯彻到避让引擎，基线（全零）与空映射逐字节同图。
+    对已标准化的映射幂等（两种写法都收），所以 `_apply_config(prepare_config(cfg))` 这条
+    每次重建的必经之路、以及「API 独立 _build 先 prepare 再交给 build_scene」都成立。
     """
     name = label or CONFIG_PATH.name
     cfg = dict(config)
+    raw_labels = cfg.get("peak_label_shifts_mm")
     raw_shifts = cfg.get("shifts_mm") or {}
     if not isinstance(raw_shifts, dict):
         raise ConfigError(f"{name}：shifts_mm 必须是字典映射")
     if unknown := sorted(set(raw_shifts) - set(SCOPES)):
         raise ConfigError(f"{name}：shifts_mm 里有未知作用域 {unknown}；可用：{list(SCOPES)}")
 
-    cfg["peak_label_shifts_mm"] = _load_label_shifts(name, cfg.get("peak_label_shifts_mm"))
+    cfg["peak_label_shifts_mm"] = {scope: {key: [0.0, 0.0] for key in _peak_label_keys()}
+                                   for scope in SCOPES}
+    for scope, per_label in _load_label_shifts(name, raw_labels).items():
+        cfg["peak_label_shifts_mm"].setdefault(scope, {}).update(per_label)
     cfg["shifts_mm"] = {scope: {sid: 0.0 for sid in SAMPLE_IDS} for scope in SCOPES}
     for scope, per_sample in raw_shifts.items():
         if per_sample is None:
@@ -214,6 +317,16 @@ def prepare_config(config: dict, *, label: str | None = None) -> dict:
                 raise ConfigError(f"{name}：shifts_mm.{scope}.{sid} = {mm} 超出 ±{SHIFT_LIMIT_MM} mm；建议改成 {sug}")
             cfg["shifts_mm"][scope][sid] = mm
     return cfg
+
+
+def _requested_peak_shifts(shifts: dict) -> dict:
+    """挑出**真的要求位移**的条目（任何 `{键: [dx, dy]}` 映射）：`[0, 0]`（含补出来的默认值）=「不动」。
+
+    零值必须与「没写」逐字节等价，否则 `prepare_config` 补出的默认零值会把
+    「没有可行避让位置」的标注强行钉回锚点——那是**改排布**，不是补默认值。
+    避让引擎、QA 的「图上有这个标注吗」、迁移写出口都用这一份口径。
+    """
+    return {key: pair for key, pair in shifts.items() if pair[0] or pair[1]}
 
 
 def load_config_nmr(path: pathlib.Path) -> dict:
@@ -288,13 +401,14 @@ def list_params() -> None:
     print("   调大会怎样: 该样品整组图元（谱线+基线+//+标注+引线）纯显示整体上移，不动科研数据")
     print("   可用样品 id: " + "、".join(SAMPLE_IDS))
     print("   使用示例: shifts_mm: { main: { vancho: 1.0 } }")
-    print("2. 逐标注微调 key: peak_label_shifts_mm.main.<标注gid> (单位 [dx, dy] mm，范围 ±10.0，dx向右，dy向上)")
-    print("   调大会怎样: 仅该峰标注独立微移（dx 向右，dy 向上），引线自动跟随重新连接")
-    print("   可用标注 gid:")
-    for _ppm, _idx, _grp, *_ in PEAK_LABELS_TEMPLATE:
-        _sid = SAMPLES_CONFIG[_idx][7]
-        print(f"     peak.{_sid}.{_gid_tag(_ppm):<12} ({_grp})")
-    print("   使用示例: peak_label_shifts_mm: { main: { peak.vancho.3p91: [0.5, 1.0] } }")
+    print("2. 逐标注微调 key: peak_label_shifts_mm.main.<标注key> (值形 [dx, dy]，单位 mm，各 ±10.0，dx向右，dy向上)")
+    print("   调大会怎样: 仅该峰标注独立微移（dx 向右，dy 向上），引线自动跟随重新连接；改完走真实重建+渲染校验")
+    print("   可用标注（左列 = YAML 键/路径第三段，整串一个键段；右列 = inspect 用的图元 gid）:")
+    for key, gid in zip(_peak_label_keys(), _peak_label_gids()):
+        print(f"     {key:<20} (gid: {gid})")
+    print("   路径第三段是完整的标注 key（不按点拆开）。JSON 示例：")
+    print('     {"operation":"set_parameter","path":["peak_label_shifts_mm","main",'
+          f'"{_peak_label_keys()[1]}"],"value":[0.5, 1.0]}}')
     print("=== 实测毫米距离与整组位置 ===")
     print(f"  pitch_mm.main: {CONFIG['pitch_mm']['main']} mm（相邻基线间距）")
     print(f"  group_y_mm.main: {CONFIG['group_y_mm']['main']} mm（所有样品及标注整组平移）")
@@ -341,7 +455,9 @@ def _apply_config(cfg: dict) -> None:
     LABEL_MIN_GAP_MM = cfg["label_min_gap_mm"]
     LABEL_MAX_DX_MM = cfg["label_max_dx_mm"]
     LABEL_LANES = cfg["label_lanes"]
-    PEAK_LABEL_SHIFTS = cfg["peak_label_shifts_mm"]
+    #: 配置里存的是作用域 → 短名；图元消费方（避让引擎 / QA / 契约）按**完整 gid** 说话。
+    #: 换算只在 `_peak_shifts_by_gid` 这一处发生，配置本身保持 YAML 的样子。
+    PEAK_LABEL_SHIFTS = _peak_shifts_by_gid(cfg["peak_label_shifts_mm"])
     #: 标注里要不要带 ppm 后缀。**只改显示格式，不改归属文字**——
     #: 归属始终是模板里的 `group_name`（Ar–OCH₃ 等），ppm 是算法检测出来的补充信息。
     SHOW_PPM = cfg["show_ppm"]
@@ -465,7 +581,7 @@ def check_label_geometry(fig) -> list[str]:
             if np.any((xy[:, 0] >= legbb.x0) & (xy[:, 0] <= legbb.x1) &
                       (xy[:, 1] >= legbb.y0) & (xy[:, 1] <= legbb.y1)):
                 out.append(f"「{gid.rsplit('.', 1)[-1]}」引线穿过图例")
-    for gid in PEAK_LABEL_SHIFTS:
+    for gid in _requested_peak_shifts(PEAK_LABEL_SHIFTS):
         if gid not in seen:
             out.append(f"未知标注 gid：{gid}（peak_label_shifts_mm 里写了，图上没有）")
     for gid in UNPLACED_GIDS:
@@ -572,26 +688,6 @@ def prepare_data():
         print("=" * 72)
     return science
 
-# ===== 2. 特征峰标注模板 (ppm 动态由算法检测填入，杜绝手写偏差！) =====
-# 格式: (搜索目标近似ppm, 样品层0~3, 基团名称, dy垂直微调, ha水平对齐, 是否自动附加ppm数字, 局部搜索窗宽)
-# 主图只标"能区分合成步骤"的诊断峰；完整归属见 SI 的 Fig_S1–Fig_S4 单谱
-# 格式: (搜索目标近似ppm, 样品层 0~3, 基团名称, dy保留位, ha对齐, 自动附加ppm, 局部搜索窗宽)
-PEAK_LABELS_TEMPLATE = [
-    # --- 第 0 层: Van-CHO (2) ---
-    (9.83, 0, "–CHO", 0, "center", True, 0.12),          # 醛基：下一步应消失
-    (3.91, 0, "Ar–OCH$_3$", 0, "center", True, 0.08),
-    (3.68, 0, "–COOCH$_3$", 0, "center", True, 0.08),    # 甲酯：胺解后应消失
-
-    # --- 第 1 层: Van-OH (3) ---
-    (4.62, 1, "–CH$_2$OH", 0, "center", True, 0.12),     # 苄醇：证明选择性还原
-
-    # --- 第 2 层: Van-NH$_2$ (4) ---
-    (3.03, 2, "–CH$_2$NH$_2$", 0, "center", True, 0.10), # 端胺：证明胺解成功
-
-    # --- 第 3 层: HAMA（终产物）---
-    (6.18, 3, "=CH$_2$ (MA)", 0, "center", True, 0.10),  # 甲基丙烯酰双键
-    (2.02, 3, "–COCH$_3$ (HA)", 0, "center", True, 0.10),# HA 骨架乙酰基内标
-]
 
 if ARGS.list_params:
     list_params()
@@ -1038,7 +1134,7 @@ def _build(science: dict, scope_target: str):
             (exact_ppm, text, peak_y, _gid("peak", sid, _gid_tag(approx_ppm))))
     PLACED_RECORDS, UNPLACED_GIDS = place_peak_labels(
         ax, labels_by_sample, lanes=LABEL_LANES, min_gap_mm=LABEL_MIN_GAP_MM,
-        max_dx_mm=LABEL_MAX_DX_MM, shifts_mm=PEAK_LABEL_SHIFTS,
+        max_dx_mm=LABEL_MAX_DX_MM, shifts_mm=_requested_peak_shifts(PEAK_LABEL_SHIFTS),
         artists_by_sample_dict=artists_by_sample,
     )
     ax.set_xlabel(r"Chemical Shift $\delta$ (ppm)", fontsize=FONTSIZE_AXIS,
@@ -1106,24 +1202,6 @@ _PEAK_TAGS = {sid: tuple(_gid_tag(p) for p, i, *_ in PEAK_LABELS_TEMPLATE
 _BASELINE_SCENES: dict[str, tuple] = {}
 
 
-def _gid(kind: str, sid: str = "", tag: str = "") -> str:
-    """对象身份的唯一构造点：`fig2_nmr.main.<kind>[.<sid>[.<tag>]]`。
-
-    末段不带点（`3p91`），否则按点切分的读取方会切错。
-    """
-    parts = [FIGURE_ID, SCOPE, kind]
-    if sid:
-        parts.append(sid)
-    if tag:
-        parts.append(tag)
-    return ".".join(parts)
-
-
-def _guide_gid(peak_gid: str) -> str:
-    """引线 gid 由标注 gid 派生——身份规则只此一处。"""
-    return peak_gid.replace(".peak.", ".guide.")
-
-
 def _baseline_scene(scope: str):
     """该 scope 的基线 (Figure, GidRegistry)，按 scope 缓存、只建一次。"""
     if scope not in _BASELINE_SCENES:
@@ -1189,8 +1267,12 @@ def _scene_roles(fig, reg) -> tuple[dict[str, list[str]], dict[int, str]]:
 
 
 def _decl_param(scope, key, path, unit, mutability, objects, *, operation=None, axis=None,
-                bounds=None, expected=None) -> dict:
-    """契约参数记录。`bounds` = (min, max)，取自 SCALARS / 关系上限，不另抄一份数字。"""
+                bounds=None, expected=None, type=None) -> dict:
+    """契约参数记录。`bounds` = (min, max)，取自 SCALARS / 关系上限，不另抄一份数字。
+
+    `type` 只给**非标量**的值形用（`"[dx,dy]"`）：`figpact.patch` 按它决定值是不是
+    「两个数字的列表」，并逐分量套同一对 min/max。标量参数不写（缺省 float）。
+    """
     rec = {"key": key, "path": list(path), "unit": unit, "mutability": mutability,
            "scopes": [scope], "objects": list(objects), "scale": 1.0}
     if operation is not None:
@@ -1201,6 +1283,8 @@ def _decl_param(scope, key, path, unit, mutability, objects, *, operation=None, 
         rec["min"], rec["max"] = bounds
     if expected is not None:
         rec["expected"] = expected
+    if type is not None:
+        rec["type"] = type
     return rec
 
 
@@ -1214,7 +1298,8 @@ def layout_contract(scope: str) -> dict:
     """该 scope 的显式布局契约：精确 YAML 路径、语义节点/分组、受影响集合、产物名。
 
     节点 / 角色 / 所属 panel 取自基线场景（`_baseline_scene`）；逐样品的毫米操作声明为
-    **实际会动的那些图元**（整层或上方所有层），不声明不存在的 gid。
+    **实际会动的那些图元**（整层或上方所有层），不声明不存在的 gid。逐标注微调同样按
+    「真的画出来的标注」声明：路径第三段是 `peak.<sid>.<tag>` 整串一段，值形是 `[dx, dy]`。
     """
     if scope not in SCOPES:
         raise ValueError(f"未知作用域 {scope!r}；可用：{list(SCOPES)}")
@@ -1283,12 +1368,17 @@ def layout_contract(scope: str) -> dict:
                   bounds=(-SHIFT_LIMIT_MM, SHIFT_LIMIT_MM),
                   expected={"kind": "translate", "objects": own, "axis": "y"})
     # 逐标注微调是 [dx, dy] **两轴**毫米偏移并重画引线——不是单轴纯平移，故走 rebuild。
-    for gid in sorted(PEAK_LABEL_SHIFTS):
-        label = gid.removeprefix(f"{FIGURE_ID}.{scope}.")
+    # 声明的是**真的画出来的**那些标注（角色取自真实建出来的图）：没画出来的峰、图上没有的
+    # 名字都不声明 = 不可编辑。路径第三段是 `peak.<sid>.<tag>` 这**一整串**（末段不带点、
+    # 也绝不按点拆开）——它同时是规范化配置里的键、`nmr.yaml` 里的键、GUI 目录里的键。
+    # 每个都带 `[0.0, 0.0]` 的零基线（`prepare_config` 补的），所以 YAML 写 `{}` 时也能设。
+    prefix = f"{FIGURE_ID}.{scope}."
+    for gid in sorted(roles["peaks"]):
+        label = gid.removeprefix(prefix)
         objects = [g for g in (gid, _guide_gid(gid)) if g in registered]
         _editable(params, scope, f"peak_label_shifts_mm.{scope}.{label}",
                   ["peak_label_shifts_mm", scope, label], "mm", objects, operation="rebuild",
-                  bounds=(-SHIFT_LIMIT_MM, SHIFT_LIMIT_MM),
+                  type="[dx,dy]", bounds=(-SHIFT_LIMIT_MM, SHIFT_LIMIT_MM),
                   expected={"kind": "style", "objects": objects})
     # 只读重建字段：声明出来是为了它们**不被当成可编辑**（缺声明 = UNCLASSIFIED 失败关闭）。
     params.append(_decl_param(scope, "schema_version", ["schema_version"], "int", "FIXED_STYLE", []))
@@ -1382,8 +1472,8 @@ def make_figure():
             raise ValueError("迁移输出必须是新文件")
         source = dict(CONFIG)
         source["peak_label_shifts_mm"] = {
-            "main": {gid.removeprefix(f"{FIGURE_ID}.main."): list(v)
-                     for gid, v in CONFIG["peak_label_shifts_mm"].items()}}
+            SCOPE: {label: list(pair) for label, pair in
+                    _requested_peak_shifts(CONFIG["peak_label_shifts_mm"][SCOPE]).items()}}
         output.write_text(yaml.safe_dump(source, allow_unicode=True, sort_keys=False), encoding="utf8")
         plt.close(fig)
         print(f"已迁移到 {output}；正式图未改动")

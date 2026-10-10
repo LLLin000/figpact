@@ -42,6 +42,24 @@ figpact audit-params --script <py> [--config <yaml>] [--output <md>]
 figpact agent --script <py> --config <yaml> --scope <scope> [--output-dir <dir>]
 ```
 
+`agent` 在 stdin/stdout 上跑 JSON-RPC：每行一个
+`{"jsonrpc":"2.0","id":1,"method":"…","params":{…}}`，stdout 每行一个响应（`result`
+或 `error{code,message}`），**只承载协议**。`try_layout` 的操作记录用判别键
+`operation`：
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"snapshot","params":{}}
+{"jsonrpc":"2.0","id":2,"method":"try_layout","params":{"revision":"<上一条的 revision>","operations":[{"operation":"set_relation","relation_id":"annotated.clearance.hama","target_mm":2.5}]}}
+{"jsonrpc":"2.0","id":3,"method":"render_preview","params":{"revision":"<上一条的 revision>"}}
+{"jsonrpc":"2.0","id":4,"method":"commit","params":{"kind":"draft","revision":"<上一条的 revision>"}}
+```
+
+`kind:"draft"` 只写 YAML 草稿（`DRAFT_SAVED`，**未过**严格校验）；`kind:"publication"`
+必须带 `confirm:true`，在独立沙箱跑全量 strict 后才事务性安装产物并保存 YAML。
+`--config` 指向哪份 YAML 就写哪份：试算请把真配置拷到临时目录、产物落 `--output-dir`
+沙箱，确认再用真实路径。实测几何读 `relations[].value_mm`（声明的 `target_mm` 是目标，
+不是结果）。完整键名、状态字面量与错误码见 `SKILL.md` §2.1。
+
 ## 本地调参预览
 在仓库根目录运行 `python -X utf8 tools/gui/server.py --port 8731`，打开
 `http://127.0.0.1:8731`。选择 FTIR 或 NMR，调整控件，点击“所见即所得 (Try)”

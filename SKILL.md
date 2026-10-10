@@ -12,8 +12,9 @@ YAML 排版参数与显式绑定连接起来，记录改动会影响谁。
 | 只测量已有 Figure，不提供 YAML | §0 |
 | 接入一张新图（新脚本 + 新 YAML） | §1 |
 | 改一张已经接好的图（人改 YAML，或让 agent 操作场景） | §2 |
+| 用既有 JSON-RPC 会话跑五个操作（确切键名与命令） | §2.1 |
 | 判断一个改动能不能做、该报什么 | §3 身份与路径 · §4 不变量 · §5 验证等级 · §6 不支持与歧义 |
-| 看真实范例与 legacy 人工闭环 | §7 |
+| 看真实范例与 legacy 人工闭环 | §7 · §8 |
 
 ---
 
@@ -114,6 +115,92 @@ legacy 接缝保持原样：`SCOPES`、`FIGURE_ID`、`CONFIG_PATH`、脚本自�
   声明路径**排除，不按扩展名一刀切。
 - 人改 YAML 的 legacy 闭环仍然是：`figpact try`（只在内存合并、写沙箱）→ 审阅对象位移毫米数与
   可行区间 → 写 YAML → `figpact render --strict`（有未豁免阻断项则退出码非零且不覆盖正式产物）。
+
+## 2.1 本机 JSON-RPC 会话：命令、信封与五个操作的精确形状
+
+常驻会话是**一张图、一个作用域、一个进程**；stdin 每行一个 JSON 请求，stdout 每行一个
+JSON 响应，**stdout 只承载协议**（不要往里打日志；诊断在结果字段里：`diagnostics[]` / `checks[]` / `qa`）。
+
+```bash
+python -m figpact agent --script examples/ftir/plot_ftir.py \
+    --config examples/ftir/ftir.yaml --scope annotated [--output-dir <发布目录>]
+```
+
+请求 `{"jsonrpc":"2.0","id":1,"method":"<method>","params":{…}}`；成功回
+`{"jsonrpc":"2.0","id":1,"result":{…}}`，失败回 `{"id":1,"error":{"code":<int>,"message":…}}`。
+`id` 缺省（通知）不回；一行也可以是请求数组，按项回复。`params.detail` 只接受 `summary`
+（默认，长几何采样折叠成 `{"elided":true,"hint":…}`）或 `full`（原样）。
+
+| method | `params`（精确键名） | `result` 关键字段 |
+|---|---|---|
+| `snapshot` | `{}` | `revision` `scope` `unit` `measurement` `nodes[]` `relations[]` `parameter_index[]` `containment` `diagnostics[]` |
+| `inspect` | `{"ids":[…], "name":…, "type":…, "scope":…}` | `count` `nodes[]` `neighbors` `relations[]` `parameters[]` `diagnostics[]` |
+| `try_layout` | `{"operations":[<op>…], "revision":"<rev>"}` | `status` `message` `verification` `changes[]` `affected_objects[]` `relations[]` `checks[]` `diagnostics[]` `science_unchanged` `revision` |
+| `render_preview` | `{"revision":"<rev>"}` | `png`（base64）`cached` `qa` `relations[]` `space[]` `science` `inventory` |
+| `commit` | `{"kind":"draft"\|"publication", "revision":"<rev>", "confirm":<bool>, "output_dir":"<dir>"}` | `status:"committed"` `kind` `verification` `changed_paths[]` `files`/`artifacts[]` |
+
+辅助：`status`（当前 revision / `has_candidate` / 契约摘要）、`close`（结束会话）。
+
+`try_layout` 的每条操作记录用判别键 **`operation`**（不是 `op` / `kind` / `type`）：
+
+```json
+{"operation":"set_parameter","path":["clearance_mm","annotated","hama"],"value":2.5}
+{"operation":"set_relation","relation_id":"annotated.clearance.hama","target_mm":2.5}
+{"operation":"reset"}
+```
+
+- `path` 是**数组**，逐段是 YAML 真实 key（gid 里的点号不是路径分隔符）；`set_relation` 只认
+  契约里声明过的关系 id（`id` 是别名，规范写法 `relation_id`）。
+- 候选**永远**是「基线配置 + 当前累积目标」，不是累加变换；一批里任一条非法整批不生效、状态不变。
+- 带 `revision` 就必须等于会话当前 revision，否则 `STALE_REVISION`。
+
+**声明 ≠ 实测。** 操作里的 `value` / `target_mm` 是**声明的目标**；实际几何读
+`snapshot` / `render_preview` 的 `relations[].value_mm`（并看 `status` `precision` `calibrated`
+`uncertainty_mm`）。`shifts_mm` 这类逐对象显示位移叠加在净距调整**之后**，实测会把它算进去，
+所以声明毫米数与实测毫米数一般不相等——报告以实测为准，也不说它「落在声明容差内」。
+
+**找 id / 参数不用读绘图源码。** 一次 `snapshot` 就够：`relations[].id` 是关系 id，
+`relations[].controlled_by` 是它映射到的精确路径，`parameter_index[] = {path, objects}` 是
+路径↔对象索引，`nodes[].controlled_by` 是反向映射；要 `min` / `max` / `operation` /
+`mutability`（含只读的 `FIXED_STYLE` / `DERIVED`）用 `figpact list-params --script <py> --config <yaml>`
+或 `figpact export-params --script <py> --config <yaml> --json`。id 各图不同，**先查再写**，
+不要照抄另一张图的字面量。
+
+**二维标签位移**使用 `value:[dx_mm,dy_mm]`，只接受基线本来就是两个有限数字、且
+契约声明 `operation:"rebuild"` 的精确路径。两个分量分别检查范围；必须真实重建、
+测量并检查科学指纹和 QA，返回 `RENDER_CHECKED`，不能走刚性平移预测。
+标量参数不接收数组，关系的 `target_mm` 仍是标量。
+
+失败返回非 `OK` 的 `status`（会话状态不变）：`LOCKED`（科学量）、`UNCLASSIFIED`（缺可变性
+或 `operation` 声明，失败关闭）、`OUT_OF_RANGE`、`UNSUPPORTED_PATH`、`NOT_IN_SCOPE`、
+`AMBIGUOUS`、`UNKNOWN_RELATION`、`UNSUPPORTED_RELATION`、`GEOMETRY_REJECTED`（实测碰撞/越界，
+`message` 是**实测**毫米数）、`NO_EFFECT`、`EFFECT_MISMATCH`、`QA_BLOCKED`。**被拒就是没做到**：
+不要把声明的目标值当结果报出来（净距要 1.5 mm 被拒，就不能说「已到 1.5 mm」）。成功时
+`verification` 是 `GEOMETRY_CHECKED` 或 `RENDER_CHECKED`，两者不可互相冒充（§5）。
+
+**`commit` 的两种 kind 信任等级不同，别混：**
+
+- `kind:"draft"`：把候选写回 `--config` 指向的 YAML（原子替换，保留注释与未改字段），
+  `verification:"DRAFT_SAVED"`——**没有**严格校验，草稿还不等于「可发布」。
+- `kind:"publication"`：必须显式 `confirm:true`（否则 `INVALID_PARAMS` 直接拒）；在**独立沙箱**
+  跑全量 strict、比对科学指纹与基线，再把**该图全部声明产物**（各作用域并集去重）**事务性**
+  装入 `output_dir`（缺省=脚本目录）并保存 YAML；任一步失败则产物与 YAML 都不动
+  （错误码 -32005 `COMMIT_REJECTED`）。它是**独立**于草稿的第二次真实校验，不靠草稿的正确性。
+- 提交前提：本会话有过**成功**的 `try_layout`（否则 -32004 `NO_CANDIDATE`），且 revision 是
+  **当前** revision；候选生成后磁盘 YAML / 脚本 / 输入文件被改动同样拒（-32003）。
+- **draft 之后会重新基线**：草稿写回 YAML，下一次调用按新文件重读基线、**清空候选目标**、
+  revision 随之改变。**同一会话不需要重启**：重新 `snapshot` 拿新 revision，再
+  `try_layout` → `render_preview` → `commit`；直接 `commit` 会因为没有候选而 -32004。
+  `publication` 成功同样会推进磁盘 revision（届时照同一流程取新 revision）。
+
+常用错误码：-32700 解析 · -32600 请求非法 · -32601 未知方法 · -32602 `params` 非法
+（含 publication 缺 `confirm`）· -32603 内部错误 · -32001 会话不可用 · -32002 会话已关闭 ·
+-32003 `STALE_REVISION` · -32004 `NO_CANDIDATE` · -32005 `COMMIT_REJECTED` · -32006 worker 错误。
+
+**试算用沙箱副本，确认才动真件。** `--config` 指向哪份 YAML，draft / publication 就写哪份；
+`--output-dir` 指向哪，产物就装到哪。探索阶段把真 YAML **拷一份到临时目录**当 `--config`、
+产物落沙箱目录（真件零改动）；人或 CI 复核后，再用**真实配置路径**开新会话、带 `confirm:true`
+做正式发布——发布写的是**你传进去的那份原始配置**，不要对着真配置反复试。
 
 ## 3. 稳定身份与精确参数路径
 

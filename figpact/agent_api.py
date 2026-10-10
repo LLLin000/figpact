@@ -255,6 +255,7 @@ class AgentSession:
             raise
         except Exception as error:
             raise AgentError(COMMIT_REJECTED, f'草稿保存被拒绝：{error}') from error
+        self._baseline_fingerprint = None
         return {'status': 'committed', 'kind': 'draft', 'verification': 'DRAFT_SAVED',
                 'config': str(self.config), 'revision': self._worker.revision,
                 'changed_paths': [list(p) for p in _flatten(candidate_patch)],
@@ -301,6 +302,7 @@ class AgentSession:
                 raise AgentError(COMMIT_REJECTED, f'发布期间保存配置被拒绝，产物已回滚：{error}') from error
         finally:
             shutil.rmtree(sandbox, ignore_errors=True)
+        self._baseline_fingerprint = None
         return {'status': 'committed', 'kind': 'publication', 'verification': 'STRICT_VERIFIED',
                 'config': str(self.config), 'output_dir': str(output_dir),
                 'revision': self._worker.revision, 'scopes': plan['scopes'],
@@ -650,8 +652,10 @@ def _scopes(module, requested):
 def _build(module, config, scope):
     if hasattr(module, 'build_scene'):
         science = module.load_science() if hasattr(module, 'load_science') else None
-        loaded = module.load_config(config) if hasattr(module, 'load_config') \
-            else yaml.safe_load(Path(config).read_text(encoding='utf-8'))
+        loaded = yaml.safe_load(Path(config).read_text(encoding='utf-8'))
+        prepare = getattr(module, 'prepare_config', None)
+        if callable(prepare):
+            loaded = prepare(loaded)
         return module.build_scene(science, loaded, scope), science
     return module.build_figure_and_registry(scope), None
 

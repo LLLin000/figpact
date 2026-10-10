@@ -79,6 +79,76 @@ shifts_mm:
     hama: 2.0     # 只抬归属版里的 HAMA；main / compare_* 一动不动
 ```
 
+## 用 Agent 会话改这张图（五个操作）
+
+协议的精确形状、错误码与提交语义见根 `SKILL.md` §2.1；这里只给**本图真实**的命令与 id。
+
+```bash
+# 仓库根目录起会话；一个会话只服务一个作用域
+python -m figpact agent --script examples/ftir/plot_ftir.py \
+    --config examples/ftir/ftir.yaml --scope annotated
+```
+
+要动 `main` / `compare_raw` / `compare_processed` 就换 `--scope` 另开会话；用 `annotated`
+的路径去动别的格会被拒（`NOT_IN_SCOPE`），对照图上下两格是**两个独立作用域**、共享一个产物。
+
+`annotated` 作用域里的真实 id（与 `clearance_mm.annotated` 的键一一对应；关系 id 用该对的
+**上方曲线 id**，与 `controlled_by` 指向的参数路径同段）：
+
+| 用途 | 关系 id | 映射到的参数路径 |
+|---|---|---|
+| hama 与其下方相邻曲线的包络净距 | `annotated.clearance.hama` | `["clearance_mm","annotated","hama"]` |
+| HAMA 这一条谱线的纯显示位移 | ——（无关系，只有参数） | `["shifts_mm","annotated","hama"]` |
+| 曲线+归属标签整组竖向平移 | —— | `["group_y_mm","annotated"]` |
+
+同类还有 `annotated.clearance.zno` / `.hama_cu_zno` / `.gel`——**底层 `ha` 没有净距关系**
+（契约里净距只登记 `CURVE_IDS[1:]`）。`main` / `compare_*` 各有自己的同名关系（带各自作用域前缀）。
+**这些 id 不要照抄去别的图**——先 `snapshot` 查
+`relations[].id` 与 `parameter_index[].path`，`min`/`max`/`operation` 用
+`python plot_ftir.py --list-params` 或
+`python -m figpact export-params --script examples/ftir/plot_ftir.py --config examples/ftir/ftir.yaml --json` 查。
+
+一次完整往返（每行一个 JSON，`<…>` 全部来自上一条响应，**不要自己编**）：
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"snapshot","params":{}}
+{"jsonrpc":"2.0","id":2,"method":"try_layout","params":{"revision":"<id1 的 revision>","operations":[{"operation":"set_relation","relation_id":"annotated.clearance.hama","target_mm":2.5}]}}
+{"jsonrpc":"2.0","id":3,"method":"render_preview","params":{"revision":"<id2 的 revision>"}}
+{"jsonrpc":"2.0","id":4,"method":"commit","params":{"kind":"draft","revision":"<id2 的 revision>"}}
+{"jsonrpc":"2.0","id":5,"method":"snapshot","params":{}}
+```
+
+`render_preview` 不改 revision；`draft` 写入 `ftir.yaml` 后会话按新文件**重新基线**——候选被
+清空、revision 变新，要接着改就先做第 5 步 `snapshot` 拿新 revision 再 `try_layout`
+（直接再 commit 会 `NO_CANDIDATE`）。**同一会话不需要重启**：接着可以继续
+`try_layout` → `render_preview` → `commit`，要正式出图就把最后一步换成
+`{"kind":"publication","confirm":true,…}`。`<…>` 全部来自上一条响应，不要自己编。
+
+等价写法也可以直接给参数路径：
+`{"operation":"set_parameter","path":["clearance_mm","annotated","hama"],"value":2.5}`。
+判别键恒为 **`operation`**；`set_relation` 只认关系 id（`relation_id`）。
+
+- **声明的 2.5 mm 不是结果**：实测净距看 `snapshot` / `render_preview` 的 `relations[]` 里
+  `id == "annotated.clearance.hama"` 那条的 `value_mm`（并看 `status` `precision`
+  `calibrated` `uncertainty_mm`）。净距调整之后还会叠加 `shifts_mm` 的额外抬升，所以声明值
+  一般 ≠ 实测值——报**实测**毫米数，不要说「落在 2.5 mm 容差内」。
+- `try_layout` 返回 `status` 非 `OK` 就是**没做到**，别把目标值当结果报出去：例如净距要
+  1.5 mm 时 `GEOMETRY_REJECTED`（实测碰撞/越界，`message` 带**实测**超限毫米数）、
+  `UNSUPPORTED_RELATION`（关系没有单一 `controlled_by` 或依赖非 `translate` 参数）、
+  `QA_BLOCKED`（渲染路径被阻断项拦下）。先看 `checks[]` / `diagnostics[]`，再决定改字号、
+  改别的参数，还是报告实测放不下。
+- 提交：`kind:"draft"` 只写草稿（`verification:"DRAFT_SAVED"`，**未过**严格校验）；
+  `kind:"publication"` 必须带 `confirm:true`，在独立沙箱跑**整张图**的全量 strict，通过后
+  事务性安装本图声明的全部产物（四个作用域的并集去重：`Fig2_FTIR_transmittance_stacked[_annotated]`
+  与 `Fig2_FTIR_transmittance_raw_processed` 的 png/pdf/svg/tiff）并保存 `ftir.yaml`，
+  失败则产物与 YAML 都不动。它不依赖草稿的正确性，是独立第二次校验。
+- **试算用沙箱副本**：把 `ftir.yaml` 拷到临时目录当 `--config`、产物落 `--output-dir` 沙箱，
+  真件零改动；人工/CI 复核后才用真实路径开新会话、带 `confirm:true` 正式发布（发布写的是
+  **你传进去的那份配置**）。
+
+会话只是既有能力的一种入口：文首的 `python plot_ftir.py [--strict]` 闭环与本仓库 GUI 照旧
+可用，本图没有新增功能。
+
 ## 关系型要求怎么落到参数上与口语同义词映射
 
 | 要求与口语表述 | 改什么 | 机制说明与不该做的事 |

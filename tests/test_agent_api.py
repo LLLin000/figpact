@@ -381,6 +381,72 @@ def test_publication_runs_independent_strict_and_installs_all_artifacts(tmp_path
             assert line in published_text, f'发布保存弄丢了注释行：{line}'
 
 
+def test_own_saves_refresh_inputs_without_allowing_external_overwrites(tmp_path):
+    with agent_session(tmp_path, 'ftir', 'main') as w:
+        contract, _ = contract_of(w['script'], w['config'], w['scope'])
+        operation, target = goal_operation(contract, w['config'])
+        for kind in ('draft', 'publication', 'draft'):
+            revision = w['agent'].call('snapshot')['revision']
+            moved = w['agent'].call('try_layout', {
+                'revision': revision, 'operations': [{**operation, 'value': target}]})
+            assert moved['status'] == 'OK', moved
+            saved = w['agent'].call('commit', {
+                'kind': kind, 'revision': moved['revision'], 'confirm': True})
+            assert saved['verification'] == ('STRICT_VERIFIED' if kind == 'publication' else 'DRAFT_SAVED')
+            cursor = yaml.safe_load(w['config'].read_text(encoding='utf-8'))
+            for part in operation['path']:
+                cursor = cursor[part]
+            assert cursor == pytest.approx(target)
+            target += 0.1
+
+        revision = w['agent'].call('snapshot')['revision']
+        moved = w['agent'].call('try_layout', {
+            'revision': revision, 'operations': [{**operation, 'value': target}]})
+        assert moved['status'] == 'OK', moved
+        external = w['config'].read_text(encoding='utf-8') + '\n# External edit after candidate\n'
+        w['config'].write_text(external, encoding='utf-8')
+        error = w['agent'].error('commit', {'kind': 'draft', 'revision': moved['revision']})
+        assert error['code'] == STALE_REVISION
+        assert w['config'].read_text(encoding='utf-8') == external
+
+
+def test_native_plot_with_imported_schema_loader_can_publish(tmp_path):
+    script, config = fixture_paths('ftir')
+    contract, payload = contract_of(script, config, 'main')
+    operation, _ = goal_operation(contract, config)
+    local_script = tmp_path / script.name
+    local_config = local_script.with_suffix('.yaml')
+    local_config.write_bytes(config.read_bytes())
+    local_script.write_text(
+        'import sys\n'
+        f'sys.path.insert(0, {str(ROOT)!r})\n'
+        'from tests.fixtures.native_ftir import *\n'
+        'from figpact.config import load_config\n'
+        'if __name__ == "__main__":\n'
+        '    import runpy\n'
+        f'    runpy.run_path({str(script)!r}, run_name="__main__")\n',
+        encoding='utf-8')
+    output_dir = tmp_path / 'exports'
+    agent = Agent(local_script, local_config, 'main', output_dir)
+    try:
+        snapshot = agent.call('snapshot')
+        moved = agent.call('try_layout', {
+            'revision': snapshot['revision'], 'operations': [operation]})
+        assert moved['status'] == 'OK' and moved['science_unchanged'] is True, moved
+        published = agent.call('commit', {
+            'kind': 'publication', 'revision': moved['revision'], 'confirm': True})
+        assert published['verification'] == 'STRICT_VERIFIED'
+        expected = sorted({name for scope in payload['scopes']
+                           for name in payload['scopes'][scope]['outputs']})
+        assert sorted(published['artifacts']) == expected
+        for name in expected:
+            path = output_dir / name
+            if path.suffix == '.png':
+                assert path.read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+    finally:
+        agent.close()
+
+
 def test_failed_strict_changes_nothing_even_when_preview_is_clean(tmp_path):
     with agent_session(tmp_path, 'negatives', 'main') as w:
         contract, payload = contract_of(w['script'], w['config'], w['scope'])
