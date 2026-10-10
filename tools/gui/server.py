@@ -159,6 +159,7 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
                 response = {
                     "figure": fig_name, "scope": scope, "revision": rev,
                     "new_png": after["png"], "inventory": after["inventory"],
+                    "relations": after["relations"], "space": after["space"],
                     "movements": movements, "qa": after["qa"], "qa_kind": "preview_qa",
                     "qa_delta": {
                         "added": [new_keys[k] for k in sorted(new_keys.keys()-old_keys.keys())],

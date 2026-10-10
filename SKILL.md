@@ -11,12 +11,12 @@
 
 接入分为以下对象类别逐类声明参数与提取契约：
 1. **画布 (Canvas)**：声明实际物理打印尺寸 `canvas_w_mm`、`canvas_h_mm`（直接决定排版比例，字号不随之缩放）。
-2. **坐标轴与范围 (Axes)**：声明轴范围与纵向/横向层间距（如 `stack_gap`、`layer_gap`、`top_headroom`）。
+2. **坐标轴与物理关系 (Axes & Relations)**：锁定科学范围，明确包络净距 `clearance_mm` 与基线间距 `pitch_mm` 的不同定义。
 3. **刻度 (Ticks)**：声明刻度字号 `tick_font_pt`、刻度长度与朝向规范。
 4. **轴标题 (Labels)**：声明轴标题字号 `axis_font_pt`。
 5. **图例 (Legend)**：声明图例字号 `legend_font_pt`、列数 `legend_cols`、水平锚点 `legend_anchor_x`。
 6. **系列/谱线 (Series/Curves)**：声明线宽 `line_width` 以及各系列纯显示位移 `shifts_mm.<scope>.<sid>`。
-7. **标注 (Annotations/Labels)**：声明峰标注字号 `peak_font_pt` / 归属字号 `label_font_pt`、避让参数（`label_min_gap_mm`、`label_max_dx_mm`、`label_lanes`、`label_lift`）。
+7. **标注 (Annotations/Labels)**：声明峰标注字号 `peak_font_pt` / 归属字号 `label_font_pt`、避让参数（`label_min_gap_mm`、`label_max_dx_mm`、`label_lanes`、`label_lift_mm`）。
 8. **色带与辅助线 (Bands/Guides)**：声明归属阴影带边界与文字标签。
 9. **作用域 (Scope)**：声明图元输出版本作用域（如 `main` 主图、`annotated` 标注版、`compare_raw` 对照版），确保同名图元在多子图与多版面导出时 ID 唯一且位移隔离。
 
@@ -38,7 +38,7 @@
 ### 策略分类说明：
 - **`locked`**：严禁随意变动（如 `schema_version`、科学常数）。
 - **`edit`**：用户与模型直接微调的排版旋钮（如 `canvas_w_mm`、`curve_gap_mm`、`legend_cols`）。
-- **`conditional`**：仅在特定标注版生效（如 `stack_gap_annotated`、`stack_lift_annotated_mm`）。
+- **`conditional`**：仅在对应 scope 生效（如 `clearance_mm.annotated`、`group_y_mm.annotated`）。
 - **`derived`**：布局求解过程中根据其它参数推导出的几何量。
 
 ---
@@ -47,8 +47,8 @@
 
 ### 自然语言需求映射法则
 - **动整幅垂直空间**：
-  - FTIR: 找总闸参数 `curve_gap_mm`（调小曲线长高上移，调大拉开标签净空）；标注版整幅上移用 `stack_lift_annotated_mm`。
-  - NMR: 顶部预留找 `top_headroom`；**注意 NMR 无底部边距旋钮**，要求「NMR 主图整体往上提留底边」应明确判定为**无解/拒绝**。
+  - FTIR：调 `clearance_mm.<scope>.<上方曲线id>` 控制相邻包络净距；`group_y_mm.<scope>` 移动整组曲线与归属标签。
+  - NMR：调 `pitch_mm.main.<上方样品id>` 控制基线间距；`group_y_mm.main` 移动所有样品与其标注。空间不足报告超限 mm，保持原信号显示标尺。
 - **动某单一谱线**：找 `shifts_mm.<scope>.<sid>` 纯显示位移（整组/单线联动；必须带明确 scope 如 `main` 或 `annotated`，漏 scope 静默失效）。
 - **动局部文字重叠/粘连**：
   - 先调字号（`label_font_pt` / `peak_font_pt`）或避让参数（`label_min_gap_mm` / `label_max_dx_mm` / `label_lanes`）。
@@ -59,21 +59,21 @@
 ### 口语同义词词典与参数映射表：
 | 口语描述（贴太近/挤/挡/看不清/整体往上等） | 适用图表 | 对应参数 | 关键操作与效果 |
 |---|---|---|---|
-| 「线和标注贴太近」、「谱线和上面的标签太挤/留白不够」 | FTIR | `curve_gap_mm` | 增大数值，拉开标签块底与曲线顶的垂直净空 |
-| 「五条线拉开一点距离」、「曲线之间太挤」 | FTIR | `stack_gap` / `stack_gap_annotated` | 增大基线间距 |
+| 「线和标注贴太近」、「谱线和上面的标签太挤/留白不够」 | FTIR | `curve_gap_mm`、`label_gap_top_mm` | 调整标签布局候选位置，查看实际 QA；不会自动缩小谱线 |
+| 「五条线拉开一点距离」、「曲线之间太挤」 | FTIR | `clearance_mm.<scope>.<上方曲线id>` | 输入毫米净距；GUI 可把本组全部相邻净距设为同一值 |
 | 「右边 Zn–O 标签贴边了/离边框太近/快撞墙了」 | FTIR | `label_edge_margin_mm` | 增大内缩边距 |
 | 「图例压住 O–H 带 / 离顶部标签太近」 | FTIR | `label_gap_top_mm` | 增大数值，标签块整体下移让开图例 |
-| 「标注版整幅谱线整体往上挪一点/别贴底」 | FTIR | `stack_lift_annotated_mm` | 增大数值（曲线与标签整幅上移） |
-| 「四层谱线之间拉开/太挤了」 | NMR | `layer_gap` | 增大数值，拉开基线距离 |
-| 「顶部留白不够/最上方图例和谱图太挤」 | NMR | `top_headroom` | 增大数值，顶部常数预留量增加 |
+| 「标注版整幅谱线整体往上挪一点/别贴底」 | FTIR | `group_y_mm.annotated` | 曲线与归属标签整组平移，内部净距不变 |
+| 「四层谱线之间拉开/太挤了」 | NMR | `pitch_mm.main.<上方样品id>` | 输入毫米基线间距；其他相邻距离不变 |
+| 「顶部留白不够/最上方图例和谱图太挤」 | NMR | `group_y_mm.main` 或相邻 `pitch_mm` | 下移整组或减小指定间距；保留谱线幅度，查看剩余空间和 QA |
 | 「两个相邻诊断峰标注叠在一起/重叠/打架」 | NMR | `peak_font_pt` 或 `label_min_gap_mm` / `peak_label_shifts_mm` | 调小字号 / 调大最小间距 / 逐标注位移 |
-| 「标注文字整体抬高离峰尖远一点/引线拉长」 | NMR | `label_lift` | 增大数值，抬高标注与引线 |
+| 「标注文字整体抬高离峰尖远一点/引线拉长」 | NMR | `label_lift_mm` | 用毫米控制标注基础抬升 |
 | 「图例由两列改成单列/太宽了」 | FTIR / NMR | `legend_cols: 1` | 设为 1 列 |
 | 「图例整体往左靠一点/别贴着右边框」 | FTIR / NMR | `legend_anchor_x` | 调小锚点比率（如 0.98 → 0.94） |
 
 ### 该拒绝 / 无解判据：
 1. **图例纵向自由移动（如挪到底部、居中）**：拒绝。两张图顶部预留模型均绑定图例置顶，无纵向坐标旋钮。
-2. **NMR 主图整体上移/增加底部留白**：拒绝。NMR 由 `layer_gap` + `top_headroom` 静态决定，无底层抬升机制。
+2. **请求超出可用空间**：报告实测超限 mm；用户明确选择调整间距、位置或画布，保持信号幅度与科学量不变。
 3. **修改原始科研数据/改变峰高比例**：拒绝。严禁改动透过率、Bruker 数据点、溶剂定标与归一化标尺。
 4. **FTIR `curve_gap_mm` < 0.5 mm**：拒绝。硬断言限制，小于 0.5 标签必压线。
 ---
@@ -108,7 +108,7 @@
 ### 3. 假阳性边界与免检标注 (False Positive Boundaries)
 以下参数在物理/逻辑上天生**不会改变被检查的单一图元自身快照**，属于假阳性边界，应正确标注而非误报为 `NO_EFFECT`：
 1. **只影响图例内部容器排布的参数**：例如 `legend_cols`（列数改动影响子条目的相对网格，若只探测图例大框的外层单个文字，可能短时间内未触发大框重算；系统应将整体 Legend 对象作为响应宿主）。
-2. **跨作用域/多输出图隔离参数**：例如 `stack_gap_annotated` 只影响 `annotated` 版，对 `main` 版输出图无视觉变化；`shifts_mm.compare_raw` 只影响对照版。在单图 inventory 下，对非本图 scope 的参数应标注为 `OUT_OF_SCOPE` 或通过匹配当前激活 scope 过滤，严禁误报为故障。
+2. **跨作用域/多输出图隔离参数**：例如 `clearance_mm.annotated` 只影响 `annotated` 版；`shifts_mm.compare_raw` 只影响对应对照面板。非当前 scope 参数应标为 `OUT_OF_SCOPE`，严禁误报为故障。
 3. **布局算法边界限制参数**：例如 `label_max_dx_mm`（避让窗口上限）或 `label_min_gap_mm`。当当前图表面板内峰位天然稀疏、未触发拥挤冲突时，增大搜索窗口不会引起实际标签位移。此类算法阈值参数应归类为条件生效 (`CONDITIONAL`)。
 
 ## 5. 禁止项与如实报告规则

@@ -146,6 +146,22 @@ def export_params_catalog(script_path: Path, config_path: Optional[Path] = None)
     for sc in scopes:
         # 深拷贝标量分组给该 scope
         sc_groups = json.loads(json.dumps(scalar_groups, ensure_ascii=False))
+        for parameter, (kind, ids) in getattr(mod, "RELATION_PARAMS", {}).items():
+            params = [{
+                "key": f"{parameter}.{sc}.{sid}", "path": [parameter, sc, sid],
+                "中文名": f"相邻净距 → {sid}" if kind == "vertical_clearance" else f"基线间距 → {sid}",
+                "类型": "float", "单位": "mm", "min": 0.0, "max": 100.0, "step": 0.05,
+                "当前值": cur_cfg[parameter][sc][sid], "relation_kind": kind,
+                "调大会怎样": "向上平移该样品和其上方样品；不缩放信号，其他相邻距离保持不变",
+            } for sid in ids]
+            params.append({
+                "key": f"group_y_mm.{sc}", "path": ["group_y_mm", sc],
+                "中文名": "整组竖向位置", "类型": "float", "单位": "mm",
+                "min": -100.0, "max": 100.0, "step": 0.05,
+                "当前值": cur_cfg["group_y_mm"][sc],
+                "调大会怎样": "整组谱线及归属标注整体上移；内部距离不变",
+            })
+            sc_groups.append({"group": "毫米距离与整体位置", "params": params})
 
         # 为当前 scope 添加位移参数分组
         shifts_cfg = cur_cfg.get("shifts_mm", {}) or {}
@@ -419,7 +435,7 @@ def audit_artists_coverage(script_path: Path, config_path: Optional[Path] = None
                         "gid": gid or f"curve.{pts}",
                         "property": "vertical_gap (垂直层间距)",
                         "category": CAT_YAML,
-                        "reason": "已暴露为 YAML 参数 stack_gap / layer_gap",
+                        "reason": "已暴露为物理关系 clearance_mm / pitch_mm",
                     })
                     entries.append({
                         "artist_type": "Line2D (Curve)",
@@ -459,7 +475,7 @@ def audit_artists_coverage(script_path: Path, config_path: Optional[Path] = None
                         "gid": gid,
                         "property": "vertical_position (基线位置)",
                         "category": CAT_YAML,
-                        "reason": "已暴露为 YAML 参数 layer_gap / shifts_mm",
+                        "reason": "已暴露为 pitch_mm / group_y_mm / shifts_mm",
                     })
                     entries.append({
                         "artist_type": "Line2D (Baseline)",
@@ -561,7 +577,7 @@ def audit_artists_coverage(script_path: Path, config_path: Optional[Path] = None
                         "gid": gid or "break_mark",
                         "property": "y_position (截顶标记垂直位置)",
                         "category": CAT_DERIVED,
-                        "reason": "截顶垂直位置由溶剂截顶阈值 PEAK_MAX_NORM 与 layer_gap / shifts_mm 派生",
+                        "reason": "截顶位置由固定信号阈值和样品组显示位移派生",
                     })
                     continue
 
@@ -642,9 +658,9 @@ def audit_artists_coverage(script_path: Path, config_path: Optional[Path] = None
                     entries.append({
                         "artist_type": "Text (PeakLabel)",
                         "gid": gid,
-                        "property": "label_lift (离峰顶垂直净空)",
+                        "property": "label_lift_mm (标注基础垂直净空)",
                         "category": CAT_YAML,
-                        "reason": "已暴露为 YAML 参数 label_lift",
+                        "reason": "已暴露为 YAML 参数 label_lift_mm",
                     })
                     entries.append({
                         "artist_type": "Text (PeakLabel)",

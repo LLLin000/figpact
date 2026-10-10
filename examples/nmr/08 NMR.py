@@ -46,6 +46,7 @@ sys.path.insert(0, str(ROOT.parent.parent))
 import figure_style as fs
 from figpact import load_config as fp_load_config, apply_display_shift as fp_apply_display_shift, GidRegistry, qa as fp_qa, publish as fp_publish, inventory as fp_inventory
 from figpact.config import ConfigError
+from figpact.relations import measure_relation, set_relation_target, remaining_space, validate_layout
 
 DATA_ROOT = ROOT / "核磁原始数据"
 
@@ -74,6 +75,7 @@ SAMPLES_CONFIG = [
     ("5/1", "HAMA\n(target)",   fs.c("MOD_HA"),      "D2O",     4.79, 4.70, 0.05, "hama"),     # 顶层：接枝产物
 ]
 SAMPLE_IDS = tuple(sid for *_, sid in SAMPLES_CONFIG)
+RELATION_PARAMS = {"pitch_mm": ("baseline_pitch", SAMPLE_IDS[1:])}
 
 # 谱图显示窗（ppm）。**不进 YAML**：这是"这张图回答什么问题"的一部分，
 # 不是排版——改窗宽会藏掉峰。与 FTIR 的 xlim(4000→400) 同一性质。
@@ -89,12 +91,10 @@ PEAK_MAX_NORM = 22
 # ──────────────────────────────────────────────────────────────────────────────
 FONT_RANGE = (3.0, 12.0)
 SCALARS = {
-    "schema_version": (int, 1, 1),
+    "schema_version": (int, 2, 2),
     "canvas_w_mm": (float, 20.0, 200.0),
     "canvas_h_mm": (float, 20.0, 200.0),
-    "layer_gap": (float, 0.0, 200.0),
-    "top_headroom": (float, 0.0, 400.0),
-    "label_lift": (float, 0.0, 60.0),
+    "label_lift_mm": (float, 0.0, 15.0),
     "line_width": (float, 0.2, 3.0),
     "peak_font_pt": (float, *FONT_RANGE),
     "legend_font_pt": (float, *FONT_RANGE),
@@ -133,6 +133,7 @@ def _cli(argv: list[str]) -> argparse.Namespace:
                     help="检查指定 gid 的图元信息")
     ap.add_argument("--probe", default=None,
                     help="试算沙箱目录：给定时产物只写这里，正式输出目录一个字节都不动")
+    ap.add_argument("--migrate-config", help="把旧 YAML 的实测布局迁移到新文件（不发布图件）")
     return ap.parse_args(argv)
 
 
@@ -140,28 +141,8 @@ ARGS = _cli(sys.argv[1:])
 CONFIG_PATH = pathlib.Path(ARGS.config).expanduser() if ARGS.config else ROOT / "nmr.yaml"
 
 
-SCHEMA = {
-    "schema_version": (int, 1, 1),
-    "show_ppm": (bool,),
-    "canvas_w_mm": (float, 20.0, 200.0),
-    "canvas_h_mm": (float, 20.0, 200.0),
-    "layer_gap": (float, 0.0, 200.0),
-    "top_headroom": (float, 0.0, 400.0),
-    "label_lift": (float, 0.0, 60.0),
-    "line_width": (float, 0.2, 3.0),
-    "peak_font_pt": (float, *FONT_RANGE),
-    "legend_font_pt": (float, *FONT_RANGE),
-    "note_font_pt": (float, *FONT_RANGE),
-    "axis_font_pt": (float, *FONT_RANGE),
-    "tick_font_pt": (float, *FONT_RANGE),
-    "legend_cols": (int, 1, 3),
-    "legend_anchor_x": (float, 0.0, 1.0),
-    "label_min_gap_mm": (float, 0.0, 15.0),
-    "label_max_dx_mm": (float, 0.0, 25.0),
-    "label_lanes": (int, 1, 5),
-    "shifts_mm": (dict,),
-    "peak_label_shifts_mm": (dict,),
-}
+SCHEMA = {**SCALARS, "show_ppm": (bool,), "shifts_mm": (dict,), "peak_label_shifts_mm": (dict,),
+          "pitch_mm": (dict,), "group_y_mm": (dict,), "layout_reference": (dict,)}
 
 
 def _load_label_shifts(path, raw) -> dict:
@@ -193,7 +174,23 @@ def _load_label_shifts(path, raw) -> dict:
 
 
 def load_config_nmr(path: pathlib.Path) -> dict:
-    cfg = fp_load_config(path, SCHEMA)
+    if ARGS.migrate_config:
+        legacy = {**SCHEMA, "schema_version": (int, 1, 1), "layer_gap": (float, 0, 200),
+                  "top_headroom": (float, 0, 400), "label_lift": (float, 0, 60)}
+        for key in ("pitch_mm", "group_y_mm", "layout_reference", "label_lift_mm"):
+            legacy.pop(key)
+        cfg = fp_load_config(path, legacy)
+        pitch, headroom, lift = (cfg.pop(k) for k in ("layer_gap", "top_headroom", "label_lift"))
+        scale = (pitch * (len(SAMPLES_CONFIG)-1) + headroom + 6) / (cfg["canvas_h_mm"] * 0.73)
+        cfg.update(schema_version=2, label_lift_mm=lift/scale,
+                   pitch_mm={"main": {sid: pitch/scale for sid in SAMPLE_IDS[1:]}},
+                   group_y_mm={"main": 0.0},
+                   layout_reference={"main": {"axis_bottom_data": -6.0, "units_per_mm": scale,
+                                              "pitch_data": pitch, "headroom_data": headroom}})
+    else:
+        cfg = fp_load_config(path, SCHEMA)
+    validate_layout(cfg, scopes=SCOPES, ids=SAMPLE_IDS[1:], parameter="pitch_mm",
+                    reference_fields=("pitch_data", "headroom_data", "axis_bottom_data", "units_per_mm"))
     raw_shifts = cfg.get("shifts_mm") or {}
     if not isinstance(raw_shifts, dict):
         raise ConfigError(f"{path.name}：shifts_mm 必须是字典映射")
@@ -242,12 +239,10 @@ def list_params() -> None:
         ]),
         ("系列/谱线 (Curves/Series)", [
             ("line_width", "谱线线宽", "pt", SCALARS["line_width"][1:], "所有谱线变粗，仅影响观感不改布局"),
-            ("layer_gap", "谱层基线间距", "a.u.", SCALARS["layer_gap"][1:], "四层谱线基线垂直间距拉开，防层间粘连"),
-            ("top_headroom", "顶部预留空间", "a.u.", SCALARS["top_headroom"][1:], "顶部留白增加，缓解图例与顶层谱线/标注拥挤"),
         ]),
         ("标注 (Annotations)", [
             ("peak_font_pt", "峰标注字号", "pt", SCALARS["peak_font_pt"][1:], "基团诊断峰文字变大；调小可缓解近峰文字重叠"),
-            ("label_lift", "标注离峰顶净空", "a.u.", SCALARS["label_lift"][1:], "峰标注整体往上抬高，拉长引线并远离峰尖"),
+            ("label_lift_mm", "标注离峰顶净空", "mm", SCALARS["label_lift_mm"][1:], "标注基础位置向上移动指定毫米，不改变真实峰位"),
             ("label_min_gap_mm", "标注最小水平净空", "mm", SCALARS["label_min_gap_mm"][1:], "相邻标注横向更稀疏避让，防文字交叠粘连"),
             ("label_max_dx_mm", "标注避让最大横移", "mm", SCALARS["label_max_dx_mm"][1:], "允许标注向两侧平移寻找避让空位的最大窗口"),
             ("label_lanes", "标注避让最大层数", "层", SCALARS["label_lanes"][1:], "允许使用的阶梯避让层数（1-5），调多纵向分层更充裕"),
@@ -279,13 +274,17 @@ def list_params() -> None:
         _sid = SAMPLES_CONFIG[_idx][7]
         print(f"     peak.{_sid}.{_gid_tag(_ppm):<12} ({_grp})")
     print("   使用示例: peak_label_shifts_mm: { main: { peak.vancho.3p91: [0.5, 1.0] } }")
+    print("=== 实测毫米距离与整组位置 ===")
+    print(f"  pitch_mm.main: {CONFIG['pitch_mm']['main']} mm（相邻基线间距）")
+    print(f"  group_y_mm.main: {CONFIG['group_y_mm']['main']} mm（所有样品及标注整组平移）")
+    print("  调大间距只平移上方样品；空间不足报超限，不缩放。独立 shifts_mm 在其后叠加。")
 
 
 
 CANVAS = (CONFIG["canvas_w_mm"], CONFIG["canvas_h_mm"])
-Y_OFFSET_STEP = CONFIG["layer_gap"]
-Y_MAX_EXPAND = CONFIG["top_headroom"]
-LABEL_LIFT = CONFIG["label_lift"]
+Y_OFFSET_STEP = CONFIG["layout_reference"]["main"]["pitch_data"]
+Y_MAX_EXPAND = CONFIG["layout_reference"]["main"]["headroom_data"]
+LABEL_LIFT = CONFIG["label_lift_mm"] * CONFIG["layout_reference"]["main"]["units_per_mm"]
 LINEWIDTH = CONFIG["line_width"]
 FONTSIZE_PEAK = CONFIG["peak_font_pt"]
 FONTSIZE_LEGEND = CONFIG["legend_font_pt"]
@@ -522,7 +521,9 @@ def _draw_spectra():
     reg = GidRegistry()
     fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
     ax.set_xlim(PPM_LEFT, PPM_RIGHT)
-    ax.set_ylim(-6, Y_OFFSET_STEP * (len(SAMPLES_CONFIG) - 1) + Y_MAX_EXPAND)
+    ref = CONFIG["layout_reference"]["main"]
+    height_mm = ax.get_window_extent().height * 25.4 / fig.dpi
+    ax.set_ylim(ref["axis_bottom_data"], ref["axis_bottom_data"] + ref["units_per_mm"] * height_mm)
     fig.canvas.draw()
     artists_by_sample = {}
     for idx, (rel, _, color, _, _, _, _, sid) in enumerate(SAMPLES_CONFIG):
@@ -532,12 +533,12 @@ def _draw_spectra():
         line, = ax.plot(ppm[mask], spec[mask] + offset, color=color, lw=LINEWIDTH, zorder=2)
         curve_gid = f"{FIGURE_ID}.{SCOPE}.curve.{sid}"
         line.set_gid(curve_gid)
-        reg.register(line, curve_gid, params=["line_width", "layer_gap", "shifts_mm"])
+        reg.register(line, curve_gid, params=["line_width", "pitch_mm", "group_y_mm", "shifts_mm"])
         artists_by_sample.setdefault(sid, []).append(line)
         base = ax.axhline(offset, color="#E2E2E2", lw=0.45, ls="--", zorder=1)
         base_gid = f"{FIGURE_ID}.{SCOPE}.baseline.{sid}"
         base.set_gid(base_gid)
-        reg.register(base, base_gid, params=["layer_gap", "shifts_mm"])
+        reg.register(base, base_gid, params=["pitch_mm", "group_y_mm", "shifts_mm"])
         artists_by_sample.setdefault(sid, []).append(base)
         if is_trunc:
             brk = ax.text(ref_solv_ppm, offset + PEAK_MAX_NORM * 1.18 + 1.0, "//",
@@ -912,9 +913,9 @@ def place_peak_labels(
                       fontsize=FONTSIZE_PEAK, ha="center", va="bottom",
                       color=trace_color, zorder=4)
         lbl.set_gid(gid)
-        reg.register(lbl, gid, params=["peak_font_pt", "label_lift", "label_min_gap_mm", "label_max_dx_mm"])
+        reg.register(lbl, gid, params=["peak_font_pt", "label_lift_mm", "label_min_gap_mm", "label_max_dx_mm", "pitch_mm", "group_y_mm"])
         guide_gid = gid.replace(".peak.", ".guide.")
-        reg.register(guide, guide_gid, params=["label_lift", "label_max_dx_mm"])
+        reg.register(guide, guide_gid, params=["label_lift_mm", "label_max_dx_mm", "pitch_mm", "group_y_mm"])
         artists_by_sample_dict.setdefault(sid, []).append(lbl)
 
     return final_placed, remaining_unplaced
@@ -953,14 +954,42 @@ def build_figure_and_registry(scope_target="main"):
         label.set_gid(gid)
         reg.register(label, gid, params=["axis_font_pt"])
     fs.strip_yticks(ax)
+    baselines = [reg.get(f"{FIGURE_ID}.{SCOPE}.baseline.{sid}") for sid in SAMPLE_IDS]
+    if ARGS.migrate_config:
+        CONFIG["pitch_mm"]["main"] = {SAMPLE_IDS[i]: measure_relation("baseline_pitch", baselines[i-1], baselines[i])
+                                      for i in range(1, len(baselines))}
+    for i in range(1, len(baselines)):
+        move = [art for sid in SAMPLE_IDS[i:] for art in artists_by_sample[sid]]
+        set_relation_target(kind="baseline_pitch", object_a=baselines[i-1], object_b=baselines[i],
+                            target_mm=CONFIG["pitch_mm"]["main"][SAMPLE_IDS[i]], move=move)
     for sid, group in artists_by_sample.items():
         for artist in group:
             apply_display_shift(artist, SHIFTS_MM[SCOPE][sid])
+    group = [art for arts in artists_by_sample.values() for art in arts]
+    for art in group:
+        apply_display_shift(art, CONFIG["group_y_mm"]["main"])
+    fig._figpact_relations = [
+        {"scope": "main", "kind": "baseline_pitch", "upper": SAMPLE_IDS[i],
+         "value_mm": measure_relation("baseline_pitch", baselines[i-1], baselines[i])}
+        for i in range(1, len(baselines))]
+    fig._figpact_space = [dict(scope="main", **v) for v in remaining_space(fig, group)]
     return fig, reg
 
 
 def make_figure():
     fig, reg = build_figure_and_registry()
+    if ARGS.migrate_config:
+        output = pathlib.Path(ARGS.migrate_config).resolve()
+        if output == CONFIG_PATH.resolve():
+            raise ValueError("迁移输出必须是新文件")
+        source = dict(CONFIG)
+        source["peak_label_shifts_mm"] = {
+            "main": {gid.removeprefix(f"{FIGURE_ID}.main."): list(v)
+                     for gid, v in CONFIG["peak_label_shifts_mm"].items()}}
+        output.write_text(yaml.safe_dump(source, allow_unicode=True, sort_keys=False), encoding="utf8")
+        plt.close(fig)
+        print(f"已迁移到 {output}；正式图未改动")
+        return
     if ARGS.inventory:
         print(json.dumps(fp_inventory(fig, reg, check_effect=ARGS.check_effect), ensure_ascii=False, indent=2))
         plt.close(fig)

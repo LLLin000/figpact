@@ -34,6 +34,7 @@ sys.path.insert(0, str(next(p for p in Path(__file__).resolve().parents
 import figure_style as fs
 from figpact import load_config, apply_display_shift, GidRegistry, qa, publish as fp_publish, inventory as fp_inventory
 from figpact.config import ConfigError
+from figpact.relations import measure_relation, set_relation_target, remaining_space, validate_layout
 
 ROOT = Path(__file__).parent
 DATA_DIR = ROOT / "2084_1788253487778_26083154776" / "26083154776"
@@ -75,7 +76,7 @@ FONT_RANGE = (3.0, 12.0)
 
 #: key → (类型, 下界, 上界)。
 SCALARS = {
-    "schema_version": (int, 1, 1),
+    "schema_version": (int, 2, 2),
     "canvas_w_mm": (float, 20.0, 200.0),
     "canvas_h_mm": (float, 20.0, 200.0),
     "label_font_pt": (float, *FONT_RANGE),
@@ -89,9 +90,6 @@ SCALARS = {
     "line_width": (float, 0.2, 3.0),
     "legend_cols": (int, 1, 3),
     "legend_anchor_x": (float, 0.0, 1.0),
-    "stack_gap": (float, 0.0, 80.0),
-    "stack_gap_annotated": (float, 0.0, 80.0),
-    "stack_lift_annotated_mm": (float, -5.0, 5.0),
 }
 #: 单条曲线的显示位移上限（mm）。再大就不是排版微调，是画错了。
 SHIFT_LIMIT_MM = 10.0
@@ -101,6 +99,7 @@ SHIFT_LIMIT_MM = 10.0
 #: 不该顺手改掉 SI 对照图）。第三张图上下两格是两个不同的 Axes，必须分开，
 #: 否则 SVG/PDF 里会出现重复 id。
 SCOPES = ("main", "annotated", "compare_raw", "compare_processed")
+RELATION_PARAMS = {"clearance_mm": ("vertical_clearance", CURVE_IDS[1:])}
 
 
 def _number(path: Path, key: str, value) -> float:
@@ -135,6 +134,7 @@ def _cli(argv: list[str]) -> argparse.Namespace:
                     help="检查指定 gid 的图元信息")
     ap.add_argument("--probe", default=None,
                     help="试算沙箱目录：给定时产物只写这里，正式输出目录一个字节都不动")
+    ap.add_argument("--migrate-config", help="把旧 YAML 的实测布局迁移到新文件（不发布图件）")
     return ap.parse_args(argv)
 
 
@@ -142,31 +142,28 @@ ARGS = _cli(sys.argv[1:])
 CONFIG_PATH = Path(ARGS.config).expanduser() if ARGS.config else ROOT / "ftir.yaml"
 
 
-SCHEMA = {
-    "schema_version": (int, 1, 1),
-    "canvas_w_mm": (float, 20.0, 200.0),
-    "canvas_h_mm": (float, 20.0, 200.0),
-    "label_font_pt": (float, *FONT_RANGE),
-    "legend_font_pt": (float, *FONT_RANGE),
-    "label_edge_margin_mm": (float, 0.0, 6.0),
-    "label_gap_top_mm": (float, 0.0, 8.0),
-    "curve_gap_mm": (float, 0.5, 8.0),
-    "axis_font_pt": (float, *FONT_RANGE),
-    "tick_font_pt": (float, *FONT_RANGE),
-    "note_font_pt": (float, *FONT_RANGE),
-    "line_width": (float, 0.2, 3.0),
-    "legend_cols": (int, 1, 3),
-    "legend_anchor_x": (float, 0.0, 1.0),
-    "stack_gap": (float, 0.0, 80.0),
-    "stack_gap_annotated": (float, 0.0, 80.0),
-    "stack_lift_annotated_mm": (float, -5.0, 5.0),
-    "shifts_mm": (dict,),
-}
+SCHEMA = {**SCALARS, "shifts_mm": (dict,), "clearance_mm": (dict,),
+          "group_y_mm": (dict,), "layout_reference": (dict,)}
 
 
 def load_config_ftir(path: Path) -> dict:
     """使用 figpact 引擎校验配置并标准化 shifts_mm。"""
-    cfg = load_config(path, SCHEMA)
+    if ARGS.migrate_config:
+        legacy = {**SCALARS, "schema_version": (int, 1, 1), "shifts_mm": (dict,),
+                  "stack_gap": (float, 0, 80), "stack_gap_annotated": (float, 0, 80),
+                  "stack_lift_annotated_mm": (float, -5, 5)}
+        cfg = load_config(path, legacy)
+        gap, annotated, lift = (cfg.pop(k) for k in
+                                ("stack_gap", "stack_gap_annotated", "stack_lift_annotated_mm"))
+        cfg.update(schema_version=2, clearance_mm={s: {} for s in SCOPES},
+                   group_y_mm={s: 0.0 for s in SCOPES},
+                   layout_reference={s: {"gap_data": annotated if s == "annotated" else gap,
+                                        "lift_mm": lift if s == "annotated" else 0.0,
+                                        "axis_bottom_data": None, "units_per_mm": None} for s in SCOPES})
+    else:
+        cfg = load_config(path, SCHEMA)
+        validate_layout(cfg, scopes=SCOPES, ids=CURVE_IDS[1:], parameter="clearance_mm",
+                        reference_fields=("gap_data", "lift_mm", "axis_bottom_data", "units_per_mm"))
 
     raw_shifts = cfg.get("shifts_mm") or {}
     if not isinstance(raw_shifts, dict):
@@ -213,19 +210,16 @@ def list_params() -> None:
             ("note_font_pt", "对照版小注字号", "pt", SCALARS["note_font_pt"][1:], "raw/processed 对照版左上角说明文字变大"),
         ]),
         ("图例 (Legend)", [
-            ("legend_font_pt", "图例字号", "pt", SCALARS["legend_font_pt"][1:], "图例框变高，顶部预留变多，谱线整体下移"),
+            ("legend_font_pt", "图例字号", "pt", SCALARS["legend_font_pt"][1:], "图例框变高，顶部占用增加；谱线不会自动缩小"),
             ("legend_cols", "图例列数", "列", SCALARS["legend_cols"][1:], "列数变多则图例变宽变扁，纵向占用高度减小"),
             ("legend_anchor_x", "图例水平锚点", "比率", SCALARS["legend_anchor_x"][1:], "图例向右靠（1.0最右，太小向左靠会压住y轴标题）"),
         ]),
         ("系列/谱线 (Curves/Series)", [
             ("line_width", "谱线线宽", "pt", SCALARS["line_width"][1:], "所有谱线变粗，仅影响观感不改布局"),
-            ("stack_gap", "主图谱线间距", "a.u.", SCALARS["stack_gap"][1:], "相邻谱线白缝变大，但曲线幅度相对压缩（跷跷板）"),
-            ("stack_gap_annotated", "标注版谱线间距", "a.u.", SCALARS["stack_gap_annotated"][1:], "标注版相邻谱线间距变大，纵向舒展"),
-            ("stack_lift_annotated_mm", "标注版整体上移", "mm", SCALARS["stack_lift_annotated_mm"][1:], "标注版曲线和标签一起上移，底部留白变大"),
         ]),
         ("标注 (Annotations)", [
-            ("label_font_pt", "官能团标签字号", "pt", SCALARS["label_font_pt"][1:], "标签变大，标签块总高度可能增加并压缩曲线空间"),
-            ("curve_gap_mm", "曲线与标签净空(总闸)", "mm", SCALARS["curve_gap_mm"][1:], "标签块底与谱线顶拉开；调小则谱线组长高并整体上移"),
+            ("label_font_pt", "官能团标签字号", "pt", SCALARS["label_font_pt"][1:], "标签块变大、可能多一层；谱线显示标尺固定，挤不下时报超限"),
+            ("curve_gap_mm", "标签布局候选净空", "mm", SCALARS["curve_gap_mm"][1:], "改变归属标签布局候选位置；不自动缩小谱线"),
             ("label_gap_top_mm", "图例与标签净空", "mm", SCALARS["label_gap_top_mm"][1:], "图例底与标签块顶拉开，标签块整体下移"),
             ("label_edge_margin_mm", "标签距左右框边距", "mm", SCALARS["label_edge_margin_mm"][1:], "Zn-O 等贴边标签向内缩进避开左右边框"),
         ]),
@@ -239,6 +233,12 @@ def list_params() -> None:
             rng_str = f"[{lo}, {hi}]"
             print(f"  {key:<24}{cname:<16}{val_str:>8} {unit:<5} {rng_str:<14} {desc}")
         print()
+
+    print("=== 实测毫米距离与整组位置 ===")
+    for scope in SCOPES:
+        print(f"  clearance_mm.{scope}: {CONFIG['clearance_mm'][scope]} mm（相邻包络净距）")
+        print(f"  group_y_mm.{scope}: {CONFIG['group_y_mm'][scope]} mm（整组平移）")
+    print("  调大间距只平移上方谱线；空间不足报超限，不缩放。独立 shifts_mm 在其后叠加。")
 
     print("=== 位移 (Shifts) ===")
     print("  可位移参数 key: shifts_mm.<作用域>.<曲线id> (单位 mm，范围 [-10.0, 10.0]，正数向上)")
@@ -267,12 +267,6 @@ LABEL_GAP_TOP_MM = CONFIG["label_gap_top_mm"]
 # 它每收 1 mm，谱线组就长高 1 mm、整体上移 1 mm。下限 0.5 是因为
 # draw_bands 要求标签必须落在 ymax + 0.5 mm 之上。
 CURVE_GAP_MM = CONFIG["curve_gap_mm"]
-# 相邻谱线基线的间距（数据单位）。55 是逐谱等高归一化后的谱深，
-# 间距越接近谱深，谱线越像贴在一起。
-TRACE_GAP = CONFIG["stack_gap"]
-# 标注版：增大谱线间距，并在最终坐标范围内整体上移（毫米）。
-ANNOTATED_TRACE_GAP = CONFIG["stack_gap_annotated"]
-ANNOTATED_TRACE_LIFT_MM = CONFIG["stack_lift_annotated_mm"]
 # 逐曲线显示位移（mm）：`{作用域: {曲线id: 毫米}}`，布局冻结后生效，见 apply_display_shift()
 SHIFTS_MM = CONFIG["shifts_mm"]
 # 图上每一类**可见文字与线**都要有入口：轴标题 / 刻度数字 / 小注 / 谱线线宽 / 图例列数与水平锚点。
@@ -348,7 +342,7 @@ def normalize_spectra(spectra, target_depth: float = 55.0):
     return out
 
 
-def compute_offsets(spectra, gap: float = TRACE_GAP) -> list[float]:
+def compute_offsets(spectra, gap: float) -> list[float]:
     offsets, previous_top = [], 0.0
     for _, y in spectra:
         lower, upper = float(np.nanmin(y)), float(np.nanmax(y))
@@ -429,13 +423,13 @@ def draw_bands(ax, y_top: float, top_limit: float, scope: str, reg: GidRegistry 
     for center, tier, (_, _, text, bid) in zip(positions, tiers, BANDS):
         y = top_limit - text_height - (max(tiers) - tier) * step
         if y < y_top:
-            raise RuntimeError("归属标签带不足，不能压缩标签层间距")
+            raise RuntimeError(f"归属标签带超限 {(y_top-y)/units_per_mm:.3f} mm；不会压缩标签层间距")
         label = ax.text(center, y, text, ha="center", va="bottom",
                         fontsize=LABEL_FS, color=fs.c("ANNOT"), zorder=5)
         band_gid = f"{FIGURE_ID}.{scope}.band.{bid}"
         label.set_gid(band_gid)
         if reg is not None:
-            reg.register(label, band_gid, params=["label_font_pt", "label_gap_top_mm", "label_edge_margin_mm"])
+            reg.register(label, band_gid, params=["label_font_pt", "label_gap_top_mm", "label_edge_margin_mm", "group_y_mm"])
     return "tiered"
 
 
@@ -461,7 +455,7 @@ def preview_qa(fig, scope):
     if scope.startswith("compare"):
         from types import SimpleNamespace
         ax = fig.axes[0 if scope == "compare_raw" else 1]
-        view = SimpleNamespace(axes=[ax], canvas=fig.canvas, dpi=fig.dpi)
+        view = SimpleNamespace(axes=[ax], canvas=fig.canvas, dpi=fig.dpi, texts=fig.texts)
         return blocking_problems(view)
     return blocking_problems(fig)
 
@@ -470,8 +464,8 @@ def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg:
     global CURVES
     if scope not in SCOPES:
         raise ValueError(f"未知作用域 {scope!r}；可用：{list(SCOPES)}")
-    offsets = compute_offsets(
-        spectra, gap=ANNOTATED_TRACE_GAP if annotate else TRACE_GAP)
+    reference = CONFIG["layout_reference"][scope]
+    offsets = compute_offsets(spectra, gap=reference["gap_data"])
     CURVES = [(np.asarray(x, dtype=float), np.asarray(y + o, dtype=float))
               for (x, y), o in zip(spectra, offsets)]
     lines: list[tuple] = []
@@ -481,7 +475,7 @@ def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg:
         line.set_gid(curve_gid)
         lines.append((line, sid))
         if reg is not None:
-            reg.register(line, curve_gid, params=["line_width", "stack_gap", "shifts_mm"])
+            reg.register(line, curve_gid, params=["line_width", "clearance_mm", "group_y_mm", "shifts_mm"])
 
     ymax = max(offset + float(np.nanmax(y)) for (_, y), offset in zip(spectra, offsets))
     ymin = min(offset + float(np.nanmin(y)) for (_, y), offset in zip(spectra, offsets))
@@ -503,18 +497,16 @@ def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg:
         band_h_mm = LABEL_GAP_TOP_MM + block_mm + CURVE_GAP_MM
     reserved_mm = legend_h_mm + band_h_mm
     if reserved_mm >= axes_h_mm:
-        raise RuntimeError("当前方形面板放不下图例与归属标签")
+        raise RuntimeError(f"图例与归属标签超限 {reserved_mm-axes_h_mm:.3f} mm；不会缩放谱线")
     y_span = R / (1.0 - reserved_mm / axes_h_mm)
     ax.set_ylim(y_bottom, y_bottom + y_span)
     if annotate:
         units_per_mm = y_span / axes_h_mm
         top_limit = y_bottom + y_span - (legend_h_mm + LABEL_GAP_TOP_MM) * units_per_mm
         draw_bands(ax, ymax + 0.5 * units_per_mm, top_limit=top_limit, scope=scope, reg=reg)
-        lift = ANNOTATED_TRACE_LIFT_MM * units_per_mm
+        lift = reference["lift_mm"] * units_per_mm
         ax.set_ylim(y_bottom - lift, y_bottom + y_span - lift)
 
-    for line, sid in lines:
-        apply_display_shift(line, dy_mm=SHIFTS_MM[scope][sid])
 
     fs.strip_yticks(ax)
     ax.set_xticks([4000, 3000, 2000, 1000])
@@ -533,6 +525,32 @@ def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg:
             ax.title.set_gid(t_gid)
             reg.register(ax.title, t_gid, params=["note_font_pt"])
     ax.grid(False)
+    if reference["units_per_mm"] is None:
+        reference["axis_bottom_data"] = float(ax.get_ylim()[0])
+        reference["units_per_mm"] = float(np.diff(ax.get_ylim())[0] / axes_h_mm)
+        CONFIG["clearance_mm"][scope] = {
+            sid: measure_relation("vertical_clearance", lines[i-1][0], line)
+            for i, (line, sid) in enumerate(lines) if i}
+    else:
+        bottom = reference["axis_bottom_data"]
+        ax.set_ylim(bottom, bottom + reference["units_per_mm"] * axes_h_mm)
+    for i in range(1, len(lines)):
+        set_relation_target(kind="vertical_clearance", object_a=lines[i-1][0], object_b=lines[i][0],
+                            target_mm=CONFIG["clearance_mm"][scope][lines[i][1]],
+                            move=[line for line, _ in lines[i:]])
+    for line, sid in lines:
+        apply_display_shift(line, dy_mm=SHIFTS_MM[scope][sid])
+    group = [line for line, _ in lines] + [t for t in ax.texts if ".band." in (t.get_gid() or "")]
+    for art in group:
+        apply_display_shift(art, dy_mm=CONFIG["group_y_mm"][scope])
+    relations = getattr(fig, "_figpact_relations", [])
+    relations.extend({"scope": scope, "kind": "vertical_clearance", "upper": lines[i][1],
+                      "value_mm": measure_relation("vertical_clearance", lines[i-1][0], lines[i][0])}
+                     for i in range(1, len(lines)))
+    fig._figpact_relations = relations
+    spaces = getattr(fig, "_figpact_space", [])
+    spaces.extend(dict(scope=scope, **v) for v in remaining_space(fig, group))
+    fig._figpact_space = spaces
     return offsets
 
 
@@ -577,6 +595,18 @@ def build_figure_and_registry(scope_target: str = "annotated"):
 
 
 def make_figure():
+    if ARGS.migrate_config:
+        for scope in ("main", "annotated", "compare_raw"):
+            fig, _ = build_figure_and_registry(scope)
+            plt.close(fig)
+        validate_layout(CONFIG, scopes=SCOPES, ids=CURVE_IDS[1:], parameter="clearance_mm",
+                        reference_fields=("gap_data", "lift_mm", "axis_bottom_data", "units_per_mm"))
+        output = Path(ARGS.migrate_config).resolve()
+        if output == CONFIG_PATH.resolve():
+            raise ValueError("迁移输出必须是新文件")
+        output.write_text(yaml.safe_dump(CONFIG, allow_unicode=True, sort_keys=False), encoding="utf8")
+        print(f"已迁移到 {output}；正式图未改动")
+        return
     # 如果是 --inventory，构建代表性主图 (annotated 版)，清点并以 JSON 输出
     if ARGS.inventory:
         fig, reg = build_figure_and_registry("annotated")
@@ -599,7 +629,7 @@ def make_figure():
     active = {s: {k: v for k, v in per.items() if v}
               for s, per in SHIFTS_MM.items() if any(per.values())}
     print(f"[配置] {CONFIG_PATH.name}: 画布 {FTIR_CANVAS[0]}×{FTIR_CANVAS[1]} mm · "
-          f"标签 {LABEL_FS} pt · 图例 {LEGEND_FS} pt · 间距 {TRACE_GAP}/{ANNOTATED_TRACE_GAP}"
+          f"标签 {LABEL_FS} pt · 图例 {LEGEND_FS} pt · 间距见 clearance_mm"
           + (f" · 位移 {active}" if active else ""))
     raw = normalize_spectra(absorbance_to_transmittance(load_spectra(processed=False)))
     proc = normalize_spectra(absorbance_to_transmittance(load_spectra(processed=True)))

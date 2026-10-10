@@ -56,6 +56,16 @@ GUI 候选预览由 `figpact.preview.preview(script=..., config=..., scope=..., 
 inventory 返回测量时的 `figure_dpi` 与 `figure_size_mm`；CLI 与 GUI 的 bbox 位移
 按该 renderer 的 DPI 换算，不能使用 PNG/TIFF 导出的 DPI。
 
+相邻距离使用物理毫米：FTIR `clearance_mm.<scope>.<上方曲线id>` 是包络净距，
+NMR `pitch_mm.main.<上方样品id>` 是基线距离。GUI 支持整组同值、逐对距离和
+`group_y_mm.<scope>` 整组位置；显示实际距离、距画布边界及坐标框的剩余空间。
+改一对不会改变其他相邻距离，也不会缩小信号；放不下时报告超限 mm。
+独立 `shifts_mm` 在距离调整之后叠加，实测值会反映这一步微调。
+
+旧 schema 1 YAML 用原脚本 `--config <旧.yaml> --migrate-config <新.yaml>` 显式迁移；
+新文件保留旧图的实测标尺和原点，`layout_reference` 只读，不是调图旋钮。
+迁移不覆盖旧配置、不发布；不能直接把旧数据单位间距当成毫米值。
+
 QA 差异和人工豁免按 `(rule_id, scope, object_ids)` 区分，测量数字不参与已识别
 诊断的身份；未知诊断保留完整原文，不能人工豁免。旧文本签名记录不再用于放行，
 需要重新审核后记录规则、对象和理由。

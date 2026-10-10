@@ -476,6 +476,20 @@
       });
     }
 
+    function applyAllGaps() {
+      const input = document.getElementById("bulk-gap-mm");
+      if (!input.value || !input.checkValidity()) { input.reportValidity(); return; }
+      const value = Number(input.value);
+      for (const group of currentCatalog.scopes[activeScope].groups) {
+        for (const param of group.params) {
+          if (param.relation_kind) currentValues[param.key] = value;
+        }
+      }
+      renderControls();
+      updateYamlPatch();
+      triggerTry();
+    }
+
     // 动态生成控件，不硬编码任何参数名
     function renderControls() {
       const container = document.getElementById("controls-container");
@@ -483,6 +497,15 @@
       const scopeData = currentCatalog.scopes[activeScope];
       if (!scopeData) return;
 
+      const relations = scopeData.groups.flatMap(g => g.params).filter(p => p.relation_kind);
+      if (relations.length) {
+        const row = document.createElement("div");
+        row.className = "group-card";
+        row.innerHTML = `<label for="bulk-gap-mm">全部相邻间距（mm）</label>
+          <input id="bulk-gap-mm" type="number" min="0" max="100" step="0.05" placeholder="输入毫米值">
+          <button class="try-btn" onclick="applyAllGaps()">应用到本组</button>`;
+        container.appendChild(row);
+      }
       scopeData.groups.forEach(grp => {
         const card = document.createElement("div");
         card.className = "group-card";
@@ -704,6 +727,23 @@
         statusItem.className = `qa-item ${data.qa_delta.code_after === 0 ? "qa-pass" : "qa-block"}`;
         statusItem.innerText = `[当前 scope 检查，未正式发布] ${data.qa_delta.status_text} · ${data.seconds.toFixed(2)} 秒`;
         qaBox.appendChild(statusItem);
+        for (const relation of data.relations || []) {
+          if (relation.scope !== activeScope) continue;
+          const item = document.createElement("div");
+          item.className = "qa-item qa-movement";
+          const kind = relation.kind === "vertical_clearance" ? "曲线包络净距" : "基线间距";
+          item.innerText = `${kind} → ${relation.upper}: 实测 ${relation.value_mm.toFixed(3)} mm`;
+          qaBox.appendChild(item);
+        }
+        for (const space of data.space || []) {
+          if (space.scope !== activeScope) continue;
+          const item = document.createElement("div");
+          item.className = `qa-item ${space.overflow_mm > 0 ? "qa-block" : "qa-pass"}`;
+          item.innerText = `坐标框剩余：上 ${space.top_mm.toFixed(3)} mm · 下 ${space.bottom_mm.toFixed(3)} mm`
+            + `；距画布边：上 ${space.canvas_top_mm.toFixed(3)} mm · 下 ${space.canvas_bottom_mm.toFixed(3)} mm`
+            + (space.overflow_mm > 0 ? ` · 超限 ${space.overflow_mm.toFixed(3)} mm；未缩放` : "");
+          qaBox.appendChild(item);
+        }
 
         // 新增阻断
         if (data.qa_delta.added && data.qa_delta.added.length > 0) {

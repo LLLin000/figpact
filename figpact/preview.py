@@ -70,7 +70,9 @@ def render_loaded(mod, scope):
             with mpl.rc_context({'savefig.bbox': None}):
                 fig.savefig(buf, format='png', dpi=fig.dpi, bbox_inches=None)
         return {'scope': scope, 'png': base64.b64encode(buf.getvalue()).decode('ascii'),
-                'inventory': inv, 'qa': qa, 'qa_kind': 'preview_qa'}
+                'inventory': inv, 'qa': qa, 'qa_kind': 'preview_qa',
+                'relations': getattr(fig, '_figpact_relations', []),
+                'space': getattr(fig, '_figpact_space', [])}
     finally:
         if fig is not None:
             plt.close(fig)
