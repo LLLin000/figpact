@@ -1,4 +1,5 @@
 """图表质量检查 (QA) 判据与报告。"""
+import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -81,8 +82,9 @@ def _scope_from_objects(object_ids: tuple[str, ...]) -> str:
 def diagnose(problem: str) -> Diagnostic:
     """把任意一处 QA 文本解析成结构化诊断。
 
-    认不出来的行归 `UNCLASSIFIED`，并把数字抹成 # 存进 object_ids —— 退路不比旧签名差，
-    但认得出的（峰 id、曲线 gid、图名）一律保住身份。
+    认不出来的行归 `UNCLASSIFIED`，**原文整句**当对象 id —— 不再抹数字：
+    抹数字会把只差对象 id 的未知文本压成同一个 key，等于给未知对象发通行证。
+    认得出的（峰 id、曲线 gid、图名）一律保住身份，数字则退到 measured/threshold。
     """
     msg = str(problem)
     scope = ""
@@ -118,8 +120,11 @@ def diagnose(problem: str) -> Diagnostic:
                           severity, nums[0] if nums else None,
                           nums[1] if len(nums) > 1 else None, msg)
 
-    masked = _NUM_RE.sub("#", body).strip()
-    return Diagnostic("UNCLASSIFIED", scope, (masked,), "unknown", measured, threshold, msg)
+    # 认不出的文本**不做数字抹除**：把数字抹成 # 会把「3p68 …」和「2p02 …」
+    # 这类只差对象 id 的未知文本压成同一个 key —— 那就又是误豁免。
+    # 未知就保留原文当身份：宁可让 measured 的变化报成「新增 + 消除」，
+    # 也不给认不出来的对象发通行证（Exemptions.write 也拒签 UNCLASSIFIED）。
+    return Diagnostic("UNCLASSIFIED", scope, (body,), "unknown", measured, threshold, msg)
 
 
 def diagnostic_key_of(problem: str) -> tuple:
@@ -127,10 +132,18 @@ def diagnostic_key_of(problem: str) -> tuple:
     return diagnostic_key(diagnose(problem))
 
 
-def signature(problem: str) -> str:
-    """**兼容壳**：结构化 key 的字符串形式（`tools/gui/server.py` 仍在用）。
-    新代码请直接用 `diagnose()` + `diagnostic_key()`。"""
-    return repr(diagnostic_key_of(problem))
+def key_to_json(key: tuple) -> str:
+    """诊断 key → 字符串（JSON 数组形式）：`["NO_FEASIBLE_SLOT", "", ["3p68"]]`。
+
+    给前端/JSON 报文用 —— 那里字典键只能是字符串，而 tuple 需要一一对应地还原。
+    """
+    return json.dumps([key[0], key[1], list(key[2])], ensure_ascii=False)
+
+
+def key_from_json(text: str) -> tuple:
+    """`key_to_json` 的逆运算，还原成 `diagnostic_key` 的 tuple 形式。"""
+    rule_id, scope, ids = json.loads(text)
+    return (rule_id, scope, tuple(sorted(str(i) for i in ids)))
 
 
 def check_out_of_frame(fig: matplotlib.figure.Figure, *, gid_filter: Optional[Any] = None) -> list[str]:
