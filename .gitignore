@@ -7,3 +7,8 @@ Thumbs.db
 figpact-stage-*/
 ftir-stage-*/
 nmr-stage-*/
+# 构建产物（导出件不进仓）
+examples/**/Fig2_*
+examples/**/Fig_*
+*.tiff
+*.pyc
