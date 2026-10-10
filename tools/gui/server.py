@@ -6,19 +6,13 @@
     python -X utf8 tools/gui/server.py
 """
 import argparse
-import base64
 import http.server
-import importlib.util
-import io
 import json
-import os
 import socketserver
-import subprocess
 import sys
-import tempfile
+import time
 import urllib.parse
 from pathlib import Path
-from typing import Any, Optional
 
 import yaml
 
@@ -26,64 +20,23 @@ import yaml
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
-from figpact.cli import (
-    _deep_merge_dict,
-    _run_script_strict,
-)
 from figpact.params import export_params_catalog
 from figpact.qa import diagnose, diagnostic_key
+from figpact.preview import preview, revision
+
+BASELINES = {}
 
 
-def _run_scoped_plot(script_path: Path, config_path: Path, scope: str, *, geometry=False):
-    """Load the requested scope; never silently substitute another panel."""
-    code = """import sys, base64, io, json, importlib.util
-from pathlib import Path
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-script_p, cfg_p = (Path(p).resolve() for p in sys.argv[1:3])
-scope, mode = sys.argv[3:5]
-sys.path.insert(0, str(script_p.parent))
-sys.path.insert(0, str(script_p.parents[2]))
-spec = importlib.util.spec_from_file_location('script_mod', script_p)
-mod = importlib.util.module_from_spec(spec)
-sys.argv = [script_p.name, '--config', str(cfg_p), '--inventory']
-try:
-    spec.loader.exec_module(mod)
-except SystemExit as exc:
-    if exc.code not in (None, 0):
-        raise
-if scope not in mod.SCOPES:
-    raise ValueError('Unknown scope: ' + scope)
-if hasattr(mod, 'build_figure_and_registry'):
-    fig, reg = mod.build_figure_and_registry(scope)
-else:
-    fig, reg = mod.fig, mod.reg
-if mode == 'geometry':
-    from figpact.inventory import inventory
-    result = inventory(fig, reg)
-else:
-    buf = io.BytesIO()
-    fig.savefig(buf, format='png', dpi=150, bbox_inches='tight')
-    result = base64.b64encode(buf.getvalue()).decode('ascii')
-print('SCOPED_RESULT:' + json.dumps(result, ensure_ascii=False))
-plt.close(fig)
-"""
-    res = subprocess.run(
-        [sys.executable, "-X", "utf8", "-c", code, str(script_path), str(config_path),
-         scope, "geometry" if geometry else "png"],
-        cwd=str(script_path.parent), capture_output=True, text=True, encoding="utf-8",
-    )
-    if res.returncode:
-        raise ValueError(res.stderr.strip() or res.stdout.strip())
-    for line in reversed(res.stdout.splitlines()):
-        if line.startswith("SCOPED_RESULT:"):
-            return json.loads(line[len("SCOPED_RESULT:"):])
-    raise ValueError("绘图脚本没有返回所选 scope")
+def baseline_preview(info, scope):
+    key = (str(info["script"]), scope)
+    rev = revision(info["script"], info["config"])
+    cached = BASELINES.get(key)
+    if cached is None or cached["revision"] != rev:
+        cached = preview(**info, scope=scope)
+        BASELINES[key] = cached
+    return cached
 
 
-def _render_script_png_base64(script_path: Path, config_path: Path, scope: str) -> str:
-    return _run_scoped_plot(script_path, config_path, scope)
 
 
 def _validate_scope(name: str, scope: str) -> None:
@@ -147,16 +100,16 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json(data)
             return
 
-        if path == "/api/params":
+        if path in ("/api/params", "/api/baseline"):
             fig_name = query.get("figure", ["ftir"])[0]
             scope = query.get("scope", ["annotated" if fig_name == "ftir" else "main"])[0]
             try:
                 _validate_scope(fig_name, scope)
                 info = _get_preset_figure_info(fig_name)
-                catalog = export_params_catalog(info["script"], info["config"])
-                catalog["current_png"] = _render_script_png_base64(info["script"], info["config"], scope)
-                catalog["scope"] = scope
-            except ValueError as exc:
+                baseline = baseline_preview(info, scope)
+                catalog = export_params_catalog(info["script"], info["config"]) if path == "/api/params" else {}
+                catalog.update(current_png=baseline["png"], scope=scope, revision=baseline["revision"])
+            except Exception as exc:
                 self._send_error_json(str(exc))
                 return
             self._send_json(catalog)
@@ -171,157 +124,54 @@ class FigpactGuiHandler(http.server.SimpleHTTPRequestHandler):
         path = url_parts.path
 
         if path == "/api/try":
-            content_length = int(self.headers.get("Content-Length", 0))
-            body_bytes = self.rfile.read(content_length)
+            started = time.perf_counter()
             try:
-                payload = json.loads(body_bytes.decode("utf-8"))
-            except Exception as e:
-                self._send_error_json(f"JSON 解析失败: {e}")
-                return
-
-            fig_name = payload.get("figure", "ftir")
-            patch_yaml_str = payload.get("patch_yaml", "")
-            run_bisection = payload.get("bisection", False)
-            scope = payload.get("scope")
-            try:
+                payload = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+                fig_name, scope = payload["figure"], payload["scope"]
                 _validate_scope(fig_name, scope)
-            except ValueError as exc:
+                patch = yaml.safe_load(payload.get("patch_yaml", "")) or {}
+                if not isinstance(patch, dict):
+                    raise ValueError("Patch YAML 必须是映射")
+                info = _get_preset_figure_info(fig_name)
+                rev = revision(**info)
+                before = BASELINES.get((str(info["script"]), scope))
+                if before and before["revision"] != rev:
+                    before = None
+                after = preview(**info, scope=scope, patch=patch) if patch or before is None else before
+                old_qa = before["qa"] if before else []
+                old_keys = {diagnostic_key(diagnose(q)): q for q in old_qa}
+                new_keys = {diagnostic_key(diagnose(q)): q for q in after["qa"]}
+                movements = []
+                if before:
+                    a = before["inventory"]
+                    b = after["inventory"]
+                    old_boxes = {it["gid"]: it["snapshot"].get("bbox") for it in a["items"]}
+                    for item in b["items"]:
+                        bb0, bb1 = old_boxes.get(item["gid"]), item["snapshot"].get("bbox")
+                        if not bb0 or not bb1:
+                            continue
+                        c0 = [(bb0[i]+bb0[i+2])*12.7/a["figure_dpi"] for i in (0, 1)]
+                        c1 = [(bb1[i]+bb1[i+2])*12.7/b["figure_dpi"] for i in (0, 1)]
+                        dx, dy = (c1[i]-c0[i] for i in (0, 1))
+                        if max(abs(dx), abs(dy)) > 0.05:
+                            movements.append({"gid": item["gid"], "dx_mm": dx, "dy_mm": dy,
+                                              "text": f"dx={dx:+.2f} mm, dy={dy:+.2f} mm"})
+                response = {
+                    "figure": fig_name, "scope": scope, "revision": rev,
+                    "new_png": after["png"], "inventory": after["inventory"],
+                    "movements": movements, "qa": after["qa"], "qa_kind": "preview_qa",
+                    "qa_delta": {
+                        "added": [new_keys[k] for k in sorted(new_keys.keys()-old_keys.keys())],
+                        "removed": [old_keys[k] for k in sorted(old_keys.keys()-new_keys.keys())],
+                        "code_before": int(bool(old_qa)), "code_after": int(bool(after["qa"])),
+                        "status_text": "当前 scope 有阻断，不可发布" if after["qa"] else "当前 scope 通过；尚未正式发布",
+                    },
+                    "feasible_intervals": [], "seconds": time.perf_counter()-started,
+                }
+            except Exception as exc:
                 self._send_error_json(str(exc))
                 return
-
-            info = _get_preset_figure_info(fig_name)
-            script = info["script"]
-            base_yaml_path = info["config"]
-
-            base_config = yaml.safe_load(base_yaml_path.read_text(encoding="utf-8")) or {}
-            patched_config = yaml.safe_load(base_yaml_path.read_text(encoding="utf-8")) or {}
-            try:
-                patch_dict = yaml.safe_load(patch_yaml_str) or {}
-                if isinstance(patch_dict, dict):
-                    _deep_merge_dict(patched_config, patch_dict)
-            except Exception as e:
-                self._send_error_json(f"Patch YAML 解析错误: {e}")
-                return
-
-            with tempfile.TemporaryDirectory(prefix="figpact-try-gui-") as tmp_dir:
-                td = Path(tmp_dir)
-                patched_yaml = td / "patched.yaml"
-                patched_yaml.write_text(yaml.safe_dump(patched_config), encoding="utf-8")
-
-                # 1. 运行 inventory 并计算位移
-                inv_before = _run_scoped_plot(script, base_yaml_path, scope, geometry=True)
-                inv_after = _run_scoped_plot(script, patched_yaml, scope, geometry=True)
-
-                snap_map_before = {it["gid"]: it.get("snapshot", {}) for it in inv_before.get("items", [])}
-                snap_map_after = {it["gid"]: it.get("snapshot", {}) for it in inv_after.get("items", [])}
-                movements = []
-                px_per_mm = float(inv_before.get("figure_dpi") or 300.0) / 25.4
-
-                for gid, s_after in snap_map_after.items():
-                    s_before = snap_map_before.get(gid)
-                    if not s_before:
-                        continue
-                    bb0 = s_before.get("bbox")
-                    bb1 = s_after.get("bbox")
-                    if bb0 and bb1:
-                        dx_px = ((bb1[0] + bb1[2]) - (bb0[0] + bb0[2])) / 2.0
-                        dy_px = ((bb1[1] + bb1[3]) - (bb0[1] + bb0[3])) / 2.0
-                        dx_mm = dx_px / px_per_mm
-                        dy_mm = dy_px / px_per_mm
-                        dist_mm = (dx_mm**2 + dy_mm**2)**0.5
-                        if dist_mm > 0.05:
-                            movements.append({
-                                "gid": gid,
-                                "dx_mm": round(dx_mm, 2),
-                                "dy_mm": round(dy_mm, 2),
-                                "dist_mm": round(dist_mm, 2),
-                                "text": f"dx={dx_mm:+.2f} mm, dy={dy_mm:+.2f} mm (位移 {dist_mm:.2f} mm)",
-                            })
-
-                # 2. 运行 baseline 与 try 的 strict 检查计算 QA 差异
-                code_before, qa_before = _run_script_strict(script, base_yaml_path)
-                code_after, qa_after = _run_script_strict(script, patched_yaml)
-
-                sig_before = {diagnostic_key(diagnose(q)): q for q in qa_before}
-                sig_after = {diagnostic_key(diagnose(q)): q for q in qa_after}
-
-                added_sigs = sorted(set(sig_after.keys()) - set(sig_before.keys()))
-                removed_sigs = sorted(set(sig_before.keys()) - set(sig_after.keys()))
-
-                qa_delta = {
-                    "added": [sig_after[s] for s in added_sigs],
-                    "removed": [sig_before[s] for s in removed_sigs],
-                    "code_before": code_before,
-                    "code_after": code_after,
-                    "status_text": "通过 (PASS)" if code_after == 0 else f"阻断 (EXIT {code_after})",
-                }
-
-                # 3. 实时渲染新图 PNG
-                new_png_b64 = _render_script_png_base64(script, patched_yaml, scope)
-
-                # 4. 可选二分可行区间
-                feasible_intervals = []
-                if run_bisection and patch_dict:
-                    # 获取首个修改的标量数字键
-                    mod_keys = [k for k in patch_dict.keys() if isinstance(patch_dict[k], (int, float)) and not isinstance(patch_dict[k], bool)]
-                    for p_key in mod_keys[:2]:  # 最多二分试算前2个，保证交互响应
-                        val_now = patch_dict[p_key]
-                        val_orig = base_config.get(p_key, 0.0)
-
-                        def test_candidate(v_test: float) -> bool:
-                            c_test = yaml.safe_load(yaml.safe_dump(base_config))
-                            c_test[p_key] = v_test
-                            cand_yaml = td / "cand.yaml"
-                            cand_yaml.write_text(yaml.safe_dump(c_test), encoding="utf-8")
-                            c_ret, _ = _run_script_strict(script, cand_yaml)
-                            return c_ret == 0
-
-                        v_orig_val = float(val_orig)
-                        low = v_orig_val - max(abs(float(val_now) - v_orig_val) * 3.0, 5.0)
-                        high = v_orig_val
-                        iters_low = 0
-                        if test_candidate(high):
-                            while high - low > 0.05 and iters_low < 8:
-                                mid = (low + high) / 2.0
-                                iters_low += 1
-                                if test_candidate(mid):
-                                    high = mid
-                                else:
-                                    low = mid
-                            f_min = high
-                        else:
-                            f_min = v_orig_val
-
-                        low_u = v_orig_val
-                        high_u = v_orig_val + max(abs(float(val_now) - v_orig_val) * 3.0, 5.0)
-                        iters_high = 0
-                        if test_candidate(low_u):
-                            while high_u - low_u > 0.05 and iters_high < 8:
-                                mid = (low_u + high_u) / 2.0
-                                iters_high += 1
-                                if test_candidate(mid):
-                                    low_u = mid
-                                else:
-                                    high_u = mid
-                            f_max = low_u
-                        else:
-                            f_max = v_orig_val
-
-                        feasible_intervals.append({
-                            "key": p_key,
-                            "interval": [round(f_min, 2), round(f_max, 2)],
-                            "iterations": iters_low + iters_high,
-                        })
-
-                response_data = {
-                    "figure": fig_name,
-                    "scope": scope,
-                    "movements": movements,
-                    "qa_delta": qa_delta,
-                    "new_png": new_png_b64,
-                    "feasible_intervals": feasible_intervals,
-                }
-                self._send_json(response_data)
+            self._send_json(response)
             return
 
         self._send_error_json(f"未知接口: {path}")

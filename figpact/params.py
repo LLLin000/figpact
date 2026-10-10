@@ -225,7 +225,8 @@ def audit_artists_coverage(script_path: Path, config_path: Optional[Path] = None
     fig = getattr(mod, "fig", None)
     reg = getattr(mod, "reg", None)
     if fig is None and hasattr(mod, "build_figure_and_registry"):
-        fig, reg = mod.build_figure_and_registry("annotated")
+        scopes = mod.SCOPES
+        fig, reg = mod.build_figure_and_registry("annotated" if "annotated" in scopes else scopes[0])
 
     if fig is None or reg is None:
         raise RuntimeError(f"未能从 {script_path} 获取 Figure 与 GidRegistry")

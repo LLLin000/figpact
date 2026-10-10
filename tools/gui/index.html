@@ -356,7 +356,7 @@
       </div>
       <div class="preview-status-bar">
         <div id="preview-status">✓ 准备就绪</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted);">分辨率 150 DPI · Agg 物理渲染</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">原尺寸画布 · 当前 scope 预览</div>
       </div>
     </div>
 
@@ -455,7 +455,14 @@
       activeScope = sc;
       renderControls();
       updateYamlPatch();
-      await triggerTry(true);
+      try {
+        const res = await fetch(`/api/baseline?figure=${encodeURIComponent(activeFigure)}&scope=${encodeURIComponent(sc)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        if (sc === activeScope) await triggerTry(true);
+      } catch (err) {
+        alert("Scope 加载失败: " + err);
+      }
     }
 
     function collectAllCurrentValues() {
@@ -695,7 +702,7 @@
         // 状态
         const statusItem = document.createElement("div");
         statusItem.className = `qa-item ${data.qa_delta.code_after === 0 ? "qa-pass" : "qa-block"}`;
-        statusItem.innerText = `[Strict 模式] 修改前 exit=${data.qa_delta.code_before} -> 修改后 exit=${data.qa_delta.code_after} (${data.qa_delta.status_text})`;
+        statusItem.innerText = `[当前 scope 检查，未正式发布] ${data.qa_delta.status_text} · ${data.seconds.toFixed(2)} 秒`;
         qaBox.appendChild(statusItem);
 
         // 新增阻断

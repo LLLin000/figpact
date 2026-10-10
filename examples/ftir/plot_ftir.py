@@ -303,7 +303,6 @@ OUT_DIR = PROBE_DIR or ROOT
 EXEMPT_PATH = OUT_DIR / "qa_exemptions.json"
 
 
-STAGING = Path(tempfile.mkdtemp(prefix="ftir-stage-"))
 FTIR_CANVAS = (CONFIG["canvas_w_mm"], CONFIG["canvas_h_mm"])
 
 fs.apply()
@@ -457,6 +456,15 @@ def blocking_problems(fig) -> list[str]:
     return (qa.blocking_problems(fig)
             + qa.check_series_order(fig, order, min_mm=0.5))
 
+
+def preview_qa(fig, scope):
+    if scope.startswith("compare"):
+        from types import SimpleNamespace
+        ax = fig.axes[0 if scope == "compare_raw" else 1]
+        view = SimpleNamespace(axes=[ax], canvas=fig.canvas, dpi=fig.dpi)
+        return blocking_problems(view)
+    return blocking_problems(fig)
+
 def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg: GidRegistry | None = None):
     """画一格。`scope` 是输出版本作用域（见 SCOPES），gid 与显示位移都按它隔离。"""
     global CURVES
@@ -587,6 +595,7 @@ def make_figure():
         plt.close(fig)
         return
 
+    STAGING = Path(tempfile.mkdtemp(prefix="ftir-stage-"))
     active = {s: {k: v for k, v in per.items() if v}
               for s, per in SHIFTS_MM.items() if any(per.values())}
     print(f"[配置] {CONFIG_PATH.name}: 画布 {FTIR_CANVAS[0]}×{FTIR_CANVAS[1]} mm · "

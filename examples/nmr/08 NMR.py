@@ -308,7 +308,6 @@ STRICT = ARGS.strict
 PROBE_DIR = (pathlib.Path(ARGS.probe).expanduser().resolve() if ARGS.probe
              else fp_publish.probe_dir())
 OUT_DIR = PROBE_DIR or ROOT
-STAGING = pathlib.Path(tempfile.mkdtemp(prefix="nmr-stage-"))
 #: 存量缺陷基线。**这是 NMR 逼出来的规范补充**：
 #: FTIR 的存量问题（字形下限、贴边）本来就在非阻断集合里，所以不需要基线；
 #: NMR 的存量问题恰好落在阻断集合里（标签重叠、文字压线），没有基线的话
@@ -480,12 +479,16 @@ def load_and_calibrate_spectrum(rel_path, solv_name, ref_ppm, search_ppm, win_w)
     print(f"[{rel_path}] {solv_name:7s} 校准核对: 观测溶剂峰 = {obs_solv_ppm:.4f} ppm -> 标准参考值 = {ref_ppm:.4f} ppm (Δδ = {delta_shift:+.4f} ppm)")
     return ppm_calib, spec_norm, is_truncated, ref_ppm
 
-print("=" * 72)
-print("开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...")
 CACHED = {}
-for rel, label, color, solv_name, ref_ppm, search_ppm, win_w, _sid in SAMPLES_CONFIG:
-    CACHED[rel] = load_and_calibrate_spectrum(rel, solv_name, ref_ppm, search_ppm, win_w)
-print("=" * 72)
+
+
+def prepare_data():
+    if not CACHED:
+        print("=" * 72)
+        print("开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...")
+        for rel, _, _, solv_name, ref_ppm, search_ppm, win_w, _ in SAMPLES_CONFIG:
+            CACHED[rel] = load_and_calibrate_spectrum(rel, solv_name, ref_ppm, search_ppm, win_w)
+        print("=" * 72)
 
 # ===== 2. 特征峰标注模板 (ppm 动态由算法检测填入，杜绝手写偏差！) =====
 # 格式: (搜索目标近似ppm, 样品层0~3, 基团名称, dy垂直微调, ha水平对齐, 是否自动附加ppm数字, 局部搜索窗宽)
@@ -513,66 +516,52 @@ if ARGS.list_params:
     raise SystemExit(0)
 
 
-# ===== 3. 绘图渲染（画布尺寸来自 nmr.yaml）=====
-fig, ax = plt.subplots(figsize=fs.canvas_mm(*CANVAS))
-reg = GidRegistry()
-# 统一正方形绘图区：left=.24 right=.97 bottom=.21 top=.94 -> .73 × .73
-fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
-ax.set_xlim(PPM_LEFT, PPM_RIGHT)
-ax.set_ylim(-6, Y_OFFSET_STEP * (len(SAMPLES_CONFIG) - 1) + Y_MAX_EXPAND)
-fig.canvas.draw()
-SPAN_PPM = PPM_LEFT - PPM_RIGHT
-PLOT_W_MM = abs(ax.get_window_extent().width) * 25.4 / fig.dpi
-MM_PER_PPM = PLOT_W_MM / SPAN_PPM
-
-# —— 第一遍：画谱线 ——
-peak_y_of: dict[int, float] = {}
-artists_by_sample: dict[str, list] = {}
-for idx, (rel, label, color, _, _, _, _, sid) in enumerate(SAMPLES_CONFIG):
-    ppm, spec, is_trunc, ref_solv_ppm = CACHED[rel]
-    offset = idx * Y_OFFSET_STEP
-    mask = (ppm >= PPM_RIGHT) & (ppm <= PPM_LEFT)
-    line, = ax.plot(ppm[mask], spec[mask] + offset, color=color, lw=LINEWIDTH, zorder=2)
-    curve_gid = f"{FIGURE_ID}.{SCOPE}.curve.{sid}"
-    line.set_gid(curve_gid)
-    reg.register(line, curve_gid, params=["line_width", "layer_gap", "shifts_mm"])
-    artists_by_sample.setdefault(sid, []).append(line)
-
-    base = ax.axhline(offset, color="#E2E2E2", lw=0.45, ls="--", zorder=1)
-    base_gid = f"{FIGURE_ID}.{SCOPE}.baseline.{sid}"
-    base.set_gid(base_gid)
-    reg.register(base, base_gid, params=["layer_gap", "shifts_mm"])
-    artists_by_sample.setdefault(sid, []).append(base)
-
-    peak_y_of[idx] = offset + float(np.max(spec[mask]))
-    if is_trunc:
-        brk = ax.text(ref_solv_ppm, offset + PEAK_MAX_NORM * 1.18 + 1.0, "//",
-                      fontsize=FONTSIZE_NOTE, color=fs.c("SOLVENT"),
-                      ha="center", va="bottom", weight="bold", zorder=5)
-        brk_gid = f"{FIGURE_ID}.{SCOPE}.break.{sid}"
-        brk.set_gid(brk_gid)
-        reg.register(brk, brk_gid, params=["note_font_pt", "shifts_mm"])
-        artists_by_sample.setdefault(sid, []).append(brk)
-
-# —— 图例：框内右上角（与 XRD 同一做法），条目自上而下 = 谱线自上而下 ——
-handles = [Line2D([], [], color=color, lw=1.2, solid_capstyle="round",
-                  label=label.replace("\n", " "))
-           for _, label, color, *_ in reversed(SAMPLES_CONFIG)]
-legend = ax.legend(handles=handles, loc="upper right",
-                   bbox_to_anchor=(LEGEND_ANCHOR_X, 0.98),
-                   frameon=False, fontsize=FONTSIZE_LEGEND, ncol=LEGEND_COLS,
-                   columnspacing=0.3, handlelength=0.5, handletextpad=0.2,
-                   labelspacing=0.20, borderaxespad=0.15)
-for _t in legend.get_texts():
-    _t.set_color(fs.c("TEXT"))
-leg_gid = f"{FIGURE_ID}.{SCOPE}.legend"
-legend.set_gid(leg_gid)
-legend.set_zorder(7)
-reg.register(legend, leg_gid, params=["legend_font_pt", "legend_cols", "legend_anchor_x"])
-
-# 将图例在数据坐标下的包络框登记进 placed_boxes，杜绝任何诊断标注与图例重叠
-renderer = fig.canvas.get_renderer()
-leg_bbox = legend.get_window_extent(renderer)
+def _draw_spectra():
+    global reg, artists_by_sample
+    fig, ax = plt.subplots(figsize=fs.canvas_mm(*CANVAS))
+    reg = GidRegistry()
+    fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
+    ax.set_xlim(PPM_LEFT, PPM_RIGHT)
+    ax.set_ylim(-6, Y_OFFSET_STEP * (len(SAMPLES_CONFIG) - 1) + Y_MAX_EXPAND)
+    fig.canvas.draw()
+    artists_by_sample = {}
+    for idx, (rel, _, color, _, _, _, _, sid) in enumerate(SAMPLES_CONFIG):
+        ppm, spec, is_trunc, ref_solv_ppm = CACHED[rel]
+        offset = idx * Y_OFFSET_STEP
+        mask = (ppm >= PPM_RIGHT) & (ppm <= PPM_LEFT)
+        line, = ax.plot(ppm[mask], spec[mask] + offset, color=color, lw=LINEWIDTH, zorder=2)
+        curve_gid = f"{FIGURE_ID}.{SCOPE}.curve.{sid}"
+        line.set_gid(curve_gid)
+        reg.register(line, curve_gid, params=["line_width", "layer_gap", "shifts_mm"])
+        artists_by_sample.setdefault(sid, []).append(line)
+        base = ax.axhline(offset, color="#E2E2E2", lw=0.45, ls="--", zorder=1)
+        base_gid = f"{FIGURE_ID}.{SCOPE}.baseline.{sid}"
+        base.set_gid(base_gid)
+        reg.register(base, base_gid, params=["layer_gap", "shifts_mm"])
+        artists_by_sample.setdefault(sid, []).append(base)
+        if is_trunc:
+            brk = ax.text(ref_solv_ppm, offset + PEAK_MAX_NORM * 1.18 + 1.0, "//",
+                          fontsize=FONTSIZE_NOTE, color=fs.c("SOLVENT"),
+                          ha="center", va="bottom", weight="bold", zorder=5)
+            brk_gid = f"{FIGURE_ID}.{SCOPE}.break.{sid}"
+            brk.set_gid(brk_gid)
+            reg.register(brk, brk_gid, params=["note_font_pt", "shifts_mm"])
+            artists_by_sample.setdefault(sid, []).append(brk)
+    handles = [Line2D([], [], color=color, lw=1.2, solid_capstyle="round",
+                      label=label.replace("\n", " "))
+               for _, label, color, *_ in reversed(SAMPLES_CONFIG)]
+    legend = ax.legend(handles=handles, loc="upper right",
+                       bbox_to_anchor=(LEGEND_ANCHOR_X, 0.98),
+                       frameon=False, fontsize=FONTSIZE_LEGEND, ncol=LEGEND_COLS,
+                       columnspacing=0.3, handlelength=0.5, handletextpad=0.2,
+                       labelspacing=0.20, borderaxespad=0.15)
+    for text in legend.get_texts():
+        text.set_color(fs.c("TEXT"))
+    leg_gid = f"{FIGURE_ID}.{SCOPE}.legend"
+    legend.set_gid(leg_gid)
+    legend.set_zorder(7)
+    reg.register(legend, leg_gid, params=["legend_font_pt", "legend_cols", "legend_anchor_x"])
+    return fig, ax
 # —— 第二遍：两阶段确定性避让排布峰标注（阶段 A 有界确定性避让 + 阶段 B 人工偏移）——
 def _segment_hits_box_mm(p1: tuple[float, float], p2: tuple[float, float],
                          box: tuple[float, float, float, float]) -> bool:
@@ -931,95 +920,90 @@ def place_peak_labels(
     return final_placed, remaining_unplaced
 
 
-labels_by_sample: dict[int, list[tuple[float, str, float]]] = {}
-for approx_ppm, sample_idx, group_name, _dy, ha_align, auto_ppm, win_search in PEAK_LABELS_TEMPLATE:
-    rel, _, _, _, _, _, _, _ = SAMPLES_CONFIG[sample_idx]
-    ppm, spec, _, _ = CACHED[rel]
-    win = np.where(np.abs(ppm - approx_ppm) <= win_search)[0]
-    j = win[np.argmax(spec[win])] if len(win) else np.argmin(np.abs(ppm - approx_ppm))
-    exact_ppm = ppm[j]
-    peak_y = min(spec[j], PEAK_MAX_NORM * 1.15)
-    text = f"{group_name} {exact_ppm:.2f}" if (auto_ppm and SHOW_PPM) else group_name
-    _sid = SAMPLES_CONFIG[sample_idx][7]
-    labels_by_sample.setdefault(sample_idx, []).append(
-        (exact_ppm, text, peak_y, f"{FIGURE_ID}.{SCOPE}.peak.{_sid}.{_gid_tag(approx_ppm)}"))
+def build_figure_and_registry(scope_target="main"):
+    global PLACED_RECORDS, UNPLACED_GIDS
+    if scope_target not in SCOPES:
+        raise ValueError(f"未知 scope：{scope_target}")
+    prepare_data()
+    fig, ax = _draw_spectra()
+    labels_by_sample = {}
+    for approx_ppm, sample_idx, group_name, _, _, auto_ppm, win_search in PEAK_LABELS_TEMPLATE:
+        rel = SAMPLES_CONFIG[sample_idx][0]
+        ppm, spec, _, _ = CACHED[rel]
+        win = np.where(np.abs(ppm - approx_ppm) <= win_search)[0]
+        j = win[np.argmax(spec[win])] if len(win) else np.argmin(np.abs(ppm - approx_ppm))
+        exact_ppm = ppm[j]
+        peak_y = min(spec[j], PEAK_MAX_NORM * 1.15)
+        text = f"{group_name} {exact_ppm:.2f}" if (auto_ppm and SHOW_PPM) else group_name
+        sid = SAMPLES_CONFIG[sample_idx][7]
+        labels_by_sample.setdefault(sample_idx, []).append(
+            (exact_ppm, text, peak_y, f"{FIGURE_ID}.{SCOPE}.peak.{sid}.{_gid_tag(approx_ppm)}"))
+    PLACED_RECORDS, UNPLACED_GIDS = place_peak_labels(
+        ax, labels_by_sample, lanes=LABEL_LANES, min_gap_mm=LABEL_MIN_GAP_MM,
+        max_dx_mm=LABEL_MAX_DX_MM, shifts_mm=PEAK_LABEL_SHIFTS,
+        artists_by_sample_dict=artists_by_sample,
+    )
+    ax.set_xlabel(r"Chemical Shift $\delta$ (ppm)", fontsize=FONTSIZE_AXIS,
+                  labelpad=3.5, weight="bold")
+    ax.set_ylabel("Normalized Intensity (a.u.)", fontsize=FONTSIZE_AXIS,
+                  labelpad=3.5, weight="bold")
+    ax.tick_params(length=2.5, width=0.6, labelsize=FONTSIZE_TICK, pad=2)
+    for label, name in ((ax.xaxis.label, "xlabel"), (ax.yaxis.label, "ylabel")):
+        gid = f"{FIGURE_ID}.{SCOPE}.{name}"
+        label.set_gid(gid)
+        reg.register(label, gid, params=["axis_font_pt"])
+    fs.strip_yticks(ax)
+    for sid, group in artists_by_sample.items():
+        for artist in group:
+            apply_display_shift(artist, SHIFTS_MM[SCOPE][sid])
+    return fig, reg
 
-PLACED_RECORDS, UNPLACED_GIDS = place_peak_labels(
-    ax,
-    labels_by_sample,
-    lanes=LABEL_LANES,
-    min_gap_mm=LABEL_MIN_GAP_MM,
-    max_dx_mm=LABEL_MAX_DX_MM,
-    shifts_mm=PEAK_LABEL_SHIFTS,
-    artists_by_sample_dict=artists_by_sample,
-)
-# 坐标轴格式化已在图例/标注计算前预设范围，此处格式化标签与刻度
-ax.set_xlabel(r"Chemical Shift $\delta$ (ppm)", fontsize=FONTSIZE_AXIS,
-              labelpad=3.5, weight="bold")
-ax.set_ylabel("Normalized Intensity (a.u.)", fontsize=FONTSIZE_AXIS,
-              labelpad=3.5, weight="bold")
-ax.tick_params(length=2.5, width=0.6, labelsize=FONTSIZE_TICK, pad=2)
-x_gid = f"{FIGURE_ID}.{SCOPE}.xlabel"
-y_gid = f"{FIGURE_ID}.{SCOPE}.ylabel"
-ax.xaxis.label.set_gid(x_gid)
-ax.yaxis.label.set_gid(y_gid)
-reg.register(ax.xaxis.label, x_gid, params=["axis_font_pt"])
-reg.register(ax.yaxis.label, y_gid, params=["axis_font_pt"])
-fs.strip_yticks(ax)
 
-# ★ 显示位移排在**所有布局求解之后**
-for _sid, _group in artists_by_sample.items():
-    _dy = SHIFTS_MM[SCOPE][_sid]
-    if _dy:
-        for _artist in _group:
-            apply_display_shift(_artist, _dy)
-
-if ARGS.inventory:
-    inv = fp_inventory(fig, reg, check_effect=ARGS.check_effect)
-    print(json.dumps(inv, ensure_ascii=False, indent=2))
-    plt.close(fig)
-    sys.exit(0)
-
-if ARGS.inspect:
-    art = reg.get(ARGS.inspect)
-    if art is None:
-        print(f"未找到 gid: {ARGS.inspect}")
-    else:
-        print(f"[{ARGS.inspect}] {type(art).__name__} | 绑定参数: {reg.params_of(ARGS.inspect)}")
-    plt.close(fig)
-    sys.exit(0)
-
-fs.export(fig, STAGING / "Fig2_NMR_pure_stacked", dpi=DPI)
-fs.qa_report(fig, "NMR 叠谱")
-report_shift_bounds(fig, "NMR 叠谱")
-_blockers = blocking_problems(fig)
-
-exemptions_mgr = fp_publish.Exemptions(EXEMPT_PATH)
-if ARGS.exempt_current:
-    exemptions_mgr.write(_blockers, ARGS.reason)
-    print(f"[豁免] 写入 {len(_blockers)} 条 → {EXEMPT_PATH.name}；理由：{ARGS.reason.strip()}")
-
-_exempt = exemptions_mgr.load()
-_key = fp_qa.diagnostic_key_of
-_exempted = [(b, _exempt[_key(b)]) for b in _blockers if _key(b) in _exempt]
-_new = [b for b in _blockers if _key(b) not in _exempt]
-if _blockers:
-    print(f"[验收] 阻断 {len(_blockers)} 条，其中 {len(_exempted)} 条人工豁免：")
-    for _b, _why in _exempted:
-        print(f"      [豁免] {_b}")
-        print(f"             理由：{_why}")
-    for _b in _new:
-        print(f"      [未豁免] {_b}")
-if _new and STRICT:
-    print(f"[验收] **未豁免**阻断项 {len(_new)} 条：**拒绝发布**，{ROOT.name} 里的正式输出未被覆盖")
+def make_figure():
+    fig, reg = build_figure_and_registry()
+    if ARGS.inventory:
+        print(json.dumps(fp_inventory(fig, reg, check_effect=ARGS.check_effect), ensure_ascii=False, indent=2))
+        plt.close(fig)
+        return
+    if ARGS.inspect:
+        art = reg.get(ARGS.inspect)
+        print(f"[{ARGS.inspect}] {type(art).__name__} | 绑定参数: {reg.params_of(ARGS.inspect)}"
+              if art is not None else f"未找到 gid: {ARGS.inspect}")
+        plt.close(fig)
+        return
+    STAGING = pathlib.Path(tempfile.mkdtemp(prefix="nmr-stage-"))
+    fs.export(fig, STAGING / "Fig2_NMR_pure_stacked", dpi=DPI)
+    fs.qa_report(fig, "NMR 叠谱")
+    report_shift_bounds(fig, "NMR 叠谱")
+    blockers = blocking_problems(fig)
+    exemptions_mgr = fp_publish.Exemptions(EXEMPT_PATH)
+    if ARGS.exempt_current:
+        exemptions_mgr.write(blockers, ARGS.reason)
+        print(f"[豁免] 写入 {len(blockers)} 条 → {EXEMPT_PATH.name}；理由：{ARGS.reason.strip()}")
+    exempt = exemptions_mgr.load()
+    exempted = [(b, exempt[fp_qa.diagnostic_key_of(b)]) for b in blockers
+                if fp_qa.diagnostic_key_of(b) in exempt]
+    new = [b for b in blockers if fp_qa.diagnostic_key_of(b) not in exempt]
+    if blockers:
+        print(f"[验收] 阻断 {len(blockers)} 条，其中 {len(exempted)} 条人工豁免：")
+        for blocker, reason in exempted:
+            print(f"      [豁免] {blocker}\n             理由：{reason}")
+        for blocker in new:
+            print(f"      [未豁免] {blocker}")
+    if new and STRICT:
+        print(f"[验收] **未豁免**阻断项 {len(new)} 条：**拒绝发布**，{ROOT.name} 里的正式输出未被覆盖")
+        shutil.rmtree(STAGING, ignore_errors=True)
+        plt.close(fig)
+        raise SystemExit(1)
+    if not blockers:
+        print("[验收] 无阻断项 ✓")
+    elif not new:
+        print(f"[验收] 无**未豁免**阻断项；但有 {len(exempted)} 条人工豁免——不等于图已经干净")
+    written = fp_publish.publish(STAGING, OUT_DIR)
     shutil.rmtree(STAGING, ignore_errors=True)
-    sys.exit(1)
-if not _blockers:
-    print("[验收] 无阻断项 ✓")
-elif not _new:
-    print("[验收] 无**未豁免**阻断项；但有 "
-          f"{len(_exempted)} 条人工豁免（上面逐条列了理由）——不等于图已经干净")
-_written = fp_publish.publish(STAGING, OUT_DIR)
-shutil.rmtree(STAGING, ignore_errors=True)
-_where = f"试算沙箱 {OUT_DIR}" if PROBE_DIR else f"正式输出 {OUT_DIR}"
-print(f"已写出 {len(_written)} 个文件到{_where}")
+    plt.close(fig)
+    print(f"已写出 {len(written)} 个文件到{'试算沙箱' if PROBE_DIR else '正式输出'} {OUT_DIR}")
+
+
+if __name__ == "__main__":
+    make_figure()

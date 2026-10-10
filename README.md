@@ -43,6 +43,11 @@ Scope 切换会重新预览所选版本，未保存值跨 scope 保留；对照�
 位移只作用于参数指定的那一格。请求中的无效 scope 会被拒绝。参数目录的
 `path` 是实际 YAML 路径段，含点号的完整 GID 是一个键，不能按点号拆开。
 
+GUI 候选预览由 `figpact.preview.preview(script=..., config=..., scope=..., patch=...)`
+一次构图返回 PNG、几何和当前 scope 的 QA，不生成 PDF/SVG/TIFF。基线按配置、
+源码和数据文件状态缓存；画布不使用 tight 裁切。界面中的“当前 scope 通过”
+不是完整 strict 发布验收，正式出图仍使用原 strict 流程。
+
 试算使用临时发布目录，不修改正式输出；即使 QA 不通过，仍可查看候选预览。
 界面目前不自动保存配置或导出正式图：点击“复制 Patch”，将对应改动合并到
 该图 YAML，再运行 `python -m figpact render --script <py> --config <yaml> --strict`。
