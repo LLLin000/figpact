@@ -1,0 +1,13 @@
+# 合成 fixture 的配置：字段与 tests/fixtures/synth_plot.SCHEMA 一一对应，缺一个就报错。
+schema_version: 1
+canvas_w_mm: 60.0
+canvas_h_mm: 45.0
+axis_font_pt: 7.5
+label_font_pt: 6.0
+line_width: 0.8
+label_offset_mm: 1.2
+# T6 素材：声明了、任何绘图代码都不读它（NO_EFFECT 用）。
+unused_knob: 5.0
+shifts_mm:
+  main: {a: 0.0, b: 0.0, c: 0.0}
+  annotated: {a: 0.0, b: 0.0, c: 0.0}
