@@ -20,7 +20,6 @@
 import argparse
 import json
 import math
-import re
 import pathlib
 import shutil
 import sys
@@ -317,31 +316,10 @@ STAGING = pathlib.Path(tempfile.mkdtemp(prefix="nmr-stage-"))
 EXEMPT_PATH = OUT_DIR / "qa_exemptions.json"
 
 
-def _signature(problem: str) -> str:
-    """把 QA 文本压成稳定签名：面积/点数/毫米都随 dpi 变，一律抹成 #。"""
-    return re.sub(r"[-\d.]+", "#", problem).strip()
-
-
-#: **阻断类**的关键词：这三类（重叠 / 压线 / 出框）+ 谱层糊在一起，一律不准进基线。
-#: 基线只用来接住"警告类"（字形下限、贴边）——那些是出版取舍；
-#: 把重叠/压线记进基线等于"违规却报告成功"，验收不允许。
-BLOCKING_KINDS = ("重叠", "压线", "超出坐标框", "最近处", "引线", "未知标注", "NO_FEASIBLE_SLOT")
-
-
-def load_exemptions() -> dict:
-    """读**人工豁免**：`{签名: 理由}`。每条必须带非空 reason——豁免是人签的字，
-    不是"把它藏起来"。没有 reason 的条目直接不认（并说明原因）。"""
-    if not EXEMPT_PATH.is_file():
-        return {}
-    data = json.loads(EXEMPT_PATH.read_text(encoding="utf-8"))
-    out = {}
-    for item in data.get("exemptions", []):
-        sig, reason = str(item.get("signature", "")), str(item.get("reason", "")).strip()
-        if sig and reason:
-            out[sig] = reason
-        elif sig:
-            print(f"[豁免] 忽略无 reason 的条目：{sig[:60]}")
-    return out
+#: 存量缺陷基线只该接住**警告类**（字形下限、贴边——出版取舍）；重叠 / 压线 / 出框 /
+#: 谱层挤压是阻断项，应该回去改布局，不该靠豁免糊过去。这条边界是**人**的判断；
+#: 机器只把每一条诊断的 severity（blocking / warning）标出来，供签字时辨别。
+#: 以前这里靠关键词匹配文本判断，现在由 `figpact.qa.diagnose()` 的结构化诊断取代。
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1022,8 +1000,9 @@ if ARGS.exempt_current:
     print(f"[豁免] 写入 {len(_blockers)} 条 → {EXEMPT_PATH.name}；理由：{ARGS.reason.strip()}")
 
 _exempt = exemptions_mgr.load()
-_exempted = [(b, _exempt[fp_qa.signature(b)]) for b in _blockers if fp_qa.signature(b) in _exempt]
-_new = [b for b in _blockers if fp_qa.signature(b) not in _exempt]
+_key = fp_qa.diagnostic_key_of
+_exempted = [(b, _exempt[_key(b)]) for b in _blockers if _key(b) in _exempt]
+_new = [b for b in _blockers if _key(b) not in _exempt]
 if _blockers:
     print(f"[验收] 阻断 {len(_blockers)} 条，其中 {len(_exempted)} 条人工豁免：")
     for _b, _why in _exempted:

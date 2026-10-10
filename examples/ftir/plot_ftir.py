@@ -8,7 +8,6 @@ from pathlib import Path
 import argparse
 import json
 import math
-import re
 import shutil
 import sys
 import tempfile
@@ -302,25 +301,6 @@ OUT_DIR = PROBE_DIR or ROOT
 #: 豁免是人签的字：每条必须带非空 reason，strict 输出会逐条列出理由，
 #: 并且**永远不会**在存在阻断项时打印「无阻断项 ✓」。
 EXEMPT_PATH = OUT_DIR / "qa_exemptions.json"
-
-
-def _signature(problem: str) -> str:
-    """把 QA 文本压成稳定签名：面积/点数/毫米都随 dpi 变，一律抹成 #。"""
-    return re.sub(r"[-\d.]+", "#", problem).strip()
-
-
-def load_exemptions() -> dict:
-    if not EXEMPT_PATH.is_file():
-        return {}
-    data = json.loads(EXEMPT_PATH.read_text(encoding="utf-8"))
-    out = {}
-    for item in data.get("exemptions", []):
-        sig, reason = str(item.get("signature", "")), str(item.get("reason", "")).strip()
-        if sig and reason:
-            out[sig] = reason
-        elif sig:
-            print(f"[豁免] 忽略无 reason 的条目：{sig[:60]}")
-    return out
 
 
 STAGING = Path(tempfile.mkdtemp(prefix="ftir-stage-"))
@@ -656,9 +636,10 @@ def make_figure():
         exemptions_mgr.write(blockers, ARGS.reason)
         print(f"[豁免] 写入 {len(blockers)} 条 → {EXEMPT_PATH.name}；理由：{ARGS.reason.strip()}")
 
+    # 豁免键 = 规则 + 作用域 + 对象 id（结构化诊断 key）：豁免一个峰不会连带豁免别的峰。
     exempt_dict = exemptions_mgr.load()
-    exempted = [(b, exempt_dict[qa.signature(b)]) for b in blockers if qa.signature(b) in exempt_dict]
-    new_blockers = [b for b in blockers if qa.signature(b) not in exempt_dict]
+    exempted = [(b, exempt_dict[qa.diagnostic_key_of(b)]) for b in blockers if qa.diagnostic_key_of(b) in exempt_dict]
+    new_blockers = [b for b in blockers if qa.diagnostic_key_of(b) not in exempt_dict]
     if blockers:
         print(f"[验收] 阻断 {len(blockers)} 条，其中 {len(exempted)} 条人工豁免：")
         for _b, _why in exempted:

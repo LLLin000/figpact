@@ -5,7 +5,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Optional
-from figpact.qa import signature
+from figpact.qa import diagnose, diagnostic_key
 
 #: 试算沙箱开关。设了它 = 这一次只许写沙箱，正式输出一个字节都不许动。
 #: 发布目标由**引擎**持有：任何走 `publish()` 的脚本都被自动改道，
@@ -47,13 +47,17 @@ def publish(staging: Path | str, target: Path | str) -> list[str]:
 
 
 class Exemptions:
-    """人工豁免记录管理器。"""
+    """人工豁免记录管理器。
+
+    键是**结构化诊断 key**（规则 + 作用域 + 对象 id），不是把数字抹成 # 的文本签名：
+    豁免「3p68」的排版缺陷**不会**顺带豁免「2p02」。
+    """
 
     def __init__(self, path: Path | str):
         self.path = Path(path)
 
-    def load(self) -> dict[str, str]:
-        """加载 {签名: 理由}，无 reason 的条目不认。"""
+    def load(self) -> dict[tuple, str]:
+        """加载 {诊断 key: 理由}，无 reason 或非结构化记录的条目不认。"""
         if not self.path.is_file():
             return {}
         try:
@@ -61,12 +65,15 @@ class Exemptions:
         except Exception:
             return {}
 
-        out = {}
+        out: dict[tuple, str] = {}
         for item in data.get("exemptions", []):
-            sig = str(item.get("signature", ""))
             reason = str(item.get("reason", "")).strip()
-            if sig and reason:
-                out[sig] = reason
+            rule_id = str(item.get("rule_id", "")).strip()
+            if not reason or not rule_id:
+                continue
+            scope = str(item.get("scope", "")).strip()
+            ids = tuple(str(v) for v in item.get("object_ids", []) or [])
+            out[(rule_id, scope, tuple(sorted(ids)))] = reason
         return out
 
     def write(self, blockers: list[str], reason: str) -> None:
@@ -77,13 +84,17 @@ class Exemptions:
 
         existing = self.load()
         for b in blockers:
-            sig = signature(b)
-            if sig:
-                existing[sig] = clean_reason
+            key = diagnostic_key(diagnose(b))
+            if key[0] == "UNCLASSIFIED":
+                # 认不出来的文本不签字：签下去就是给一整片未知区域发通行证。
+                print(f"[豁免] 跳过无法结构化的条目：{str(b)[:60]}")
+                continue
+            existing[key] = clean_reason
 
         payload = {
             "exemptions": [
-                {"signature": sig, "reason": r} for sig, r in sorted(existing.items())
+                {"rule_id": k[0], "scope": k[1], "object_ids": list(k[2]), "reason": r}
+                for k, r in sorted(existing.items())
             ]
         }
         self.path.parent.mkdir(parents=True, exist_ok=True)

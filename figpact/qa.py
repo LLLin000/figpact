@@ -1,5 +1,6 @@
 """图表质量检查 (QA) 判据与报告。"""
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 import numpy as np
@@ -7,9 +8,129 @@ import matplotlib.figure
 from figpact.units import MM_PER_INCH
 
 
+@dataclass(frozen=True)
+class Diagnostic:
+    """一条结构化 QA 诊断。
+
+    数值（mm / px² / 点数 / 字号）随 dpi 与排版变，**不许**进标识；
+    规则、作用域、对象 id 是这条缺陷的身份，**不许**被抹掉。
+    """
+    rule_id: str
+    scope: str
+    object_ids: tuple[str, ...]
+    severity: str           # "blocking" | "warning" | "unknown"
+    measured: Optional[float]
+    threshold: Optional[float]
+    message: str
+
+
+def diagnostic_key(d: Diagnostic) -> tuple:
+    """缺陷的稳定标识：(规则, 作用域, 对象 id 排序)。
+
+    这是「豁免不串」与「try 差异不误判」的前提：
+    `「3p68」无可行避让位置` 与 `「2p02」无可行避让位置` 是**两条**缺陷，
+    以前那个把数字抹成 # 的正则签名会把它们压成同一个字符串。
+    """
+    return (d.rule_id, d.scope, tuple(sorted(d.object_ids)))
+
+
+#: 规则表：(rule_id, severity, 正则)。同一 rule_id 可有多条（同一缺陷的不同措辞）。
+#: 正则里的 o1/o2/o3 命名组按顺序成为 object_ids。**先具体、后笼统**。
+_RULES: tuple[tuple[str, str, re.Pattern], ...] = (
+    ("NO_FEASIBLE_SLOT", "blocking", re.compile(r"「(?P<o1>[^」]+)」无可行避让位置")),
+    ("GUIDE_CROSSES_LEGEND", "blocking", re.compile(r"「(?P<o1>[^」]+)」引线穿过图例")),
+    ("OUT_OF_FRAME", "blocking", re.compile(r"「(?P<o1>[^」]+)」[^「]*?超出坐标框")),
+    ("UNKNOWN_LABEL_GID", "blocking", re.compile(r"未知标注 gid[:：](?P<o1>[^（(]+)")),
+    ("TEXT_OVERLAP", "blocking", re.compile(r"«(?P<o1>[^»]+)»\s*与\s*«(?P<o2>[^»]+)»\s*重叠")),
+    ("TEXT_OVERLAP", "blocking", re.compile(r"重叠[^«]*«(?P<o1>[^»]+)»\s*×\s*«(?P<o2>[^»]+)»")),
+    ("SERIES_ORDER", "blocking", re.compile(r"「(?P<o1>[^」]+)」与「(?P<o2>[^」]+)」最近处")),
+    ("TEXT_ON_DATA", "blocking", re.compile(r"«(?P<o1>[^»]+)»\s*压在\s*(?P<o2>\S+)\s*上")),
+    ("TEXT_ON_DATA", "blocking", re.compile(r"压线[^«]*«(?P<o1>[^»]+)»")),
+    ("EDGE_CLEARANCE", "warning", re.compile(r"«(?P<o1>[^»]+)»\s*距(?P<o2>[上下左右])边框仅")),
+    ("EDGE_CLEARANCE", "warning", re.compile(r"贴(?P<o2>[上下左右])边框[^«]*«(?P<o1>[^»]+)»")),
+    ("GLYPH_FLOOR", "warning", re.compile(r"[-\d.]+ pt\s*→\s*字形[^«]*«(?P<o1>[^»]+)»")),
+    # 汇总行（`[QA] <图名>: 发现 N 处…`）：只留规则与图名，数字是计数。
+    ("QA_GLYPH_FLOOR", "warning", re.compile(r"^(\d+) 处上下标字号跌破字形下限")),
+    ("QA_TEXT_OVERLAP", "blocking", re.compile(r"^发现 \d+ 处文字重叠")),
+    ("QA_TEXT_ON_DATA", "blocking", re.compile(r"^发现 \d+ 处文字压线")),
+    ("QA_EDGE_CLEARANCE", "warning", re.compile(r"^发现 \d+ 处贴边")),
+    ("QA_BLOCKING", "blocking", re.compile(r"^发现 \d+ 处阻断项")),
+    ("QA_SHIFT_BOUNDS", "blocking", re.compile(r"^\d+ 处(显示位移越界|越界)")),
+)
+
+_QA_LINE_RE = re.compile(r"^\[QA\]\s*(?P<name>[^:：]+)[：:]\s*(?P<body>.*)$")
+_TAG_RE = re.compile(r"^\[(?:未豁免|豁免|验收)\]\s*")
+_SCOPE_PREFIX_RE = re.compile(r"^\[(?P<scope>[^\]]+)\]\s*")
+_NUM_RE = re.compile(r"-?\d+(?:\.\d+)?")
+
+
+def _scope_from_objects(object_ids: tuple[str, ...]) -> str:
+    """从 gid 里取作用域：`fig2_nmr.main.curve.vannh2` → `main`。
+
+    只认 `fig…` 开头的 gid：QA 文本里的对象 id 也可能是**文字内容**
+    （如 «Transmittance (a.u.)»），拿它按点切会切出 `u` 这种假作用域。
+    """
+    for oid in object_ids:
+        parts = oid.split(".")
+        if len(parts) >= 3 and parts[0].lower().startswith("fig") and parts[1] \
+                and not parts[1][0].isdigit():
+            return parts[1]
+    return ""
+
+
+def diagnose(problem: str) -> Diagnostic:
+    """把任意一处 QA 文本解析成结构化诊断。
+
+    认不出来的行归 `UNCLASSIFIED`，并把数字抹成 # 存进 object_ids —— 退路不比旧签名差，
+    但认得出的（峰 id、曲线 gid、图名）一律保住身份。
+    """
+    msg = str(problem)
+    scope = ""
+    body = msg.strip()
+    m = _QA_LINE_RE.match(body)
+    if m:
+        scope = m.group("name").strip()
+        body = m.group("body").strip()
+    else:
+        body = _TAG_RE.sub("", body).strip()
+        m = _SCOPE_PREFIX_RE.match(body)
+        if m:
+            scope = m.group("scope").strip()
+            body = body[m.end():].strip()
+
+    nums = [float(x) for x in _NUM_RE.findall(body)]
+    measured = nums[0] if nums else None
+    threshold = nums[1] if len(nums) > 1 else None
+
+    for rule_id, severity, rx in _RULES:
+        hit = rx.search(body)
+        if not hit:
+            continue
+        ids = tuple(str(v).strip() for v in hit.groupdict().values() if v)  # type: ignore[union-attr]
+        ids = tuple(v for v in ids if v)
+        # measured/threshold 只做展示：取**对象 id 之外**的第一/第二个数字。
+        # （对象 id 里本身可能带数字，比如峰名 3p68，那不是测得的量。）
+        rest = body
+        for v in ids:
+            rest = rest.replace(v, " ", 1)
+        nums = [float(x) for x in _NUM_RE.findall(rest)]
+        return Diagnostic(rule_id, scope or _scope_from_objects(ids), ids,
+                          severity, nums[0] if nums else None,
+                          nums[1] if len(nums) > 1 else None, msg)
+
+    masked = _NUM_RE.sub("#", body).strip()
+    return Diagnostic("UNCLASSIFIED", scope, (masked,), "unknown", measured, threshold, msg)
+
+
+def diagnostic_key_of(problem: str) -> tuple:
+    """字符串版便捷入口：`diagnostic_key(diagnose(problem))`。"""
+    return diagnostic_key(diagnose(problem))
+
+
 def signature(problem: str) -> str:
-    """把 QA 文本压成稳定签名：面积/点数/毫米都随 dpi 变，一律抹成 #。"""
-    return re.sub(r"[-\d.]+", "#", problem).strip()
+    """**兼容壳**：结构化 key 的字符串形式（`tools/gui/server.py` 仍在用）。
+    新代码请直接用 `diagnose()` + `diagnostic_key()`。"""
+    return repr(diagnostic_key_of(problem))
 
 
 def check_out_of_frame(fig: matplotlib.figure.Figure, *, gid_filter: Optional[Any] = None) -> list[str]:

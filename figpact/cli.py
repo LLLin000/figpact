@@ -282,7 +282,7 @@ def _run_script_strict(script: Path, cfg_path: Path, probe_dir: Optional[Path] =
 
 def cmd_try(args: argparse.Namespace) -> int:
     """把 patch/--set 在内存中合并到当前配置，试算位移、QA 差异与参数可行区间。"""
-    from figpact.qa import signature
+    from figpact.qa import diagnose, diagnostic_key
 
     script = Path(args.script).expanduser().resolve()
     if not script.is_file():
@@ -373,25 +373,28 @@ def cmd_try(args: argparse.Namespace) -> int:
         if moved_count == 0:
             print("（无图元发生物理位置位移）")
 
-        # 计算 QA 差异
+        # 计算 QA 差异：按**结构化诊断 key**（规则 + 作用域 + 对象 id）比对，
+        # 数值（mm/px²/点数）不参与 —— 所以「3p68 解决、2p02 新增」不会再被误判成无变化。
         print("\n=== 2. QA 差异 (QA Delta) ===")
-        sig_before = {signature(q): q for q in qa_before}
-        sig_after = {signature(q): q for q in qa_after}
+        key_before = {diagnostic_key(diagnose(q)): q for q in qa_before}
+        key_after = {diagnostic_key(diagnose(q)): q for q in qa_after}
 
-        added_sigs = set(sig_after.keys()) - set(sig_before.keys())
-        removed_sigs = set(sig_before.keys()) - set(sig_after.keys())
+        added_keys = set(key_after.keys()) - set(key_before.keys())
+        removed_keys = set(key_before.keys()) - set(key_after.keys())
 
-        if added_sigs:
+        if added_keys:
             print("【新增阻断/警告】:")
-            for s in sorted(added_sigs):
-                print(f"  + {sig_after[s]}")
+            for k in sorted(added_keys):
+                print(f"  + {key_after[k]}")
+                print(f"      key: {k[0]} | scope={k[1] or '-'} | objects={list(k[2])}")
         else:
             print("【新增阻断/警告】: 无")
 
-        if removed_sigs:
+        if removed_keys:
             print("【消除阻断/警告】:")
-            for s in sorted(removed_sigs):
-                print(f"  - {sig_before[s]}")
+            for k in sorted(removed_keys):
+                print(f"  - {key_before[k]}")
+                print(f"      key: {k[0]} | scope={k[1] or '-'} | objects={list(k[2])}")
         else:
             print("【消除阻断/警告】: 无")
         print(f"Strict 状态: 修改前 exit={code_before} -> 修改后 exit={code_after}")
