@@ -90,13 +90,15 @@ def cmd_render(args: argparse.Namespace) -> int:
 
 
 def cmd_inventory(args: argparse.Namespace) -> int:
-    """转发 --inventory 给脚本，把 JSON 打印成人看的清单。"""
+    """转发 --inventory 给脚本，把 JSON 打印成人看的清单，支持生效检查。"""
     script = Path(args.script).expanduser().resolve()
     if not script.is_file():
         print(f"[错误] 脚本不存在：{script}", file=sys.stderr)
         return 1
 
     cmd = [sys.executable, "-X", "utf8", str(script), "--inventory"]
+    if getattr(args, "check_effect", False):
+        cmd.append("--check-effect")
     if args.config:
         cmd.extend(["--config", str(Path(args.config).expanduser().resolve())])
 
@@ -120,6 +122,7 @@ def cmd_inventory(args: argparse.Namespace) -> int:
     items = data.get("items", [])
     unreg = data.get("unregistered", [])
     unb = data.get("unbound", [])
+    effects = data.get("param_effects", {})
 
     print(f"=== 图元清点清单 (共 {len(items)} 个已登记图元) ===")
     for it in items:
@@ -134,6 +137,20 @@ def cmd_inventory(args: argparse.Namespace) -> int:
     print(f"未绑定参数对象 (unbound): {len(unb)}")
     for ub in unb:
         print(f"  - {ub}")
+
+    if effects:
+        print("\n=== 参数生效检查 (Effectiveness Check) ===")
+        no_effect_list = []
+        for p, info in effects.items():
+            st = info.get("status", "UNKNOWN")
+            cnt = info.get("bound_gids_count", 0)
+            print(f"  • {p:<24} 状态: {st:<10} 关联图元数: {cnt}")
+            if st == "NO_EFFECT":
+                no_effect_list.append(p)
+        if no_effect_list:
+            print(f"\n[警告] 发现未生效参数 (NO_EFFECT): {', '.join(no_effect_list)}", file=sys.stderr)
+        else:
+            print("\n[OK] 所有被检查的绑定参数均通过扰动生效验证！")
 
     return 0
 
@@ -172,11 +189,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_ren.add_argument("--config", default=None, help="配置文件 YAML 路径")
     p_ren.add_argument("--strict", action="store_true", help="严格模式（有阻断项则退出码非零）")
 
-    # inventory --script <py> --config <yaml>
+    # inventory --script <py> --config <yaml> [--check-effect]
     p_inv = subparsers.add_parser("inventory", help="获取可见图元清点清单")
     p_inv.add_argument("--script", required=True, help="绘图脚本路径")
     p_inv.add_argument("--config", default=None, help="配置文件 YAML 路径")
-
+    p_inv.add_argument("--check-effect", action="store_true", help="执行参数生效扰动检查")
     # inspect <gid> --script <py> --config <yaml>
     p_ins = subparsers.add_parser("inspect", help="检查特定 gid 的图元信息")
     p_ins.add_argument("gid", help="要检查的图元 gid")

@@ -14,10 +14,12 @@
 import pathlib
 
 import sys
-from pathlib import Path as _P
-sys.path.insert(0, str(next(p for p in _P(__file__).resolve().parents
-                             if (p / "figure_style.py").is_file())))
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.parent))
 import figure_style as fs
+from figpact import GidRegistry, load_config as fp_load_config, apply_display_shift as fp_apply_display_shift, inventory as fp_inventory
+import argparse
+import json
 
 import nmrglue as ng
 import matplotlib.pyplot as plt
@@ -59,24 +61,30 @@ def load_and_process_spec(rel_path, solv_ppm=None, solv_w=0.06, norm_val=22):
 # ==============================================================================
 def draw_single_nmr_panel(ax, struct_img_path, rel_path, title_text, solv_text,
                           solv_ppm, solv_w, ppm_left, ppm_right, peak_items,
-                          color=fs.c("CPD3_VANOH"), struct_width_ratio=0.28):
+                          color=fs.c("CPD3_VANOH"), struct_width_ratio=0.28,
+                          *, scope="main", sid="sample", reg: GidRegistry | None = None,
+                          shifts_cfg: dict | None = None):
     """
-    在指定的 Axes 区域内绘制：左侧结构式 + 右侧单溶剂核磁谱图
+    在指定的 Axes 区域内绘制：左侧结构式 + 右侧单溶剂核磁谱图，支持 figpact GidRegistry 与 Scope 隔离。
     """
     ppm, spec = load_and_process_spec(rel_path, solv_ppm, solv_w, norm_val=22)
     mask = (ppm >= ppm_right) & (ppm <= ppm_left)
     
     # 绘制谱线与基线
-    ax.plot(ppm[mask], spec[mask], color=color, lw=0.75, zorder=2)
-    ax.axhline(0, color="#E5E5E5", lw=0.45, ls="--", zorder=1)
+    line, = ax.plot(ppm[mask], spec[mask], color=color, lw=0.75, zorder=2)
+    base = ax.axhline(0, color="#E5E5E5", lw=0.45, ls="--", zorder=1)
 
-    # ★ 必须先固定坐标范围：下面的字号→数据单位换算、标签边界钳位都依赖它。
-    #   （曾把 set_xlim/ylim 放在放标签之后 → 换算用了默认 (0,1) 区间，
-    #     导致窄面板里的峰标签溢出画框。）
+    if reg is not None:
+        curve_gid = f"fig2_all.{scope}.curve.{sid}"
+        base_gid = f"fig2_all.{scope}.baseline.{sid}"
+        line.set_gid(curve_gid)
+        base.set_gid(base_gid)
+        reg.register(line, curve_gid, params=["line_width", "shifts_mm"])
+        reg.register(base, base_gid, params=["shifts_mm"])
+
     ax.set_xlim(ppm_left, ppm_right)
-    ax.set_ylim(-4, 44)   # 顶部留白足够，避免峰标注贴住上边框
+    ax.set_ylim(-4, 44)
     
-    # 精确峰顶吸附 + 自动放置（不压线、不压其他标签；颜色跟随谱线）
     items = []
     for approx_p, label_text, _dy in peak_items:
         w = np.where(np.abs(ppm - approx_p) <= 0.15)[0]
@@ -84,7 +92,6 @@ def draw_single_nmr_panel(ax, struct_img_path, rel_path, title_text, solv_text,
             idx_m = w[np.argmax(spec[w])]
         else:
             idx_m = np.argmin(np.abs(ppm - approx_p))
-        # 双行标签在本画布内放不下（层高翻倍 → 层数减半），统一压成单行
         items.append((ppm[idx_m], label_text.replace("\n", " "), spec[idx_m]))
 
     fig = ax.figure
@@ -96,7 +103,6 @@ def draw_single_nmr_panel(ax, struct_img_path, rel_path, title_text, solv_text,
     mm_per_ppm = bb.width * mm_per_px / span_x
     mm_per_au = bb.height * mm_per_px / max(y1 - y0, 1e-9)
     font_pt = fs.script_safe("annot")
-    # 用实测包围盒高度（这些标签是双行，名义字号会低估约一倍）
     _w, _h_mm = fs.measure_text_boxes_mm(ax, [t for _, t, _ in items], font_pt)
     text_h = _h_mm / mm_per_au
 
@@ -104,7 +110,6 @@ def draw_single_nmr_panel(ax, struct_img_path, rel_path, title_text, solv_text,
         m = (p >= x - hw) & (p <= x + hw)
         return float(np.max(s[m])) + 0.8 if m.any() else 0.8
 
-    # 面板标题（图外左上）的包围盒换算到数据坐标，作为不可侵占的障碍区
     fig.canvas.draw()
     _rend = fig.canvas.get_renderer()
     _tb = ax.title.get_window_extent(_rend)
@@ -122,7 +127,6 @@ def draw_single_nmr_panel(ax, struct_img_path, rel_path, title_text, solv_text,
         
     ax.set_xlabel("Chemical Shift $\\delta$ (ppm)", fontsize=fs.FONT["axis"],
                   weight="bold", labelpad=3)
-    # 与 XRD / FTIR 统一：刻度朝内、四边闭合框（不设 direction，继承全局设置）
     ax.tick_params(length=3.0, width=0.8, labelsize=fs.FONT["tick"], pad=3)
     ax.set_yticks([])
 
@@ -135,8 +139,24 @@ def draw_single_nmr_panel(ax, struct_img_path, rel_path, title_text, solv_text,
     ax.set_title(f"{title_text} ({solv_text})", fontsize=fs.FONT["panel"],
                  weight="bold", pad=6, loc="left")
 
+    if reg is not None:
+        x_gid = f"fig2_all.{scope}.xlabel.{sid}"
+        t_gid = f"fig2_all.{scope}.title.{sid}"
+        ax.xaxis.label.set_gid(x_gid)
+        ax.title.set_gid(t_gid)
+        reg.register(ax.xaxis.label, x_gid, params=["axis_font_pt"])
+        reg.register(ax.title, t_gid, params=["axis_font_pt"])
+
+    # 纯显示位移应用（仅对当前 scope 及 sid 生效）
+    if shifts_cfg and scope in shifts_cfg and sid in shifts_cfg[scope]:
+        dy_mm = float(shifts_cfg[scope][sid])
+        if dy_mm and reg is not None:
+            reg.apply_shift(f"fig2_all.{scope}.curve.{sid}", dy_mm=dy_mm)
+            reg.apply_shift(f"fig2_all.{scope}.baseline.{sid}", dy_mm=dy_mm)
+
 # 各样品的红字编号配置（完全对齐分子式.pptx！）
 CONFIG_C2 = {
+    "sid": "vancho",
     "title": "(a) Compound 2 (KY-2)",
     "solv": "in CDCl$_3$, 500 MHz",
     "rel": "2/1", "solv_ppm": 7.26, "solv_w": 0.04,
@@ -155,6 +175,7 @@ CONFIG_C2 = {
 }
 
 CONFIG_C3 = {
+    "sid": "vanoh",
     "title": "(b) Compound 3",
     "solv": "in CDCl$_3$, 400 MHz",
     "rel": "3/2", "solv_ppm": 7.19, "solv_w": 0.08,
@@ -173,6 +194,7 @@ CONFIG_C3 = {
 }
 
 CONFIG_C4 = {
+    "sid": "vannh2",
     "title": "(c) Compound 4",
     "solv": "in DMSO-d$_6$, 400 MHz",
     "rel": "4/1", "solv_ppm": 2.50, "solv_w": 0.06,
@@ -190,6 +212,7 @@ CONFIG_C4 = {
 }
 
 CONFIG_HAMBDA = {
+    "sid": "hambda",
     "title": "(d) Triple-Modified HA (HAMBDA)",
     "solv": "in D$_2$O, 500 MHz",
     "rel": "5/1", "solv_ppm": 4.70, "solv_w": 0.12,
@@ -204,28 +227,47 @@ CONFIG_HAMBDA = {
     ]
 }
 
+def _cli(argv: list[str]) -> argparse.Namespace:
+    ap = argparse.ArgumentParser(description="生成标准学术出版级核磁系列图件并支持 figpact 契约与清点")
+    ap.add_argument("--config", default=None, help="配置文件 YAML 路径")
+    ap.add_argument("--inventory", action="store_true", help="打印可见图元清单 JSON 并退出")
+    ap.add_argument("--check-effect", action="store_true", help="在清点中执行参数生效扰动检查")
+    return ap.parse_args(argv)
+
+
+ARGS = _cli(sys.argv[1:])
+CONFIG_PATH = pathlib.Path(ARGS.config).expanduser().resolve() if ARGS.config else ROOT / "nmr.yaml"
+
+# 尝试加载 figpact shifts_mm 配置
+SHIFTS_CONFIG = {}
+if CONFIG_PATH.is_file():
+    try:
+        import yaml
+        raw_yaml = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8")) or {}
+        SHIFTS_CONFIG = raw_yaml.get("shifts_mm", {})
+    except Exception:
+        pass
+
 # ==============================================================================
-# 3. 绘制 2x2 出版级总图 (Figure 2)
+# 3. 绘制 2x2 出版级总图 (Figure 2，作用域: combined_2x2)
 # ==============================================================================
 fig2x2 = plt.figure(figsize=fs.canvas("GRID2x2"))
 gs2x2 = fig2x2.add_gridspec(2, 2, hspace=0.36, wspace=0.25)
+reg_2x2 = GidRegistry()
 
 configs = [CONFIG_C2, CONFIG_C3, CONFIG_C4, CONFIG_HAMBDA]
 
 for i, cfg in enumerate(configs):
     r, c = divmod(i, 2)
-    # 每个 cell 再分为 [结构式, 谱图]
     sub_gs = gs2x2[r, c].subgridspec(1, 2, width_ratios=[0.32, 0.68], wspace=0.08)
     ax_struct = fig2x2.add_subplot(sub_gs[0])
     ax_spec = fig2x2.add_subplot(sub_gs[1])
     
-    # 左侧放结构式图片
     if cfg["struct"].exists():
         im = Image.open(cfg["struct"])
         ax_struct.imshow(im)
     ax_struct.axis("off")
     
-    # 右侧放对应溶剂的核磁谱图
     draw_single_nmr_panel(
         ax=ax_spec,
         struct_img_path=cfg["struct"],
@@ -237,8 +279,18 @@ for i, cfg in enumerate(configs):
         ppm_left=cfg["ppm_left"],
         ppm_right=cfg["ppm_right"],
         peak_items=cfg["peaks"],
-        color=cfg["color"]
+        color=cfg["color"],
+        scope="combined_2x2",
+        sid=cfg["sid"],
+        reg=reg_2x2,
+        shifts_cfg=SHIFTS_CONFIG,
     )
+
+if ARGS.inventory:
+    inv = fp_inventory(fig2x2, reg_2x2, check_effect=ARGS.check_effect)
+    print(json.dumps(inv, ensure_ascii=False, indent=2))
+    plt.close(fig2x2)
+    sys.exit(0)
 
 # 导出 2x2 总图
 out_2x2 = ROOT / "Fig2_NMR_Combined_2x2.png"
@@ -249,13 +301,15 @@ fig2x2.savefig(ROOT / "Fig2_NMR_Combined_2x2.svg", bbox_inches="tight")
 print("已生成 2x2 复合总图:", out_2x2)
 
 # ==============================================================================
-# 4. 同时导出 4 张独立的 SI 附录图 (Figure S1 ~ S4)
+# 4. 同时导出 4 张独立的 SI 附录图 (Figure S1 ~ S4，各自独立作用域 si_s1 ~ si_s4)
 # ==============================================================================
 for i, cfg in enumerate(configs):
     fig_si = plt.figure(figsize=fs.canvas("SQ"))
     gs_si = fig_si.add_gridspec(1, 2, width_ratios=[0.30, 0.70], wspace=0.08)
     ax_str = fig_si.add_subplot(gs_si[0])
     ax_spc = fig_si.add_subplot(gs_si[1])
+    reg_si = GidRegistry()
+    si_scope = f"si_s{i+1}"
     
     if cfg["struct"].exists():
         im = Image.open(cfg["struct"])
@@ -273,7 +327,11 @@ for i, cfg in enumerate(configs):
         ppm_left=cfg["ppm_left"],
         ppm_right=cfg["ppm_right"],
         peak_items=cfg["peaks"],
-        color=cfg["color"]
+        color=cfg["color"],
+        scope=si_scope,
+        sid=cfg["sid"],
+        reg=reg_si,
+        shifts_cfg=SHIFTS_CONFIG,
     )
     
     si_name = f"Fig_S{i+1}_{cfg['rel'].replace('/', '_')}_NMR.png"
