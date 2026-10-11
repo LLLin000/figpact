@@ -197,7 +197,7 @@ C 相对 B 的工具区间累计耗时减少 18.85%，但该区间不是完整 A
 且三臂未通过完整覆盖与流程有效性检查；实际 `Figure.draw` 次数不等于完整重建次数。
 因此不宣称 80% 首改成功、50% 任务提速或全部任务零科学违规，不启动 P4 自动排版。
 本机原始记录、失败及缺失证据保存在
-`../figpact-vnext-verification-temp/real-agent-trials-step5/` 的
+`I:/figpact-test-archive/previous-90/D-verification/real-agent-trials-step5/` 的
 `actual-trials.json`、`c7-independent-report.json`、`arm-audit.json` 和
 `acceptance-summary.json`；这些私人实验记录不在仓库中，不是公开性能承诺。
 
