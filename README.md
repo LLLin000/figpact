@@ -125,6 +125,21 @@ python -X utf8 tests/benchmarks/bench_vnext.py --lanes cold_preview warm_preview
 不能宣称任意精度。移动图像时保护的是原图数组及科学窗口，不承诺不同画布下
 重采样后的屏幕像素逐字节相同。
 
+### Agent 效率门槛：尚未通过
+
+本机三流程盲测使用 `opencode-go/step-5-preview-free`，共 90 条真实记录。
+A/B 冻结在 `e441477`，C 冻结在 `c7bb42e`；独立验收复核了 55 条，
+另 35 条未能复核。A 的 17 个候选中有 9 个没有实际 Python 排版修改，
+不能把它们当作“直接改 Python”成功。整项任务的 `attempt=1` 也不代表首次编辑成功。
+
+C 相对 B 的工具区间累计耗时减少 18.85%，但该区间不是完整 Agent 生命周期，
+且三臂未通过完整覆盖与流程有效性检查；实际 `Figure.draw` 次数不等于完整重建次数。
+因此不宣称 80% 首改成功、50% 任务提速或全部任务零科学违规，不启动 P4 自动排版。
+本机原始记录、失败及缺失证据保存在
+`../figpact-vnext-verification-temp/real-agent-trials-step5/` 的
+`actual-trials.json`、`c7-independent-report.json`、`arm-audit.json` 和
+`acceptance-summary.json`；这些私人实验记录不在仓库中，不是公开性能承诺。
+
 ## 查询场景与物理几何
 
 ```python
