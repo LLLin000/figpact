@@ -86,33 +86,48 @@ def _worker_error(error):
     return AgentError(WORKER_ERROR, str(error))
 
 
-def source_fingerprint(script, config, *, exclude=(), extra=()):
+def source_fingerprint(script, config, *, exclude=(), extra=(), output_dir=None):
     """Content of every source and input a candidate depends on.
 
     Content, not mtime: a touched-but-unchanged file is not a change, an edited data
     file is. Nothing is skipped by extension -- a `.png`/`.pdf`/`.json` next to the
     script can be a scientific input (instrument original, processing metadata) --
-    only the exact declared output filenames and bytecode are left out, so publishing
-    does not look like a source change while a swapped input still does.
+    only the exact declared artifacts and bytecode are left out, so publishing does
+    not look like a source change while a swapped input still does.
+
+    Exclusions are resolved **path identities**, never basenames: the declared
+    artifacts are resolved against `output_dir` -- the root the caller owns, the
+    script directory by default -- so a same-named *input* elsewhere stays in the
+    fingerprint and a nested artifact under the real output root is still left out.
+    Every walked file is labelled with its path relative to the script directory, so
+    the digest tracks *which* file changed, not just some set of contents.
 
     `extra` are the files the figure *declares* it read. They can live outside the
     script directory (an instrument dump elsewhere on disk), so walking the directory
     is not enough; a declared input that disappeared is a change too, not a no-op.
+    A declared input wins every exclusion -- including an artifact-shaped or
+    `.figpact-*` name -- because the figure says it is read, not written. The script
+    and the real config are excluded by nothing: a caller cannot blind the fingerprint
+    by declaring them as its own artifacts.
     """
     script, config = Path(script).resolve(), Path(config).resolve()
-    excluded = {str(name) for name in exclude}
+    output_root = Path(output_dir).expanduser().resolve() if output_dir else script.parent
+    declared = {Path(item).expanduser().resolve() for item in extra}
+    excluded = ({(output_root / name).resolve() for name in exclude} - declared
+                - {script, config})
     digest = hashlib.sha256(config.read_bytes() if config.is_file() else b'')
-    for path in sorted(script.parent.rglob('*')):
+    root = script.parent
+    for path in sorted(root.rglob('*'), key=lambda p: p.relative_to(root).as_posix()):
         if not path.is_file() or '__pycache__' in path.parts or path.suffix == '.pyc':
             continue
-        if path.name in excluded or path.name.startswith('.figpact-'):
+        resolved = path.resolve()
+        if resolved in declared or resolved in excluded:
             continue
-        digest.update(f'{path.name}:'.encode('utf8'))
+        if path.name.startswith('.figpact-'):
+            continue
+        digest.update(f'{path.relative_to(root).as_posix()}:'.encode('utf8'))
         digest.update(hashlib.sha256(path.read_bytes()).digest())
-    for declared in sorted({str(Path(item).expanduser().resolve()) for item in extra}):
-        path = Path(declared)
-        if path.name in excluded or path.name.startswith('.figpact-'):
-            continue
+    for path in sorted(declared):
         digest.update(f'{path}:'.encode('utf8'))
         digest.update(hashlib.sha256(path.read_bytes()).digest() if path.is_file() else b'MISSING')
     return digest.hexdigest()
@@ -148,20 +163,33 @@ class AgentSession:
         self._worker = worker_factory(self.script, self.config, self.scope)
         self._baseline_fingerprint = None
 
+    def _input_fingerprint(self, state, output_dir):
+        """Fingerprint of the script, config and declared inputs of a worker state.
+
+        The declared artifacts are excluded by identity against `output_dir` -- the root the
+        candidate was created with -- so re-publishing cannot look like a source change, while
+        a same-named file anywhere else still counts. Every check of one candidate uses this
+        same root; where a publication installs is a separate question.
+        """
+        contract = state.get('contract') or {}
+        return source_fingerprint(self.script, self.config,
+                                  exclude=contract.get('outputs') or (),
+                                  extra=state.get('science_inputs') or (),
+                                  output_dir=output_dir)
+
     def _baseline_inputs(self):
         """Fingerprint captured when the candidate is created, not at session start.
 
-        Declared outputs are excluded by exact filename, so re-publishing cannot look
-        like a source change, while a swapped input with an output-like extension still
-        does. Declared science inputs are included even when they live outside the script
-        directory. Both the baseline and the commit-time check use this same set.
+        Declared artifacts are excluded by exact path identity against this session's output
+        root, so re-publishing cannot look like a source change, while a swapped input with an
+        artifact-like extension still does. Declared science inputs are included even when they
+        live outside the script directory. The baseline and every later check of the candidate
+        use this same set -- a different install target does not change which files the
+        candidate was built from.
         """
         if self._baseline_fingerprint is None:
             state = self._call(self._worker.state) or {}
-            self._baseline_fingerprint = source_fingerprint(
-                self.script, self.config,
-                exclude=(state.get('contract') or {}).get('outputs') or (),
-                extra=state.get('science_inputs') or ())
+            self._baseline_fingerprint = self._input_fingerprint(state, self.output_dir)
         return self._baseline_fingerprint
 
     # ---------------------------------------------------------------- operations
@@ -268,7 +296,13 @@ class AgentSession:
         try:
             candidate_yaml = sandbox / 'candidate.yaml'
             candidate_yaml.write_text(text, encoding='utf-8')
-            qa_lines, code = self._run_strict(candidate_yaml, sandbox)
+            # The plan comes first, before anything is rendered: every declared scope's contract
+            # goes through the shared validator, and every declared artifact name must resolve
+            # inside the formal output tree without being the script, the real config or a
+            # declared scientific input. A `../`, absolute/Windows or symlinked-parent name is
+            # refused here, so the strict run is never started for a declaration that could not be
+            # installed anyway. (The script itself is trusted Python; this is declaration hygiene,
+            # not an OS sandbox.)
             plan = self._plan(candidate_yaml)
             expected = []
             for scope in plan['scopes']:
@@ -278,8 +312,26 @@ class AgentSession:
             if not expected:
                 raise AgentError(COMMIT_REJECTED, '脚本未声明任何发布产物，拒绝发布',
                                  data={'scopes': plan['scopes']})
-            missing = [name for name in expected
-                       if not (sandbox / name).is_file() or not (sandbox / name).stat().st_size]
+            state = self._call(self._worker.state) or {}
+            protected = {self.script, self.config} | {
+                Path(item).expanduser().resolve() for item in state.get('science_inputs') or ()}
+            for name in expected:
+                destination = _approved_path(output_dir, name, '正式产物')
+                # Canonical file identity, never basename: an artifact that *is* the script, the
+                # real config or a declared scientific original would be overwritten by the
+                # install, so it is refused -- while a same-named artifact in another directory
+                # stays legal. (The same identities are what the input fingerprint excludes.)
+                if destination in protected:
+                    raise AgentError(
+                        COMMIT_REJECTED,
+                        f'声明产物与源脚本/配置/科学输入是同一个文件，拒绝发布：{destination}',
+                        data={'artifact': name, 'would_overwrite': str(destination)})
+            qa_lines, code = self._run_strict(candidate_yaml, sandbox)
+            # The sandbox side is resolved after the run: only artifacts that really exist inside
+            # the sandbox are ever copied out, and the destination is re-resolved at install time.
+            artifacts = {name: _approved_path(sandbox, name, '严格校验产物') for name in expected}
+            missing = [name for name, source in artifacts.items()
+                       if not source.is_file() or not source.stat().st_size]
             if code != 0:
                 raise AgentError(COMMIT_REJECTED, '严格校验未通过，正式产物与配置未改动',
                                  data={'returncode': code, 'qa': qa_lines, 'missing_artifacts': missing})
@@ -291,7 +343,13 @@ class AgentSession:
             if diagnostics:
                 raise AgentError(COMMIT_REJECTED, '受保护科学内容与基线不一致，正式产物未改动',
                                  data={'diagnostics': diagnostics})
-            installed, before = _install_transactional({name: sandbox / name for name in expected}, output_dir)
+            # The strict render and the science comparison take real time. Nothing may be
+            # installed on the strength of a candidate whose script/config/inputs moved
+            # while they ran, so the baseline is re-checked immediately before the disk
+            # changes. This narrows the window, it does not close it: a writer that lands
+            # after this line is unavoidable without a filesystem lock that does not exist.
+            self._require_unchanged_on_disk()
+            installed, before = _install_transactional(artifacts, output_dir)
             try:
                 record = _patch().commit_changes(self.config, self._worker.base_config_revision,
                                                  {self.config: text.encode('utf-8')})
@@ -359,9 +417,11 @@ class AgentSession:
             raise AgentError(STALE_REVISION, '配置文件在候选生成后已被修改，拒绝覆盖磁盘改动',
                              data={'disk_revision': current})
         state = self._call(self._worker.state) or {}
-        if source_fingerprint(self.script, self.config,
-                              exclude=(state.get('contract') or {}).get('outputs') or (),
-                              extra=state.get('science_inputs') or ()) != self._baseline_inputs():
+        # The dependency set is the candidate's, not the install target's: it is captured with
+        # this session's output root and every later check must compare against exactly that
+        # same set. A commit that installs somewhere else changes nothing about which files
+        # the candidate was built from, so it must not look like drift.
+        if self._input_fingerprint(state, self.output_dir) != self._baseline_inputs():
             raise AgentError(STALE_REVISION, '脚本或输入文件在候选生成后发生变化，候选已失效')
 
     def _candidate_text(self, candidate_patch, contract):
@@ -430,24 +490,67 @@ def _patch():
     return patch
 
 
+def _approved_path(root, name, what):
+    """Resolve one declared artifact path, refusing anything that leaves `root`.
+
+    Resolution follows symlinks and reparse points, so a declaration like
+    `C:/elsewhere/x.png`, a `../` climb, or a nested `exports/x.png` whose `exports`
+    links out of the tree is a refusal rather than a write somewhere else. This keeps
+    the declared artifact names honest about the roots the gate owns; the drawing
+    script itself is trusted Python, so this is not a sandbox against a hostile one.
+    """
+    root = Path(root).resolve()
+    resolved = (root / name).resolve()
+    if resolved != root and not resolved.is_relative_to(root):
+        raise AgentError(COMMIT_REJECTED, f'{what}越出允许的目录，拒绝发布：{name!r} → {resolved}')
+    return resolved
+
+
+def _ensure_parent(path):
+    """Create the destination's missing parents; return the directories this created."""
+    missing = []
+    parent = path.parent
+    while not parent.exists():
+        missing.append(parent)
+        parent = parent.parent
+    for directory in reversed(missing):
+        directory.mkdir()
+    return missing
+
+
 def _install_transactional(sources, target_dir):
-    """Copy every artifact into place, or put every artifact back."""
+    """Copy every artifact into place, or put every artifact back.
+
+    Nested declared artifacts (`exports/fig.png`) are supported: missing parents are
+    created, and each artifact is staged in its *own* destination directory so the
+    final step stays a same-directory rename. Every destination is resolved first and
+    must stay under `target_dir`. Staged files are removed even when staging itself
+    fails; rollback restores files that already existed and removes the files and
+    directories this call created.
+    """
     target_dir = Path(target_dir)
+    destinations = {name: _approved_path(target_dir, name, '正式产物') for name in sources}
     target_dir.mkdir(parents=True, exist_ok=True)
-    before, staged, applied = {}, {}, []
+    before, staged, applied, created = {}, {}, [], []
     try:
         for name, src in sources.items():
-            dst = target_dir / name
+            dst = destinations[name]
+            created.extend(_ensure_parent(dst))
             before[name] = dst.read_bytes() if dst.is_file() else None
-            tmp = target_dir / f'.figpact-stage-{os.getpid()}-{name}'
-            shutil.copyfile(src, tmp)
+            tmp = dst.parent / f'.figpact-stage-{os.getpid()}-{dst.name}'
             staged[name] = tmp
+            shutil.copyfile(src, tmp)
         for name in sources:
-            os.replace(staged[name], target_dir / name)
+            os.replace(staged[name], destinations[name])
             applied.append(name)
     except BaseException:
         for name in reversed(applied):
-            _restore_one(target_dir / name, before[name])
+            _restore_one(destinations[name], before[name])
+        for directory in sorted(created, key=lambda p: len(p.parts), reverse=True):
+            try:
+                directory.rmdir()
+            except OSError:
+                pass
         raise
     finally:
         for tmp in staged.values():
@@ -668,10 +771,16 @@ def _worker_plan(payload):
         contract = module.layout_contract(scope) if hasattr(module, 'layout_contract') else {}
         if not isinstance(contract, dict):
             raise AgentError(INVALID_PARAMS, f'layout_contract({scope}) 必须返回映射')
-        missing = [name for name in contract.get('outputs', []) if not isinstance(name, str) or not name]
-        if missing or not contract.get('outputs'):
+        if not contract.get('outputs'):
             raise AgentError(INVALID_PARAMS, f'scope {scope} 未声明可用的 outputs 列表')
-        outputs[scope] = [str(name) for name in contract['outputs']]
+        # Every declared scope goes through the same shared validator the session uses:
+        # another scope's incomplete or unclassified record, and an unsafe artifact path,
+        # are refused here -- publication installs for all scopes, not just the requested one.
+        try:
+            checked = contracts.validate_contract(contract, scope=scope)
+        except ValueError as error:
+            raise AgentError(INVALID_PARAMS, f'scope {scope} 的作者契约未通过校验：{error}') from error
+        outputs[scope] = [str(name) for name in checked['outputs']]
         problems[scope] = list(contract.get('problems', []) or [])
     return {'figure_id': getattr(module, 'FIGURE_ID', None), 'scopes': scopes,
             'outputs': outputs, 'contract_problems': problems}

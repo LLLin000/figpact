@@ -273,5 +273,158 @@ class PanelPublishSafetyTest(unittest.TestCase):
             self.assertFalse(array.flags.writeable, "受保护像素数组必须只读")
 
 
+def _nested_fixture_source(prefix: str = "panels/") -> str:
+    """原生夹具的私有包装脚本：把每个作用域声明的产物都加一层目录。
+
+    只改**声明**：构建、科学自检、严格门、`publish()` 全是生产那套（`runpy` 进它的
+    `__main__`），所以验的是真实的私有严格发布，不是 `_install` 级别的替身。
+    """
+    return (
+        "import sys\n"
+        f"sys.path.insert(0, {str(ROOT)!r})\n"
+        "from tests.fixtures.native_ftir import *\n"
+        "\n"
+        "\n"
+        "_fixture_contract = layout_contract\n"
+        "\n"
+        "\n"
+        "def layout_contract(scope):\n"
+        "    contract = dict(_fixture_contract(scope))\n"
+        f'    contract["outputs"] = ["{prefix}" + name for name in contract["outputs"]]\n'
+        "    return contract\n"
+        "\n"
+        'if __name__ == "__main__":\n'
+        "    from tests.fixtures import _native\n"
+        "    raise SystemExit(_native.run(sys.modules[__name__]))\n"
+    )
+
+
+class NestedArtifactPublishTest(unittest.TestCase):
+    """声明成 `panels/<名字>` 的产物：暂存与发布都按相对路径落成真目录，平铺行为逐字不变。"""
+
+    def tearDown(self):
+        plt.close("all")
+
+    def test_nested_declared_artifacts_publish_under_their_relative_directory(self):
+        """端到端：私有严格发布必须真的产出 `<out>/panels/…`，不是被静默丢掉。"""
+        with tempfile.TemporaryDirectory(prefix="figpact-nested-") as td:
+            root = Path(td)
+            script = root / "nested_ftir.py"
+            config = root / "nested_ftir.yaml"
+            shutil.copyfile(ROOT / "tests" / "fixtures" / "native_ftir.yaml", config)
+            script.write_text(_nested_fixture_source(), encoding="utf-8")
+            module = load("native_ftir")
+            declared = sorted({f"panels/{name}" for scope in module.SCOPES
+                               for name in module.layout_contract(scope)["outputs"]})
+            self.assertTrue(declared, "夹具必须声明发布产物")
+
+            out = root / "official"
+            (out / "panels").mkdir(parents=True)
+            replaced = out / declared[0]
+            replaced.write_bytes(b"OLD-NESTED")
+
+            env = {**os.environ, "MPLBACKEND": "Agg"}
+            env.pop(publish.PROBE_ENV, None)
+            res = subprocess.run([sys.executable, "-X", "utf8", str(script), "--config", str(config),
+                                  "--strict", "--out", str(out)],
+                                 cwd=str(root), capture_output=True, text=True, encoding="utf-8", env=env)
+            self.assertEqual(res.returncode, 0, res.stderr)
+            for name in declared:
+                artifact = out / name
+                self.assertTrue(artifact.is_file() and artifact.stat().st_size > 0,
+                                f"声明的嵌套产物没有落地：{name}")
+            self.assertNotEqual(replaced.read_bytes(), b"OLD-NESTED", "已存在的嵌套产物必须被替换")
+            for name in declared:
+                flat = out / Path(name).name
+                self.assertFalse(flat.exists(), f"产物不该平铺在目标根：{flat.name}")
+            self.assertEqual(list(out.rglob(".tmp_*")), [], "嵌套目录里留下了临时文件")
+
+    def test_probe_run_keeps_nested_artifacts_in_the_sandbox(self):
+        """嵌套产物在试算模式下同样只进沙箱：正式目录里的同名嵌套文件一个字节都不动。"""
+        with tempfile.TemporaryDirectory(prefix="figpact-nested-") as td:
+            root = Path(td)
+            staging = publish.staging_dir("figpact-test-nested-")
+            (staging / "panels").mkdir()
+            (staging / "panels" / "Fig9.png").write_bytes(b"CANDIDATE")
+            (staging / "Fig9.pdf").write_bytes(b"CANDIDATE-PDF")
+            official = root / "official"
+            (official / "panels").mkdir(parents=True)
+            (official / "panels" / "Fig9.png").write_bytes(b"OFFICIAL")
+            sandbox = root / "sandbox"
+
+            old = os.environ.get(publish.PROBE_ENV)
+            try:
+                os.environ[publish.PROBE_ENV] = str(sandbox)
+                written = publish.publish(staging, official)
+            finally:
+                if old is None:
+                    os.environ.pop(publish.PROBE_ENV, None)
+                else:
+                    os.environ[publish.PROBE_ENV] = old
+                shutil.rmtree(staging, ignore_errors=True)
+
+            self.assertEqual(sorted(written), ["Fig9.pdf", "panels/Fig9.png"])
+            self.assertEqual((official / "panels" / "Fig9.png").read_bytes(), b"OFFICIAL", "试算动了正式文件")
+            self.assertEqual(sorted(p.name for p in official.iterdir()), ["panels"],
+                             "试算在正式目录里留下了新文件")
+            self.assertEqual((sandbox / "panels" / "Fig9.png").read_bytes(), b"CANDIDATE")
+            self.assertEqual((sandbox / "Fig9.pdf").read_bytes(), b"CANDIDATE-PDF")
+            self.assertEqual(list(official.rglob(".tmp_*")), [], "正式目录里留下了临时文件")
+            self.assertEqual(list(sandbox.rglob(".tmp_*")), [], "沙箱里留下了临时文件")
+
+    def test_publish_refuses_a_staged_link_that_leaves_the_staging_root(self):
+        """暂存目录里的符号链接指向根外：拒绝，且目标根里一个字节都不落。"""
+        with tempfile.TemporaryDirectory(prefix="figpact-nested-") as td:
+            root = Path(td)
+            outside = root / "outside"
+            outside.mkdir()
+            (outside / "stolen.png").write_bytes(b"OUTSIDE")
+            target = root / "official"
+            target.mkdir()
+            staging = publish.staging_dir("figpact-test-escape-")
+            old = os.environ.pop(publish.PROBE_ENV, None)
+            try:
+                (staging / "panels").mkdir()
+                try:
+                    os.symlink(outside / "stolen.png", staging / "panels" / "leak.png")
+                except (OSError, NotImplementedError, AttributeError):
+                    self.skipTest("这个平台/权限建不了符号链接，来源逃逸无从验证")
+                with self.assertRaises(ValueError):
+                    publish.publish(staging, target)
+                self.assertEqual(sorted(p.name for p in target.iterdir()), [],
+                                 "被拒绝的发布不得在目标根里留下东西")
+                self.assertEqual((outside / "stolen.png").read_bytes(), b"OUTSIDE")
+            finally:
+                if old is not None:
+                    os.environ[publish.PROBE_ENV] = old
+                shutil.rmtree(staging, ignore_errors=True)
+
+    def test_publish_refuses_a_destination_parent_that_leaves_the_target_root(self):
+        """目标根里的父目录是指向根外的符号链接：拒绝，链接那头一个字节都不落。"""
+        with tempfile.TemporaryDirectory(prefix="figpact-nested-") as td:
+            root = Path(td)
+            outside = root / "outside"
+            outside.mkdir()
+            staging = publish.staging_dir("figpact-test-escape-")
+            (staging / "panels").mkdir()
+            (staging / "panels" / "Fig9.png").write_bytes(b"CANDIDATE")
+            target = root / "official"
+            target.mkdir()
+            old = os.environ.pop(publish.PROBE_ENV, None)
+            try:
+                try:
+                    os.symlink(outside, target / "panels", target_is_directory=True)
+                except (OSError, NotImplementedError, AttributeError):
+                    self.skipTest("这个平台/权限建不了目录符号链接，目标逃逸无从验证")
+                with self.assertRaises(ValueError):
+                    publish.publish(staging, target)
+                self.assertEqual(sorted(p.name for p in outside.iterdir()), [],
+                                 "符号链接不得把产物写到目标根之外")
+            finally:
+                if old is not None:
+                    os.environ[publish.PROBE_ENV] = old
+                shutil.rmtree(staging, ignore_errors=True)
+
+
 if __name__ == "__main__":
     unittest.main()

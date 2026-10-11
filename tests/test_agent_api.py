@@ -1,12 +1,18 @@
 """Consumer-visible behaviour of the local agent JSON-RPC surface.
 
-Every test here talks to a real `figpact agent` process over stdin/stdout and asserts
+Most tests here talk to a real `figpact agent` process over stdin/stdout and assert
 only what a client sees: JSON-RPC results and error codes, files on disk, process
-lifetime. No wiring, default, source-text or wording assertions.
+lifetime. The publication-safety regressions drive the same code the commit gate
+drives -- the internal plan worker (`figpact.agent_api --worker`), and the real
+install/config transaction on real files -- because what they exercise (a foreign
+scope's declared artifacts, a nested install, an input that moves between validation
+and installation) is not reachable through one session's own scope. No wiring,
+default, source-text or wording assertions, and no mocks.
 """
 import base64
 import contextlib
 import json
+import os
 import queue
 import shutil
 import subprocess
@@ -511,6 +517,14 @@ def test_source_fingerprint_covers_declared_inputs_and_skips_outputs(tmp_path):
     sample.unlink()
     assert fingerprint() != changed, '声明过的输入消失是变化，不是静默忽略'
 
+    # 显式声明的科学输入赢过一切排除：哪怕它与产物同名同路径，也照样算源。
+    declared_output = agent_api.source_fingerprint(script, config, exclude=['native_plot_main.png'],
+                                                   extra=[str(artifact)])
+    artifact.write_bytes(b'edited artifact bytes')
+    assert agent_api.source_fingerprint(script, config, exclude=['native_plot_main.png'],
+                                       extra=[str(artifact)]) != declared_output, \
+        '声明的科学输入与产物同名同路径时，输入声明赢，改它必须算源变化'
+
 
 def test_session_cleanup_and_restart_are_exposed(tmp_path):
     with agent_session(tmp_path, 'ftir', 'main') as w:
@@ -822,3 +836,481 @@ def test_contract_and_science_fail_closed():
     changed = science.compare_science({'digest': 'x', 'objects': {'a': 1}},
                                       {'digest': 'y', 'objects': {'a': 2}})
     assert changed and changed[0]['object_ids'] == ['a']
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 发布安全：逐作用域契约、嵌套产物事务、发布根越界、安装前的输入复检
+# ──────────────────────────────────────────────────────────────────────────────
+
+#: 只声明契约、不画图的探针脚本：'main' 永远合法，'other' 按用例写成要拒绝的样子。
+PLAN_PROBE_SOURCE = (
+    'SCOPES = ("main", "other")\n'
+    'FIGURE_ID = "fig_plan_probe"\n'
+    'OTHER_OUTPUTS = {outputs!r}\n'
+    'OTHER_PARAMETERS = {parameters}\n'
+    '\n'
+    '\n'
+    'def _contract(scope, outputs, parameters=()):\n'
+    '    return {{"scope": scope, "version": 1, "parameters": list(parameters), "relations": [],\n'
+    '            "groups": [], "nodes": {{}}, "outputs": list(outputs)}}\n'
+    '\n'
+    '\n'
+    'def layout_contract(scope):\n'
+    '    if scope != "other":\n'
+    '        return _contract(scope, ["main.png"])\n'
+    '    return _contract(scope, OTHER_OUTPUTS, OTHER_PARAMETERS)\n'
+)
+
+
+def plan_worker(script, config):
+    """发布门真正调用的内部分析工作进程（`figpact.agent_api --worker`）。"""
+    request = {'command': 'plan', 'script': str(script), 'config': str(config)}
+    res = subprocess.run([sys.executable, '-X', 'utf8', '-m', 'figpact.agent_api', '--worker'],
+                         input=json.dumps(request), text=True, encoding='utf-8',
+                         capture_output=True, cwd=str(ROOT), timeout=REQUEST_TIMEOUT)
+    if res.returncode == 0:
+        return json.loads(res.stdout)
+    lines = [line for line in res.stderr.splitlines() if line.strip()]
+    return {'error': json.loads(lines[-1])['error']}
+
+
+def fixture_wrapper(script, definitions=(), *, strict_log=None):
+    """原生夹具在临时目录里的一份副本，只加上本用例要声明的那些东西。
+
+    包装脚本导入真实夹具模块（构建器仍是生产那份），并把 `definitions` 原样接在后面。
+    `strict_log` 给 `__main__` 块加一行日志：只有脚本被当作严格构建入口执行时这个文件才
+    会出现，所以「文件不存在」是「严格入口没启动」的直接证据，不是对实现结构的猜测。
+    """
+    lines = [
+        'import sys\n',
+        f'sys.path.insert(0, {str(ROOT)!r})\n',
+        'from tests.fixtures.native_ftir import *\n',
+        'from figpact.config import load_config\n',
+        *definitions,
+        'if __name__ == "__main__":\n',
+    ]
+    if strict_log is not None:
+        lines.append(f'    open({str(strict_log)!r}, "a", encoding="utf-8").write("strict entry\\n")\n')
+    lines += [
+        '    import runpy\n',
+        f'    runpy.run_path({str(script)!r}, run_name="__main__")\n',
+    ]
+    return ''.join(lines)
+
+
+def outputs_override(scope, names):
+    """只把这一个作用域声明的产物换成 `names` 的包装脚本定义。"""
+    return [
+        '_fixture_contract = layout_contract\n'
+        '\n'
+        '\n'
+        'def layout_contract(scope):\n'
+        '    contract = dict(_fixture_contract(scope))\n'
+        f'    if scope == {scope!r}:\n'
+        f'        contract["outputs"] = list({list(names)!r})\n'
+        '    return contract\n',
+    ]
+
+
+def test_plan_validates_every_declared_scope_and_refuses_unsafe_artifacts(tmp_path):
+    """发布按全部 scope 装产物：别的作用域契约坏掉或路径越界，任何一张图都不许发。"""
+    config = tmp_path / 'plan_probe.yaml'
+    config.write_text('canvas_w_mm: 60.0\n', encoding='utf-8')
+    cases = [
+        (['exports/other.png', 'plain.txt'], '()', True),
+        (['../escape.png'], '()', False),
+        (['/figpact-escape.png'], '()', False),
+        (['C:/figpact-escape.png'], '()', False),
+        (['other.png', 5], '()', False),
+        (['other:stream.png'], '()', False),
+        ([], '()', False),
+        (['other.png'], '([{"path": ["a_mm"], "objects": ["x"]}],)', False),
+    ]
+    for index, (outputs, parameters, accepted) in enumerate(cases):
+        script = tmp_path / f'plan_probe_{index}.py'
+        script.write_text(PLAN_PROBE_SOURCE.format(outputs=outputs, parameters=parameters),
+                          encoding='utf-8')
+        payload = plan_worker(script, config)
+        label = f'other.outputs={outputs!r} other.parameters={parameters}'
+        if accepted:
+            assert 'error' not in payload, (label, payload)
+            assert payload['scopes'] == ['main', 'other'], (label, payload)
+            assert payload['outputs'] == {'main': ['main.png'], 'other': outputs}, (label, payload)
+        else:
+            assert 'error' in payload, (label, payload)
+            assert 'other' in payload['error'], f'{label}：拒绝必须点名出问题的 scope：{payload}'
+
+
+def test_nested_declared_artifacts_install_and_roll_back(tmp_path):
+    """嵌套声明的产物：缺的父目录要建、已存在的要换，任何一步失败整个事务退回原样。"""
+    from figpact import agent_api
+
+    staged = tmp_path / 'staged'
+    staged.mkdir()
+    for name in ('export.png', 'deep.txt', 'blocked.png'):
+        (staged / name).write_bytes(f'{name} bytes'.encode('utf-8'))
+
+    # 安装：父目录不存在 + 目标文件已存在，两个名字都是嵌套路径。
+    out = tmp_path / 'published'
+    (out / 'exports').mkdir(parents=True)
+    (out / 'exports' / 'export.png').write_bytes(b'previous official artifact')
+    applied, before = agent_api._install_transactional(
+        {'exports/export.png': staged / 'export.png', 'deep/dir/deep.txt': staged / 'deep.txt'}, out)
+    assert applied == ['deep/dir/deep.txt', 'exports/export.png'], applied
+    assert before == {'exports/export.png': b'previous official artifact',
+                      'deep/dir/deep.txt': None}, before
+    assert (out / 'exports' / 'export.png').read_bytes() == b'export.png bytes'
+    assert (out / 'deep' / 'dir' / 'deep.txt').read_bytes() == b'deep.txt bytes'
+    assert not list(out.rglob('.figpact-*')), '安装完成后不得残留暂存文件'
+
+    # 回滚：第二个产物是新文件、第三个产物的落点是目录，替换必然失败。
+    rollback = tmp_path / 'rollback'
+    (rollback / 'exports').mkdir(parents=True)
+    (rollback / 'exports' / 'export.png').write_bytes(b'previous official artifact')
+    (rollback / 'blocked.png').mkdir()
+    with pytest.raises(OSError):
+        agent_api._install_transactional(
+            {'exports/export.png': staged / 'export.png',
+             'late/new/deep.txt': staged / 'deep.txt',
+             'blocked.png': staged / 'blocked.png'}, rollback)
+    assert (rollback / 'exports' / 'export.png').read_bytes() == b'previous official artifact', \
+        '回滚必须还原被替换掉的已存在嵌套产物'
+    assert not (rollback / 'late').exists(), '回滚必须撤掉本次安装新建的目录'
+    assert not list(rollback.rglob('.figpact-*')), '回滚后不得残留暂存文件'
+    assert (rollback / 'blocked.png').is_dir(), '落点是目录时事务失败，但那个目录本身不归安装管'
+
+    # 暂存阶段就失败（源不存在）：暂存文件也要清掉，落点一个字节都不动。
+    staging = tmp_path / 'staging-failure'
+    (staging / 'exports').mkdir(parents=True)
+    (staging / 'exports' / 'export.png').write_bytes(b'previous official artifact')
+    with pytest.raises(OSError):
+        agent_api._install_transactional({'exports/export.png': staged / 'export.png',
+                                          'missing.txt': staged / 'absent.txt'}, staging)
+    assert (staging / 'exports' / 'export.png').read_bytes() == b'previous official artifact'
+    assert not (staging / 'missing.txt').exists()
+    assert not list(staging.rglob('.figpact-*')), '暂存失败也不得留下暂存文件'
+
+
+def test_install_refuses_destinations_outside_the_output_root(tmp_path):
+    """绝对路径、`..`、指向根外的符号链接：解析之后只要出了允许根就拒绝，先于任何写入。"""
+    from figpact import agent_api
+
+    source = tmp_path / 'artifact.png'
+    source.write_bytes(b'artifact bytes')
+    out = tmp_path / 'published'
+    out.mkdir()
+
+    escapes = [('../escape.png', tmp_path / 'escape.png'),
+               (str(tmp_path / 'absolute.png'), tmp_path / 'absolute.png')]
+    if os.name == 'nt':
+        escapes.append(('C:/figpact-escape.png', None))
+    for name, landed in escapes:
+        with pytest.raises(agent_api.AgentError) as excinfo:
+            agent_api._install_transactional({name: source}, out)
+        assert excinfo.value.code == agent_api.COMMIT_REJECTED, (name, excinfo.value.to_error())
+        if landed is not None:
+            assert not landed.exists(), f'{name} 不得落到允许根之外'
+    assert list(out.iterdir()) == [], '被拒绝的安装不得在允许根里留下任何东西'
+
+    target = tmp_path / 'outside-root'
+    target.mkdir()
+    try:
+        os.symlink(target, out / 'exports', target_is_directory=True)
+    except (OSError, NotImplementedError, AttributeError):
+        pytest.skip('这个平台/权限建不了目录符号链接，逃逸路径无从验证')
+    with pytest.raises(agent_api.AgentError) as excinfo:
+        agent_api._install_transactional({'exports/linked.png': source}, out)
+    assert excinfo.value.code == agent_api.COMMIT_REJECTED, excinfo.value.to_error()
+    assert list(target.iterdir()) == [], '符号链接不得把产物写到允许根之外'
+
+
+def test_source_fingerprint_uses_path_identity_not_basenames(tmp_path):
+    """排除与计入都按解析后的路径身份：同基名的另一份输入仍然是源。"""
+    from figpact import agent_api
+
+    figure = tmp_path / 'figure'
+    (figure / 'exports').mkdir(parents=True)
+    (figure / 'other').mkdir()
+    script = figure / 'plot.py'
+    script.write_text('SCOPES = ("main",)\n', encoding='utf-8')
+    config = figure / 'plot.yaml'
+    config.write_text('canvas_w_mm: 60.0\n', encoding='utf-8')
+    artifact_shaped_input = figure / 'exports' / 'fig_main.png'
+    artifact_shaped_input.write_bytes(b'input bytes')
+    twin = figure / 'other' / 'fig_main.png'
+    twin.write_bytes(b'other input bytes')
+    out = tmp_path / 'published'
+    out.mkdir()
+
+    def fingerprint():
+        return agent_api.source_fingerprint(script, config, exclude=['fig_main.png'], output_dir=out)
+
+    base = fingerprint()
+    (out / 'fig_main.png').write_bytes(b'official artifact')
+    assert fingerprint() == base, '发布根下的正式产物按身份排除：重发不算源变化'
+    twin.write_bytes(b'edited other input')
+    assert fingerprint() != base, '同基名的另一份输入必须仍然算进指纹'
+    changed = fingerprint()
+    artifact_shaped_input.write_bytes(b'edited declared input')
+    assert fingerprint() != changed, '与产物同名的文件按路径身份排除：改源目录里那一份必须算源变化'
+
+    # 源脚本与真实配置永远是源：把它们声明成产物也不能让指纹瞎掉。
+    def guarded():
+        return agent_api.source_fingerprint(script, config, exclude=[script.name, config.name],
+                                            output_dir=figure)
+
+    guarded_base = guarded()
+    script.write_text('SCOPES = ("main",)\n# edited\n', encoding='utf-8')
+    assert guarded() != guarded_base, '脚本被声明成产物也不得从输入指纹里消失'
+    edited = guarded()
+    config.write_text('canvas_w_mm: 61.0\n', encoding='utf-8')
+    assert guarded() != edited, '真实配置被声明成产物也不得从输入指纹里消失'
+
+
+def test_source_fingerprint_tracks_nested_artifacts_and_declared_hidden_inputs(tmp_path):
+    """嵌套产物按身份排除；显式声明的 `.figpact-*` 输入永远计入，消失也是变化。"""
+    from figpact import agent_api
+
+    figure = tmp_path / 'figure'
+    figure.mkdir()
+    script = figure / 'plot.py'
+    script.write_text('SCOPES = ("main",)\n', encoding='utf-8')
+    config = figure / 'plot.yaml'
+    config.write_text('canvas_w_mm: 60.0\n', encoding='utf-8')
+    hidden = figure / '.figpact-instrument-original.png'
+    hidden.write_bytes(b'instrument original')
+    out = tmp_path / 'published'
+    (out / 'exports').mkdir(parents=True)
+    artifact = out / 'exports' / 'fig_main.png'
+    artifact.write_bytes(b'official artifact')
+
+    def fingerprint():
+        return agent_api.source_fingerprint(script, config, exclude=['exports/fig_main.png'],
+                                            extra=[str(hidden)], output_dir=out)
+
+    base = fingerprint()
+    artifact.write_bytes(b'republished artifact')
+    assert fingerprint() == base, '嵌套声明的产物按身份排除：重发不算源变化'
+    hidden.write_bytes(b'edited instrument original')
+    assert fingerprint() != base, '显式声明的 `.figpact-*` 输入必须照样计入'
+    changed = fingerprint()
+    hidden.unlink()
+    assert fingerprint() != changed, '声明的输入消失仍是变化，不是静默忽略'
+
+
+@pytest.mark.parametrize('collision', ['declared_science_input', 'real_config'])
+def test_publication_refuses_an_artifact_that_would_overwrite_a_protected_file(tmp_path, collision):
+    """产物落点与源脚本/配置/科学输入**是同一个文件**：直接拒绝，原件与正式产物都不动。
+
+    冲突认的是解析后的同一个路径；同 basename 换个目录不算冲突（那是允许的）。
+    """
+    from figpact import agent_api
+
+    script, fixture_config = fixture_paths('ftir')
+    local_script = tmp_path / script.name
+    local_config = tmp_path / 'native_ftir.yaml'
+    local_config.write_bytes(fixture_config.read_bytes())
+    if collision == 'real_config':
+        output_dir = tmp_path
+        artifact = local_config.name
+        protected_path = local_config
+        added = []
+    else:
+        output_dir = tmp_path / 'originals'
+        output_dir.mkdir()
+        artifact = 'fig_ftir_native_main.png'
+        protected_path = output_dir / artifact
+        protected_path.write_bytes(b'instrument original bytes')
+        added = [f'def science_inputs():\n    return ({str(protected_path)!r},)\n']
+    local_script.write_text(fixture_wrapper(script, outputs_override('main', [artifact]) + added),
+                            encoding='utf-8')
+    contract, _ = contract_of(script, fixture_config, 'main')
+    operation, _ = goal_operation(contract, fixture_config)
+    before = protected_path.read_bytes()
+
+    session = agent_api.AgentSession(local_script, local_config, 'main', output_dir=output_dir)
+    try:
+        moved = session.try_layout([operation])
+        assert moved['status'] == 'OK', moved
+        with pytest.raises(agent_api.AgentError) as excinfo:
+            session.commit('publication', confirm=True)
+    finally:
+        session.close()
+
+    assert excinfo.value.code == agent_api.COMMIT_REJECTED, excinfo.value.to_error()
+    assert excinfo.value.data.get('would_overwrite') == str(protected_path.resolve()), \
+        excinfo.value.to_error()
+    assert protected_path.read_bytes() == before, '被源脚本/配置/科学输入占着的文件一个字节都不许动'
+    assert not (output_dir / 'fig_ftir_native_compare.png').exists(), '拒绝后不得安装任何产物'
+
+
+def test_publication_into_a_new_nested_output_root_still_verifies(tmp_path):
+    """换一个正式输出根（新目录、路径带空格、嵌套）必须照常发布：候选的依赖集不随安装目标变。"""
+    from figpact import agent_api
+
+    script, fixture_config = fixture_paths('ftir')
+    local_script = tmp_path / script.name
+    local_config = tmp_path / 'native_ftir.yaml'
+    local_config.write_bytes(fixture_config.read_bytes())
+    local_script.write_text(fixture_wrapper(script), encoding='utf-8')
+    session_root = tmp_path / 'session-output'
+    session_root.mkdir()
+    override = tmp_path / 'published items' / 'v2'
+    contract, payload = contract_of(script, fixture_config, 'main')
+    operation, _ = goal_operation(contract, fixture_config)
+
+    session = agent_api.AgentSession(local_script, local_config, 'main', output_dir=session_root)
+    try:
+        moved = session.try_layout([operation])
+        assert moved['status'] == 'OK', moved
+        published = session.commit('publication', confirm=True, output_dir=override)
+    finally:
+        session.close()
+
+    assert published['verification'] == 'STRICT_VERIFIED', published
+    assert published['output_dir'] == str(override.resolve()), published
+    assert published['science'] == 'protected payload identical to baseline', published
+    declared = sorted({name for scope in payload['scopes']
+                       for name in payload['scopes'][scope]['outputs']})
+    assert sorted(published['artifacts']) == declared, published
+    for name in declared:
+        artifact = override / name
+        assert artifact.is_file() and artifact.stat().st_size, f'缺少发布产物 {name}'
+    assert list(session_root.iterdir()) == [], '会话自己的输出根在换目标时不得被写入'
+    assert local_config.read_bytes() != fixture_config.read_bytes(), '发布必须真的写回配置'
+
+
+@pytest.mark.parametrize('drift', ['late_input', 'late_script_edit'])
+def test_publication_rechecks_the_candidate_inputs_immediately_before_installing(
+        tmp_path, monkeypatch, drift):
+    """严格校验与科学比对要花时间：它们跑完之后源再变，候选必须作废、一个字节都不落。
+
+    注入点就是门自己的最后一道校验步骤（`_science_diagnostics`）：改动落在「校验通过」
+    之后、「安装」之前，正是没有锁能覆盖的那段窗口。
+    """
+    from figpact import agent_api
+
+    script, fixture_config = fixture_paths('ftir')
+    local_script = tmp_path / script.name
+    local_config = tmp_path / 'native_ftir.yaml'
+    local_config.write_bytes(fixture_config.read_bytes())
+    local_script.write_text(fixture_wrapper(script), encoding='utf-8')
+    output_dir = tmp_path / 'exports'
+    output_dir.mkdir()
+    contract, _ = contract_of(script, fixture_config, 'main')
+    operation, _ = goal_operation(contract, fixture_config)
+    late_input = tmp_path / 'late_input.csv'
+
+    session = agent_api.AgentSession(local_script, local_config, 'main', output_dir=output_dir)
+    checked = []
+    original = agent_api.AgentSession._science_diagnostics
+
+    def late_change(self, candidate_yaml, scopes):
+        diagnostics = original(self, candidate_yaml, scopes)
+        checked.append(scopes)
+        assert diagnostics == [], f'这条用例必须先通过科学校验才谈得上复检：{diagnostics}'
+        if drift == 'late_script_edit':
+            local_script.write_text(local_script.read_text(encoding='utf-8') + '# late external edit\n',
+                                    encoding='utf-8')
+        else:
+            late_input.write_text('late external science input\n', encoding='utf-8')
+        return diagnostics
+
+    monkeypatch.setattr(agent_api.AgentSession, '_science_diagnostics', late_change)
+    try:
+        moved = session.try_layout([operation])
+        assert moved['status'] == 'OK', moved
+        with pytest.raises(agent_api.AgentError) as excinfo:
+            session.commit('publication', confirm=True)
+    finally:
+        session.close()
+
+    assert checked, '必须真的走到严格校验之后、安装之前的那一次输入复检'
+    assert excinfo.value.code == agent_api.STALE_REVISION, excinfo.value.to_error()
+    assert late_input.is_file() or local_script.read_text(encoding='utf-8').endswith('# late external edit\n'), \
+        '注入的晚到改动必须还在盘上（门不回滚外部改动）'
+    assert local_config.read_bytes() == fixture_config.read_bytes(), '拒绝后配置不得改动'
+    assert list(output_dir.iterdir()) == [], '拒绝后一个正式产物都不许落地'
+
+
+def test_publication_refuses_an_unusable_foreign_scope_before_starting_strict(tmp_path):
+    """别的作用域声明了越界产物：严格构建入口一次都不许启动，正式产物与配置一字节不动。
+
+    探针脚本在被当作 `__main__` 执行（= 严格构建入口）时先写一行日志，所以「日志不存在」
+    就是「严格入口没启动」的直接证据，不是对实现内部结构的猜测。
+    """
+    from figpact import agent_api
+
+    script, fixture_config = fixture_paths('ftir')
+    local_script = tmp_path / script.name
+    local_config = tmp_path / 'native_ftir.yaml'
+    local_config.write_bytes(fixture_config.read_bytes())
+    strict_entry = tmp_path / 'strict-entry.log'
+    extra_scope = 'escaped'
+    local_script.write_text(fixture_wrapper(script, [
+        '_fixture_contract = layout_contract\n'
+        '\n'
+        '\n'
+        f'SCOPES = (*SCOPES, {extra_scope!r})\n'
+        '\n'
+        '\n'
+        'def layout_contract(scope):\n'
+        f'    if scope == {extra_scope!r}:\n'
+        '        return {"scope": scope, "version": 1, "parameters": [], "relations": [],\n'
+        '                "groups": [], "nodes": {}, "outputs": ["../escaped.png"]}\n'
+        '    return _fixture_contract(scope)\n',
+    ], strict_log=strict_entry), encoding='utf-8')
+    output_dir = tmp_path / 'exports'
+    output_dir.mkdir()
+    published = output_dir / 'fig_ftir_native_main.png'
+    published.write_bytes(b'previous official artifact')
+    contract, _ = contract_of(script, fixture_config, 'main')
+    operation, _ = goal_operation(contract, fixture_config)
+
+    session = agent_api.AgentSession(local_script, local_config, 'main', output_dir=output_dir)
+    try:
+        moved = session.try_layout([operation])
+        assert moved['status'] == 'OK', moved
+        with pytest.raises(agent_api.AgentError) as excinfo:
+            session.commit('publication', confirm=True)
+    finally:
+        session.close()
+
+    assert excinfo.value.code == agent_api.COMMIT_REJECTED, excinfo.value.to_error()
+    assert excinfo.value.data.get('command') == 'plan', excinfo.value.to_error()
+    assert 'escaped' in str(excinfo.value), '拒绝必须点名越界的那个作用域'
+    assert not strict_entry.exists(), '契约/路径未通过时严格构建入口不得启动'
+    assert not (tmp_path / 'escaped.png').exists(), '越界产物不得在沙箱外落地'
+    assert published.read_bytes() == b'previous official artifact', '正式产物不得改动'
+    assert sorted(p.name for p in output_dir.iterdir()) == [published.name]
+    assert local_config.read_bytes() == fixture_config.read_bytes(), '配置不得改动'
+
+
+def test_approved_path_refuses_a_linked_source_or_destination(tmp_path):
+    """被解析到允许根之外的声明产物路径一律拒绝，父目录是符号链接也算；根内嵌套路径照常。"""
+    from figpact import agent_api
+
+    sandbox = tmp_path / 'sandbox'
+    sandbox.mkdir()
+    outside = tmp_path / 'outside'
+    outside.mkdir()
+    (outside / 'stolen.png').write_bytes(b'outside bytes')
+    assert agent_api._approved_path(sandbox, 'exports/fig.png', '严格校验产物') \
+        == (sandbox / 'exports' / 'fig.png').resolve(), '根内的嵌套相对路径必须照常解析'
+
+    escapes = ['../escape.png', str(outside / 'stolen.png')]
+    if os.name == 'nt':
+        escapes.append('C:/figpact-escape.png')
+    for name in escapes:
+        with pytest.raises(agent_api.AgentError) as excinfo:
+            agent_api._approved_path(sandbox, name, '严格校验产物')
+        assert excinfo.value.code == agent_api.COMMIT_REJECTED, (name, excinfo.value.to_error())
+
+    try:
+        os.symlink(outside, sandbox / 'exports', target_is_directory=True)
+    except (OSError, NotImplementedError, AttributeError):
+        pytest.skip('这个平台/权限建不了目录符号链接，链接逃逸无从验证')
+    with pytest.raises(agent_api.AgentError) as excinfo:
+        agent_api._approved_path(sandbox, 'exports/stolen.png', '严格校验产物')
+    assert excinfo.value.code == agent_api.COMMIT_REJECTED, excinfo.value.to_error()
+

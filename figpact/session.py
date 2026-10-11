@@ -155,24 +155,24 @@ def engine_fingerprint() -> str:
 
 
 def declared_science_inputs(module) -> list[str]:
-    """原生适配器声明的科学输入文件（SCIENCE_INPUTS 列表 或 science_inputs() 钩子）。"""
-    raw = getattr(module, 'SCIENCE_INPUTS', None)
-    if raw is None:
-        hook = getattr(module, 'science_inputs', None)
-        if callable(hook):
-            raw = hook()
-    if raw is None:
-        return []
-    if isinstance(raw, (str, Path)):
-        raw = [raw]
+    """合并两种显式声明；空的 SCIENCE_INPUTS 不能屏蔽 science_inputs()。"""
+    sources = [getattr(module, 'SCIENCE_INPUTS', None)]
+    hook = getattr(module, 'science_inputs', None)
+    if callable(hook):
+        sources.append(hook())
     base = Path(getattr(module, '__file__', '.')).resolve().parent
     out, missing = [], []
-    for item in raw:
-        path = Path(item)
-        resolved = (path if path.is_absolute() else base / path).resolve()
-        if not resolved.is_file():
-            missing.append(str(resolved))
-        out.append(str(resolved))
+    for raw in sources:
+        if raw is None:
+            continue
+        if isinstance(raw, (str, Path)):
+            raw = [raw]
+        for item in raw:
+            path = Path(item)
+            resolved = (path if path.is_absolute() else base / path).resolve()
+            if not resolved.is_file():
+                missing.append(str(resolved))
+            out.append(str(resolved))
     if missing:
         raise SessionError(f'SCIENCE_INPUTS 声明的科学输入不存在：{missing}（声明即须在场，不许静默丢弃）')
     return sorted(set(out))

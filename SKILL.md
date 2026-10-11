@@ -52,7 +52,7 @@ gap = geometry.measure_relation("gap", panels[:2], axis="x")
 | `build_scene(science, config, scope)` | 由**候选配置**确定性建图，返回 `(Figure, GidRegistry)` | 同一 `(science, config, scope)` 永远得到同一张图 |
 | `layout_contract(scope)` | 声明该场景的精确路径 / 节点 / 分组 / 关系 / 产物名 | 每个可编辑参数 `objects` 非空，且每个 gid 都真实存在（不声明不存在的图元） |
 | `science_manifest(science)` | 声明来源、处理、受保护锚点与标尺含义；只列**偏离默认策略**的图元 | 峰锚点与绘图用的是**同一个检测函数**，不是另抄一份数 |
-| `science_inputs()` | 逐条列出**实际读取**的输入文件（精确路径，不 glob、不扫目录）；等价写法是模块级 `SCIENCE_INPUTS` | 声明的文件不存在就报错，不静默丢；产物不算输入 |
+| `science_inputs()` | 逐条列出**实际读取**的输入文件（精确路径，不 glob、不扫目录）；另一种声明是模块级 `SCIENCE_INPUTS`，两者同时存在时取完整路径并集 | 文件不存在就报错；空常量不能屏蔽钩子声明，明确的科学输入不能被产物排除规则隐藏 |
 
 **新图优先显式传参。** 新脚本用 `build_scene(science, config, scope)` 收三个显式参数，
 只从传入的配置确定性建图，不依赖模块全局。legacy 脚本把 YAML 装进模块全局也可以，但
@@ -182,10 +182,14 @@ python -m figpact agent --script examples/ftir/plot_ftir.py \
 
 - `kind:"draft"`：把候选写回 `--config` 指向的 YAML（原子替换，保留注释与未改字段），
   `verification:"DRAFT_SAVED"`——**没有**严格校验，草稿还不等于「可发布」。
-- `kind:"publication"`：必须显式 `confirm:true`（否则 `INVALID_PARAMS` 直接拒）；在**独立沙箱**
-  跑全量 strict、比对科学指纹与基线，再把**该图全部声明产物**（各作用域并集去重）**事务性**
-  装入 `output_dir`（缺省=脚本目录）并保存 YAML；任一步失败则产物与 YAML 都不动
-  （错误码 -32005 `COMMIT_REJECTED`）。它是**独立**于草稿的第二次真实校验，不靠草稿的正确性。
+- `kind:"publication"`：必须显式 `confirm:true`（否则 `INVALID_PARAMS` 直接拒）；先逐 scope
+  验证完整产物契约，拒绝绝对路径、越出目标目录的路径和覆盖科学输入/脚本/配置的产物。
+  再在独立输出目录跑全量 strict、比对科学载荷，安装前最后复核输入与脚本指纹，拒绝过期候选。
+  **全部声明产物**（各作用域并集去重，支持安全的嵌套相对路径）批量装入 `output_dir`
+  （缺省=脚本目录）并保存 YAML；可捕获的安装或保存异常会回滚（-32005 `COMMIT_REJECTED`）。
+  **不是整批原子发布**：进程崩溃、强制终止或断电可能留下部分新文件；没有事务日志与恢复流程。
+  独立输出目录不是操作系统安全沙箱，绘图 Python 必须可信。最后指纹复核缩小并发窗口，
+  不等于锁定外部文件。完整发布独立重验，不借用草稿或热预览结论。
 - 提交前提：本会话有过**成功**的 `try_layout`（否则 -32004 `NO_CANDIDATE`），且 revision 是
   **当前** revision；候选生成后磁盘 YAML / 脚本 / 输入文件被改动同样拒（-32003）。
 - **draft 之后会重新基线**：草稿写回 YAML，下一次调用按新文件重读基线、**清空候选目标**、

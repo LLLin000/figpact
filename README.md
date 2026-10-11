@@ -7,7 +7,13 @@
 2. **纯显示位移**：不改数据坐标，不改数据本身，仅在布局完成后施加 Display Shift。
 3. **图元身份（GID）与参数绑定**：每个排版图元具备稳定 ID 并声明关联参数。
 4. **严格验收（QA）与阻断机制**：排版几何越界（裁剪、重叠、压线、顺序颠倒）作为阻断项。
-5. **原子发布**：通过暂存目录渲染，验收合格后原子发布，防止半成品或破损图覆盖正式产物。
+5. **验收后发布**：在独立输出目录完成验收后逐文件替换；Agent / GUI 的批量安装遇到可捕获异常会回滚。进程崩溃或断电可能留下部分新文件，当前没有事务日志与恢复流程，不承诺整批原子发布。
+
+图幅图像（`fig.figimage`）与坐标轴内图像都保护像素、方向和显示范围。图幅图像的位置是版面，
+不是科学裁剪范围；无 YAML 的测量、会话几何与正式 QA 都使用它未裁切的图幅像素包围盒，
+不使用 Matplotlib 继承的零框。无法测量即阻断，未注册也不能逃过正式画布裁切检查。
+图幅像素按当前 Figure DPI 换算毫米，必须与 renderer DPI 一致；这不是跨 DPI 的物理标定。
+
 
 ## CLI 命令与使用
 ```bash
@@ -55,7 +61,7 @@ figpact agent --script <py> --config <yaml> --scope <scope> [--output-dir <dir>]
 ```
 
 `kind:"draft"` 只写 YAML 草稿（`DRAFT_SAVED`，**未过**严格校验）；`kind:"publication"`
-必须带 `confirm:true`，在独立沙箱跑全量 strict 后才事务性安装产物并保存 YAML。
+必须带 `confirm:true`，先逐 scope 验证完整产物契约和安全相对路径，再在独立输出目录跑全量 strict、复核科学载荷与源文件状态，最后批量安装产物并保存 YAML。捕获到的安装异常会回滚；崩溃一致性不在当前保证内。
 `--config` 指向哪份 YAML 就写哪份：试算请把真配置拷到临时目录、产物落 `--output-dir`
 沙箱，确认再用真实路径。实测几何读 `relations[].value_mm`（声明的 `target_mm` 是目标，
 不是结果）。完整键名、状态字面量与错误码见 `SKILL.md` §2.1。
@@ -80,6 +86,7 @@ GUI 候选预览由 `figpact.preview.preview(script=..., config=..., scope=..., 
 也可以保存，但界面明确标记不可发布。科学字段、只读标尺和未知参数不能保存。
 “保存并发布”先在沙箱运行所有必需输出的原始 strict，再一起更新 YAML 和图件；
 strict 失败时两者均不修改，后续文件替换失败会回滚已经替换的文件。
+这里的“回滚”只处理可捕获的异常，不覆盖进程中途退出或断电；底层 `publish()` 是逐文件替换，不是整批事务。独立输出目录只隔离产物路径，不是操作系统安全沙箱，绘图 Python 仍须可信。
 
 保存检查浏览器所持配置 SHA-256；旧版本返回 HTTP 409，不覆盖磁盘的新修改。
 “撤销保存”恢复本会话中该图最近一次保存；若该次已发布，也恢复原图件。
@@ -124,6 +131,30 @@ python -X utf8 tests/benchmarks/bench_vnext.py --lanes cold_preview warm_preview
 毫米位移可核对实际 renderer 的坐标；字体包围盒仍受 DPI 和栅格化影响，
 不能宣称任意精度。移动图像时保护的是原图数组及科学窗口，不承诺不同画布下
 重采样后的屏幕像素逐字节相同。
+
+### P3.1 安全收口实测
+
+指定模型 `opencode-go/step-5-preview-free` 在本机运行：focused 144 passed / 5 skipped，
+full 269 passed / 6 skipped（另有 71 个 subtests 通过），没有修改断言来放行失败。
+4 项符号链接测试因 Windows 创建权限跳过，2 项 legacy 测试因旧夹具不在场跳过；
+这些跳过不算已验证。回归覆盖逐 scope 契约、嵌套产物、异常回滚、最终输入复核、
+显式科学输入优先、图幅图像保护，以及不依赖 YAML 的实测快照。
+
+两套真实脚本未改；分别完成查询、毫米修改、实际渲染、私有草稿与独立 strict 发布：
+
+|图件|实测结果|非缓存渲染/校验|独立 strict 发布|产物|
+|---|---|---|---|---|
+|FTIR|5 条曲线各上移 0.050 mm|`render_preview` 0.405 s|8.951 s|12 个 PDF/PNG/SVG/TIFF|
+|NMR|3.91 ppm 标签与引线末端上移 0.150 mm，科学首锚点不动|`try_layout` 真实重建+校验 0.868 s|9.249 s|4 个 PDF/PNG/SVG/TIFF|
+
+这是并发验证负载下的单次值，不是 P95；NMR 随后的 PNG 请求命中缓存，不计作新绘制。
+两套科学载荷一致，22 个原脚本、配置、样式和正式产物的 SHA-256 均未变化。
+按作者要求，临时验收记录已核对 SHA-256 后归档到本机
+`I:/figpact-test-archive/P31-620fdaf/D-verification/`：
+`p31-final-suite-v2/`、`p31-real-output/logs/{protocol_r2.jsonl,summary_r2.json,*_measure_r2.json}`，
+真实试算产物为 `p31-real-output/exports/{ftir-r2,nmr-r2}/`。
+归档清单保存原路径、目标路径和校验值；C/D 盘临时副本已清理，仓库测试与科研原件仍在原位。
+新一轮完整 Agent 任务对比独立记录，不能用上面的渲染秒数替代 Agent 全耗时；P4 继续冻结。
 
 ### Agent 效率门槛：尚未通过
 
