@@ -104,6 +104,10 @@ _Avoid_: editable plot data
 The protected selection of scientific content, such as an image crop or a chemical-shift range.
 _Avoid_: layout viewport, blank headroom
 
+**Image Placement**:
+The position of protected image content within a figure's display space. Moving an image does not authorize changing its pixels or scientific view window.
+_Avoid_: scientific crop, image pixel coordinates
+
 **Layout Viewport**:
 An explicitly authorized display region whose blank headroom may change while the scientific origin, signal scale, and content remain fixed.
 _Avoid_: scientific view window, automatic rescaling

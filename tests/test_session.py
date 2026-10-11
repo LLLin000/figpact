@@ -365,6 +365,145 @@ def write_panel_fixture(root: Path):
     return script, config
 
 
+FIGIMAGE_SCRIPT = '''\
+"""原生图幅图像夹具：`fig.figimage` 的真实显示几何、包含性与碰撞参与。
+
+画布 60×45 mm（dpi 100，1 mm = 100/25.4 px）。`figimg` 是一张 6 列 × 4 行的**已注册**图幅
+图像，位置 = 210 px + `figimg_x_mm`（脚本自己把 mm 换算成图幅像素）——所以「平移 1 mm」
+「把它推出画布右边界」都是可算的确定性事实。它的节点在科学声明里被**错标**成 LAYOUT：
+像素照样是科学载荷，只有位置是版面。`figimg_lift_mm` 是同一条 mm 位移，但声明成 `rebuild`：
+它走真实重建 + 渲染验证那条路，`figimg_x_mm` 走几何快车道 —— 两条路都不许把图像丢出画布。
+
+`ghost` 是一张**未注册**的图幅图像，贴在曲线**基线**峰顶上方 6 px 处（位置用未施加位移时
+的真实显示坐标算出来，与被位移参数无关）：它没有 gid，但真几何必须照样进测量，否则曲线
+向上平移撞上它也没人发现。
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from figpact import GidRegistry, apply_display_shift
+from figpact.config import load_config as _engine_load_config
+
+FIGURE_ID = "figimg"
+SCOPES = ("main",)
+CONFIG_PATH = Path(__file__).with_name("figimage.yaml")
+DPI = 100.0
+MM_PER_INCH = 25.4
+#: 已注册图幅图像的基线图幅像素偏移（图幅像素，不是数据坐标）。
+BASE_XO_PX = 210.0
+BASE_YO_PX = 120.0
+#: 未注册图幅图像与曲线基线峰顶之间的实测间隙（图幅像素）。
+GHOST_GAP_PX = 6.0
+
+SCHEMA = {
+    "schema_version": (int, 1, 1),
+    "canvas_w_mm": (float, 40.0, 80.0),
+    "canvas_h_mm": (float, 30.0, 60.0),
+    "figimg_x_mm": (float, -10.0, 10.0),
+    "figimg_lift_mm": (float, -40.0, 40.0),
+    "curve_shift_mm": (float, -6.0, 6.0),
+}
+
+
+def load_config(path=CONFIG_PATH):
+    return _engine_load_config(path, SCHEMA)
+
+
+def load_science():
+    return {"image": np.arange(24, dtype=float).reshape(4, 6), "loaded": True}
+
+
+def science_manifest(science):
+    return {"science": {"arrays": 1, "image_shape": list(science["image"].shape)},
+            "nodes": {FIGURE_ID + "." + SCOPES[0] + ".figimage": {"science_policy": "LAYOUT",
+                                                                 "type": "image"}}}
+
+
+def to_px(mm):
+    """mm → 图幅像素（脚本自己的换算，不是引擎的测量口径）。"""
+    return float(mm) * DPI / MM_PER_INCH
+
+
+def build_scene(science, config, scope):
+    if scope not in SCOPES:
+        raise ValueError("未知 scope: " + scope)
+    print("[figimg] build " + scope)
+    fig = plt.figure(figsize=(config["canvas_w_mm"] / MM_PER_INCH,
+                              config["canvas_h_mm"] / MM_PER_INCH), dpi=DPI)
+    reg = GidRegistry()
+    prefix = FIGURE_ID + "." + scope
+    ax = fig.add_axes([0.15, 0.25, 0.7, 0.55])
+    ax.set_xlim(0.0, 10.0)
+    ax.set_ylim(-1.2, 1.3)
+    x = np.linspace(0.0, 10.0, 121)
+    curve, = ax.plot(x, np.sin(x), lw=0.8)
+    reg.register(curve, prefix + ".curve", params=["curve_shift_mm"])
+    # 未注册图幅图像：位置按**未施加位移**的真实显示坐标算出来，所以位移参数带不动它。
+    points = curve.get_transform().transform(curve.get_xydata())
+    top = points[int(np.argmax(points[:, 1]))]
+    fig.figimage(np.full((6, 40), 1e6), xo=int(round(top[0])) - 20,
+                 yo=int(round(top[1] + GHOST_GAP_PX)), origin="upper")
+    apply_display_shift(curve, dy_mm=config["curve_shift_mm"])
+    # 已注册图幅图像：位置由 figimg_x_mm（几何快车道）与 figimg_lift_mm（rebuild 路）决定。
+    image = fig.figimage(science["image"], xo=BASE_XO_PX + to_px(config["figimg_x_mm"]),
+                         yo=BASE_YO_PX + to_px(config["figimg_lift_mm"]), origin="upper")
+    reg.register(image, prefix + ".figimage", params=["figimg_x_mm", "figimg_lift_mm"])
+    return fig, reg
+
+
+def layout_contract(scope):
+    if scope not in SCOPES:
+        raise ValueError("未知 scope: " + scope)
+    prefix = FIGURE_ID + "." + scope
+    curve, figimage = prefix + ".curve", prefix + ".figimage"
+    return {
+        "parameters": [
+            {"key": "figimg_x", "path": ["figimg_x_mm"], "unit": "mm",
+             "mutability": "EDITABLE", "operation": "translate", "axis": "x", "scale": 1.0,
+             "min": -10.0, "max": 10.0, "scopes": list(SCOPES), "objects": [figimage],
+             "expected": {"kind": "translate", "objects": [figimage], "axis": "x"}},
+            {"key": "figimg_lift", "path": ["figimg_lift_mm"], "unit": "mm",
+             "mutability": "EDITABLE", "operation": "rebuild", "axis": "y",
+             "min": -40.0, "max": 40.0, "scopes": list(SCOPES), "objects": [figimage],
+             "expected": {"kind": "translate", "objects": [figimage], "axis": "y"}},
+            {"key": "curve_shift", "path": ["curve_shift_mm"], "unit": "mm",
+             "mutability": "EDITABLE", "operation": "translate", "axis": "y", "scale": 1.0,
+             "min": -6.0, "max": 6.0, "scopes": list(SCOPES), "objects": [curve],
+             "expected": {"kind": "translate", "objects": [curve], "axis": "y"}},
+        ],
+        "nodes": {figimage: {"type": "FigureImage", "parent": prefix, "editable": True,
+                             "science_policy": "LAYOUT"},
+                  curve: {"type": "Line2D", "parent": prefix, "editable": True,
+                          "science_policy": "LAYOUT"}},
+        "groups": [{"id": prefix, "parent": FIGURE_ID, "members": [curve, figimage]}],
+        "relations": [],
+        "outputs": ["figimage.png"],
+    }
+'''
+
+FIGIMAGE_YAML = """\
+schema_version: 1
+canvas_w_mm: 60.0
+canvas_h_mm: 45.0
+figimg_x_mm: 0.0
+figimg_lift_mm: 0.0
+curve_shift_mm: 0.0
+"""
+
+
+def write_figimage_fixture(root: Path):
+    """把图幅图像夹具脚本 + 配置写进目录；返回 (script, config)。"""
+    script = root / 'figimage_plot.py'
+    config = root / 'figimage.yaml'
+    script.write_text(FIGIMAGE_SCRIPT, encoding='utf8')
+    config.write_text(FIGIMAGE_YAML, encoding='utf8')
+    return script, config
+
+
 PAIR_SCRIPT = '''\
 """原生 2D 标注位移夹具：一对 `[dx, dy]`（mm）的显示位移，锚点与曲线不动。
 
@@ -1015,6 +1154,146 @@ class PanelClosureTest(unittest.TestCase):
             self.assertAlmostEqual(after['panels.main.panel.b'][0]
                                    - baseline['panels.main.panel.b'][0], 0.0, delta=0.01,
                                    msg='无关兄弟必须原地不动')
+
+
+class FigureImageSafetyTest(unittest.TestCase):
+    """`fig.figimage` 的真实显示几何：未裁切的 mm 包围盒、包含性与碰撞参与。
+
+    断言打在消费方真正看得见的东西上：`drawn_shapes` 的 mm 记录、`try_layout` 的状态字、
+    检查项与原子性（失败不许留下目标）。不打印任何实现细节，也不钉内部键的拼写。
+    """
+
+    FIGIMAGE_GID = 'figimg.main.figimage'
+    CURVE_GID = 'figimg.main.curve'
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(prefix='figpact-figimage-test-')
+        self.root = Path(self._tmp.name)
+        self.script, self.config = write_figimage_fixture(self.root)
+
+    def tearDown(self):
+        import matplotlib.pyplot as plt
+        plt.close('all')
+        self._tmp.cleanup()
+
+    def session(self, **kwargs):
+        return FigureSession(self.script, self.config, kwargs.pop('scope', 'main'), **kwargs)
+
+    def test_figure_image_extent_is_the_real_uncropped_box_not_the_empty_one(self):
+        """画到画布外的图幅图像必须按真实未裁切几何量出来。
+
+        `FigureImage` 继承的 `Artist.get_window_extent()` 恒返回空框 (0,0,0,0)：拿它当
+        几何会把「画到画布外」伪装成「停在左下角」，所以这里同时钉住「有记录」与
+        「记录的是真实未裁切框」两件事。
+        """
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        mm_per_px = 25.4 / 100.0
+        fig = plt.figure(figsize=(60 / 25.4, 45 / 25.4), dpi=100)
+        try:
+            fig.figimage(np.arange(24, dtype=float).reshape(4, 6), xo=-4, yo=176,
+                         origin='upper')
+            registered = fig.figimage(np.ones((2, 2)), xo=210, yo=120, origin='upper')
+            registered.set_gid('figimg.extent')
+            shapes = drawn_shapes(fig)
+        finally:
+            plt.close(fig)
+        record = shapes['None:figure_image_envelope:0']
+        self.assertEqual(record['kind'], 'figure_image_envelope')
+        self.assertIsNone(record['axes'], '图幅图像不挂在任何坐标轴上')
+        expected = [-4 * mm_per_px, 176 * mm_per_px, 2 * mm_per_px, 180 * mm_per_px]
+        for measured, want in zip(record['bbox_mm'], expected):
+            self.assertAlmostEqual(measured, want, places=9)
+        self.assertNotEqual(record['bbox_mm'], [0.0, 0.0, 0.0, 0.0],
+                            '空包围盒会把「画布外」伪装成「左下角」')
+        self.assertLess(record['bbox_mm'][0], 0.0, '左侧越界的图像必须量出负的 x0')
+        self.assertGreater(record['bbox_mm'][3], 45.0, '上侧越界的图像必须量出超画布的 y1')
+        registered_record = shapes['gid:figimg.extent']
+        self.assertAlmostEqual(registered_record['bbox_mm'][0], 210 * mm_per_px, places=9)
+        self.assertAlmostEqual(registered_record['bbox_mm'][3], 122 * mm_per_px, places=9)
+
+    def test_unmeasurable_figure_image_is_refused_instead_of_assumed_safe(self):
+        """可见但量不出真几何的图幅图像：显式失败关闭，不拿假框当安全。"""
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        fig = plt.figure(figsize=(2, 2), dpi=100)
+        try:
+            image = fig.figimage(np.ones((2, 2)), xo=5, yo=5)
+            fig.canvas.draw()
+            image.ox = float('nan')
+            with self.assertRaises(SessionError) as caught:
+                drawn_shapes(fig)
+            self.assertIn('fig.figimage', str(caught.exception),
+                          '拒绝理由必须点名不可测的是图幅图像')
+        finally:
+            plt.close(fig)
+
+    def test_figure_image_translate_is_measured_and_keeps_science(self):
+        """声明的图幅图像平移走几何快车道：真实 mm 位移 + 科学等值，位置不是科学载荷。"""
+        with self.session() as session:
+            baseline = session.revision
+            result = session.try_layout([{'operation': 'set_parameter',
+                                          'path': ['figimg_x_mm'], 'value': 1.0}])
+            self.assertEqual(result['status'], STATUS_OK, result)
+            self.assertEqual(result['verification'], VERIFICATION_GEOMETRY, result)
+            self.assertIs(result['science_unchanged'], True, result)
+            self.assertEqual(next(c for c in result['checks']
+                                  if c['check'] == 'containment')['status'], 'OK')
+            self.assertNotEqual(result['revision'], baseline)
+
+    def test_figure_image_pushed_outside_canvas_is_refused_atomically(self):
+        """把它推出画布：几何快车道必须拒绝，不许只改了位置就当成功。"""
+        with self.session() as session:
+            revision = session.revision
+            result = session.try_layout([{'operation': 'set_parameter',
+                                          'path': ['figimg_x_mm'], 'value': 8.0}])
+            self.assertEqual(result['status'], STATUS_GEOMETRY_REJECTED, result)
+            self.assertEqual(result['verification'], VERIFICATION_GEOMETRY, result)
+            failure = next(c for c in result['checks']
+                           if c['check'] == 'containment' and c['status'] == 'FAIL')
+            self.assertEqual(failure['object'], self.FIGIMAGE_GID)
+            self.assertEqual(failure['bound'], '画布边界')
+            self.assertGreater(failure['overflow_mm'], 0.0)
+            self.assertEqual(session.revision, revision)
+            self.assertEqual(session.candidate_patch, {})
+
+    def test_unregistered_figure_image_blocks_a_new_collision(self):
+        """曲线平移撞上**未注册**的图幅图像：它没有 gid，但真几何照样进碰撞测量。"""
+        with self.session() as session:
+            revision = session.revision
+            result = session.try_layout([{'operation': 'set_parameter',
+                                          'path': ['curve_shift_mm'], 'value': 2.0}])
+            self.assertEqual(result['status'], STATUS_GEOMETRY_REJECTED, result)
+            self.assertEqual(result['verification'], VERIFICATION_GEOMETRY, result)
+            collision = next(c for c in result['checks'] if c['check'] == 'collision')
+            self.assertEqual(collision['status'], 'FAIL')
+            pair = next(p for p in collision['pairs'] if self.CURVE_GID in p['pair'])
+            other = next(name for name in pair['pair'] if name != self.CURVE_GID)
+            self.assertFalse(other.startswith('gid:'),
+                             f'撞上的必须是没有 gid 的图幅图像，实际是 {other}')
+            self.assertEqual(pair['method'], 'polyline_vs_envelope')
+            self.assertLessEqual(pair['gap_mm'], 0.0)
+            self.assertGreater(pair['baseline_gap_mm'], 0.0,
+                               '基线里同一对并未相交 → 这是新碰撞，不是既有布局')
+            self.assertEqual(session.revision, revision)
+            self.assertEqual(session.candidate_patch, {})
+
+    def test_rebuild_lane_lift_out_of_canvas_is_refused_before_qa(self):
+        """rebuild 那条路（真实重建）也不许把图幅图像丢出画布：QA 根本不看 fig.images。"""
+        with self.session() as session:
+            revision = session.revision
+            result = session.try_layout([{'operation': 'set_parameter',
+                                          'path': ['figimg_lift_mm'], 'value': 14.0}])
+            self.assertEqual(result['status'], STATUS_GEOMETRY_REJECTED, result)
+            self.assertIsNone(result['verification'], '拒绝不是「已检查通过」')
+            failure = next(c for c in result['checks'] if c['check'] == 'figure_image_canvas')
+            self.assertEqual(failure['status'], 'FAIL')
+            self.assertEqual(failure['object'], self.FIGIMAGE_GID)
+            self.assertGreater(failure['overflow_mm'], 0.0)
+            self.assertEqual(session.revision, revision)
+            self.assertEqual(session.candidate_patch, {})
 
 
 class WorkerProtocolTest(_ProbeCase):

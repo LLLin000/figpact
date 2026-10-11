@@ -219,6 +219,35 @@ class MillimetreTest(unittest.TestCase):
                              f"{results[(scope, 120)]} vs {results[(scope, 300)]}")
 
 
+class FigureImagePublicationQATest(unittest.TestCase):
+    def tearDown(self):
+        plt.close("all")
+
+    def test_visible_figure_image_cropping_blocks_publication_without_a_gid(self):
+        for registered in (False, True):
+            with self.subTest(registered=registered):
+                fig = plt.figure(figsize=(1, 1), dpi=100)
+                image = fig.figimage(np.zeros((10, 10)), xo=80, yo=80)
+                if registered:
+                    image.set_gid("fig.main.image.specimen")
+                self.assertEqual(qa.check_out_of_frame(fig), [])
+                image.ox = 96
+                diagnostics = [qa.diagnose(p) for p in qa.check_out_of_frame(fig,
+                                                                            gid_filter="curve")]
+                diagnostic, = diagnostics
+                self.assertEqual(diagnostic.rule_id, "OUT_OF_FRAME")
+                self.assertEqual(diagnostic.severity, "blocking")
+                self.assertAlmostEqual(diagnostic.measured, 1.52, places=2)
+                plt.close(fig)
+
+    def test_unmeasurable_figure_image_is_a_publication_blocker(self):
+        fig = plt.figure(figsize=(1, 1), dpi=100)
+        fig.figimage(np.zeros((3, 4)), xo=float("nan"), yo=40)
+        diagnostic, = [qa.diagnose(p) for p in qa.check_out_of_frame(fig)]
+        self.assertEqual(diagnostic.rule_id, "UNMEASURED_GEOMETRY")
+        self.assertEqual(diagnostic.severity, "blocking")
+
+
 class PanelPublishSafetyTest(unittest.TestCase):
     """显微图夹具的像素不许因为"保存一次"就变：发布前后字节相同。"""
 

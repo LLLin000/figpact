@@ -784,5 +784,92 @@ class NegativeFixtureTruthTest(unittest.TestCase):
             plt.close(clean)
 
 
+class FigureImageProtectionTest(unittest.TestCase):
+    """`fig.figimage` 的像素 / origin / 显示范围受保护，图幅位置是版面。
+
+    合成图（确定性整数数组，不用任何生产数据）：一张 3×4 的图幅图像，注册成 `figimg`，
+    可以按调用方给的节点声明**错标**成 LAYOUT/guide，也可以根本不注册。断言打在
+    `capture_science` / `compare_science` 的返回上——那就是会话真正消费的接口。
+    """
+
+    PIXELS = ((0, 1, 2, 3), (4, 5, 6, 7), (8, 9, 10, 11))
+
+    def tearDown(self):
+        plt.close("all")
+
+    def capture(self, *, pixels=None, clim=None, origin="upper", xo=20, yo=20, ox=None,
+                gid="figimg", node=None):
+        """一张只有图幅图像的合成图 → 它的科学指纹。"""
+        from figpact import GidRegistry
+        from figpact import science as science_mod
+
+        fig = plt.figure(figsize=(2, 2), dpi=100)
+        try:
+            image = fig.figimage(np.asarray(self.PIXELS if pixels is None else pixels,
+                                            dtype=float),
+                                 xo=xo, yo=yo, origin=origin)
+            if clim is not None:
+                image.set_clim(*clim)
+            if ox is not None:
+                image.ox = ox
+            registry = GidRegistry()
+            if gid is not None:
+                registry.register(image, gid)
+            declarations = {"nodes": {gid: dict(node)}} if node else {"nodes": {}}
+            return science_mod.capture_science(fig, registry, declarations=declarations)
+        finally:
+            plt.close(fig)
+
+    @staticmethod
+    def changed(before, after):
+        from figpact import science as science_mod
+
+        return science_mod.compare_science(before, after)
+
+    def test_figure_image_pixels_are_protected_even_when_tagged_layout_or_guide(self):
+        """错标成 LAYOUT（甚至 guide）的图幅图像，像素照样是科学载荷。"""
+        tampered = ((0, 1, 2, 3), (4, 5, 6, 7), (8, 9, 10, 12))
+        baseline = self.capture()
+        self.assertIn("figimg", baseline["objects"], "图幅图像像素必须进保护载荷")
+        self.assertEqual(self.changed(baseline, self.capture()), [], "同一份真图必须指纹一致")
+        for node in (None, {"science_policy": "LAYOUT"},
+                     {"science_policy": "LAYOUT", "type": "guide"}):
+            labelled = self.capture(node=node)
+            self.assertEqual(labelled["digest"], baseline["digest"],
+                             f"声明怎么标只该影响豁免，不该改真实指纹：{node}")
+            diff = self.changed(labelled, self.capture(pixels=tampered, node=node))
+            self.assertTrue(diff, f"错标成 {node} 的图幅图像像素篡改必须被拦住")
+            self.assertEqual(diff[0]["rule_id"], "SCIENCE_CHANGED")
+            self.assertIn("figimg", diff[0]["object_ids"])
+
+    def test_figure_image_origin_clim_and_unregistered_pixels_are_protected(self):
+        """origin（数组朝向）与 clim（显示范围）是图像的科学解释；没有 gid 也受保护。"""
+        baseline = self.capture()
+        flipped = self.changed(baseline, self.capture(origin="lower"))
+        self.assertTrue(flipped and "figimg" in flipped[0]["object_ids"],
+                        "把 origin 翻过来改变了像素的科学解释，必须被拦住")
+        rescaled = self.changed(baseline, self.capture(clim=(2.0, 9.0)))
+        self.assertTrue(rescaled and "figimg" in rescaled[0]["object_ids"],
+                        "显示范围（clim）变化必须被拦住")
+        unnamed = self.capture(gid=None)
+        self.assertIn("figure.unregistered.image.0", unnamed["objects"],
+                      "没有 gid 的图幅图像照样受保护，按图幅序号记名")
+        unregistered = self.changed(unnamed, self.capture(gid=None, pixels=(
+            (0, 1, 2, 3), (4, 5, 6, 7), (8, 9, 10, 12))))
+        self.assertTrue(unregistered, "未注册图幅图像的像素篡改必须被拦住")
+        self.assertIn("figure.unregistered.image.0", unregistered[0]["object_ids"])
+
+    def test_figure_image_placement_is_layout_and_stays_out_of_the_payload(self):
+        """换位置（重建时给别的 xo/yo，或直接改 ox）是版面：科学指纹必须不变。"""
+        baseline = self.capture()
+        self.assertEqual(self.capture(xo=120, yo=90)["digest"], baseline["digest"],
+                         "同一张图换个图幅位置，内容指纹必须不变")
+        moved = self.capture(ox=200)
+        self.assertEqual(moved["digest"], baseline["digest"],
+                         "移动图幅图像是版面动作，不许进科学载荷")
+        self.assertEqual(self.changed(baseline, moved), [],
+                         "版面位移不是受保护载荷的差异")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -7,6 +7,7 @@ from typing import Any, Optional
 import numpy as np
 import matplotlib.figure
 from figpact.units import MM_PER_INCH
+from figpact.geometry import figure_image_bbox
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,8 @@ _RULES: tuple[tuple[str, str, re.Pattern], ...] = (
     ("NO_FEASIBLE_SLOT", "blocking", re.compile(r"「(?P<o1>[^」]+)」无可行避让位置")),
     ("GUIDE_CROSSES_LEGEND", "blocking", re.compile(r"「(?P<o1>[^」]+)」引线穿过图例")),
     ("OUT_OF_FRAME", "blocking", re.compile(r"「(?P<o1>[^」]+)」[^「]*?超出坐标框")),
+    ("OUT_OF_FRAME", "blocking", re.compile(r"「(?P<o1>[^」]+)」[^「]*?超出画布")),
+    ("UNMEASURED_GEOMETRY", "blocking", re.compile(r"「(?P<o1>[^」]+)」图幅图像几何无法测量")),
     ("UNKNOWN_LABEL_GID", "blocking", re.compile(r"未知标注 gid[:：](?P<o1>[^（(]+)")),
     ("TEXT_OVERLAP", "blocking", re.compile(r"«(?P<o1>[^»]+)»\s*与\s*«(?P<o2>[^»]+)»\s*重叠")),
     ("TEXT_OVERLAP", "blocking", re.compile(r"重叠[^«]*«(?P<o1>[^»]+)»\s*×\s*«(?P<o2>[^»]+)»")),
@@ -147,7 +150,7 @@ def key_from_json(text: str) -> tuple:
 
 
 def check_out_of_frame(fig: matplotlib.figure.Figure, *, gid_filter: Optional[Any] = None) -> list[str]:
-    """检查对象是否超出坐标轴框架（裁切）。显示坐标实测。"""
+    """检查坐标轴裁切及图幅图像的画布裁切；未注册图幅图像同样检查。"""
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
     mm_per_px = MM_PER_INCH / fig.dpi
@@ -184,6 +187,20 @@ def check_out_of_frame(fig: matplotlib.figure.Figure, *, gid_filter: Optional[An
             if v_over > 0.05 / mm_per_px:  # 容许微小误差
                 name = gid.rsplit(".", 1)[-1]
                 out.append(f"「{name}」超出坐标框 {v_over * mm_per_px:.2f} mm（已被裁切）")
+    for index, image in enumerate(fig.images):
+        if not image.get_visible():
+            continue
+        # gid_filter is an axes-only selector, never an exemption for image pixels.
+        gid = image.get_gid() or f"unregistered.figure_image.{index}"
+        bb = figure_image_bbox(image)
+        if bb is None:
+            out.append(f"「{gid}」图幅图像几何无法测量，拒绝将裁切判为安全")
+            continue
+        frame = fig.bbox
+        overflow = max(0.0, frame.x0 - bb.x0, frame.y0 - bb.y0,
+                       bb.x1 - frame.x1, bb.y1 - frame.y1) * mm_per_px
+        if overflow > 0.05:
+            out.append(f"「{gid}」超出画布 {overflow:.2f} mm（图像已被裁切）")
     return out
 
 

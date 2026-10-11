@@ -205,8 +205,10 @@ def capture_science(fig, registry, *, declarations=None):
     """Hash actual content, scientific view windows and explicit source/processing declarations.
 
     Only a declared guide (science_policy LAYOUT and type guide) has its decorative geometry
-    exempt. Image pixels, image origin/extent/display range, text content, curve arrays and scatter
-    offsets are always protected, and collection value arrays are protected even on a guide.
+    exempt. Image pixels, image origin and image display range are always protected -- axes images
+    and figure images (``fig.figimage``) alike, the latter carrying no data-space extent, so only
+    their placement stays layout -- as are text content, curve arrays and scatter offsets, and
+    collection value arrays are protected even on a guide.
     Rotation is layout and stays out of the text content hash, while the raw scientific payload of
     source declarations (including scale-bar meaning/ratio) is hashed.
     A y view window is locked unless ``declarations['layout_viewports']`` declares an immutable
@@ -266,6 +268,17 @@ def capture_science(fig, registry, *, declarations=None):
                 gid = text.get_gid() or f'{panel}.unregistered.text.{j}'
                 # Text is scientific content whatever the policy says; rotation is layout.
                 records[gid + ':text'] = {'text': str(text.get_text())}
+    # 图幅图像（`fig.figimage` 出来的 FigureImage）同样是受保护载荷：像素、origin 与显示
+    # 范围（clim）永远是科学解释的一部分，节点被错标成 LAYOUT/guide、或者干脆没有 gid 都不
+    # 豁免。位置（ox/oy，图幅像素）是作者允许的版面，由会话的真实显示几何测量，不进这份
+    # 载荷；连 `get_extent()` 都不哈希：FigureImage 的那个值是「图幅像素 ±0.5」的伪数据坐标，
+    # 拿它当科学窗口等于给版面编一个数据含义。
+    for j, image in enumerate(getattr(fig, 'images', [])):
+        if not image.get_visible():
+            continue
+        gid = image.get_gid() or f'figure.unregistered.image.{j}'
+        records[gid] = {'pixels': _array(image.get_array()), 'origin': str(image.origin),
+                        'clim': _floats(image.get_clim())}
     for j, text in enumerate(fig.texts):
         if text.get_visible() and text.get_text():
             gid = text.get_gid() or f'figure.unregistered.text.{j}'

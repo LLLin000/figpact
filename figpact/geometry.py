@@ -27,6 +27,31 @@ import numpy as np
 _ANCHORS = ('left', 'right', 'top', 'bottom', 'center_x', 'center_y', 'baseline')
 _DEVIATION_KINDS = ('align', 'equal_size', 'distribute')
 
+def figure_image_bbox(image):
+    """图幅图像（`fig.figimage`）的真实显示包围盒（**未裁切**，图幅 dpi 像素）；量不出来返回 None。
+
+    `FigureImage` **没有**自己的 `get_window_extent`：它继承 `Artist` 的实现，恒返回空框
+    `(0, 0, 0, 0)`。拿那个空框当几何，会把「画到画布外」伪装成「停在画布左下角」，所以这里
+    按真实绘制语义自己算：`ox`/`oy` 是以**图幅 dpi 像素**为单位的左下角偏移
+    （`FigureImage.make_image` 用的就是这两个值，会话里 `fig.canvas.draw()` 拿到的渲染器
+    dpi 就是 fig.dpi），边长就是数组的 (列, 行)；`magnification` 只改分辨率，不改位置与尺寸
+    （dpi 100 下 0.5×/1×/2× 画出的是同一块像素）。
+
+    没有数组（形状未知）、偏移不是有限数、边长非正一律返回 None —— **绝不**返回一个假框，
+    调用方必须据此失败关闭。
+    """
+    try:
+        size = image.get_size()
+        ox, oy = float(image.ox), float(image.oy)
+    except (AttributeError, TypeError, ValueError):
+        return None
+    if len(size) != 2:
+        return None
+    cols, rows = int(size[1]), int(size[0])
+    if rows <= 0 or cols <= 0 or not (math.isfinite(ox) and math.isfinite(oy)):
+        return None
+    from matplotlib.transforms import Bbox
+    return Bbox.from_extents(ox, oy, ox + cols, oy + rows)
 
 # --------------------------------------------------------------------- helpers
 def _bounds(node: dict[str, Any]) -> Optional[tuple[float, float, float, float]]:

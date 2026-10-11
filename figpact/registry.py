@@ -246,6 +246,11 @@ class GidRegistry:
                 entry = take(leg, "Legend")
                 if entry:
                     yield entry
+        for im in fig.images:
+            if im.get_visible():
+                entry = take(im, f"FigureImage({_image_shape(im)})")
+                if entry:
+                    yield entry
         for t in fig.texts:
             if t.get_visible() and t.get_text().strip():
                 entry = take(t, f"FigureText: {_text_summary(t)}")

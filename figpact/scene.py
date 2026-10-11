@@ -504,10 +504,13 @@ def _image_payload(artist: Any) -> dict[str, Any]:
         payload['shape'] = [int(n) for n in artist.get_array().shape]
     except Exception:
         payload['shape'] = None
+    figure_image = isinstance(artist, matplotlib.image.FigureImage)
+    extent_key = 'extent_figure_pixels' if figure_image else 'extent_data'
+    payload['coordinate_reference'] = 'figure_dpi_pixels' if figure_image else 'axes_data'
     try:
-        payload['extent_data'] = [float(v) for v in artist.get_extent()]
+        payload[extent_key] = [float(v) for v in artist.get_extent()]
     except Exception:
-        payload['extent_data'] = None
+        payload[extent_key] = None
     try:
         payload['interpolation'] = str(artist.get_interpolation())
     except Exception:
@@ -638,7 +641,12 @@ def _artist_node(artist: Any, *, node_id: Optional[str], gid: Optional[str], sco
                      float(clip_box.x1), float(clip_box.y1))
 
     bbox = None
-    if hasattr(artist, 'get_window_extent'):
+    if isinstance(artist, matplotlib.image.FigureImage):
+        # FigureImage inherits a zero bbox: use its uncropped figure-pixel footprint.
+        if float(getattr(renderer, 'dpi', artist.figure.dpi)) == float(artist.figure.dpi):
+            bbox = geometry.figure_image_bbox(artist)
+        node['envelope_source'] = 'figure_image_pixels'
+    elif hasattr(artist, 'get_window_extent'):
         try:
             bbox = artist.get_window_extent(renderer)
         except Exception:
@@ -853,6 +861,7 @@ def snapshot(fig: matplotlib.figure.Figure, registry: GidRegistry, *, scope: str
         'calibrated': False,
         'basis': {
             'envelope': 'renderer_window_extent（轴对齐包围盒，旋转文字更保守）',
+            'figure_image': 'figure_dpi_pixels（未裁切；renderer DPI 必须与 Figure 一致）',
             'baseline': 'font_metrics_descent（仅未旋转文字）',
             'polyline': 'display_transform_of_data（中心线，数学精确；裁剪断成多段时逐段给出、'
                         '段间无连线；不含线宽/端点帽，可见笔迹更粗）',
@@ -975,6 +984,9 @@ def snapshot(fig: matplotlib.figure.Figure, registry: GidRegistry, *, scope: str
         unreg_id = f'{scope}::unregistered.{index}'
         node = _artist_node(entry['artist'], node_id=unreg_id, gid=None, scope=scope, registered=False,
                             renderer=renderer, mm_per_px=mm_per_px, descriptor=entry['descriptor'])
+        if not node['measured']:
+            diag('UNMEASURED_GEOMETRY', f'{unreg_id} 的几何无法测量', [unreg_id],
+                 severity='blocking')
         node['parent'] = panel_ids.get(id(getattr(entry['artist'], 'axes', None))) or canvas_id
         collection_diag(node)
         nodes.append(node)

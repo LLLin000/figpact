@@ -33,6 +33,7 @@ import yaml
 
 from figpact.registry import GidRegistry
 from figpact.units import MM_PER_INCH
+from figpact.geometry import figure_image_bbox
 
 #: 状态字面量（会话与 CLI/agent_api 的共同词表）。
 STATUS_OK = 'OK'
@@ -428,13 +429,27 @@ def _line_points(line):
         return None
 
 
+
+
+def _canvas_bounds(shapes):
+    """显示几何里的画布容器包围盒（mm）；没有画布记录返回 None。"""
+    for rec in shapes.values():
+        if rec.get('kind') == 'canvas':
+            return rec.get('bbox_mm')
+    return None
+
+
 def drawn_shapes(fig, registry=None, *, include_frames=False):
-    """当前图上**实际画出来**的显示几何（mm）：折线、包络、坐标框。
+    """当前图上**实际画出来**的显示几何（mm）：折线、包络、坐标框、图幅图像。
 
     注册过的图元按 gid 记名；未注册的按「轴序号 + 类型 + 该类型内序号」记名，
     两次同样结构的构建之间键是稳定可比的。坐标框（axes frame）默认单独归类，
     只用于包含性判断，不参与碰撞；`include_frames` 还会记一条画布（figure 包围盒）
     容器，它是 contain 关系里的 canvas、也是所有可见几何的最终外边界。
+
+    图幅图像（`fig.figimage`，不挂任何坐标轴）按它真实的**未裁切**图幅像素几何记一条，
+    量不出来（没有数组 / 偏移不是有限数）**失败关闭**抛错：不用那个恒为空的包围盒冒充几何，
+    也不默默跳过 —— 跳过等于告诉包含性与碰撞「这里什么都没有」。
 
     `get_visible()` 为真**不等于**被画出来：`ax.set_axis_off()` 之后刻度标签与轴标题
     仍是可见属性为真、却一个像素都不画——那些潜伏对象不进测量（否则它们会以
@@ -571,6 +586,17 @@ def drawn_shapes(fig, registry=None, *, include_frames=False):
                         continue
                     add(art.get_gid(), ax_idx, f'{axis_name}_{part}_envelope', i, bbox=bb,
                         text=str(art.get_text())[:20])
+    for i, image in enumerate(getattr(fig, 'images', [])):
+        if not image.get_visible():
+            continue
+        # 图幅图像没有自己的 get_window_extent、也不挂在任何坐标框上：按真实未裁切几何记一条。
+        # 量不出来就失败关闭，绝不用那个恒为空的包围盒冒充，也不默默跳过。
+        bbox = figure_image_bbox(image)
+        if bbox is None:
+            raise SessionError(
+                f'可见的图幅图像（fig.figimage 第 {i} 个）真实显示几何量不出来：'
+                f'没有数组或偏移不是有限数，拒绝把不可测的可见图像当成安全几何')
+        add(image.get_gid(), None, 'figure_image_envelope', i, bbox=bbox)
     for i, txt in enumerate(fig.texts):
         if not txt.get_visible() or not txt.get_text().strip():
             continue
@@ -1724,6 +1750,10 @@ class FigureSession:
         for key, rec in list(shapes.items()):
             if key.startswith('gid:'):
                 continue
+            if rec.get('kind') == 'figure_image_envelope':
+                # 图幅图像的位置是脚本写死的图幅像素偏移：它不挂在任何坐标轴上，也不随画布/
+                # 面板容器平移；只按自己声明的 gid 位移（那条路径在上面的 offsets 里）。
+                continue
             offset = axes_offsets.get(rec.get('axes'))
             if offset and (offset[0] or offset[1]):
                 shapes[key] = _shift_shape(shapes[key], offset[0], offset[1])
@@ -2207,6 +2237,55 @@ class FigureSession:
 
     # -- 渲染验证 ---------------------------------------------------------- #
 
+    def _figure_image_canvas_check(self, base_shapes, shapes, tol):
+        """候选里**新**压出画布的图幅图像 → 拒绝结果；没有就返回 None。
+
+        图幅图像的像素由 Agg 按画布裁掉（`FigureImage.make_image` 拿画布当 clip），所以
+        「新压出画布」= 把受保护的像素悄悄切掉一块。判据只有**实测的显示几何**（不读 YAML），
+        规则与几何快车道的画布边界一致：基线里本来就压出去的不算新增，只有这次改动加深了才
+        拒绝；几何或画布边界量不出来时也拒绝 —— 绝不拿「没测到」冒充「没越界」。
+        几何快车道只看得见注册 gid 的对象，这条补上真实重建里**未注册**的图幅图像。
+        """
+        keys = sorted(key for key, rec in shapes.items()
+                      if rec.get('kind') == 'figure_image_envelope')
+        if not keys:
+            return None
+        canvas, base_canvas = _canvas_bounds(shapes), _canvas_bounds(base_shapes)
+        for key in keys:
+            rec = shapes[key]
+            gid = rec.get('gid')
+            name = gid or f'未注册的图幅图像（{key}）'
+            box = rec.get('bbox_mm')
+            base = base_shapes.get(key)
+            base_box = base.get('bbox_mm') if isinstance(base, dict) else None
+            if box is None or canvas is None:
+                return self._refuse(
+                    STATUS_GEOMETRY_REJECTED,
+                    f'{name} 或画布边界的显示几何量不出来：拒绝把「没测到」当成「没越界」',
+                    checks=[{'check': 'figure_image_canvas', 'object': gid or key,
+                             'status': 'UNMEASURED'}],
+                    affected=[gid] if gid else [])
+            overflow = max(canvas[0] - box[0], canvas[1] - box[1],
+                           box[2] - canvas[2], box[3] - canvas[3])
+            if overflow <= tol:
+                continue
+            base_overflow = None
+            if base_box is not None and base_canvas is not None:
+                base_overflow = max(0.0, base_canvas[0] - base_box[0],
+                                    base_canvas[1] - base_box[1],
+                                    base_box[2] - base_canvas[2], base_box[3] - base_canvas[3])
+            if base_overflow is not None and overflow <= base_overflow + tol:
+                continue
+            return self._refuse(
+                STATUS_GEOMETRY_REJECTED,
+                f'{name} 压出画布 {round(overflow, 3)} mm：画布外的像素会被直接裁掉',
+                checks=[{'check': 'figure_image_canvas', 'object': gid or key, 'status': 'FAIL',
+                         'overflow_mm': round(overflow, 4),
+                         'baseline_overflow_mm': (None if base_overflow is None
+                                                  else round(base_overflow, 4))}],
+                affected=[gid] if gid else [])
+        return None
+
     def _audit_candidate(self, goals, relation_ops, shapes, styles, png_b64):
         """在**真实重建出来的**候选上核对每一条声明（几何 / 样式 / 关系 / 产物）。
 
@@ -2237,6 +2316,12 @@ class FigureSession:
                 claimed |= _owned_keys(shapes, owned) | _owned_keys(base_shapes, owned)
 
         checks, diagnostics = [], []
+        # 图幅图像由画布直接裁掉：候选里**新**压出画布就是切掉一块受保护的像素。
+        # 这与几何快车道的画布边界是同一条规则，但这里看的是**真实重建**的候选，
+        # 连没有 gid 的图幅图像也一起核对。
+        canvas_refusal = self._figure_image_canvas_check(base_shapes, shapes, tol)
+        if canvas_refusal is not None:
+            return canvas_refusal, checks, diagnostics
         for goal in goals:
             rec, path, value = goal['param'], goal['path'], goal['value']
             key = rec.get('key') or str(list(path))

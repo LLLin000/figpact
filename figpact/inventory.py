@@ -1,6 +1,8 @@
 """图表图元清点。"""
 from typing import Any
 import matplotlib.figure
+import matplotlib.image
+from figpact.geometry import figure_image_bbox
 from figpact.registry import GidRegistry
 
 
@@ -14,8 +16,10 @@ def _snapshot_artist(art: Any, fig: matplotlib.figure.Figure) -> dict[str, Any]:
 
     if hasattr(art, "get_window_extent") and renderer is not None:
         try:
-            bbox = art.get_window_extent(renderer)
-            snap["bbox"] = (round(bbox.x0, 2), round(bbox.y0, 2), round(bbox.x1, 2), round(bbox.y1, 2))
+            bbox = (figure_image_bbox(art) if isinstance(art, matplotlib.image.FigureImage)
+                    else art.get_window_extent(renderer))
+            if bbox is not None:
+                snap["bbox"] = (round(bbox.x0, 2), round(bbox.y0, 2), round(bbox.x1, 2), round(bbox.y1, 2))
         except Exception:
             pass
 

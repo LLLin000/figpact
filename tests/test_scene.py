@@ -559,6 +559,35 @@ class UnregisteredAndUnmeasuredTest(unittest.TestCase):
         self.assertTrue(image["image"]["scientific"])
         self.assertNotIn("array", image["image"])       # 只给引用，不改写像素
 
+    def test_figure_images_have_real_bounds_without_yaml_or_registration(self):
+        for registered in (False, True):
+            with self.subTest(registered=registered):
+                fig, _ = mm_canvas()
+                image = fig.figimage(np.arange(12).reshape(3, 4), xo=50, yo=40)
+                reg = GidRegistry(scope="main")
+                if registered:
+                    reg.register(image, "fig.main.image.specimen")
+                snap = scene.snapshot(fig, reg, scope="main")
+                node, = [n for n in snap["nodes"] if n["artist_type"] == "FigureImage"]
+                np.testing.assert_allclose(node["bounds_mm"], [12.7, 10.16, 13.716, 10.922],
+                                           atol=1e-9, rtol=0)
+                self.assertEqual(node["registered"], registered)
+                self.assertEqual(node["parent"], "main::canvas")
+                self.assertNotIn("extent_data", node["image"])
+                self.assertEqual(node["image"]["coordinate_reference"], "figure_dpi_pixels")
+                self.assertFalse(node["editable"])
+                plt.close(fig)
+
+    def test_unmeasurable_figure_image_is_not_reported_as_zero_bounds(self):
+        fig, _ = mm_canvas()
+        fig.figimage(np.zeros((3, 4)), xo=float("nan"), yo=40)
+        snap = scene.snapshot(fig, GidRegistry(scope="main"), scope="main")
+        node, = [n for n in snap["nodes"] if n["artist_type"] == "FigureImage"]
+        self.assertFalse(node["measured"])
+        self.assertIsNone(node["bounds_mm"])
+        self.assertTrue(any(d["kind"] == "UNMEASURED_GEOMETRY" and node["id"] in d["ids"]
+                            and d["severity"] == "blocking" for d in snap["diagnostics"]))
+
     def test_no_renderer_means_unmeasured_not_zeros(self):
         fig, ax = mm_canvas()
         line, = ax.plot([0, 1], [0, 1])
