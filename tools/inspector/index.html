@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>figpact Inspector（只读 Scene 检查器）</title>
+  <link rel="stylesheet" href="inspector.css">
+</head>
+<body>
+  <div id="inspector-root" data-selected-id="" data-hover-id="" data-ready="false" data-frame-state="loading">
+    <header id="inspector-header">
+      <div class="brand">
+        <h1>figpact Inspector</h1>
+        <span class="tag" id="badge-readonly">READ_ONLY</span>
+        <span class="tag" id="frame-scope"></span>
+        <span class="tag mono" id="frame-revision"></span>
+      </div>
+      <p id="integrity-status" class="status status-pending" role="status" aria-live="polite">正在校验帧完整性…</p>
+    </header>
+
+    <main id="inspector-main">
+      <section id="stage" aria-label="画布视图">
+        <div id="toolbar">
+          <form id="search-form" role="search" autocomplete="off">
+            <label for="search-input">搜索对象</label>
+            <input id="search-input" type="search" placeholder="gid / 文本 / 类型 / id" aria-describedby="search-hint">
+            <span id="search-hint" class="hint">对象列表可作为选中兜底</span>
+          </form>
+          <div id="view-controls" role="group" aria-label="视图控制">
+            <button id="zoom-in" type="button" aria-label="放大视图">放大</button>
+            <button id="zoom-out" type="button" aria-label="缩小视图">缩小</button>
+            <button id="view-reset" type="button" aria-label="重置视图">重置视图</button>
+            <button id="toggle-list" type="button" aria-expanded="false" aria-controls="object-list-panel">对象列表</button>
+          </div>
+        </div>
+
+        <div id="viewport-wrap">
+          <div id="ruler-top" class="ruler ruler-h" aria-hidden="true"></div>
+          <div id="ruler-left" class="ruler ruler-v" aria-hidden="true"></div>
+          <svg id="viewport" tabindex="0" role="application"
+               aria-label="只读图像视图：悬停高亮，单击选中，Alt+单击轮换，空格拖拽平移"></svg>
+          <p id="viewport-empty" class="empty" hidden></p>
+        </div>
+
+        <p id="stage-hint">
+          悬停只看不改；单击选中；Alt+单击在重叠对象间轮换；Esc 取消选择。
+          滚轮平移，Ctrl+滚轮或 +/- 缩放，空格+拖拽平移，只影响视图，不移动任何图元。
+        </p>
+      </section>
+
+      <aside id="detail-panel" aria-label="选中对象详情">
+        <h2>选中对象</h2>
+        <p id="detail-empty" class="hint">未选中对象。点选图像中的对象，或从对象列表选择。</p>
+        <dl id="detail-fields" hidden></dl>
+        <p id="detail-ephemeral" class="notice notice-ephemeral" hidden></p>
+        <p id="detail-readonly" class="notice notice-readonly" hidden></p>
+        <p id="detail-annotation" class="notice notice-science" hidden></p>
+      </aside>
+
+      <aside id="object-list-panel" aria-label="对象列表" hidden>
+        <h2>对象列表</h2>
+        <p id="object-list-count" class="hint"></p>
+        <ul id="object-list"></ul>
+      </aside>
+    </main>
+
+    <footer id="inspector-footer">
+      <p id="calibration-note" class="notice notice-warning" hidden></p>
+      <dl id="state-fields"></dl>
+    </footer>
+  </div>
+
+  <script src="frame.js" defer></script>
+  <script src="inspector.js" defer></script>
+</body>
+</html>
