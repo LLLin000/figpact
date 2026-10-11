@@ -10,6 +10,7 @@ YAML 排版参数与显式绑定连接起来，记录改动会影响谁。
 | 你要做的事 | 从哪开始 |
 |---|---|
 | 只测量已有 Figure，不提供 YAML | §0 |
+| 用户想在图上示范“标签往上 0.15 mm” | §0.1（仅示范与当前会话候选，不保存源码） |
 | 接入一张新图（新脚本 + 新 YAML） | §1 |
 | 改一张已经接好的图（人改 YAML，或让 agent 操作场景） | §2 |
 | 用既有 JSON-RPC 会话跑五个操作（确切键名与命令） | §2.1 |
@@ -47,8 +48,28 @@ page = export_inspector(fig, r"I:\figpact-inspections\my-figure")  # 必须是�
 毫米换算未做物理校准，也不是 strict 验收。范围和证据见 `docs/G1_INSPECTOR.md`。
 
 测量不要求 YAML、不要求可编辑绑定、不要求 `prepare_config` 与草稿文件；
-只读 Inspector **已经有独立入口**，无 YAML 编辑和统一测量/编辑入口**尚未实现**。
-下面的接入、Worker、试算、保存与 strict 规则都只适用于编辑，不是测量的前置条件。
+只读 Inspector **已经有独立入口**，G2 可在同一前端演示几何意图并对已有 YAML 绑定试算；
+**无 YAML 编辑尚未实现**。下面的接入、Worker、保存与 strict 规则不是测量的前置条件。
+
+### 0.1 用户在图上示范：G2 Geometry Intent
+
+```bash
+python -m figpact.inspector_server --example nmr --scope main
+python -m figpact.inspector_server --example plain
+```
+
+先选中目标，再使用方向键（0.1 mm；Alt 0.01 mm；Shift 0.5 mm）或填写 dx/dy。
+示范只是临时 Overlay，不表示参数可实现，也不移动原 Figure 或写文件。
+标签关联引线的科学端必须固定，标签端期望跟随；不允许单独拖引线科学端。
+
+有真实 YAML 绑定时，点击试算得到实际重建的目标位移和 QA；仅 `OK / FEASIBLE /
+RENDER_CHECKED` 且实际位移满足要求时才允许接受。失败保留用户要求，不偷偷减小位移、
+缩小字号或更改科学内容。不存在唯一许可映射、跨 scope 或科学内容变化时明确拒绝。
+会话接受、取消和独立撤销都不保存 Python/YAML、不发布正式图，也不创建持久 History。
+
+普通无 YAML Figure 和临时身份可以测量/示范，但不得借此声称源码可编辑。
+高 DPI 必须同帧重建图像与几何，先选质量再开始候选操作；同帧摘要失配就禁用命中。
+如果用户要求保存或出正式图，仍用 §2 既有 YAML Agent API；G2 没有新增保存/发布端点。
 
 ## 1. 新图接入
 

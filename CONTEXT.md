@@ -112,6 +112,18 @@ _Avoid_: scientific curve, editable signal
 A proposed layout derived from a known baseline, with its changes, scientific invariants, diagnostics, and verification level stated.
 _Avoid_: published figure, verified output
 
+**Geometry Intent**:
+A user's requested geometric change, expressed against a particular measured figure state. It states the desired result, not evidence that the result is feasible or has been applied.
+_Avoid_: parameter patch, accepted change
+
+**Desired Overlay**:
+A temporary visual demonstration of a geometry intent. It does not change the measured figure or protected scientific payload.
+_Avoid_: edited figure, render-checked candidate
+
+**Accepted Operation**:
+A render-checked geometric change explicitly accepted for the current session. Acceptance alone does not save source files or approve publication.
+_Avoid_: saved draft, published result
+
 **Scientific Payload**:
 Protected data, processing choices, scientific text and assignments, image content, display windows, and scale-bar meaning. Permitted layout changes do not authorize changes to this payload.
 _Avoid_: editable plot data

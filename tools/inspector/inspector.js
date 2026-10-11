@@ -373,11 +373,11 @@
     const section = byId('intent-section');
     if (!section) return;
     const node = state.nodes.get(state.selected);
-    if (!node || !state.intentSession) {
+    if (!state.intentSession) {
       section.hidden = true;
       return;
     }
-    section.hidden = false;
+    section.hidden = !node && !state.operationStack.canUndo() && !state.pendingOperationId;
     const snap = state.intentSession.snapshot();
     byId('intent-notice').hidden = true;
     byId('intent-status-badge').textContent = snap.status;
@@ -387,9 +387,9 @@
     byId('intent-dx').value = delta[0];
     byId('intent-dy').value = delta[1];
 
-    const canEval = snap.canEvaluate;
+    const canEval = state.ready && snap.canEvaluate;
     byId('btn-evaluate').disabled = !canEval || (delta[0] === 0 && delta[1] === 0);
-    byId('btn-accept').disabled = !(state.lastEvaluation && canAcceptEvaluation(state.lastEvaluation, snap.intent));
+    byId('btn-accept').disabled = !state.ready || !(state.lastEvaluation && canAcceptEvaluation(state.lastEvaluation, snap.intent));
     const hasCancelable = (delta[0] !== 0 || delta[1] !== 0) || !!state.pendingOperationId || !!state.lastEvaluation || !!state.candidateFrame;
     byId('btn-cancel-intent').disabled = !hasCancelable;
 
@@ -406,6 +406,10 @@
   }
   function select(id) {
     if (!state.ready) return;
+    if (state.pendingOperationId && id !== state.selected) {
+      status('请先接受或取消当前候选，再选择其他对象', 'pending');
+      return;
+    }
     if (state.intentSession) {
       const allowed = state.intentSession.select(id);
       if (!allowed) {
@@ -414,9 +418,6 @@
         byId('intent-notice').textContent = `当前对象存在未提交的示范（Δ [${snap.intent?.delta_mm.join(', ')}] mm）。请先接受或取消当前示范，再选择其他对象。`;
         return;
       }
-    }
-    if (state.candidateFrame) {
-      restoreAcceptedPreview();
     }
     state.selected = state.nodes.has(id) ? id : null;
     container.dataset.selectedId = state.selected || '';
@@ -540,7 +541,7 @@
     }
   }
   function fit() {
-    if (!state.scene) return;
+    if (!state.scene || !wrap.clientWidth || !wrap.clientHeight) return;
     const view = fitViewport(state.scene.canvas_bounds_mm, wrap.clientWidth, wrap.clientHeight, state.zoom);
     state.scale = view.scale;
     state.view = view;
@@ -673,6 +674,7 @@
   });
   async function cancelIntent(notifyBackend = true) {
     if (!state.intentSession) return;
+    const selectedId = state.selected;
     const snap = state.intentSession.snapshot();
     const opId = snap.intent?.operation_id || state.pendingOperationId || state.lastEvaluation?.operation_id;
     state.inFlightGuard.cancel();
@@ -707,7 +709,8 @@
     state.lastEvaluation = null;
     byId('intent-eval-results').hidden = true;
     if (state.candidateFrame && state.acceptedFrame) {
-      await loadFrame(state.acceptedFrame, undefined, false);
+      await loadFrame(state.acceptedFrame, undefined, true);
+      select(selectedId);
     }
     updateIntentUI();
     highlights();
@@ -923,7 +926,7 @@
         state.lastEvaluation = null;
         state.pendingOperationId = null;
       } else {
-        state.candidateFrame = frame;
+        state.candidateFrame = frame.frame_revision === state.acceptedFrame?.frame_revision ? null : frame;
       }
       const sessionObj = state.acceptedFrame?.session || frame.session;
       const canRebuild = !!(sessionObj && sessionObj.can_evaluate !== false && sessionObj.source_revision);
@@ -959,9 +962,14 @@
         wrap.scrollLeft = wrap.scrollTop = 0;
         fit();
         objectList();
-      } else {
+        select(null);
+      } else if (state.candidateFrame) {
         byId('frame-revision').textContent = `${state.acceptedFrame?.frame_revision?.slice(0, 12) || ''} (候选: ${frame.frame_revision.slice(0, 8)})`;
         status('候选预览已呈现 · 几何与图像核对通过 · 尚未接受至会话', 'pending');
+        select(state.selected);
+      } else {
+        byId('frame-revision').textContent = frame.frame_revision.slice(0, 12);
+        select(state.selected);
       }
       updateIntentUI();
       highlights();

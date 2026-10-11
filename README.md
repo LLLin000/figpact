@@ -36,6 +36,30 @@ print(page)  # 用浏览器打开生成的 index.html；无需启动后端服务
 详细范围、验收证据和限制见 [G1 Inspector 交付报告](docs/G1_INSPECTOR.md)；
 原有测试、科学文件保护与性能基线见 [G0 基线](docs/G0_BASELINE.md)。
 
+### G2：在图上示范，再验证候选（不写源文件）
+
+```bash
+python -m figpact.inspector_server --example nmr --scope main
+python -m figpact.inspector_server --example plain
+```
+
+打开命令打印的本机地址。前端仍在 `tools/inspector/`，会话与 HTTP 桥在
+`figpact/intents.py`、`figpact/inspector_server.py`；不是另一套 GUI 或几何引擎。
+方向键只创建临时毫米位移示范：默认 0.1 mm，Alt 0.01 mm，Shift 0.5 mm；
+也可直接输入 dx/dy。15 次 Alt+↑ 合并为一项 +0.15 mm 意图，不逐次请求 Python。
+
+有明确 YAML 绑定的对象才能试算：复用已有会话重建实际 Figure，检查目标位移、
+引线科学端、科学载荷、未授权对象变化和当前 scope QA；不是修改一个参数就算成功。
+接受只保存在当前进程内，取消只丢弃当前候选；独立撤销不会重置其他已接受操作。
+关闭服务后这些操作丢失，不是 YAML 草稿、源码 History 或正式发布。
+
+普通无 YAML Figure 可以测量和展示期望位置，不能在 G2 写回 Python。
+120/240 DPI 必须重新生成完整图片和几何；在开始试算/接受之前选择 DPI。
+跨 scope 绑定、没有明确映射或存在多个同样合法映射时拒绝，不自动改源码或科学数据。
+既有 YAML Agent API、草稿保存和独立 strict 出图入口保持原样。
+本次真实测试、毫米数值、耗时、失败记录和未支持范围见
+[G2 Geometry Intent 交付记录](docs/G2_GEOMETRY_INTENT.md)。
+
 ## CLI 命令与使用
 ```bash
 # 查看支持的参数清单（按可见对象分组，含单位、范围与调参效果）
@@ -268,10 +292,10 @@ gap = geometry.measure_relation("gap", panels[:2], axis="x")
 临时对象身份只用于当前快照，不承诺跨版本稳定，也不虚构 `controlled_by`。
 原有登记信息可直接传入测量，但能测量不等于获准修改。
 
-当前无 YAML 的入口是上述 Python 接口；统一入口按只读“测量模式”和有真实绑定的
-“编辑模式”区分，**尚未实现**——现在只有上述 Python 接口，以及下面的既有 CLI 与 GUI
-（两者都在编辑路径上）。编辑模式继续检查参数范围、revision、科学载荷，
-正式发布继续独立 strict；不为只读测量要求伪造 YAML、可编辑绑定或科学处理钩子。
+无 YAML 可直接使用上述 Python 接口或只读 Inspector；有可信重建入口与明确 YAML
+绑定时，可在同一 Inspector 前端进行 G2 会话内试算。**无 YAML 编辑尚未实现**。
+既有编辑模式继续检查参数范围、revision、科学载荷，正式发布继续独立 strict；
+不为只读测量要求伪造 YAML、可编辑绑定或科学处理钩子。
 
 
 ## 数据文件说明
