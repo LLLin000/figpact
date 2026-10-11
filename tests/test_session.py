@@ -1392,6 +1392,23 @@ class RealNativeFixtureTest(unittest.TestCase):
                 self.assertAlmostEqual(x1 - x0, width, places=6)
                 self.assertAlmostEqual(y1 - y0, height, places=6)
 
+    def test_moving_panels_outside_canvas_is_refused_atomically(self):
+        path = _fixture('native_panels.py')
+        module = _import_fixture(path)
+        with FigureSession(path, Path(module.CONFIG_PATH), 'main') as session:
+            baseline = session.snapshot()
+            revision = session.revision
+            rejected = session.try_layout([
+                {'operation': 'set_parameter', 'path': ['gap_y_mm'], 'value': 20.0},
+            ])
+            self.assertEqual(rejected['status'], STATUS_GEOMETRY_REJECTED, rejected)
+            failure = next(check for check in rejected['checks']
+                           if check['check'] == 'containment' and check['status'] == 'FAIL')
+            self.assertAlmostEqual(failure['overflow_mm'], 4.0, places=6)
+            self.assertEqual(session.revision, revision)
+            self.assertEqual(session.snapshot()['nodes'], baseline['nodes'])
+            self.assertEqual(session.candidate_patch, {})
+
     def test_negative_fixture_defects_are_detected(self):
         from figpact import effects
         path = _fixture(NEGATIVE_FIXTURE)

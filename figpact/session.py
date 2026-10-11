@@ -1832,9 +1832,10 @@ class FigureSession:
         if candidates is None:
             return self._render_verify(affected, relation_ops, goals, changes,
                                        note='候选几何无法从基线 + 平移目标推导（对象缺失或轴未声明）')
-        moved_keys = [key for key in sorted(candidates)
-                      if key.startswith('gid:') and not candidates[key].get('container')
-                      and _shapes_differ(base_shapes.get(key), candidates[key])]
+        containment_keys = [key for key in sorted(candidates)
+                            if key.startswith('gid:')
+                            and _shapes_differ(base_shapes.get(key), candidates[key])]
+        moved_keys = [key for key in containment_keys if not candidates[key].get('container')]
         moved_names = [key.split(':', 1)[1] for key in moved_keys]
         if not moved_names:
             checks.append({'check': 'degenerate', 'status': 'OK',
@@ -1849,7 +1850,7 @@ class FigureSession:
         by_axes = {rec['axes']: rec['bbox_mm']
                    for rec in candidates.values() if rec.get('container')}
         pre_existing_overflow = []
-        for key in moved_keys:
+        for key in containment_keys:
             shape = candidates[key]
             bounds = []  # (边界来源, 候选框, 基线框)
             if shape.get('clipped') or shape['kind'] == 'legend_envelope':
@@ -1881,8 +1882,8 @@ class FigureSession:
                 base_shape = base_shapes.get(key)
                 if base_shape is not None and base_frame is not None:
                     b = base_shape['bbox_mm']
-                    base_overflow = max(base_frame[0] - b[0], base_frame[1] - b[1],
-                                        base_frame[2] - b[2], base_frame[3] - b[3])
+                    base_overflow = max(0.0, base_frame[0] - b[0], base_frame[1] - b[1],
+                                        b[2] - base_frame[2], b[3] - base_frame[3])
                 if base_overflow is not None and overflow <= base_overflow + TOL_SAME_RENDERER_MM:
                     # 基线里就已经压出这么多：既有布局，不是这次改动造成的新越界。
                     pre_existing_overflow.append({'object': shape['gid'], 'bound': source,
@@ -1902,7 +1903,7 @@ class FigureSession:
                         'png': None}
         checks.append({'check': 'containment', 'status': 'OK',
                        'pre_existing': pre_existing_overflow,
-                       'detail': f'{len(moved_keys)} 个移动对象都没有越出作者声明的容器'
+                       'detail': f'{len(containment_keys)} 个移动对象都没有越出作者声明的容器'
                                  f'（画布外边界 + contain 关系 + 实际裁切边界，形状包围盒，mm）'
                                  + (f'；基线里已存在的越界 {len(pre_existing_overflow)} 处未加深'
                                     if pre_existing_overflow else '')})

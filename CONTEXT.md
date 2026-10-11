@@ -40,6 +40,18 @@ _Avoid_: baseline pitch, nearest distance
 The minimum distance between explicitly identified displayed shapes. Envelope clearance and local curve clearance are distinct measurements.
 _Avoid_: gap without a measurement definition
 
+**Containment**:
+An object's displayed extent staying within an explicitly identified boundary.
+_Avoid_: visibility after clipping
+
+**Overflow**:
+The greatest distance an object's extent crosses the specified boundary; zero when contained.
+_Avoid_: free space, boundary margin
+
+**Boundary Margin**:
+Space remaining between a contained object and its specified boundary. A margin is not existing overflow.
+_Avoid_: overflow, shape-to-shape clearance
+
 **Measurement Tolerance**:
 The maximum deviation an author permits for a stated layout requirement. Meeting this tolerance does not establish the physical accuracy of the measurement.
 _Avoid_: calibrated accuracy
