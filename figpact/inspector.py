@@ -352,6 +352,7 @@ def _refuse_unsafe_target(target: pathlib.Path) -> None:
         raise InspectorError(
             f'导出目录已存在（含符号链接）：{target} —— Inspector 只写自己新建的目录，'
             f'绝不覆盖任何已有文件或科学产物')
+    absolute = absolute.resolve()
     for guarded in _GUARDED_DIRS:
         if absolute == guarded or guarded in absolute.parents:
             raise InspectorError(
@@ -362,10 +363,11 @@ def _frontend_assets() -> list[pathlib.Path]:
     directory = _FRONTEND_DIR
     if not directory.is_dir():
         raise InspectorError(f'前端资源目录不存在：{directory}（仓库 tools/inspector 未提供）')
-    assets = [pathlib.Path(entry.path) for entry in os.scandir(directory) if entry.is_file()]
-    if not assets:
-        raise InspectorError(f'前端资源目录为空：{directory}')
-    return sorted(assets, key=lambda path: path.name)
+    assets = [directory / name for name in ('index.html', 'inspector.js', 'inspector.css')]
+    missing = [path.name for path in assets if not path.is_file()]
+    if missing:
+        raise InspectorError(f'前端资源不完整：{missing}')
+    return assets
 
 
 def export_inspector(fig, output_dir, registry=None, *, scope='measurement', contract=None,
@@ -397,24 +399,29 @@ def export_inspector(fig, output_dir, registry=None, *, scope='measurement', con
     frame_js = f'window.FIGPACT_INSPECTOR_FRAME = JSON.parse({literal});\n'
 
     created: list[pathlib.Path] = []
+    owns_directory = False
     try:
         target.mkdir(parents=True)
+        owns_directory = True
         frame_path = target / 'frame.js'
-        frame_path.write_bytes(frame_js.encode('utf-8'))
-        created.append(frame_path)
+        with frame_path.open('xb') as stream:
+            created.append(frame_path)
+            stream.write(frame_js.encode('utf-8'))
         for asset in assets:
             destination = target / asset.name
-            shutil.copyfile(asset, destination)
-            created.append(destination)
+            with asset.open('rb') as source, destination.open('xb') as stream:
+                created.append(destination)
+                shutil.copyfileobj(source, stream)
     except BaseException:
-        for path in created:
+        if owns_directory:
+            for path in created:
+                try:
+                    path.unlink()
+                except OSError:
+                    pass
             try:
-                path.unlink()
+                target.rmdir()
             except OSError:
                 pass
-        try:
-            target.rmdir()
-        except OSError:
-            pass
         raise
     return target / 'index.html'

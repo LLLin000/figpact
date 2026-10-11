@@ -33,8 +33,21 @@ gap = geometry.measure_relation("gap", panels[:2], axis="x")
 没有登记表时传空 `GidRegistry()`：未登记可见对象仍进入诊断，不要求创建 YAML、编辑契约
 或 `prepare_config`。这些临时身份只对当前快照有效；能测量不等于有编辑权限。
 
-测量不要求 YAML、不要求可编辑绑定、不要求 `prepare_config` 与草稿文件；统一入口的
-「测量模式 / 编辑模式」**尚未实现**，现在只有上面的 Python 接口与既有 CLI/GUI。
+需要用户看着图定位时，在源码 checkout 中导出独立只读 Inspector：
+
+```python
+from figpact.inspector import export_inspector
+
+page = export_inspector(fig, r"I:\figpact-inspections\my-figure")  # 必须是不存在的新目录
+```
+
+浏览器打开 `page`：Hover 看真实折线/引线，Click 锁定，Alt+Click 轮换重叠对象，
+用毫米标尺、搜索和对象列表定位。图像和几何必须通过同帧摘要校验才能选择。
+重新导出会清空选择；临时身份不能跨帧复用。它是静态快照，不实时监控源文件；
+毫米换算未做物理校准，也不是 strict 验收。范围和证据见 `docs/G1_INSPECTOR.md`。
+
+测量不要求 YAML、不要求可编辑绑定、不要求 `prepare_config` 与草稿文件；
+只读 Inspector **已经有独立入口**，无 YAML 编辑和统一测量/编辑入口**尚未实现**。
 下面的接入、Worker、试算、保存与 strict 规则都只适用于编辑，不是测量的前置条件。
 
 ## 1. 新图接入

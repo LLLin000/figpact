@@ -243,7 +243,7 @@
   viewport.addEventListener('pointerleave', () => { state.hover = null; container.dataset.hoverId = ''; highlights(); });
   viewport.addEventListener('pointerdown', event => {
     if (!state.ready) return;
-    viewport.focus();
+    viewport.focus({ preventScroll: true });
     if (state.space || event.button === 1) {
       event.preventDefault(); viewport.setPointerCapture(event.pointerId);
       state.pan = { x: event.clientX, y: event.clientY, left: wrap.scrollLeft, top: wrap.scrollTop, moved: false };

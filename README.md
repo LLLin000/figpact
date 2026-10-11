@@ -15,6 +15,27 @@
 图幅像素按当前 Figure DPI 换算毫米，必须与 renderer DPI 一致；这不是跨 DPI 的物理标定。
 
 
+## 只读 Figure Inspector（不需要 YAML）
+
+在源码 checkout 中，直接把已有 Matplotlib `fig` 导出到一个**不存在的新目录**：
+
+```python
+from figpact.inspector import export_inspector
+
+page = export_inspector(fig, r"I:\figpact-inspections\my-figure")
+print(page)  # 用浏览器打开生成的 index.html；无需启动后端服务
+```
+
+独立前端位于 `tools/inspector/`，Python 捕获后端位于 `figpact/inspector.py`。
+支持真实折线/引线 Hover、Click 锁定、Alt+Click 重叠轮换、毫米标尺、搜索及对象列表。
+坐标原点是画布左下角；毫米来自当前 renderer / DPI 换算，不代表物理仪器校准。
+未登记对象使用单帧临时身份；已登记身份也不自动取得编辑权限。
+
+这是静态只读快照，不实时监控源文件，不修改 Artist、Python、YAML 或正式图件，
+不能据此宣称无 YAML 编辑或 strict 发布已经完成。重新出帧后需要重新选择对象。
+详细范围、验收证据和限制见 [G1 Inspector 交付报告](docs/G1_INSPECTOR.md)；
+原有测试、科学文件保护与性能基线见 [G0 基线](docs/G0_BASELINE.md)。
+
 ## CLI 命令与使用
 ```bash
 # 查看支持的参数清单（按可见对象分组，含单位、范围与调参效果）

@@ -64,6 +64,22 @@ _Avoid_: requested tolerance, mathematical exactness
 Read-only observation of objects, dimensions, and spatial relationships. Measurement does not require editable parameters and grants no authority to change a scene.
 _Avoid_: editing session, publication approval
 
+**Figure Inspector**:
+A read-only view of a scientific figure's observed objects and measurements. Selecting an object grants no authority to edit or publish it.
+_Avoid_: figure editor, publication gate
+
+**Inspection Frame**:
+A rendering and its scene measurements belonging to the same observation. A matching frame does not establish that the underlying source is still current or that publication checks have passed.
+_Avoid_: independently captured screenshot, verified layout candidate
+
+**Stable Object Identity**:
+An author-declared identity intended to name the same scientific-figure object across observations. Registration declares that intention; it does not prove semantic continuity.
+_Avoid_: incidental object index, editing permission
+
+**Ephemeral Object Identity**:
+A reference valid only within one inspection frame. It cannot identify a persistent edit target across reconstructed figures.
+_Avoid_: stable GID, cross-frame selection
+
 **Editing Mode**:
 Proposing and saving layout changes through explicitly permitted bindings while preserving the scientific payload. Being measurable does not make an object editable.
 _Avoid_: unrestricted manipulation, measurement mode

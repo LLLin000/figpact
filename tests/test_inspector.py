@@ -104,15 +104,21 @@ class ExportSafetyTest(unittest.TestCase):
         self.assertEqual(sorted(p.name for p in protected.iterdir()),
                          ["Fig_S2_3_2_NMR.png", "peak_table.csv"])
 
+    def test_export_does_not_remove_a_directory_created_during_capture(self):
+        destination = self.td / "appeared-during-draw"
+        self.fig.canvas.mpl_connect("draw_event", lambda event: destination.mkdir())
+        with self.assertRaises(FileExistsError):
+            inspector.export_inspector(self.fig, destination)
+        self.assertTrue(destination.is_dir(), "Cleanup must not remove another writer's directory")
+
     def test_export_refuses_a_symlinked_target(self):
-        try:
-            os.symlink(self.td / "not-created-yet", self.td / "link")
-        except OSError:
-            self.skipTest("Windows 当前账号不能创建符号链接；该用例只在可创建符号链接的宿主上跑")
         real = self.td / "real-outputs"
         real.mkdir()
         (real / "keep.bin").write_bytes(b"KEEP")
-        os.symlink(real, self.td / "link", target_is_directory=True)
+        try:
+            os.symlink(real, self.td / "link", target_is_directory=True)
+        except OSError:
+            self.skipTest("Windows 当前账号不能创建符号链接；该用例只在可创建符号链接的宿主上跑")
 
         with self.assertRaises(inspector.InspectorError):
             inspector.export_inspector(self.fig, self.td / "link")
