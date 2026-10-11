@@ -365,3 +365,194 @@ test('validateFrame compares an optional expected source revision without invent
   assert.equal(validateFrame(noSource, null).source_revision, null);
   assert.throws(() => validateFrame(noSource, 'source-sha-2'), /source/i);
 });
+
+function labelNode(extra = {}) {
+  return { id: 'label', gid: 'label.391', registered: true, identity_stability: 'stable',
+    type: 'text', measured: true, hit_mode: 'envelope', bounds_mm: [10, 10, 30, 20],
+    editable_capability: 'READ_ONLY', ...extra };
+}
+
+function liveBundle(nodes = [labelNode()]) {
+  const frame = bundleFixture(sceneFixture(nodes, { source_revision: 'source-1' }));
+  frame.session = { session_id: 'session-1', scene_revision: frame.frame_revision,
+    source_revision: 'source-1', can_evaluate: true };
+  return frame;
+}
+
+test('G1 fit uses actual wrap width and height and centers the canvas', () => {
+  const { fitViewport } = loadHelper();
+  const view = fitViewport([0, 0, 100, 50], 418, 218, 1);
+  assert.equal(view.scale, 4);
+  assert.deepEqual([view.width, view.height, view.left, view.top], [400, 200, 18, 18]);
+  const tall = fitViewport([0, 0, 100, 50], 818, 218, 1);
+  assert.equal(tall.left, 218);
+  assert.equal(tall.top, 18);
+});
+
+test('G1 zoom preserves the pointed mm location with positioned viewport offsets', () => {
+  const { fitViewport, zoomViewport, screenToMm } = loadHelper();
+  const before = fitViewport([0, 0, 100, 50], 818, 418, 1);
+  const after = fitViewport([0, 0, 100, 50], 818, 418, 2);
+  const anchor = { x: 450, y: 240 };
+  const scroll = zoomViewport(before, after, { left: 0, top: 0 }, anchor);
+  const mmBefore = screenToMm({ left: before.left, top: before.top, width: before.width, height: before.height }, [0, 0, 100, 50], anchor.x, anchor.y);
+  const mmAfter = screenToMm({ left: after.left - scroll.left, top: after.top - scroll.top, width: after.width, height: after.height }, [0, 0, 100, 50], anchor.x, anchor.y);
+  assert.deepEqual(mmAfter, mmBefore);
+});
+
+test('G2 fifteen Alt presses aggregate one desired operation without mutating geometry', () => {
+  const { createIntentSession } = loadHelper();
+  const frame = liveBundle(), original = frame.scene_json;
+  const session = createIntentSession(frame);
+  session.select('label');
+  session.press({ key: 'ArrowRight', altKey: true, viewportFocused: true });
+  const operation = session.snapshot().intent.operation_id;
+  for (let i = 1; i < 15; i++) session.press({ key: 'ArrowRight', altKey: true, viewportFocused: true, repeat: true });
+  const snapshot = session.snapshot();
+  assert.equal(snapshot.intent.operation_id, operation);
+  assert.deepEqual(snapshot.intent.delta_mm, [0.15, 0]);
+  assert.equal(snapshot.status, 'DESIRED_ONLY');
+  assert.deepEqual(snapshot.ghost.bounds_mm, [10.15, 10, 30.15, 20]);
+  assert.equal(frame.scene_json, original);
+});
+
+test('G2 Arrow input focus and system shortcuts cannot create a desired operation', () => {
+  const { createIntentSession } = loadHelper();
+  const session = createIntentSession(liveBundle());
+  session.select('label');
+  for (const context of [{ inputActive: true }, { viewportFocused: false }, { ctrlKey: true }, { metaKey: true }]) {
+    assert.equal(session.press({ key: 'ArrowUp', viewportFocused: true, ...context }), false);
+    assert.equal(session.snapshot().intent, null);
+  }
+  session.press({ key: 'ArrowUp', shiftKey: true, viewportFocused: true });
+  assert.deepEqual(session.snapshot().intent.delta_mm, [0, 0.5]);
+});
+
+test('G2 scientific curves and independent guide endpoints cannot masquerade as rigid ghosts', () => {
+  const { createIntentSession } = loadHelper();
+  const session = createIntentSession(liveBundle([
+    strokeNode('curve', [[[10, 10], [20, 20]]]),
+    strokeNode('guide', [[[10, 10], [20, 20]]], { type: 'guide' }),
+    labelNode({ id: 'unmeasured', measured: false }),
+  ]));
+  for (const id of ['curve', 'guide', 'unmeasured']) {
+    session.select(id);
+    assert.equal(session.press({ key: 'ArrowRight', viewportFocused: true }), false);
+    assert.equal(session.snapshot().ghost, null);
+  }
+});
+
+test('G2 exact numeric delta retains out-of-range ghost and requires explicit selection decision', () => {
+  const { createIntentSession } = loadHelper();
+  const session = createIntentSession(liveBundle([labelNode(), labelNode({ id: 'other', gid: 'other' })]));
+  session.select('label');
+  session.setDelta(0.15, 0);
+  assert.deepEqual(session.snapshot().intent.delta_mm, [0.15, 0]);
+  assert.equal(session.select('other'), false);
+  assert.equal(session.snapshot().selected, 'label');
+  assert.equal(session.snapshot().selectionBlocked, true);
+  session.setDelta(150, 0);
+  assert.deepEqual(session.snapshot().ghost.bounds_mm, [160, 10, 180, 20]);
+  assert.equal(session.snapshot().status, 'OUT_OF_RANGE');
+  session.cancel();
+  assert.equal(session.select('other'), true);
+});
+
+test('G2 linked guide prediction fixes the scientific endpoint and never changes the original', () => {
+  const { createIntentSession } = loadHelper();
+  const guide = strokeNode('guide', [[[4, 5], [15, 15]]], { type: 'guide', gid: 'guide.391' });
+  const frame = liveBundle([labelNode({ linked_guide_gid: 'guide.391' }), guide]);
+  const session = createIntentSession(frame);
+  session.select('label');
+  session.setDelta(0.15, 0);
+  assert.deepEqual(session.snapshot().intent.preserve.follow_gids, ['guide.391']);
+  assert.deepEqual(session.snapshot().ghost.guide_runs_mm, [[[4, 5], [15.15, 15]]]);
+  assert.deepEqual(guide.runs_mm, [[[4, 5], [15, 15]]]);
+});
+
+test('G2 static ordinary plots are desired-only and cannot claim live accept capability', () => {
+  const { createIntentSession, canAcceptEvaluation } = loadHelper();
+  const session = createIntentSession(bundleFixture(sceneFixture([labelNode({ registered: false, identity_stability: 'ephemeral', gid: null })])));
+  session.select('label');
+  session.setDelta(0.15, 0);
+  assert.equal(session.snapshot().canEvaluate, false);
+  assert.equal(session.snapshot().status, 'DESIRED_ONLY');
+  assert.equal(canAcceptEvaluation({}, session.snapshot().intent), false);
+});
+
+test('G2 accept refuses actual 0.11mm mismatch and unverified evidence despite OK status', () => {
+  const { createIntentSession, canAcceptEvaluation } = loadHelper();
+  const session = createIntentSession(liveBundle());
+  session.select('label'); session.setDelta(0.15, 0);
+  const intent = session.snapshot().intent;
+  const response = { status: 'OK', operation_id: intent.operation_id, intent_state: 'READY',
+    evaluation_state: 'FEASIBLE', verification_level: 'RENDER_CHECKED', persistence_state: 'EPHEMERAL',
+    target_delta_mm: [0.15, 0], measured_delta_mm: [0.15, 0], error_mm: 0,
+    checks: [{ check: 'science', status: 'PASS' }] };
+  assert.equal(canAcceptEvaluation(response, intent), true);
+  assert.equal(canAcceptEvaluation({ ...response, measured_delta_mm: [0.11, 0], error_mm: 0 }, intent), false);
+  assert.equal(canAcceptEvaluation({ ...response, verification_level: 'NONE' }, intent), false);
+  assert.equal(canAcceptEvaluation({ ...response, checks: [{ check: 'science', status: 'UNVERIFIED' }] }, intent), false);
+  assert.equal(canAcceptEvaluation({ ...response, operation_id: 'other' }, intent), false);
+});
+
+test('G2 stale live session metadata is rejected before interaction', () => {
+  const { validateFrame } = loadHelper();
+  const frame = liveBundle();
+  assert.throws(() => validateFrame({ ...frame, session: { ...frame.session, scene_revision: sha256Hex('stale') } }), /session|revision/i);
+  assert.throws(() => validateFrame({ ...frame, session: { ...frame.session, source_revision: 'different' } }), /session|source/i);
+});
+
+test('G2 decision payload enforces accepted scene_revision and valid operation identity', () => {
+  const { buildDecisionPayload } = loadHelper();
+  const frame = liveBundle();
+  const payload = buildDecisionPayload(frame, 'op-test-1', 'accept');
+  assert.equal(payload.operation_id, 'op-test-1');
+  assert.equal(payload.decision, 'accept');
+  assert.equal(payload.session_id, 'session-1');
+  assert.equal(payload.scene_revision, frame.frame_revision);
+  assert.equal(payload.source_revision, 'source-1');
+  assert.throws(() => buildDecisionPayload(frame, '', 'accept'), /operation_id/i);
+  assert.throws(() => buildDecisionPayload(frame, 'op-1', 'invalid_decision'), /decision/i);
+  assert.throws(() => buildDecisionPayload({ ...frame, session: null }, 'op-1', 'cancel'), /session/i);
+});
+
+test('G2 session operation stack manages real accepted operation ids without history bloat', () => {
+  const { createOperationStack } = loadHelper();
+  const stack = createOperationStack();
+  assert.equal(stack.canUndo(), false);
+  assert.equal(stack.pop(), null);
+  stack.push('op-1');
+  stack.push('op-2');
+  assert.equal(stack.canUndo(), true);
+  assert.equal(stack.peek(), 'op-2');
+  assert.deepEqual(stack.all(), ['op-1', 'op-2']);
+  assert.equal(stack.pop(), 'op-2');
+  assert.equal(stack.pop(), 'op-1');
+  assert.equal(stack.canUndo(), false);
+});
+
+test('G2 decision response validation rejects QUALITY_LOCKED, STALE_REVISION, and non-OK status', () => {
+  const { isDecisionSuccessful } = loadHelper();
+  assert.equal(isDecisionSuccessful({ status: 'OK' }), true);
+  assert.equal(isDecisionSuccessful({ status: 'QUALITY_LOCKED' }), false);
+  assert.equal(isDecisionSuccessful({ status: 'STALE_REVISION' }), false);
+  assert.equal(isDecisionSuccessful({ status: 'INVALID_INTENT' }), false);
+  assert.equal(isDecisionSuccessful({ status: 'UNDO_CONFLICT' }), false);
+  assert.equal(isDecisionSuccessful(null), false);
+  assert.equal(isDecisionSuccessful({}), false);
+});
+
+test('G2 in-flight evaluation guard prevents stale or mismatched responses from overriding state', () => {
+  const { createInFlightGuard } = loadHelper();
+  const guard = createInFlightGuard();
+  const gen1 = guard.start('op-1', [0, 0.15]);
+  assert.equal(guard.isValid(gen1, 'op-1', [0, 0.15]), true);
+  assert.equal(guard.isValid(gen1, 'op-2', [0, 0.15]), false);
+  assert.equal(guard.isValid(gen1, 'op-1', [0, 0.20]), false);
+  const gen2 = guard.start('op-2', [0.15, 0]);
+  assert.equal(guard.isValid(gen1, 'op-1', [0, 0.15]), false);
+  assert.equal(guard.isValid(gen2, 'op-2', [0.15, 0]), true);
+  guard.cancel();
+  assert.equal(guard.isValid(gen2, 'op-2', [0.15, 0]), false);
+});

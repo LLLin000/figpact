@@ -32,6 +32,12 @@
       requireFact(node.runs_mm == null || (Array.isArray(node.runs_mm) && node.runs_mm.every(run => Array.isArray(run) && run.every(point))), 'Invalid polyline geometry');
       if (node.identity_stability !== undefined) requireFact(node.identity_stability === (node.registered ? 'stable' : 'ephemeral'), 'Identity registration/stability mismatch');
     }
+    if (frame.session != null) {
+      requireFact(typeof frame.session === 'object', 'Invalid session metadata');
+      requireFact(typeof frame.session.session_id === 'string' && frame.session.session_id, 'Invalid session id');
+      requireFact(frame.session.scene_revision === frame.frame_revision, 'Stale session scene revision; refresh required');
+      requireFact(frame.session.source_revision === scene.source_revision, 'Stale session source revision; refresh required');
+    }
     return scene;
   }
 
@@ -107,15 +113,244 @@
     const base = 10 ** Math.floor(Math.log10(wanted));
     return [1, 2, 5, 10].map(n => n * base).find(n => n >= wanted) || base * 10;
   }
+  function fitViewport(bounds, wrapWidth, wrapHeight, zoom = 1) {
+    requireFact(box(bounds) && bounds[2] > bounds[0] && bounds[3] > bounds[1], 'Invalid bounds');
+    requireFact(finite(wrapWidth) && wrapWidth > 0 && finite(wrapHeight) && wrapHeight > 0, 'Invalid wrap dimensions');
+    requireFact(finite(zoom) && zoom > 0, 'Invalid zoom');
+    const margin = 18;
+    const availW = Math.max(0, wrapWidth - margin);
+    const availH = Math.max(0, wrapHeight - margin);
+    const w = bounds[2] - bounds[0];
+    const h = bounds[3] - bounds[1];
+    const scale = Math.min(availW / w, availH / h) * zoom;
+    const width = w * scale;
+    const height = h * scale;
+    const left = margin + Math.max(0, (availW - width) / 2);
+    const top = margin + Math.max(0, (availH - height) / 2);
+    return { scale, width, height, left, top };
+  }
+  function zoomViewport(before, after, scroll = { left: 0, top: 0 }, anchor) {
+    requireFact(before && after, 'Invalid before/after viewport');
+    const curScroll = scroll || { left: 0, top: 0 };
+    const anc = anchor || { x: before.left + before.width / 2, y: before.top + before.height / 2 };
+    const ratioX = (anc.x - (before.left - (curScroll.left || 0))) / before.width;
+    const ratioY = (anc.y - (before.top - (curScroll.top || 0))) / before.height;
+    return {
+      left: after.left + ratioX * after.width - anc.x,
+      top: after.top + ratioY * after.height - anc.y
+    };
+  }
+  function canAcceptEvaluation(response, intent) {
+    if (!response || !intent) return false;
+    if (response.status !== 'OK') return false;
+    if (response.operation_id !== intent.operation_id) return false;
+    if (response.intent_state !== 'READY') return false;
+    if (response.evaluation_state !== 'FEASIBLE') return false;
+    if (response.verification_level !== 'RENDER_CHECKED') return false;
+    if (!Array.isArray(response.target_delta_mm) || !Array.isArray(response.measured_delta_mm)) return false;
+    const tol = intent.tolerance_mm ?? 0.01;
+    if (Math.abs(response.measured_delta_mm[0] - intent.delta_mm[0]) > tol ||
+        Math.abs(response.measured_delta_mm[1] - intent.delta_mm[1]) > tol) return false;
+    if (response.error_mm != null && response.error_mm > tol) return false;
+    if (!Array.isArray(response.checks) || response.checks.length === 0) return false;
+    if (response.checks.some(c => c.status !== 'PASS')) return false;
+    return true;
+  }
+  function createIntentSession(frame) {
+    const scene = typeof frame.scene_json === 'string' ? JSON.parse(frame.scene_json) : (frame.scene || {});
+    const nodesMap = new Map((scene.nodes || []).map(n => [n.id, n]));
+    let selectedId = null;
+    let currentDelta = [0, 0];
+    let operationId = null;
+    let selectionBlocked = false;
+    function round4(v) { return Math.round(v * 10000) / 10000; }
+    function getSelectedNode() { return selectedId ? nodesMap.get(selectedId) || null : null; }
+    function canNodeGhost(node) {
+      if (!node || !node.measured || node.fully_clipped) return false;
+      if (node.type === 'curve' || node.type === 'guide' || node.type === 'panel') return false;
+      return true;
+    }
+    function select(id) {
+      if (id === selectedId) { selectionBlocked = false; return true; }
+      const hasPendingIntent = (currentDelta[0] !== 0 || currentDelta[1] !== 0) && selectedId != null;
+      if (hasPendingIntent) { selectionBlocked = true; return false; }
+      selectionBlocked = false;
+      selectedId = id != null && nodesMap.has(id) ? id : null;
+      return true;
+    }
+    function press(event) {
+      if (!event || !event.viewportFocused) return false;
+      if (event.inputActive || event.ctrlKey || event.metaKey) return false;
+      const node = getSelectedNode();
+      if (!canNodeGhost(node)) return false;
+      const key = event.key;
+      let step = event.shiftKey ? 0.5 : (event.altKey ? 0.01 : 0.1);
+      let dx = 0, dy = 0;
+      if (key === 'ArrowUp') dy = step;
+      else if (key === 'ArrowDown') dy = -step;
+      else if (key === 'ArrowRight') dx = step;
+      else if (key === 'ArrowLeft') dx = -step;
+      else return false;
+      if (!operationId) {
+        operationId = 'intent-' + (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2, 11));
+      }
+      currentDelta = [round4(currentDelta[0] + dx), round4(currentDelta[1] + dy)];
+      selectionBlocked = false;
+      return true;
+    }
+    function setDelta(dx, dy) {
+      const node = getSelectedNode();
+      if (!canNodeGhost(node)) return false;
+      if (!operationId && (dx !== 0 || dy !== 0)) {
+        operationId = 'intent-' + (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2, 11));
+      }
+      currentDelta = [round4(dx), round4(dy)];
+      selectionBlocked = false;
+      return true;
+    }
+    function cancel() {
+      currentDelta = [0, 0];
+      operationId = null;
+      selectionBlocked = false;
+    }
+    function snapshot() {
+      const node = getSelectedNode();
+      const hasDelta = currentDelta[0] !== 0 || currentDelta[1] !== 0;
+      const canEval = !!(frame.session?.can_evaluate && node?.registered && node?.identity_stability === 'stable');
+      let ghost = null;
+      let status = 'DESIRED_ONLY';
+      if (node && canNodeGhost(node) && hasDelta) {
+        const b = node.bounds_mm;
+        const dx = currentDelta[0], dy = currentDelta[1];
+        const ghostBounds = box(b) ? [round4(b[0] + dx), round4(b[1] + dy), round4(b[2] + dx), round4(b[3] + dy)] : null;
+        ghost = { bounds_mm: ghostBounds };
+        if (node.linked_guide_gid) {
+          const guideNode = (scene.nodes || []).find(n => n.gid === node.linked_guide_gid || n.id === node.linked_guide_gid);
+          if (guideNode && Array.isArray(guideNode.runs_mm)) {
+            ghost.guide_runs_mm = guideNode.runs_mm.map(run => {
+              if (!Array.isArray(run) || run.length === 0) return run;
+              return run.map((p, idx) => {
+                if (idx === run.length - 1) return [round4(p[0] + dx), round4(p[1] + dy)];
+                return [p[0], p[1]];
+              });
+            });
+          }
+        }
+        if (ghostBounds && box(scene.canvas_bounds_mm)) {
+          const [cx0, cy0, cx1, cy1] = scene.canvas_bounds_mm;
+          if (ghostBounds[0] < cx0 || ghostBounds[1] < cy0 || ghostBounds[2] > cx1 || ghostBounds[3] > cy1) {
+            status = 'OUT_OF_RANGE';
+          }
+        }
+      }
+      let intent = null;
+      if (node && hasDelta) {
+        intent = {
+          operation_id: operationId,
+          session_id: frame.session?.session_id || null,
+          scene_revision: frame.frame_revision,
+          source_revision: scene.source_revision,
+          scope: scene.scope,
+          target_gid: node.gid || node.id,
+          operation: 'translate',
+          delta_mm: [currentDelta[0], currentDelta[1]],
+          tolerance_mm: 0.01,
+          preserve: {
+            science: true,
+            follow_gids: node.linked_guide_gid ? [node.linked_guide_gid] : [],
+            fixed_gids: []
+          },
+          demonstration: { display_only: true }
+        };
+      }
+      return { selected: selectedId, selectionBlocked, canEvaluate: canEval, status, intent, ghost };
+    }
+    return { select, press, setDelta, cancel, snapshot };
+  }
+  function buildDecisionPayload(frame, operationId, decision) {
+    requireFact(frame && typeof frame === 'object', 'Invalid frame');
+    requireFact(frame.session && typeof frame.session.session_id === 'string', 'Frame must contain live session');
+    requireFact(typeof operationId === 'string' && operationId.length > 0, 'Invalid operation_id');
+    requireFact(['accept', 'cancel', 'undo'].includes(decision), 'Invalid decision');
+    const scene = typeof frame.scene_json === 'string' ? JSON.parse(frame.scene_json) : (frame.scene || {});
+    return {
+      operation_id: operationId,
+      decision,
+      session_id: frame.session.session_id,
+      scene_revision: frame.frame_revision,
+      source_revision: scene.source_revision
+    };
+  }
+  function createOperationStack(initialIds = []) {
+    const stack = Array.isArray(initialIds) ? [...initialIds] : [];
+    return {
+      push(id) { if (typeof id === 'string' && id) stack.push(id); },
+      pop() { return stack.length > 0 ? stack.pop() : null; },
+      peek() { return stack.length > 0 ? stack[stack.length - 1] : null; },
+      canUndo() { return stack.length > 0; },
+      all() { return [...stack]; }
+    };
+  }
+  function isDecisionSuccessful(response) {
+    return !!(response && typeof response === 'object' && response.status === 'OK');
+  }
+  function createInFlightGuard() {
+    let currentToken = 0;
+    let expectedOp = null;
+    let expectedDelta = null;
+    return {
+      start(opId, delta) {
+        currentToken++;
+        expectedOp = opId;
+        expectedDelta = Array.isArray(delta) ? [delta[0], delta[1]] : null;
+        return currentToken;
+      },
+      isValid(token, opId, delta) {
+        if (token !== currentToken) return false;
+        if (opId !== expectedOp) return false;
+        if (!expectedDelta || !Array.isArray(delta)) return false;
+        return expectedDelta[0] === delta[0] && expectedDelta[1] === delta[1];
+      },
+      cancel() {
+        currentToken++;
+        expectedOp = null;
+        expectedDelta = null;
+      }
+    };
+  }
 
-  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep };
+  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard };
+  const globalScope = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : root);
+  globalScope.FigpactInspector = api;
   root.FigpactInspector = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (typeof document === 'undefined') return;
 
   const byId = id => document.getElementById(id);
   const container = byId('inspector-root'), viewport = byId('viewport'), wrap = byId('viewport-wrap');
-  const state = { scene: null, nodes: new Map(), paths: new Map(), selected: null, hover: null, zoom: 1, scale: 1, ready: false, epoch: 0, space: false, pan: null };
+  if (!container || !viewport || !wrap) return;
+  const state = {
+    frame: null,
+    scene: null,
+    acceptedFrame: null,
+    candidateFrame: null,
+    nodes: new Map(),
+    paths: new Map(),
+    selected: null,
+    hover: null,
+    zoom: 1,
+    scale: 1,
+    view: null,
+    ready: false,
+    epoch: 0,
+    space: false,
+    pan: null,
+    intentSession: null,
+    lastEvaluation: null,
+    operationStack: createOperationStack(),
+    inFlightGuard: createInFlightGuard(),
+    pendingOperationId: null
+  };
   const svg = (tag, attrs = {}) => {
     const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
     for (const [key, value] of Object.entries(attrs)) element.setAttribute(key, String(value));
@@ -134,19 +369,79 @@
       element.append(dt, dd);
     }
   }
+  function updateIntentUI() {
+    const section = byId('intent-section');
+    if (!section) return;
+    const node = state.nodes.get(state.selected);
+    if (!node || !state.intentSession) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    const snap = state.intentSession.snapshot();
+    byId('intent-notice').hidden = true;
+    byId('intent-status-badge').textContent = snap.status;
+    byId('intent-status-badge').className = `tag ${snap.status === 'OUT_OF_RANGE' ? 'tag-warning' : ''}`;
+    const delta = snap.intent ? snap.intent.delta_mm : [0, 0];
+    byId('intent-displacement').textContent = `Δ [${delta[0]}, ${delta[1]}] mm`;
+    byId('intent-dx').value = delta[0];
+    byId('intent-dy').value = delta[1];
+
+    const canEval = snap.canEvaluate;
+    byId('btn-evaluate').disabled = !canEval || (delta[0] === 0 && delta[1] === 0);
+    byId('btn-accept').disabled = !(state.lastEvaluation && canAcceptEvaluation(state.lastEvaluation, snap.intent));
+    const hasCancelable = (delta[0] !== 0 || delta[1] !== 0) || !!state.pendingOperationId || !!state.lastEvaluation || !!state.candidateFrame;
+    byId('btn-cancel-intent').disabled = !hasCancelable;
+
+    if (!canEval) {
+      byId('btn-evaluate').title = '静态示范或临时身份对象不支持实测评测';
+      byId('btn-accept').title = '静态示范或临时身份对象不能应用';
+    } else {
+      byId('btn-evaluate').title = '';
+      byId('btn-accept').title = '';
+    }
+    const canUndo = state.operationStack.canUndo();
+    byId('btn-undo').disabled = !canUndo;
+    byId('btn-undo').title = canUndo ? `可撤销上一步 (${state.operationStack.peek()})` : '暂无可撤销意图';
+  }
   function select(id) {
-    state.selected = state.ready && state.nodes.has(id) ? id : null;
+    if (!state.ready) return;
+    if (state.intentSession) {
+      const allowed = state.intentSession.select(id);
+      if (!allowed) {
+        const snap = state.intentSession.snapshot();
+        byId('intent-notice').hidden = false;
+        byId('intent-notice').textContent = `当前对象存在未提交的示范（Δ [${snap.intent?.delta_mm.join(', ')}] mm）。请先接受或取消当前示范，再选择其他对象。`;
+        return;
+      }
+    }
+    if (state.candidateFrame) {
+      restoreAcceptedPreview();
+    }
+    state.selected = state.nodes.has(id) ? id : null;
     container.dataset.selectedId = state.selected || '';
     const node = state.nodes.get(state.selected);
     byId('detail-empty').hidden = !!node;
     byId('detail-fields').hidden = !node;
-    for (const id of ['detail-ephemeral', 'detail-readonly', 'detail-annotation']) byId(id).hidden = true;
+    for (const nid of ['detail-ephemeral', 'detail-readonly', 'detail-annotation']) byId(nid).hidden = true;
     if (node) {
-      fields(byId('detail-fields'), [['对象', title(node)], ['GID / 单帧 ID', node.gid || node.id], ['类型', node.type], ['身份', node.identity_stability], ['位置包络 mm', node.bounds_mm], ['锚点 mm', node.anchors], ['科学声明', node.science_policy || '未声明'], ['测量限制', node.hit_note || node.stroke?.limitation || '包络不等于复杂形状的精确轮廓']]);
+      fields(byId('detail-fields'), [
+        ['对象', title(node)],
+        ['GID', node.gid || node.id],
+        ['坐标/尺寸 mm', node.bounds_mm ? `[${node.bounds_mm.map(v => Number(v.toFixed(3))).join(', ')}] (${Number((node.bounds_mm[2] - node.bounds_mm[0]).toFixed(3))} × ${Number((node.bounds_mm[3] - node.bounds_mm[1]).toFixed(3))} mm)` : '无包络'],
+        ['身份', node.identity_stability === 'stable' ? '稳定 (stable)' : '临时 (ephemeral)'],
+        ['关联引线', node.linked_guide_gid || (node.annotation ? node.annotation.linked_label_gid : '无')],
+        ['只读能力', node.editable_capability || 'READ_ONLY']
+      ]);
       byId('detail-ephemeral').hidden = node.identity_stability !== 'ephemeral';
       byId('detail-ephemeral').textContent = '临时身份只在当前帧有效；重建后需要重新选择，不能用于持久编辑。';
       byId('detail-readonly').hidden = false;
-      byId('detail-readonly').textContent = 'READ_ONLY：这里只能测量与选择，不修改图元、Python、YAML 或正式产物。';
+      const sessionObj = state.acceptedFrame?.session || state.frame?.session;
+      const canRebuild = !!(sessionObj && sessionObj.can_evaluate !== false && sessionObj.source_revision);
+      byId('detail-readonly').hidden = false;
+      byId('detail-readonly').textContent = canRebuild
+        ? '会话试算/接受：可进行布局参数试算与会话内接受，不修改源码、YAML 或正式图件。'
+        : 'READ_ONLY（静态快照 / 普通 Figure）：这里只能测量与选择，不修改图元、Python、YAML 或正式产物。';
       if (node.annotation || node.linked_guide_gid) {
         byId('detail-annotation').hidden = false;
         byId('detail-annotation').textContent = node.annotation
@@ -154,6 +449,7 @@
           : `关联引线：${node.linked_guide_gid}。标签和引线是两个可分别选择的对象；本界面不编辑它们。`;
       }
     }
+    updateIntentUI();
     highlights();
   }
   function outline(node, className) {
@@ -178,6 +474,35 @@
       const shape = outline(state.nodes.get(id), style);
       if (shape) group.append(shape);
     }
+    if (state.intentSession) {
+      const snap = state.intentSession.snapshot();
+      if (snap.ghost && state.scene) {
+        const height = state.scene.canvas_bounds_mm[3];
+        if (snap.ghost.bounds_mm) {
+          const gb = snap.ghost.bounds_mm;
+          group.append(svg('rect', {
+            x: gb[0],
+            y: height - gb[3],
+            width: gb[2] - gb[0],
+            height: gb[3] - gb[1],
+            class: 'outline ghost-outline',
+            'pointer-events': 'none'
+          }));
+        }
+        if (Array.isArray(snap.ghost.guide_runs_mm)) {
+          for (const run of snap.ghost.guide_runs_mm) {
+            if (Array.isArray(run) && run.length > 0) {
+              const d = run.map((p, i) => `${i ? 'L' : 'M'}${p[0]},${height - p[1]}`).join(' ');
+              group.append(svg('path', {
+                d,
+                class: 'outline ghost-guide-outline',
+                'pointer-events': 'none'
+              }));
+            }
+          }
+        }
+      }
+    }
   }
   function objectList() {
     const query = byId('search-input').value.toLowerCase();
@@ -199,9 +524,11 @@
     top.replaceChildren(); left.replaceChildren();
     top.style.top = `${wrap.scrollTop}px`; top.style.left = `${wrap.scrollLeft + 18}px`; top.style.width = `${wrap.clientWidth - 18}px`;
     left.style.left = `${wrap.scrollLeft}px`; left.style.top = `${wrap.scrollTop + 18}px`; left.style.height = `${wrap.clientHeight - 18}px`;
+    const viewLeft = state.view ? state.view.left : 18;
+    const viewTop = state.view ? state.view.top : 18;
     for (const [element, low, high, axis] of [[top, x0, x1, 'left'], [left, y0, y1, 'top']]) {
       for (let value = Math.ceil(low / step) * step; value <= high; value += step) {
-        const offset = axis === 'left' ? (value - x0) * state.scale - wrap.scrollLeft : (y1 - value) * state.scale - wrap.scrollTop;
+        const offset = axis === 'left' ? viewLeft + (value - x0) * state.scale - wrap.scrollLeft : viewTop + (y1 - value) * state.scale - wrap.scrollTop;
         const limit = axis === 'left' ? wrap.clientWidth : wrap.clientHeight;
         if (offset < -10 || offset > limit) continue;
         const tick = document.createElement('span'), label = document.createElement('span');
@@ -214,12 +541,35 @@
   }
   function fit() {
     if (!state.scene) return;
-    const b = state.scene.canvas_bounds_mm, width = b[2] - b[0], height = b[3] - b[1];
-    state.scale = Math.min(Math.max(100, wrap.clientWidth - 20) / width, Math.max(300, innerHeight - 270) / height) * state.zoom;
-    viewport.setAttribute('width', width * state.scale); viewport.setAttribute('height', height * state.scale);
+    const view = fitViewport(state.scene.canvas_bounds_mm, wrap.clientWidth, wrap.clientHeight, state.zoom);
+    state.scale = view.scale;
+    state.view = view;
+    viewport.setAttribute('width', view.width);
+    viewport.setAttribute('height', view.height);
+    viewport.style.position = 'absolute';
+    viewport.style.left = `${view.left}px`;
+    viewport.style.top = `${view.top}px`;
     rulers();
   }
-  function zoom(factor) { state.zoom = Math.max(0.25, Math.min(16, state.zoom * factor)); fit(); }
+  function zoomWithAnchor(factor, anchor) {
+    if (!state.scene) return;
+    const bounds = state.scene.canvas_bounds_mm;
+    const curZoom = state.zoom;
+    const nextZoom = Math.max(0.25, Math.min(16, curZoom * factor));
+    if (curZoom === nextZoom) return;
+    const before = fitViewport(bounds, wrap.clientWidth, wrap.clientHeight, curZoom);
+    const after = fitViewport(bounds, wrap.clientWidth, wrap.clientHeight, nextZoom);
+    const anc = anchor || { x: wrap.clientWidth / 2, y: wrap.clientHeight / 2 };
+    const nextScroll = zoomViewport(before, after, { left: wrap.scrollLeft, top: wrap.scrollTop }, anc);
+    state.zoom = nextZoom;
+    fit();
+    wrap.scrollLeft = Math.max(0, nextScroll.left);
+    wrap.scrollTop = Math.max(0, nextScroll.top);
+    rulers();
+  }
+  function zoom(factor) {
+    zoomWithAnchor(factor, { x: wrap.clientWidth / 2, y: wrap.clientHeight / 2 });
+  }
   function candidates(event) {
     const rect = viewport.getBoundingClientRect();
     const p = screenToMm(rect, state.scene.canvas_bounds_mm, event.clientX, event.clientY);
@@ -258,7 +608,14 @@
   viewport.addEventListener('pointercancel', () => { state.pan = null; viewport.classList.remove('panning'); });
   wrap.addEventListener('scroll', rulers);
   wrap.addEventListener('wheel', event => {
-    if (event.ctrlKey && state.ready) { event.preventDefault(); zoom(event.deltaY < 0 ? 1.25 : 0.8); }
+    if ((event.ctrlKey || event.metaKey) && state.ready) {
+      event.preventDefault();
+      const wrapRect = wrap.getBoundingClientRect();
+      zoomWithAnchor(event.deltaY < 0 ? 1.25 : 0.8, {
+        x: event.clientX - wrapRect.left,
+        y: event.clientY - wrapRect.top
+      });
+    }
   }, { passive: false });
   byId('zoom-in').addEventListener('click', () => zoom(1.25));
   byId('zoom-out').addEventListener('click', () => zoom(0.8));
@@ -272,25 +629,279 @@
   byId('search-form').addEventListener('submit', event => event.preventDefault());
   document.addEventListener('keydown', event => {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
-    if (event.key === 'Escape') select(null);
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      cancelIntent(true);
+      return;
+    }
     if (document.activeElement !== viewport) return;
     if (event.code === 'Space') { event.preventDefault(); state.space = true; }
     if (event.key === '+' || event.key === '=') { event.preventDefault(); zoom(1.25); }
     if (event.key === '-') { event.preventDefault(); zoom(0.8); }
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      if (state.intentSession && state.selected) {
+        event.preventDefault();
+        state.inFlightGuard.cancel();
+        const handled = state.intentSession.press({
+          key: event.key,
+          altKey: event.altKey,
+          shiftKey: event.shiftKey,
+          ctrlKey: event.ctrlKey,
+          metaKey: event.metaKey,
+          repeat: event.repeat,
+          viewportFocused: true,
+          inputActive: false
+        });
+        if (handled) {
+          state.lastEvaluation = null;
+          updateIntentUI();
+          highlights();
+        }
+      }
+    }
   });
   document.addEventListener('keyup', event => { if (event.code === 'Space') state.space = false; });
+  byId('btn-apply-delta').addEventListener('click', () => {
+    if (!state.intentSession || !state.selected) return;
+    state.inFlightGuard.cancel();
+    const dx = parseFloat(byId('intent-dx').value) || 0;
+    const dy = parseFloat(byId('intent-dy').value) || 0;
+    state.intentSession.setDelta(dx, dy);
+    state.lastEvaluation = null;
+    updateIntentUI();
+    highlights();
+  });
+  async function cancelIntent(notifyBackend = true) {
+    if (!state.intentSession) return;
+    const snap = state.intentSession.snapshot();
+    const opId = snap.intent?.operation_id || state.pendingOperationId || state.lastEvaluation?.operation_id;
+    state.inFlightGuard.cancel();
+
+    if (notifyBackend && opId && (state.acceptedFrame?.session || state.frame?.session)) {
+      status('正在向本地桥取消当前候选…', 'pending');
+      try {
+        const baseline = state.acceptedFrame || state.frame;
+        const payload = buildDecisionPayload(baseline, opId, 'cancel');
+        const res = await fetch('/api/intents/decision', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!isDecisionSuccessful(data)) {
+          status(`取消未通过：${data.message || data.status}`, 'error');
+          return;
+        }
+        if (data.accepted_frame) {
+          state.acceptedFrame = data.accepted_frame;
+        }
+      } catch (e) {
+        status(`取消请求失败：${e.message}`, 'error');
+        return;
+      }
+    }
+
+    state.pendingOperationId = null;
+    state.intentSession.cancel();
+    state.lastEvaluation = null;
+    byId('intent-eval-results').hidden = true;
+    if (state.candidateFrame && state.acceptedFrame) {
+      await loadFrame(state.acceptedFrame, undefined, false);
+    }
+    updateIntentUI();
+    highlights();
+    status('已取消当前候选；已接受操作保持', 'ok');
+  }
+  byId('btn-cancel-intent').addEventListener('click', () => {
+    cancelIntent(true);
+  });
+  byId('btn-evaluate').addEventListener('click', async () => {
+    if (!state.intentSession) return;
+    const snap = state.intentSession.snapshot();
+    if (!snap.intent || !snap.canEvaluate) return;
+    state.pendingOperationId = snap.intent.operation_id;
+    const token = state.inFlightGuard.start(snap.intent.operation_id, snap.intent.delta_mm);
+    byId('btn-evaluate').disabled = true;
+    status('正在向本地桥请求试算评测…', 'pending');
+    try {
+      const res = await fetch('/api/intents/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(snap.intent)
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const currentSnap = state.intentSession.snapshot();
+      if (!state.inFlightGuard.isValid(token, currentSnap.intent?.operation_id, currentSnap.intent?.delta_mm)) {
+        return;
+      }
+      state.lastEvaluation = data;
+      byId('intent-eval-results').hidden = false;
+      byId('eval-state-text').textContent = `状态：${data.status} · 评测：${data.evaluation_state} · 校验：${data.verification_level}`;
+      fields(byId('eval-fields'), [
+        ['目标位移', JSON.stringify(data.target_delta_mm)],
+        ['实测位移', JSON.stringify(data.measured_delta_mm)],
+        ['误差 mm', data.error_mm != null ? Number(data.error_mm.toFixed(4)) : 'null'],
+        ['质检项', (data.checks || []).map(c => `${c.check}:${c.status}`).join(', ') || '无']
+      ]);
+      const acceptable = canAcceptEvaluation(data, currentSnap.intent);
+      byId('btn-accept').disabled = !acceptable;
+      if (data.frame && isDecisionSuccessful(data)) {
+        await loadFrame(data.frame, undefined, false);
+      } else {
+        if (state.candidateFrame && state.acceptedFrame) {
+          await loadFrame(state.acceptedFrame, undefined, false);
+        }
+        status(acceptable ? '试算通过 · 实测与目标符合，可接受' : `试算未通过：${data.message || data.status || '位移或质检不符合'}`, acceptable ? 'ok' : 'error');
+      }
+    } catch (e) {
+      status(`试算请求失败：${e.message}`, 'error');
+    } finally {
+      updateIntentUI();
+    }
+  });
+  byId('btn-accept').addEventListener('click', async () => {
+    if (!state.intentSession || !state.lastEvaluation) return;
+    const snap = state.intentSession.snapshot();
+    if (!canAcceptEvaluation(state.lastEvaluation, snap.intent)) {
+      status('无法接受：未通过验证', 'error');
+      return;
+    }
+    const baseline = state.acceptedFrame || state.frame;
+    const payload = buildDecisionPayload(baseline, snap.intent.operation_id, 'accept');
+    status('正在接受意图并更新会话状态…', 'pending');
+    try {
+      const res = await fetch('/api/intents/decision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!isDecisionSuccessful(data)) {
+        status(`接受未通过：${data.message || data.status}`, 'error');
+        return;
+      }
+      state.operationStack.push(snap.intent.operation_id);
+      const newFrame = data.accepted_frame || data.frame || state.candidateFrame;
+      state.acceptedFrame = newFrame;
+      state.candidateFrame = null;
+      if (newFrame) await loadFrame(newFrame, undefined, true);
+      state.intentSession.cancel();
+      state.lastEvaluation = null;
+      byId('intent-eval-results').hidden = true;
+      updateIntentUI();
+      highlights();
+      status('已接受并更新会话状态（非文件保存）', 'ok');
+    } catch (e) {
+      status(`接受失败：${e.message}`, 'error');
+    }
+  });
+  byId('btn-undo').addEventListener('click', async () => {
+    const current = state.acceptedFrame || state.frame;
+    const canRebuild = !!(current?.session && current.session.can_evaluate !== false && current.session.source_revision);
+    if (!canRebuild) {
+      status('普通 Figure 缺少可信重建入口，不支持撤销', 'error');
+      return;
+    }
+    if (!state.operationStack.canUndo()) {
+      status('暂无可撤销的操作', 'pending');
+      return;
+    }
+    const opId = state.operationStack.pop();
+    const payload = buildDecisionPayload(current, opId, 'undo');
+    status(`正在撤销意图 ${opId}…`, 'pending');
+    try {
+      const res = await fetch('/api/intents/decision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!isDecisionSuccessful(data)) {
+        state.operationStack.push(opId);
+        status(`撤销未通过：${data.message || data.status}`, 'error');
+        updateIntentUI();
+        return;
+      }
+      const newFrame = data.accepted_frame || data.frame;
+      state.acceptedFrame = newFrame;
+      state.candidateFrame = null;
+      if (newFrame) await loadFrame(newFrame, undefined, true);
+      state.intentSession.cancel();
+      state.lastEvaluation = null;
+      byId('intent-eval-results').hidden = true;
+      updateIntentUI();
+      highlights();
+      status('撤销已完成', 'ok');
+    } catch (e) {
+      state.operationStack.push(opId);
+      status(`撤销失败：${e.message}`, 'error');
+      updateIntentUI();
+    }
+  });
+  async function changeQuality(dpi) {
+    const current = state.acceptedFrame || state.frame;
+    const canRebuild = !!(current?.session && current.session.can_evaluate !== false && current.session.source_revision);
+    if (!canRebuild) {
+      status('静态快照或普通 Figure 禁用质量切换：缺少可信重建入口', 'error');
+      return;
+    }
+    status(`正在切换至 ${dpi} DPI 并重新生成完整几何与图像…`, 'pending');
+    try {
+      const res = await fetch('/api/frame/quality', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dpi,
+          session_id: current.session.session_id,
+          scene_revision: current.frame_revision,
+          source_revision: state.scene?.source_revision
+        })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!isDecisionSuccessful(data)) {
+        status(`质量切换未通过：${data.message || data.status}`, 'error');
+        return;
+      }
+      const newFrame = data.frame || data.accepted_frame;
+      if (newFrame) {
+        state.acceptedFrame = newFrame;
+        state.candidateFrame = null;
+        await loadFrame(newFrame, undefined, true);
+      }
+      status(`已加载 ${dpi} DPI 完整同帧几何与图像`, 'ok');
+    } catch (e) {
+      status(`质量切换失败：${e.message}`, 'error');
+    }
+  }
+  byId('btn-dpi-120').addEventListener('click', () => changeQuality(120));
+  byId('btn-dpi-240').addEventListener('click', () => changeQuality(240));
   root.addEventListener('blur', () => { state.space = false; state.pan = null; viewport.classList.remove('panning'); });
   root.addEventListener('resize', fit);
 
-  async function loadFrame(frame, expectedSourceRevision) {
+  async function loadFrame(frame, expectedSourceRevision, isNewAccepted = true) {
     const epoch = ++state.epoch;
-    state.ready = false; state.scene = null; state.hover = state.selected = null; state.nodes.clear(); state.paths.clear();
-    viewport.replaceChildren();
-    byId('frame-scope').textContent = byId('frame-revision').textContent = '';
-    byId('state-fields').replaceChildren(); byId('detail-fields').replaceChildren();
-    byId('calibration-note').hidden = true;
-    container.dataset.ready = 'false'; container.dataset.frameState = 'loading'; container.dataset.hoverId = container.dataset.selectedId = '';
-    select(null); status('正在校验图像、几何与帧摘要…', 'pending');
+    state.ready = false;
+    if (isNewAccepted) {
+      state.scene = null;
+      state.hover = state.selected = null;
+      state.nodes.clear();
+      state.paths.clear();
+      viewport.replaceChildren();
+      byId('frame-scope').textContent = byId('frame-revision').textContent = '';
+      byId('state-fields').replaceChildren();
+      byId('detail-fields').replaceChildren();
+      byId('calibration-note').hidden = true;
+      container.dataset.hoverId = container.dataset.selectedId = '';
+      select(null);
+    }
+    container.dataset.ready = 'false';
+    container.dataset.frameState = 'loading';
+    status(isNewAccepted ? '正在校验图像、几何与帧摘要…' : '正在校验候选图像与几何…', 'pending');
     try {
       const scene = await verifyFrame(frame, expectedSourceRevision);
       const image = new Image();
@@ -298,25 +909,86 @@
       await image.decode();
       requireFact(image.naturalWidth === scene.image.width_px && image.naturalHeight === scene.image.height_px, 'Decoded PNG dimensions mismatch');
       if (epoch !== state.epoch) return;
-      state.scene = scene; state.nodes = new Map(scene.nodes.map(node => [node.id, node])); state.zoom = 1;
+      state.scene = scene;
+      state.nodes = new Map(scene.nodes.map(node => [node.id, node]));
+      state.paths.clear();
+      if (isNewAccepted) {
+        state.acceptedFrame = frame;
+        state.candidateFrame = null;
+        if (frame?.session?.accepted_operation_ids && Array.isArray(frame.session.accepted_operation_ids)) {
+          state.operationStack = createOperationStack(frame.session.accepted_operation_ids);
+        }
+        state.frame = frame;
+        state.intentSession = createIntentSession(frame);
+        state.lastEvaluation = null;
+        state.pendingOperationId = null;
+      } else {
+        state.candidateFrame = frame;
+      }
+      const sessionObj = state.acceptedFrame?.session || frame.session;
+      const canRebuild = !!(sessionObj && sessionObj.can_evaluate !== false && sessionObj.source_revision);
+      byId('btn-dpi-120').disabled = !canRebuild;
+      byId('btn-dpi-240').disabled = !canRebuild;
+      if (!canRebuild) {
+        byId('btn-dpi-120').title = byId('btn-dpi-240').title = '静态快照或普通 Figure 禁用：缺少可信重建入口，仅支持测量与示范';
+      } else {
+        byId('btn-dpi-120').title = byId('btn-dpi-240').title = '';
+      }
       const b = scene.canvas_bounds_mm, ib = scene.image.bounds_mm;
       viewport.setAttribute('viewBox', `${b[0]} 0 ${b[2] - b[0]} ${b[3] - b[1]}`);
-      viewport.append(svg('image', { x: ib[0], y: b[3] - ib[3], width: ib[2] - ib[0], height: ib[3] - ib[1], href: image.src, preserveAspectRatio: 'none' }));
-      viewport.append(svg('g', { id: 'highlights' }));
-      state.ready = true; container.dataset.ready = 'true'; container.dataset.frameState = 'verified';
+      let img = viewport.querySelector('image');
+      if (!img) {
+        viewport.replaceChildren();
+        img = svg('image', { x: ib[0], y: b[3] - ib[3], width: ib[2] - ib[0], height: ib[3] - ib[1], href: image.src, preserveAspectRatio: 'none' });
+        viewport.append(img);
+        viewport.append(svg('g', { id: 'highlights' }));
+      } else {
+        img.setAttribute('href', image.src);
+        img.setAttribute('x', ib[0]);
+        img.setAttribute('y', b[3] - ib[3]);
+        img.setAttribute('width', ib[2] - ib[0]);
+        img.setAttribute('height', ib[3] - ib[1]);
+      }
+      state.ready = true;
+      container.dataset.ready = 'true';
+      container.dataset.frameState = 'verified';
       byId('frame-scope').textContent = scene.scope;
-      byId('frame-revision').textContent = frame.frame_revision.slice(0, 12);
-      byId('calibration-note').hidden = false;
-      byId('calibration-note').textContent = 'calibrated=false：标尺是 renderer / 导出页面毫米，不是显示器的实际毫米；折线为中心线模型，文字为保守包络。固定快照：源文件改变后请重新导出，不提供实时源码监控或 strict 验收。';
-      fields(byId('state-fields'), [['renderer', scene.measurement.renderer || '未声明'], ['DPI', scene.measurement.dpi], ['source revision', scene.source_revision || '无 YAML / 未提供'], ['诊断', scene.diagnostics?.length || 0]]);
-      status('同帧摘要与 PNG 尺寸核对通过 · 只读快照', 'ok');
-      wrap.scrollLeft = wrap.scrollTop = 0; fit(); objectList();
+      if (isNewAccepted) {
+        byId('frame-revision').textContent = frame.frame_revision.slice(0, 12);
+        status('同帧摘要与 PNG 尺寸核对通过 · 只读快照', 'ok');
+        wrap.scrollLeft = wrap.scrollTop = 0;
+        fit();
+        objectList();
+      } else {
+        byId('frame-revision').textContent = `${state.acceptedFrame?.frame_revision?.slice(0, 12) || ''} (候选: ${frame.frame_revision.slice(0, 8)})`;
+        status('候选预览已呈现 · 几何与图像核对通过 · 尚未接受至会话', 'pending');
+      }
+      updateIntentUI();
+      highlights();
     } catch (error) {
       if (epoch !== state.epoch) return;
-      state.ready = false; container.dataset.ready = 'false'; container.dataset.frameState = 'invalid'; select(null);
+      state.ready = false;
+      container.dataset.ready = 'false';
+      container.dataset.frameState = 'invalid';
+      if (isNewAccepted) select(null);
       status(`不可使用：${error.message}；请重新导出或刷新。`, 'error');
     }
   }
   api.loadFrame = loadFrame;
-  loadFrame(root.FIGPACT_INSPECTOR_FRAME, root.FIGPACT_INSPECTOR_EXPECTED_SOURCE_REVISION);
+  if (root.FIGPACT_INSPECTOR_FRAME) {
+    loadFrame(root.FIGPACT_INSPECTOR_FRAME, root.FIGPACT_INSPECTOR_EXPECTED_SOURCE_REVISION);
+  } else if (typeof fetch === 'function') {
+    fetch('/api/frame')
+      .then(res => res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`)))
+      .then(frame => {
+        if (frame && frame.schema === 'figpact.inspector/1') loadFrame(frame);
+        else loadFrame(undefined);
+      })
+      .catch(() => {
+        loadFrame(undefined);
+      });
+  } else {
+    loadFrame(undefined);
+  }
+  globalScope.FigpactInspector = api;
 })(globalThis);

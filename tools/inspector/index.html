@@ -31,6 +31,9 @@
             <button id="zoom-out" type="button" aria-label="缩小视图">缩小</button>
             <button id="view-reset" type="button" aria-label="重置视图">重置视图</button>
             <button id="toggle-list" type="button" aria-expanded="false" aria-controls="object-list-panel">对象列表</button>
+            <span class="sep" aria-hidden="true">|</span>
+            <button id="btn-dpi-120" type="button" aria-label="120 DPI">120 DPI</button>
+            <button id="btn-dpi-240" type="button" aria-label="240 DPI">240 DPI</button>
           </div>
         </div>
 
@@ -55,6 +58,32 @@
         <p id="detail-ephemeral" class="notice notice-ephemeral" hidden></p>
         <p id="detail-readonly" class="notice notice-readonly" hidden></p>
         <p id="detail-annotation" class="notice notice-science" hidden></p>
+        <section id="intent-section" aria-label="意图与示范" hidden>
+          <h3>意图示范与试算</h3>
+          <p id="intent-hint" class="hint">方向键：默认 0.1mm | Alt 0.01mm | Shift 0.5mm</p>
+          <div class="intent-inputs">
+            <label for="intent-dx">dx (mm)</label>
+            <input id="intent-dx" type="number" step="0.01" value="0">
+            <label for="intent-dy">dy (mm)</label>
+            <input id="intent-dy" type="number" step="0.01" value="0">
+            <button id="btn-apply-delta" type="button">设置位移</button>
+          </div>
+          <div class="intent-status-row">
+            <span id="intent-status-badge" class="tag">DESIRED_ONLY</span>
+            <span id="intent-displacement" class="mono">Δ [0, 0] mm</span>
+          </div>
+          <div id="intent-eval-results" class="eval-results" hidden>
+            <p id="eval-state-text" class="hint"></p>
+            <dl id="eval-fields"></dl>
+          </div>
+          <div class="intent-actions">
+            <button id="btn-evaluate" type="button">试算 / Evaluate</button>
+            <button id="btn-accept" type="button" disabled>接受 / Accept</button>
+            <button id="btn-cancel-intent" type="button">取消 / Cancel</button>
+            <button id="btn-undo" type="button">撤销 / Undo</button>
+          </div>
+          <p id="intent-notice" class="notice notice-warning" hidden></p>
+        </section>
       </aside>
 
       <aside id="object-list-panel" aria-label="对象列表" hidden>
