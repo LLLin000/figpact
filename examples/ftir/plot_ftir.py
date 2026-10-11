@@ -521,7 +521,8 @@ def preview_qa(fig, scope):
     if scope.startswith("compare"):
         from types import SimpleNamespace
         ax = fig.axes[0 if scope == "compare_raw" else 1]
-        view = SimpleNamespace(axes=[ax], canvas=fig.canvas, dpi=fig.dpi, texts=fig.texts)
+        view = SimpleNamespace(axes=[ax], canvas=fig.canvas, dpi=fig.dpi,
+                               texts=fig.texts, images=fig.images, bbox=fig.bbox)
         return blocking_problems(view)
     return blocking_problems(fig)
 
