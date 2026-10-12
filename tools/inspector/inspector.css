@@ -536,7 +536,7 @@ button[aria-expanded="true"] {
   overflow-wrap: anywhere;
 }
 
-/* ---------- 调整与试算区 / Intent Section ---------- */
+/* ---------- 位置微调区 / Intent Section ---------- */
 #intent-section {
   margin-top: 14px;
   padding-top: 12px;

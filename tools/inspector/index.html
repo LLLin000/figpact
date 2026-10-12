@@ -73,13 +73,13 @@
         <p id="detail-annotation" class="notice notice-science" hidden></p>
 
         <details class="technical-details" id="detail-tech-wrap" hidden>
-          <summary>高级技术细节与凭证</summary>
+          <summary>详细技术参数</summary>
           <dl id="detail-tech-fields"></dl>
         </details>
 
-        <section id="intent-section" aria-label="位置调整与试算" hidden>
+        <section id="intent-section" aria-label="位置微调" hidden>
           <div class="section-header">
-            <h3>位置微调与试算</h3>
+            <h3>位置微调</h3>
             <span id="intent-status-badge" class="tag">未调整</span>
           </div>
           <p id="intent-hint" class="hint">方向键：平移 0.1 mm · Alt 微调 0.01 mm · Shift 0.5 mm</p>
@@ -104,12 +104,12 @@
             <dl id="eval-fields"></dl>
           </div>
           <div class="intent-actions">
-            <button id="btn-evaluate" type="button">试算排版</button>
+            <button id="btn-evaluate" type="button">检查排版</button>
             <button id="btn-accept" type="button" disabled>保留这次调整</button>
             <button id="btn-cancel-intent" type="button">取消</button>
             <button id="btn-undo" type="button">撤销调整</button>
           </div>
-          <p class="session-note" id="session-note">仅本次打开有效，未保存到文件</p>
+          <p class="session-note" id="session-note">只保留在当前服务中，未保存到文件；停止服务后会丢失</p>
           <p id="intent-notice" class="notice notice-warning" hidden></p>
         </section>
       </aside>
@@ -118,8 +118,8 @@
     <footer id="inspector-footer">
       <p id="calibration-note" class="notice notice-warning" hidden></p>
       <details class="technical-details" id="footer-tech-wrap">
-        <summary>系统与校验凭证</summary>
-        <p class="hint">输出版本：<span id="frame-scope"></span> · 图片版本：<span class="mono" id="frame-revision"></span></p>
+        <summary>系统与校验信息</summary>
+        <p class="hint">输出范围：<span id="frame-scope"></span> · 图像版本：<span class="mono" id="frame-revision"></span></p>
         <dl id="state-fields"></dl>
       </details>
     </footer>
