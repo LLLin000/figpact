@@ -728,6 +728,87 @@ button[aria-expanded="true"] {
 #state-fields dt { color: var(--text-muted); white-space: nowrap; }
 #state-fields dd { margin: 0; font-family: var(--mono); overflow-wrap: anywhere; }
 
+/* ---------- 极简面板模式 / Minimal panel (?panel=min) ---------- */
+#inspector-root[data-panel="min"] #inspector-header,
+#inspector-root[data-panel="min"] #toolbar,
+#inspector-root[data-panel="min"] #object-list-panel,
+#inspector-root[data-panel="min"] #ruler-top,
+#inspector-root[data-panel="min"] #ruler-left,
+#inspector-root[data-panel="min"] #stage-hint,
+#inspector-root[data-panel="min"] #inspector-footer,
+#inspector-root[data-panel="min"] #detail-panel > .panel-header,
+#inspector-root[data-panel="min"] #detail-empty,
+#inspector-root[data-panel="min"] #detail-fields,
+#inspector-root[data-panel="min"] #detail-ephemeral,
+#inspector-root[data-panel="min"] #detail-readonly,
+#inspector-root[data-panel="min"] #detail-annotation,
+#inspector-root[data-panel="min"] #detail-tech-wrap,
+#inspector-root[data-panel="min"] #intent-section .section-header,
+#inspector-root[data-panel="min"] #intent-hint,
+#inspector-root[data-panel="min"] .intent-inputs,
+#inspector-root[data-panel="min"] .intent-status-row,
+#inspector-root[data-panel="min"] #intent-eval-results,
+#inspector-root[data-panel="min"] .session-note,
+#inspector-root[data-panel="min"] #intent-notice,
+#inspector-root[data-panel="min"] #btn-undo {
+  display: none !important;
+}
+
+#inspector-root[data-panel="min"] #inspector-main {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "stage" "detail";
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0;
+  padding: 0;
+  height: auto;
+}
+
+/* 图占满可用高度：窄窗口也不裁图、不出现滚动条 */
+#inspector-root[data-panel="min"] #viewport-wrap { min-height: 0; }
+
+#inspector-root[data-panel="min"] #detail-panel {
+  grid-area: detail;
+  display: flex;
+  align-items: center;
+  max-height: none;
+  overflow: visible;
+  padding: 6px 10px;
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+#inspector-root[data-panel="min"] #intent-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border-top: none;
+}
+
+#inspector-root[data-panel="min"] .intent-actions {
+  margin: 0;
+  flex-wrap: nowrap;
+}
+
+#inspector-root[data-panel="min"] .intent-actions button {
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+#inspector-root[data-panel="min"] .min-status {
+  margin: 0;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ---------- 响应式 / Responsive ---------- */
 @media (max-width: 960px) {
   #inspector-main {

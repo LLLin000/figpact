@@ -109,6 +109,7 @@
             <button id="btn-cancel-intent" type="button">取消</button>
             <button id="btn-undo" type="button">撤销调整</button>
           </div>
+          <p id="min-status" class="min-status" hidden></p>
           <p class="session-note" id="session-note">只保留在当前服务中，未保存到文件；停止服务后会丢失</p>
           <p id="intent-notice" class="notice notice-warning" hidden></p>
         </section>
@@ -125,6 +126,7 @@
     </footer>
   </div>
 
+  <script type="application/json" id="agent-detail"></script>
   <script src="frame.js" defer></script>
   <script src="inspector.js" defer></script>
 </body>

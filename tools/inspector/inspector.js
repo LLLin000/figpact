@@ -319,7 +319,61 @@
     };
   }
 
-  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard };
+  function readPanelMode(search) {
+    return new URLSearchParams(search || '').get('panel') === 'min' ? 'min' : 'full';
+  }
+  const signedMm = v => `${v >= 0 ? '+' : '-'}${Math.abs(v).toFixed(3)}`;
+  function minimalStatusText(input) {
+    const { node = null, snapshot = null, evaluation = null } = input || {};
+    if (!node) return '未选择对象';
+    if (evaluation) {
+      if (canAcceptEvaluation(evaluation, snapshot?.intent)) {
+        const measured = Array.isArray(evaluation.measured_delta_mm) ? (evaluation.measured_delta_mm[0] || evaluation.measured_delta_mm[1]) : null;
+        return measured == null ? '试算通过' : `试算通过 · 实测 ${signedMm(measured)} mm`;
+      }
+      return `试算未通过 · ${evaluation.status || '未通过'}`;
+    }
+    const delta = snapshot?.intent?.delta_mm || [0, 0];
+    const parts = [];
+    if (delta[1]) parts.push(`已${delta[1] > 0 ? '上' : '下'}移 ${Math.abs(delta[1])} mm`);
+    if (delta[0]) parts.push(`已${delta[0] > 0 ? '右' : '左'}移 ${Math.abs(delta[0])} mm`);
+    if (parts.length) return snapshot?.status === 'OUT_OF_RANGE' ? `${parts.join(' · ')} · 超出允许范围` : parts.join(' · ');
+    return snapshot?.selectionBlocked ? '请先保留或取消当前调整' : '方向键微调位置';
+  }
+  function buildAgentDetail(input) {
+    const { node = null, title = null, type = null, snapshot = null, frame = null, scene = null, evaluation = null, acceptedOperationIds = [] } = input || {};
+    const delta = snapshot?.intent?.delta_mm || [0, 0];
+    return {
+      schema: 'figpact.inspector.agent_detail/1',
+      selected: node ? (node.gid || node.id || null) : null,
+      id: node ? node.id : null,
+      title: node ? (title ?? null) : null,
+      type: node ? (type ?? null) : null,
+      bounds_mm: node?.bounds_mm ?? null,
+      delta_mm: [delta[0], delta[1]],
+      status: node ? (snapshot?.status || 'DESIRED_ONLY') : 'NO_SELECTION',
+      selection_blocked: !!snapshot?.selectionBlocked,
+      can_evaluate: !!snapshot?.canEvaluate,
+      frame_revision: frame?.frame_revision ?? null,
+      source_revision: scene?.source_revision ?? null,
+      session_id: frame?.session?.session_id ?? null,
+      accepted_operation_ids: Array.isArray(acceptedOperationIds) ? [...acceptedOperationIds] : [],
+      evaluation: evaluation ? {
+        status: evaluation.status ?? null,
+        verification_level: evaluation.verification_level ?? null,
+        target_delta_mm: evaluation.target_delta_mm ?? null,
+        measured_delta_mm: evaluation.measured_delta_mm ?? null,
+        error_mm: evaluation.error_mm ?? null,
+        checks: evaluation.checks ?? null
+      } : null
+    };
+  }
+
+  function stageSizeChanged(previous, width, height) {
+    return !previous || previous.width !== width || previous.height !== height;
+  }
+
+  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged };
   const globalScope = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : root);
   globalScope.FigpactInspector = api;
   root.FigpactInspector = api;
@@ -329,6 +383,12 @@
   const byId = id => document.getElementById(id);
   const container = byId('inspector-root'), viewport = byId('viewport'), wrap = byId('viewport-wrap');
   if (!container || !viewport || !wrap) return;
+  const minimal = readPanelMode(location.search) === 'min';
+  if (minimal) {
+    container.dataset.panel = 'min';
+    const statusLine = byId('min-status');
+    if (statusLine) statusLine.hidden = false;
+  }
   const state = {
     frame: null,
     scene: null,
@@ -411,9 +471,15 @@
 
   function status(message, kind) {
     const el = byId('integrity-status');
-    if (!el) return;
-    el.textContent = message;
-    el.className = `status status-${kind}`;
+    if (el) {
+      el.textContent = message;
+      el.className = `status status-${kind}`;
+    }
+    // 极简模式隐藏了顶栏，加载失败必须落在唯一的动作行上，否则页面看起来是空的
+    if (minimal && kind === 'error') {
+      const line = byId('min-status');
+      if (line) line.textContent = message;
+    }
   }
   function fields(element, pairs) {
     if (!element) return;
@@ -425,16 +491,38 @@
     }
   }
 
+  // 机器可读快照：极简模式看不到的细节都写进这个不可见元素，供 agent 读取（完整模式同样写入）
+  function publishAgentDetail() {
+    const node = state.nodes.get(state.selected) || null;
+    const snapshot = state.intentSession ? state.intentSession.snapshot() : null;
+    const holder = byId('agent-detail');
+    if (holder) {
+      holder.textContent = JSON.stringify(buildAgentDetail({
+        node,
+        title: node ? displayTitle(node) : null,
+        type: node ? displayType(node) : null,
+        snapshot,
+        frame: state.acceptedFrame || state.frame,
+        scene: state.scene,
+        evaluation: state.lastEvaluation,
+        acceptedOperationIds: state.operationStack.all()
+      }));
+    }
+    const line = byId('min-status');
+    if (line) line.textContent = minimalStatusText({ node, snapshot, evaluation: state.lastEvaluation });
+  }
+
   function updateIntentUI() {
+    publishAgentDetail();
     const section = byId('intent-section');
     if (!section) return;
     const node = state.nodes.get(state.selected);
     if (!state.intentSession) {
-      section.hidden = true;
+      section.hidden = !minimal;
       return;
     }
     const canUndo = state.operationStack.canUndo();
-    section.hidden = !node && !canUndo && !state.pendingOperationId;
+    section.hidden = minimal ? false : (!node && !canUndo && !state.pendingOperationId);
     byId('intent-notice').hidden = true;
 
     if (!node) {
@@ -698,7 +786,7 @@
   }
 
   function rulers() {
-    if (!state.scene) return;
+    if (!state.scene || minimal) return;
     const [x0, y0, x1, y1] = state.scene.canvas_bounds_mm;
     const step = niceTickStep(1 / state.scale);
     const top = byId('ruler-top'), left = byId('ruler-left');
@@ -721,6 +809,7 @@
     }
   }
 
+  let lastStageSize = null;
   function fit() {
     if (!state.scene || !wrap.clientWidth || !wrap.clientHeight) return;
     const view = fitViewport(state.scene.canvas_bounds_mm, wrap.clientWidth, wrap.clientHeight, state.zoom);
@@ -731,8 +820,17 @@
     viewport.style.position = 'absolute';
     viewport.style.left = `${view.left}px`;
     viewport.style.top = `${view.top}px`;
+    lastStageSize = { width: wrap.clientWidth, height: wrap.clientHeight };
     rulers();
   }
+
+  // 首次 fit() 可能早于最终布局（极简模式的动作条由 hidden 转可见、窄窗口重排），
+  // 之后 stage 尺寸变化不会再触发适配，画布就会越过容器被裁切或要滚动。尺寸真的变了才重排。
+  const refitStage = () => {
+    if (!stageSizeChanged(lastStageSize, wrap.clientWidth, wrap.clientHeight)) return;
+    fit();
+  };
+  if (minimal && typeof ResizeObserver === 'function') new ResizeObserver(refitStage).observe(wrap);
 
   function zoomWithAnchor(factor, anchor) {
     if (!state.scene) return;

@@ -556,3 +556,123 @@ test('G2 in-flight evaluation guard prevents stale or mismatched responses from 
   guard.cancel();
   assert.equal(guard.isValid(gen2, 'op-2', [0.15, 0]), false);
 });
+
+test('G3 minimal panel mode is decided purely from the query string', () => {
+  const { readPanelMode } = loadHelper();
+  assert.equal(readPanelMode('?panel=min'), 'min');
+  assert.equal(readPanelMode('panel=min'), 'min');
+  assert.equal(readPanelMode('?other=1&panel=min&x=2'), 'min');
+  assert.equal(readPanelMode(''), 'full');
+  assert.equal(readPanelMode(undefined), 'full');
+  assert.equal(readPanelMode(null), 'full');
+  assert.equal(readPanelMode('?panel=full'), 'full');
+  assert.equal(readPanelMode('?panel=MIN'), 'full');
+  assert.equal(readPanelMode('?panel=minimal'), 'full');
+});
+
+test('G3 agent snapshot exposes the selection facts hidden from the minimal panel', () => {
+  const { createIntentSession, buildAgentDetail } = loadHelper();
+  const frame = liveBundle();
+  const node = JSON.parse(frame.scene_json).nodes[0];
+  const session = createIntentSession(frame);
+  session.select('label');
+  session.setDelta(0, 0.15);
+  const detail = buildAgentDetail({
+    node,
+    title: '3.91 ppm',
+    type: '文本',
+    snapshot: session.snapshot(),
+    frame,
+    scene: JSON.parse(frame.scene_json),
+    acceptedOperationIds: ['op-1']
+  });
+  assert.equal(detail.selected, 'label.391');
+  assert.equal(detail.id, 'label');
+  assert.equal(detail.title, '3.91 ppm');
+  assert.equal(detail.type, '文本');
+  assert.deepEqual(detail.bounds_mm, [10, 10, 30, 20]);
+  assert.deepEqual(detail.delta_mm, [0, 0.15]);
+  assert.equal(detail.status, 'DESIRED_ONLY');
+  assert.equal(detail.can_evaluate, true);
+  assert.equal(detail.frame_revision, frame.frame_revision);
+  assert.equal(detail.source_revision, 'source-1');
+  assert.equal(detail.session_id, 'session-1');
+  assert.deepEqual(detail.accepted_operation_ids, ['op-1']);
+  assert.equal(detail.evaluation, null);
+  assert.equal(detail.schema, 'figpact.inspector.agent_detail/1');
+  // the snapshot must not alias the live operation stack
+  const ids = ['op-1'];
+  buildAgentDetail({ node, acceptedOperationIds: ids }).accepted_operation_ids.push('op-9');
+  assert.deepEqual(ids, ['op-1']);
+});
+
+test('G3 agent snapshot is explicit when nothing is selected and carries the last verdict', () => {
+  const { createIntentSession, buildAgentDetail } = loadHelper();
+  const empty = buildAgentDetail();
+  assert.equal(empty.selected, null);
+  assert.equal(empty.id, null);
+  assert.equal(empty.title, null);
+  assert.equal(empty.bounds_mm, null);
+  assert.equal(empty.status, 'NO_SELECTION');
+  assert.equal(empty.can_evaluate, false);
+  assert.deepEqual(empty.delta_mm, [0, 0]);
+  assert.deepEqual(empty.accepted_operation_ids, []);
+
+  const frame = liveBundle();
+  const node = JSON.parse(frame.scene_json).nodes[0];
+  const session = createIntentSession(frame);
+  session.select('label');
+  session.setDelta(0, 0.15);
+  const intent = session.snapshot().intent;
+  const detail = buildAgentDetail({
+    node,
+    snapshot: session.snapshot(),
+    frame,
+    evaluation: {
+      status: 'OK', operation_id: intent.operation_id, intent_state: 'READY', evaluation_state: 'FEASIBLE',
+      verification_level: 'RENDER_CHECKED', persistence_state: 'EPHEMERAL', target_delta_mm: [0, 0.15],
+      measured_delta_mm: [0, 0.15], error_mm: 0, checks: [{ check: 'science', status: 'PASS' }]
+    }
+  });
+  assert.equal(detail.evaluation.verification_level, 'RENDER_CHECKED');
+  assert.deepEqual(detail.evaluation.measured_delta_mm, [0, 0.15]);
+  assert.equal(detail.evaluation.error_mm, 0);
+  assert.deepEqual(detail.evaluation.checks, [{ check: 'science', status: 'PASS' }]);
+  assert.deepEqual(detail.evaluation.target_delta_mm, [0, 0.15]);
+});
+
+test('G3 minimal status line stays one short line for every interaction state', () => {
+  const { createIntentSession, minimalStatusText } = loadHelper();
+  assert.equal(minimalStatusText({}), '未选择对象');
+  assert.equal(minimalStatusText(null), '未选择对象');
+
+  const frame = liveBundle();
+  const node = JSON.parse(frame.scene_json).nodes[0];
+  const session = createIntentSession(frame);
+  session.select('label');
+  assert.equal(minimalStatusText({ node, snapshot: session.snapshot() }), '方向键微调位置');
+
+  session.setDelta(0, 0.15);
+  const snapshot = session.snapshot();
+  assert.equal(minimalStatusText({ node, snapshot }), '已上移 0.15 mm');
+
+  const intent = snapshot.intent;
+  const evaluation = {
+    status: 'OK', operation_id: intent.operation_id, intent_state: 'READY', evaluation_state: 'FEASIBLE',
+    verification_level: 'RENDER_CHECKED', target_delta_mm: [0, 0.15], measured_delta_mm: [0, 0.15], error_mm: 0,
+    checks: [{ check: 'science', status: 'PASS' }]
+  };
+  assert.equal(minimalStatusText({ node, snapshot, evaluation }), '试算通过 · 实测 +0.150 mm');
+  assert.equal(minimalStatusText({ node, snapshot, evaluation: { status: 'TARGET_MISMATCH' } }), '试算未通过 · TARGET_MISMATCH');
+
+  session.setDelta(-150, 0);
+  assert.equal(minimalStatusText({ node, snapshot: session.snapshot() }), '已左移 150 mm · 超出允许范围');
+});
+
+test('G3 stage resize triggers a refit only when the stage size really changed', () => {
+  const { stageSizeChanged } = loadHelper();
+  assert.equal(stageSizeChanged(null, 880, 719), true);
+  assert.equal(stageSizeChanged({ width: 880, height: 719 }, 880, 719), false);
+  assert.equal(stageSizeChanged({ width: 880, height: 719 }, 880, 745), true);
+  assert.equal(stageSizeChanged({ width: 880, height: 719 }, 700, 719), true);
+});
