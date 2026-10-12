@@ -467,7 +467,6 @@ button[aria-expanded="true"] {
 
 #detail-fields dd {
   margin: 0;
-  font-family: var(--mono);
   font-size: 12px;
   overflow-wrap: anywhere;
 }
@@ -490,6 +489,52 @@ button[aria-expanded="true"] {
 .notice-readonly { background: var(--readonly-soft); color: var(--readonly); border: 1px solid #c7f0f6; }
 .notice-science { background: var(--accent-soft); color: #0a4380; border: 1px solid #c6defa; }
 .notice-warning { background: var(--warning-soft); color: var(--warning); border: 1px solid #f2e2b6; }
+
+/* 折叠式技术细节 */
+.technical-details {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #f8fafc;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.technical-details summary {
+  padding: 6px 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+  background: #f0f3f6;
+  outline: none;
+}
+
+.technical-details summary:hover {
+  background: #e6ebf0;
+  color: var(--text);
+}
+
+.technical-details dl {
+  margin: 0;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 10px;
+}
+
+.technical-details dt {
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.technical-details dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
 
 /* ---------- 调整与试算区 / Intent Section ---------- */
 #intent-section {
@@ -559,7 +604,7 @@ button[aria-expanded="true"] {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  margin: 10px 0 6px;
+  margin: 10px 0 4px;
 }
 
 .intent-actions button {
@@ -597,6 +642,13 @@ button[aria-expanded="true"] {
   border-color: var(--border) !important;
 }
 
+.session-note {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
 .eval-results {
   background: #f8fafc;
   border: 1px solid var(--border);
@@ -618,7 +670,7 @@ button[aria-expanded="true"] {
 
 .hint { color: var(--text-muted); font-size: 12px; }
 
-/* ---------- 图元大纲列表 / Object List ---------- */
+/* ---------- 对象大纲列表 / Object List ---------- */
 #object-list {
   list-style: none;
   margin: 8px 0 0;
@@ -666,18 +718,15 @@ button[aria-expanded="true"] {
 #calibration-note { margin: 0 0 6px; }
 
 #state-fields {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 18px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 10px;
   margin: 0;
-  font-family: var(--mono);
   font-size: 11px;
-  color: var(--text-muted);
 }
 
-#state-fields div { display: flex; gap: 6px; }
-#state-fields dt { color: var(--text-muted); }
-#state-fields dd { margin: 0; }
+#state-fields dt { color: var(--text-muted); white-space: nowrap; }
+#state-fields dd { margin: 0; font-family: var(--mono); overflow-wrap: anywhere; }
 
 /* ---------- 响应式 / Responsive ---------- */
 @media (max-width: 960px) {
@@ -727,4 +776,7 @@ button[aria-expanded="true"] {
   .notice-ephemeral, .notice-warning { background: var(--warning-soft); color: var(--warning); border-color: #524020; }
   .status-ok { color: #63d99b; }
   .ruler { background: rgba(24, 29, 38, 0.95); }
+  .technical-details { background: #161b24; border-color: var(--border); }
+  .technical-details summary { background: #202734; color: var(--text-muted); }
+  .technical-details summary:hover { background: #2a3344; color: var(--text); }
 }

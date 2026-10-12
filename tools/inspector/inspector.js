@@ -370,7 +370,7 @@
   }
 
   function displayTitle(node) {
-    if (!node) return '未命名图元';
+    if (!node) return '未命名对象';
     if (node.text) {
       const clean = formatScientificText(node.text);
       if (node.annotation && node.annotation.declared_exact_ppm) {
@@ -378,22 +378,41 @@
       }
       return clean;
     }
-    if (node.type === 'guide') {
+    if (node.type === 'guide' || node.annotation || node.gid?.includes('guide')) {
       if (node.annotation && node.annotation.declared_exact_ppm) {
         return `峰位引线 (${Number(node.annotation.declared_exact_ppm.toFixed(2))} ppm)`;
       }
-      return '峰位引导线';
+      return '峰位引线';
     }
     if (node.gid) {
       if (node.gid.includes('3p91') || node.gid.includes('3.91')) {
-        return `${node.type === 'guide' ? '引线' : '图元'} · 3.91 ppm`;
+        return `${node.type === 'guide' ? '引线' : '对象'} · 3.91 ppm`;
       }
       return node.gid;
     }
     return node.descriptor || `${node.type}: ${node.id}`;
   }
 
-  const title = node => node.text || node.gid || node.descriptor || `${node.type}: ${node.id}`;
+  function displayType(node) {
+    if (!node) return '对象';
+    if (node.type === 'guide' || node.annotation || node.gid?.includes('guide')) return '引线';
+    if (node.type === 'text') return '文本';
+    if (node.type === 'curve') return '曲线';
+    if (node.type === 'image') return '图像';
+    if (node.type === 'panel') return '画板';
+    return node.type || '对象';
+  }
+
+  function formatBounds(b) {
+    if (!Array.isArray(b) || b.length !== 4) return '无位置信息';
+    const x = Number(b[0].toFixed(3));
+    const y = Number(b[1].toFixed(3));
+    const w = Number((b[2] - b[0]).toFixed(3));
+    const h = Number((b[3] - b[1]).toFixed(3));
+    return `水平 x: ${x} mm, 垂直 y: ${y} mm · 宽 ${w} mm × 高 ${h} mm`;
+  }
+
+  const title = node => displayTitle(node);
 
   function status(message, kind) {
     const el = byId('integrity-status');
@@ -424,84 +443,90 @@
     byId('intent-notice').hidden = true;
 
     if (!node) {
-      byId('intent-status-badge').textContent = canUndo ? '会话已就绪' : '未选中图元';
+      byId('intent-status-badge').textContent = canUndo ? '会话已就绪' : '未选中对象';
       byId('intent-status-badge').className = 'tag';
-      byId('intent-displacement').textContent = '位移：未选中图元';
+      byId('intent-displacement').textContent = '本次调整：未选中对象';
       byId('intent-dx').value = 0;
       byId('intent-dx').disabled = true;
       byId('intent-dy').value = 0;
       byId('intent-dy').disabled = true;
       byId('btn-apply-delta').disabled = true;
       byId('btn-evaluate').disabled = true;
-      byId('btn-evaluate').title = '请先选中可调整图元';
+      byId('btn-evaluate').title = '请先选中可微调的对象';
       byId('btn-accept').disabled = true;
       byId('btn-accept').title = '需先完成试算并通过验证';
       byId('btn-cancel-intent').disabled = true;
       byId('btn-undo').disabled = !canUndo;
-      byId('btn-undo').title = canUndo ? `可撤销会话中的上一步操作 (${state.operationStack.peek()})` : '当前没有可撤销的操作';
+      byId('btn-undo').title = canUndo ? `可撤销上一步调整 (${state.operationStack.peek()})` : '当前没有可撤销的调整';
       return;
     }
 
-    const canGhost = !(node.type === 'guide' || node.type === 'curve' || node.type === 'panel' || !node.measured || node.fully_clipped);
+    const canGhost = !(node.type === 'guide' || node.type === 'curve' || node.type === 'panel' || node.annotation || node.gid?.includes('guide') || !node.measured || node.fully_clipped);
     byId('intent-dx').disabled = !canGhost;
     byId('intent-dy').disabled = !canGhost;
     byId('btn-apply-delta').disabled = !canGhost;
-
     const snap = state.intentSession.snapshot();
-    let plainStatus = '示范中（未进行排版试算）';
+    const delta = snap.intent ? snap.intent.delta_mm : [0, 0];
+    const hasDelta = delta[0] !== 0 || delta[1] !== 0;
+    let plainStatus = '未调整';
     let statusClass = 'tag';
+
     if (!canGhost) {
-      if (node.type === 'guide') {
-        plainStatus = '引线不支持独立编辑';
-        byId('btn-apply-delta').title = '移动标签时引线会自动调整，不能单独移动引线';
+      if (node.type === 'guide' || node.annotation || node.gid?.includes('guide')) {
+        plainStatus = '引线不支持独立微调';
+        byId('btn-apply-delta').title = '移动标签时引线会自动调整，这里不能单独移动引线';
       } else if (node.type === 'curve') {
-        plainStatus = '科学数据曲线不可编辑';
-        byId('btn-apply-delta').title = '科学数据曲线受保护，不可编辑';
+        plainStatus = '科学曲线不可编辑';
+        byId('btn-apply-delta').title = '科学曲线受保护，不可移动';
       } else {
-        plainStatus = '图元不支持位置调整';
-        byId('btn-apply-delta').title = '该图元不支持位置调整';
+        plainStatus = '对象不支持位置调整';
+        byId('btn-apply-delta').title = '该对象不支持位置调整';
       }
     } else if (snap.status === 'OUT_OF_RANGE') {
       plainStatus = '超出允许范围 (±10 mm)';
       statusClass = 'tag tag-warning';
     } else if (state.lastEvaluation) {
       if (canAcceptEvaluation(state.lastEvaluation, snap.intent)) {
-        plainStatus = '真实渲染几何检验通过（待接受到会话）';
+        plainStatus = '真实渲染几何检验通过（可保留调整）';
         statusClass = 'tag tag-success';
       } else {
         plainStatus = `试算未通过 (${state.lastEvaluation.status || '未通过'})`;
         statusClass = 'tag tag-warning';
       }
+    } else if (hasDelta) {
+      plainStatus = '示范中（未进行排版试算）';
+      statusClass = 'tag';
     }
     byId('intent-status-badge').textContent = plainStatus;
     byId('intent-status-badge').className = statusClass;
 
-    const delta = snap.intent ? snap.intent.delta_mm : [0, 0];
-    byId('intent-displacement').textContent = `位移：ΔX ${delta[0]} mm, ΔY ${delta[1]} mm`;
+    byId('intent-displacement').textContent = `本次调整：ΔX ${delta[0]} mm, ΔY ${delta[1]} mm`;
     byId('intent-dx').value = delta[0];
     byId('intent-dy').value = delta[1];
-
-    const canEval = state.ready && snap.canEvaluate;
+    const canEval = state.ready && snap.canEvaluate && canGhost;
     byId('btn-evaluate').disabled = !canEval || (delta[0] === 0 && delta[1] === 0);
     byId('btn-accept').disabled = !state.ready || !(state.lastEvaluation && canAcceptEvaluation(state.lastEvaluation, snap.intent));
     const hasCancelable = (delta[0] !== 0 || delta[1] !== 0) || !!state.pendingOperationId || !!state.lastEvaluation || !!state.candidateFrame;
     byId('btn-cancel-intent').disabled = !hasCancelable;
 
-    if (!canEval) {
-      byId('btn-evaluate').title = '未注册或临时身份图元不支持真实排版试算';
-      byId('btn-accept').title = '需先通过试算验证，且仅能接受到当前会话，不写回文件';
+    if (!canGhost) {
+      byId('btn-evaluate').title = '该对象不支持位置微调';
+      byId('btn-accept').title = '该对象不支持位置微调';
+    } else if (!snap.canEvaluate) {
+      byId('btn-evaluate').title = '本次临时编号对象仅供预览，不支持排版试算';
+      byId('btn-accept').title = '需先通过试算验证，且仅能保留到当前会话，不写回文件';
     } else {
       byId('btn-evaluate').title = '对当前示范位移执行真实排版重建与几何安全性检验';
-      byId('btn-accept').title = '将通过验证的调整应用到当前交互会话（不修改源文件）';
+      byId('btn-accept').title = '保留这次调整（仅本次打开有效，未保存到文件）';
     }
     byId('btn-undo').disabled = !canUndo;
-    byId('btn-undo').title = canUndo ? `可撤销会话中的上一步操作 (${state.operationStack.peek()})` : '当前没有可撤销的操作';
+    byId('btn-undo').title = canUndo ? `可撤销上一步调整 (${state.operationStack.peek()})` : '当前没有可撤销的调整';
   }
 
   function select(id) {
     if (!state.ready) return;
     if (state.pendingOperationId && id !== state.selected) {
-      status('当前有正在调整的候选图元；请先在检查器中接受到会话或取消候选，再选择其他图元', 'pending');
+      status('当前有正在调整的候选；请先在检查器中保留或取消本次调整，再选择其他对象', 'pending');
       return;
     }
     if (state.intentSession) {
@@ -509,7 +534,7 @@
       if (!allowed) {
         const snap = state.intentSession.snapshot();
         byId('intent-notice').hidden = false;
-        byId('intent-notice').textContent = `当前图元存在未处理的示范偏移（ΔX ${snap.intent?.delta_mm[0]} mm, ΔY ${snap.intent?.delta_mm[1]} mm）。请先在检查器中接受或取消当前示范，再选择其他图元。`;
+        byId('intent-notice').textContent = `当前对象存在未处理的示范偏移（ΔX ${snap.intent?.delta_mm[0]} mm, ΔY ${snap.intent?.delta_mm[1]} mm）。请先保留或取消本次调整，再选择其他对象。`;
         return;
       }
     }
@@ -518,39 +543,66 @@
     const node = state.nodes.get(state.selected);
     byId('detail-empty').hidden = !!node;
     byId('detail-fields').hidden = !node;
+    if (byId('detail-tech-wrap')) byId('detail-tech-wrap').hidden = !node;
     for (const nid of ['detail-ephemeral', 'detail-readonly', 'detail-annotation']) byId(nid).hidden = true;
     if (node) {
       const sessionObj = state.acceptedFrame?.session || state.frame?.session;
       const canRebuild = !!(sessionObj && sessionObj.can_evaluate !== false && sessionObj.source_revision);
       const cleanTitle = displayTitle(node);
       const rawText = node.text || null;
-      const detailPairs = [
-        ['图元名称', cleanTitle],
-        ['图元类型', node.type === 'text' ? '文本标签' : (node.type === 'guide' ? '引导线' : (node.type === 'curve' ? '数据曲线' : node.type))],
-        ['显示位置/尺寸', node.bounds_mm ? `[${node.bounds_mm.map(v => Number(v.toFixed(3))).join(', ')}] (${Number((node.bounds_mm[2] - node.bounds_mm[0]).toFixed(3))} × ${Number((node.bounds_mm[3] - node.bounds_mm[1]).toFixed(3))} mm)` : '无外包络'],
-        ['标识稳定性', node.identity_stability === 'stable' ? '稳定标识（支持排版调整）' : '临时图元（仅当前视图有效）'],
-        ['关联关系', node.linked_guide_gid ? `关联引线: ${node.linked_guide_gid}` : (node.annotation ? `关联标签: ${node.annotation.linked_label_gid}` : '无关联')],
-        ['保护模式', canRebuild ? '会话调整模式（磁盘源文件受保护）' : '只读测量模式（不可编辑）']
-      ];
-      if (rawText && rawText !== cleanTitle) {
-        detailPairs.push(['原始科学文本', rawText]);
+      const typeText = displayType(node);
+      const canGhost = !(node.type === 'guide' || node.type === 'curve' || node.type === 'panel' || node.annotation || node.gid?.includes('guide') || !node.measured || node.fully_clipped);
+
+      // 1. 第一视线：通俗易懂的核心对象属性
+      fields(byId('detail-fields'), [
+        ['对象名称', cleanTitle],
+        ['对象类型', typeText],
+        ['位置与尺寸', formatBounds(node.bounds_mm)],
+        ['编号属性', node.identity_stability === 'stable' ? '固定编号' : '本次临时编号'],
+        ['微调权限', (node.registered && canRebuild && canGhost) ? '支持本次微调' : '仅供查看（不支持试调）']
+      ]);
+
+      // 2. 二级折叠：高级技术细节与凭证（收起在 details 内，不淹没首屏）
+      if (byId('detail-tech-fields')) {
+        const techPairs = [
+          ['全局标识 (GID)', node.gid || '未分配'],
+          ['底层节点 (ID)', node.id],
+          ['显示模式', canRebuild ? '会话试调（源文件受保护）' : '只读测量（不可编辑）']
+        ];
+        if (rawText && rawText !== cleanTitle) {
+          techPairs.push(['原始科学文本', rawText]);
+        }
+        if (node.annotation) {
+          techPairs.push(['关联标签 GID', node.annotation.linked_label_gid || '无']);
+          techPairs.push(['科学峰位锚点', JSON.stringify(node.annotation.declared_guide_anchor_data)]);
+          techPairs.push(['显示端点坐标 mm', JSON.stringify([node.annotation.displayed_first_run_endpoint_mm, node.annotation.displayed_last_run_endpoint_mm])]);
+        } else if (node.linked_guide_gid) {
+          techPairs.push(['关联引线 GID', node.linked_guide_gid]);
+        }
+        if (state.scene?.source_revision) {
+          techPairs.push(['配置版本摘要', state.scene.source_revision.slice(0, 16)]);
+        }
+        if (state.frame?.frame_revision) {
+          techPairs.push(['帧校验哈希', state.frame.frame_revision.slice(0, 16)]);
+        }
+        fields(byId('detail-tech-fields'), techPairs);
       }
-      detailPairs.push(['全局标识 (GID)', node.gid || node.id]);
-      fields(byId('detail-fields'), detailPairs);
 
       byId('detail-ephemeral').hidden = node.identity_stability !== 'ephemeral';
-      byId('detail-ephemeral').textContent = '该图元属于普通绘制元素，仅在当前画面有效；缺少永久配置，不支持真实试算与调整。';
+      byId('detail-ephemeral').textContent = '该对象属于本次临时编号元素，仅在当前画面有效；不支持试调。';
+
       byId('detail-readonly').hidden = false;
       byId('detail-readonly').textContent = canRebuild
-        ? '会话调整模式：可在当前会话中试算与临时应用布局；源码、配置文件及正式图件均处于受保护状态，不会被修改。'
-        : '只读测量模式：本图件为普通图形或静态快照，仅支持精确测量与示范，不修改源码、YAML 或输出图件。';
-      if (node.annotation || node.linked_guide_gid) {
+        ? '会话试调模式：可试调位置并预览排版；原 Python 源码与 YAML 配置文件处于受保护状态，不会被改动。'
+        : '只读测量模式：本图件为普通图形或静态快照，仅供测量与查看，不可改动。';
+
+      if (node.annotation || node.linked_guide_gid || node.type === 'guide') {
         byId('detail-annotation').hidden = false;
-        if (node.annotation) {
-          byId('detail-annotation').textContent = '移动标签时，引线会跟着调整；指向峰的位置不变。这里不能单独移动引线。' +
-            `（关联标签：${node.annotation.linked_label_gid} · 峰位锚点：${JSON.stringify(node.annotation.declared_guide_anchor_data)}）`;
+        if (node.annotation || node.type === 'guide') {
+          // 用户特别指定的通俗引导提示，绝不拼接技术数组
+          byId('detail-annotation').textContent = '移动标签时，引线会跟着调整；指向峰的位置不变。这里不能单独移动引线。';
         } else {
-          byId('detail-annotation').textContent = `已关联引线：${node.linked_guide_gid}。平移本标签时，引线会自动调整并保持指向峰位。`;
+          byId('detail-annotation').textContent = `已关联引线：${displayTitle(state.nodes.get(node.linked_guide_gid)) || '对应引线'}。平移本标签时，引线会自动调整并保持指向峰的位置。`;
         }
       }
     }
@@ -619,7 +671,7 @@
   function objectList() {
     const query = byId('search-input').value.toLowerCase();
     const nodes = state.scene.nodes.filter(n => [n.id, n.gid, n.text, n.type, n.descriptor].some(v => String(v || '').toLowerCase().includes(query)));
-    byId('object-list-count').textContent = `共 ${nodes.length} 个图元（总计 ${state.scene.nodes.length} 个）`;
+    byId('object-list-count').textContent = `共 ${nodes.length} 个对象（总计 ${state.scene.nodes.length} 个）`;
     byId('object-list').replaceChildren();
     for (const node of nodes) {
       const li = document.createElement('li');
@@ -633,7 +685,7 @@
       titleSpan.textContent = displayTitle(node);
       const metaSpan = document.createElement('span');
       metaSpan.className = 'meta';
-      metaSpan.textContent = `${node.type === 'text' ? '文本' : (node.type === 'guide' ? '引线' : (node.type === 'curve' ? '曲线' : node.type))} · ${node.identity_stability === 'stable' ? '稳定' : '临时'}`;
+      metaSpan.textContent = `${displayType(node)} · ${node.identity_stability === 'stable' ? '固定编号' : '本次临时编号'}`;
       button.append(titleSpan, metaSpan);
 
       button.addEventListener('click', () => {
@@ -816,7 +868,7 @@
     state.inFlightGuard.cancel();
 
     if (notifyBackend && opId && (state.acceptedFrame?.session || state.frame?.session)) {
-      status('正在向本地服务取消当前候选…', 'pending');
+      status('正在向本地服务取消本次调整…', 'pending');
       try {
         const baseline = state.acceptedFrame || state.frame;
         const payload = buildDecisionPayload(baseline, opId, 'cancel');
@@ -850,7 +902,7 @@
     }
     updateIntentUI();
     highlights();
-    status('已取消当前候选；之前已接受的操作继续保持生效', 'ok');
+    status('已取消本次调整，已保留的历史不受影响', 'ok');
   }
   byId('btn-cancel-intent').addEventListener('click', () => {
     cancelIntent(true);
@@ -895,7 +947,7 @@
         if (state.candidateFrame && state.acceptedFrame) {
           await loadFrame(state.acceptedFrame, undefined, false);
         }
-        status(acceptable ? '真实渲染几何检验通过 · 预览呈现中 · 尚未接受到会话' : `试算未通过：${data.message || data.status || '位移或质检不符合安全规范'}`, acceptable ? 'ok' : 'error');
+        status(acceptable ? '已生成候选预览 · 尚未保留本次调整' : `试算未通过：${data.message || data.status || '位移或质检不符合安全规范'}`, acceptable ? 'ok' : 'error');
       }
     } catch (e) {
       status(`试算请求失败：${e.message}`, 'error');
@@ -908,12 +960,12 @@
     if (!state.intentSession || !state.lastEvaluation) return;
     const snap = state.intentSession.snapshot();
     if (!canAcceptEvaluation(state.lastEvaluation, snap.intent)) {
-      status('无法接受：未通过几何验证', 'error');
+      status('无法保留：未通过几何安全验证', 'error');
       return;
     }
     const baseline = state.acceptedFrame || state.frame;
     const payload = buildDecisionPayload(baseline, snap.intent.operation_id, 'accept');
-    status('正在应用调整并更新会话状态…', 'pending');
+    status('正在保留本次调整…', 'pending');
     try {
       const res = await fetch('/api/intents/decision', {
         method: 'POST',
@@ -923,7 +975,7 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (!isDecisionSuccessful(data)) {
-        status(`接受未通过：${data.message || data.status}`, 'error');
+        status(`保留未通过：${data.message || data.status}`, 'error');
         return;
       }
       state.operationStack.push(snap.intent.operation_id);
@@ -936,9 +988,9 @@
       byId('intent-eval-results').hidden = true;
       updateIntentUI();
       highlights();
-      status('已应用到当前会话 · 内存调整生效（磁盘源文件未修改）', 'ok');
+      status('已保留本次调整（仅本次打开有效，未保存到文件）', 'ok');
     } catch (e) {
-      status(`接受失败：${e.message}`, 'error');
+      status(`保留失败：${e.message}`, 'error');
     }
   });
 
@@ -950,12 +1002,12 @@
       return;
     }
     if (!state.operationStack.canUndo()) {
-      status('当前没有可撤销的操作', 'pending');
+      status('当前没有可撤销的调整', 'pending');
       return;
     }
     const opId = state.operationStack.pop();
     const payload = buildDecisionPayload(current, opId, 'undo');
-    status('正在撤销上一步操作…', 'pending');
+    status('正在撤销上一步调整…', 'pending');
     try {
       const res = await fetch('/api/intents/decision', {
         method: 'POST',
@@ -979,7 +1031,7 @@
       byId('intent-eval-results').hidden = true;
       updateIntentUI();
       highlights();
-      status('已撤销上一步操作；恢复至之前的会话状态', 'ok');
+      status('已撤销上一步调整，已恢复之前的状态', 'ok');
     } catch (e) {
       state.operationStack.push(opId);
       status(`撤销失败：${e.message}`, 'error');
@@ -991,10 +1043,10 @@
     const current = state.acceptedFrame || state.frame;
     const canRebuild = !!(current?.session && current.session.can_evaluate !== false && current.session.source_revision);
     if (!canRebuild) {
-      status('静态快照或普通图件不支持切换清晰度：缺少可信重建支持', 'error');
+      status('当前图件不支持切换显示清晰度：缺少可信重建支持', 'error');
       return;
     }
-    status(`正在切换至 ${dpi} DPI 并重新生成完整几何与图像…`, 'pending');
+    status(`正在切换至 ${dpi} DPI 显示清晰度…`, 'pending');
     try {
       const res = await fetch('/api/frame/quality', {
         method: 'POST',
@@ -1018,7 +1070,7 @@
         state.candidateFrame = null;
         await loadFrame(newFrame, undefined, true);
       }
-      status(`已加载 ${dpi} DPI 完整同帧几何与图像`, 'ok');
+      status(`已切换至 ${dpi} DPI 显示清晰度`, 'ok');
     } catch (e) {
       status(`清晰度切换失败：${e.message}`, 'error');
     }
@@ -1043,13 +1095,15 @@
       byId('frame-scope').textContent = byId('frame-revision').textContent = '';
       byId('state-fields').replaceChildren();
       byId('detail-fields').replaceChildren();
+      if (byId('detail-tech-fields')) byId('detail-tech-fields').replaceChildren();
+      if (byId('detail-tech-wrap')) byId('detail-tech-wrap').hidden = true;
       byId('calibration-note').hidden = true;
       container.dataset.hoverId = container.dataset.selectedId = '';
       select(null);
     }
     container.dataset.ready = 'false';
     container.dataset.frameState = 'loading';
-    status(isNewAccepted ? '正在校验图形数据与几何摘要…' : '正在校验候选图像与几何…', 'pending');
+    status(isNewAccepted ? '正在读取图形数据…' : '正在校验候选图像与几何…', 'pending');
     try {
       const scene = await verifyFrame(frame, expectedSourceRevision);
       const image = new Image();
@@ -1077,16 +1131,16 @@
       const canRebuild = !!(sessionObj && sessionObj.can_evaluate !== false && sessionObj.source_revision);
 
       const dpiButtons = [
-        { btn: byId('btn-dpi-120'), dpi: 120, title: '标准清晰度 (120 DPI)' },
-        { btn: byId('btn-dpi-240'), dpi: 240, title: '高清打印清晰度 (240 DPI)' },
-        { btn: byId('btn-dpi-600'), dpi: 600, title: '出版清晰度 (600 DPI)' }
+        { btn: byId('btn-dpi-120'), dpi: 120, title: '流畅视图 (120 DPI)，仅改变显示' },
+        { btn: byId('btn-dpi-240'), dpi: 240, title: '清晰视图 (240 DPI)，仅改变显示' },
+        { btn: byId('btn-dpi-600'), dpi: 600, title: '精细视图 (600 DPI)，仅改变显示' }
       ];
       const currentDpi = scene.measurement?.dpi;
       for (const item of dpiButtons) {
         if (!item.btn) continue;
         item.btn.disabled = !canRebuild;
         if (!canRebuild) {
-          item.btn.title = '普通图件或静态快照仅支持查看测量，不支持切换清晰度';
+          item.btn.title = '当前图件不支持切换显示清晰度';
         } else {
           item.btn.title = item.title;
         }
@@ -1118,34 +1172,35 @@
       const badge = byId('badge-readonly');
       if (badge) {
         if (canRebuild) {
-          badge.textContent = '会话试算（源文件受保护）';
+          badge.textContent = '可试调 / 不改原文件';
           badge.className = 'tag mode-session';
         } else {
-          badge.textContent = '只读测量';
+          badge.textContent = '仅查看';
           badge.className = 'tag mode-static';
         }
       }
 
+      // 底栏系统与凭证（收折在 details 中）
       fields(byId('state-fields'), [
-        ['渲染器', scene.measurement?.renderer || 'Agg'],
-        ['清晰度', `${scene.measurement?.dpi || 120} DPI`],
-        ['页面尺寸', `${Number((scene.canvas_bounds_mm[2] - scene.canvas_bounds_mm[0]).toFixed(2))} × ${Number((scene.canvas_bounds_mm[3] - scene.canvas_bounds_mm[1]).toFixed(2))} mm`],
-        ['源版本', scene.source_revision ? scene.source_revision.slice(0, 12) : '无配置 / 未提供'],
-        ['帧摘要', frame.frame_revision ? frame.frame_revision.slice(0, 12) : '无']
+        ['图形渲染引擎', scene.measurement?.renderer || 'Agg (光栅底层 + 矢量辅助)'],
+        ['当前显示清晰度', `${scene.measurement?.dpi || 120} DPI`],
+        ['页面物理尺寸', `${Number((scene.canvas_bounds_mm[2] - scene.canvas_bounds_mm[0]).toFixed(2))} × ${Number((scene.canvas_bounds_mm[3] - scene.canvas_bounds_mm[1]).toFixed(2))} mm`],
+        ['源码版本摘要', scene.source_revision ? scene.source_revision.slice(0, 16) : '无配置 / 未提供'],
+        ['帧校验哈希', frame.frame_revision ? frame.frame_revision.slice(0, 16) : '无']
       ]);
       byId('calibration-note').hidden = false;
       byId('calibration-note').textContent = '物理标尺基于图件导出页面尺寸（毫米），非显示屏幕实际物理毫米。折线采用中心线几何模型，文字采用保守外包络。';
 
       if (isNewAccepted) {
         byId('frame-revision').textContent = frame.frame_revision.slice(0, 12);
-        status(canRebuild ? '会话已就绪 · 几何数据与渲染像素完全吻合（源文件受保护）' : '图件校验通过 · 只读快照', 'ok');
+        status(canRebuild ? '图片已加载 · 尺寸核对一致' : '图片已加载 · 尺寸核对一致', 'ok');
         wrap.scrollLeft = wrap.scrollTop = 0;
         fit();
         objectList();
         select(null);
       } else if (state.candidateFrame) {
         byId('frame-revision').textContent = `${state.acceptedFrame?.frame_revision?.slice(0, 12) || ''} (候选: ${frame.frame_revision.slice(0, 8)})`;
-        status('真实渲染几何检验通过 · 预览呈现中 · 尚未接受到会话', 'pending');
+        status('已生成候选预览 · 尚未保留本次调整', 'pending');
         select(state.selected);
       } else {
         byId('frame-revision').textContent = frame.frame_revision.slice(0, 12);
