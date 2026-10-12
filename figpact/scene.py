@@ -210,13 +210,74 @@ def _same_point(a: Any, b: Any) -> bool:
     return abs(float(a[0]) - float(b[0])) <= tol and abs(float(a[1]) - float(b[1])) <= tol
 
 
+_CLIP_INSIDE_MARGIN = 2.0 ** -45
+
+
+def _clip_is_inside(points: Any, bounds: Sequence[float]) -> bool:
+    """整条折线是否**可证明**落在框内，且框内线段裁剪参数恰好是 0.0/1.0。
+
+    框内线段只有一处会被浮点舍入翻掉：终点贴在**右/上**边、位移又朝那边时，
+    `x1 - p0[0]` 与 `p1[0] - p0[0]` 的被减数不同，两个减法的舍入差（量级 2**-53 × B）
+    可能让 `r = q / p` 掉到 1 以下，t1 就不再是 1.0。左/下边没有这个问题：
+    `p0[0] - x0` 与 `p0[0] - p1[0]` 共用被减数，减法对减数单调，框内必然 `q >= p`。
+    所以离右/上边留出 2**-45 倍量级的空隙就够（比所需上界 2**-51 倍宽 64 倍）；
+    与边**逐位相等**时两个减法字面同式，同样安全。NaN/Inf 一律不算框内。
+    """
+    if len(points) < 2:                         # 单点/空折线没有线段可裁
+        return False
+    arr = np.asarray(points, dtype=float)
+    if arr.ndim != 2 or arr.shape[1] != 2:
+        return False
+    if not bool(np.isfinite(arr).all()):
+        return False
+    x0, y0 = float(bounds[0]), float(bounds[1])
+    x1, y1 = float(bounds[2]), float(bounds[3])
+    x, y = arr[:, 0], arr[:, 1]
+    if not bool(((x >= x0) & (x <= x1) & (y >= y0) & (y <= y1)).all()):
+        return False
+    margin = max(1.0, abs(x0), abs(y0), abs(x1), abs(y1)) * _CLIP_INSIDE_MARGIN
+    right, top = x1 - x, y1 - y
+    return not bool((((right != 0.0) & (right < margin))
+                     | ((top != 0.0) & (top < margin))).any())
+
+
+def _clip_inside_runs(points: np.ndarray) -> list[np.ndarray]:
+    """框内折线的快路径：与逐段 Liang–Barsky 的旧结果**逐位一致**，只是不再真去裁剪。
+
+    框内线段的 t 恒为 0.0/1.0，`start + t * (end - start)` 就退化成一个 0.0 乘、一个
+    1.0 乘（两者都精确），这里用 Python float 照算同一串 IEEE 双精度运算；段链语义
+    （连链、`_same_point` 去重、`>= 2` 个点才算一段）与默认路径逐字相同。
+    """
+    runs: list[list[list[float]]] = []
+    for start, end in zip(points[:-1], points[1:]):
+        sx, sy = float(start[0]), float(start[1])
+        dx, dy = float(end[0]) - sx, float(end[1]) - sy
+        head = [sx + 0.0 * dx, sy + 0.0 * dy]
+        tail = [sx + 1.0 * dx, sy + 1.0 * dy]
+        if runs and _same_point(runs[-1][-1], head):
+            chain = runs[-1]
+        else:
+            chain = []
+            runs.append(chain)
+            chain.append([head[0], head[1]])
+        if not _same_point(chain[-1], tail):
+            chain.append([tail[0], tail[1]])
+    return [np.asarray(run, dtype=float) for run in runs if len(run) >= 2]
+
+
 def _clip_polyline_runs(points: np.ndarray, bounds: Sequence[float]) -> list[np.ndarray]:
     """把折线裁进矩形，返回**互不相连**的可见段链。
 
     一条折线离开坐标框再回来时，两段可见部分之间本来没有连线；把它们拼成一条折线
     会凭空多出一条根本不存在的连线，净空/碰撞测量就会对着鬼影说话。所以每段可见链
     单独返回（`>= 2` 个点的段才有几何意义）。
+
+    整条（有限）折线都在框内时走 `_clip_inside_runs`：结果与逐段裁剪逐位相同，
+    省掉每个线段的 Liang–Barsky（真实 NMR 图上是 10 万次）。部分裁剪、NaN 断口、
+    退化线段、非有限点仍走下面的逐段默认路径。
     """
+    if _clip_is_inside(points, bounds):
+        return _clip_inside_runs(points)
     runs: list[list[list[float]]] = []
     for start, end in zip(points[:-1], points[1:]):
         t0, t1, visible = _clip_segment_t(bounds, start, end)
