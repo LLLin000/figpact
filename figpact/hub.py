@@ -1,8 +1,19 @@
-"""G5a 会话 Hub：只读选区、接收几何任务、调用既有试算。
+"""G5a 会话 Hub（G5b 追加计划授权）：只读选区、接收几何任务、调用既有试算。
 
-只做协调层：读选区、收几何任务、调既有 ``IntentSession.evaluate``；
-**不授予源码写入或发布权限**，不另建 Figure、不另算科学、不另做 QA。
-状态只在内存、会话级、不落盘；服务器是单线程 ``HTTPServer``，写入天然串行。
+G5a 的协调层：读选区、收几何任务、调既有 ``IntentSession.evaluate``；不另建 Figure、
+不另算科学、不另做 QA。任务路由仍**不授予源码写入或发布权限**。状态只在内存、会话级、
+不落盘；服务器是单线程 ``HTTPServer``，写入天然串行。
+
+G5b 追加一条**被约束的**源码写入路径（``/api/plans`` 系列）：计划由服务端用
+``python_native.plan_layout_edit`` 铸造（**零字节**写用户源码），只有页面带着服务端
+签发、注入 ``/frame.js`` 的会话令牌同意过，且**申请该计划的客户端**在应用时磁盘字节
+仍逐文件等于计划里的 ``before_sha256``，才走 ``source_writes.apply_source_change``
+落盘并追加 history 的 ``source_change`` 检查点。授权主体（``client_id``）、操作范围
+（哪份计划 / 哪些文件 / 哪个 gid）、计划版本（``plan_id`` + before 哈希）与磁盘事实
+四者齐备才写；请求 body 里的布尔字段永远不构成授权。
+
+诚实边界：这是**本机单用户**的同意绑定（回环 + 同源 + 页面会话令牌），**不是**多用户
+认证。计划与 grant 是内存态、会话级：进程重启即失去所有批准，这是设计意图。
 
 公开方法返回 ``(payload, http_status)`` 以便 HTTP 路由直接回包，但本模块
 不依赖 HTTP，也不依赖 matplotlib。
@@ -10,13 +21,27 @@
 from __future__ import annotations
 
 import copy
+import hashlib
+import hmac
 import uuid
 from collections import deque
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+from . import python_native, source_writes
+from .history import HistoryError, HistoryStore, default_state_home
 
 FORBIDDEN_KINDS = ('source_write', 'publish', 'delete', 'git')
 FORBIDDEN_MESSAGE = 'G5a Hub 只允许读取选区、提交几何任务并调用既有试算；不授予源码写入或发布权限'
 MAX_TASKS = 50
+#: 计划与 grant 的会话级上限：FIFO 淘汰最旧的一条（grant 与计划同生共死）。
+MAX_PLANS = 50
+#: 计划（与由其结出的 grant）的有效期，默认 15 分钟。
+PLAN_TTL = timedelta(minutes=15)
+#: 页面会话同意令牌与申请客户端身份的请求头。授权是 header + 服务端令牌，不是 body 布尔字段。
+UI_TOKEN_HEADER = 'X-Figpact-Ui'
+CLIENT_HEADER = 'X-Figpact-Client'
+PLAN_KIND = 'layout_edit'
 # GET /api/selection 的 stale 判定字段：发布值必须与实时会话一致。
 REVISION_FIELDS = (('session_id', '会话'), ('scene_revision', '图帧'), ('source_revision', '源文件'))
 
@@ -25,14 +50,30 @@ def _error(status, message):
     return {'status': status, 'message': message}
 
 
-class SessionHub:
-    """内存态 Hub；不落盘、不写 history、不改用户文件。"""
+def _sha256_file(path):
+    """磁盘此刻的字节事实；读不出来（含不存在）返回 None——那同样是"与 before 不符"。"""
+    try:
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    except OSError:
+        return None
 
-    def __init__(self):
+
+class SessionHub:
+    """内存态 Hub；不落盘、不写 history、不改用户文件（G5b 授权路径除外，且只在授权后）。"""
+
+    def __init__(self, state_home=None, source=None, ui_token=None):
         self.selection = None
         self.selection_seq = None
         self.hub_revision = 0
         self.tasks = deque(maxlen=MAX_TASKS)
+        # G5b：状态目录（journal/blob 落这里；用户源码不在这里）与页面会话令牌。
+        self.state_home = Path(state_home).expanduser() if state_home is not None \
+            else default_state_home()
+        #: 这次源码写入在 history 里的工作区身份（script/config/scope）；未知就不伪造历史。
+        self.source = dict(source) if source else {}
+        self.ui_token = ui_token
+        self._plans: dict[str, dict] = {}
+        self._grants: dict[str, dict] = {}
 
     # 选区：页面 → Hub
 
@@ -118,7 +159,212 @@ class SessionHub:
         return {'status': 'OK', 'hub_revision': self.hub_revision,
                 'tasks': [copy.deepcopy(task) for task in self.tasks]}, 200
 
+    # 计划：Agent → Hub（铸造；零字节写用户源码）
+
+    def create_plan(self, body):
+        """定位 → 铸造计划（写 journal/blob 与内存状态）。定位不到就原样透传拒绝，不铸造。
+
+        服务端铸造的是 ``plan_id`` 与这份计划自己的 ``before_sha256``：授权只对**这一版**
+        源码有效，之后磁盘上被任何人改过一个字节，应用都会被 ``STALE_SOURCE`` 挡住。
+        """
+        if not isinstance(body, dict):
+            return _error('INVALID_PLAN', '请求必须是 JSON 对象'), 400
+        client_id = body.get('client_id')
+        if not isinstance(client_id, str) or not client_id:
+            return _error('INVALID_PLAN', 'client_id 必须是非空字符串'), 400
+        if body.get('kind') != PLAN_KIND:
+            return _error('INVALID_PLAN', f'kind 只能是 {PLAN_KIND}'), 400
+        script, gid = body.get('script'), body.get('gid')
+        if not isinstance(script, str) or not script or not isinstance(gid, str) or not gid:
+            return _error('INVALID_PLAN', 'script 与 gid 必须是非空字符串'), 400
+        reason = body.get('reason')
+        if not isinstance(reason, str) or not reason.strip():
+            return _error('INVALID_PLAN', 'reason 必须说明这次修改为什么发生'), 400
+        planned = python_native.plan_layout_edit(Path(script), gid, body.get('value'),
+                                                 state_home=self.state_home, reason=reason)
+        if planned.get('status') != 'OK':
+            # 值非法/定位歧义/需要作者级改动：原样透传 python_native 的拒绝，不铸造计划。
+            return planned, 409 if planned.get('status') != 'INVALID' else 400
+        journal = planned['journal']
+        now = datetime.now(timezone.utc)
+        plan = {'plan_id': uuid.uuid4().hex, 'client_id': client_id, 'kind': PLAN_KIND,
+                'script': str(Path(script)), 'gid': gid,
+                'value': [float(item) for item in body['value']], 'reason': reason,
+                'journal_id': journal['id'],
+                'files': [{field: entry[field]
+                           for field in ('path', 'before_sha256', 'after_sha256', 'diff')}
+                          for entry in journal['files']],
+                'created_at': now.isoformat(), 'expires_at': (now + PLAN_TTL).isoformat(),
+                'state': 'PENDING'}
+        self._plans[plan['plan_id']] = plan
+        while len(self._plans) > MAX_PLANS:
+            oldest = next(iter(self._plans))
+            del self._plans[oldest]
+            self._grants.pop(oldest, None)
+        return {'status': 'OK', 'plan': copy.deepcopy(plan)}, 200
+
+    def read_plans(self):
+        """任意本地客户端 ← Hub：最近 50 条计划及其状态（含 grant 是否还活着）。"""
+        plans = []
+        for plan_id, plan in self._plans.items():
+            public = copy.deepcopy(plan)
+            grant = self._grants.get(plan_id)
+            public['grant'] = None if grant is None else {
+                'plan_id': grant['plan_id'], 'authorized_at': grant['authorized_at'],
+                'expires_at': grant['expires_at'], 'single_use': True,
+                'used': bool(grant.get('used'))}
+            plans.append(public)
+        return {'status': 'OK', 'plans': plans}, 200
+
+    # 计划：页面 → Hub（同意）
+
+    def authorize_plan(self, plan_id, token):
+        """页面会话同意：header 带服务端注入 ``/frame.js`` 的令牌，缺/错一律 403。
+
+        这不是一个布尔开关：令牌由服务端在**服务这个页面时**签发并注入页面，body 里的
+        ``authorized: true`` 之类字段在这里不存在，也就永远不构成授权。
+        """
+        if not isinstance(token, str) or not token or not isinstance(self.ui_token, str) \
+                or not hmac.compare_digest(token, self.ui_token):
+            return _error('FORBIDDEN', f'同意必须来自服务端注入 {UI_TOKEN_HEADER} 页面会话令牌的'
+                                       ' Inspector 页面；请求体里的布尔字段不是授权'), 403
+        plan = self._plans.get(plan_id)
+        if plan is None:
+            return _error('PLAN_UNKNOWN', f'计划 {plan_id} 不存在'), 409
+        if self._expired(plan['expires_at']):
+            return _error('PLAN_EXPIRED', f"计划 {plan_id} 已在 {plan['expires_at']} 过期"), 409
+        if plan['state'] != 'PENDING':
+            return _error('PLAN_NOT_PENDING',
+                          f"计划 {plan_id} 当前状态 {plan['state']}，不能再授权"), 409
+        now = datetime.now(timezone.utc)
+        grant = {'plan_id': plan_id, 'authorized_at': now.isoformat(),
+                 'expires_at': plan['expires_at'], 'single_use': True, 'used': False}
+        plan['state'] = 'AUTHORIZED'
+        self._grants[plan_id] = grant
+        return {'status': 'OK', 'grant': copy.deepcopy(grant)}, 200
+
+    # 计划：申请该计划的客户端 → Hub（写盘）
+
+    def apply_plan(self, plan_id, client_id):
+        """写盘前的全部校验通过才动手；任一条不过就一个字节都不写。
+
+        校验顺序：计划存在且 ``AUTHORIZED`` → 计划未过期 → 请求方就是申请该计划的
+        ``client_id`` → grant 存在、未过期、未使用 → 底层 journal 仍 ``PREPARED`` 且
+        before 哈希与计划一致 → **磁盘每个文件仍逐字节等于计划的 ``before_sha256``**。
+        """
+        if not isinstance(client_id, str) or not client_id:
+            return _error('FORBIDDEN', f'写盘必须带 {CLIENT_HEADER} 表明自己是申请该计划的客户端'), 403
+        plan = self._plans.get(plan_id)
+        if plan is None:
+            return _error('PLAN_UNKNOWN', f'计划 {plan_id} 不存在'), 409
+        if plan['state'] != 'AUTHORIZED':
+            code = {'PENDING': 'PLAN_NOT_PENDING', 'CANCELLED': 'PLAN_CANCELLED',
+                    'APPLIED': 'PLAN_APPLIED'}.get(plan['state'], 'PLAN_NOT_PENDING')
+            return _error(code, f"计划 {plan_id} 当前状态 {plan['state']}，不能应用"), 409
+        if self._expired(plan['expires_at']):
+            return _error('PLAN_EXPIRED', f"计划 {plan_id} 已在 {plan['expires_at']} 过期"), 409
+        if client_id != plan['client_id']:
+            return _error('FORBIDDEN', f'计划 {plan_id} 是客户端 {plan["client_id"]} 申请的；'
+                                       f'拒绝客户端 {client_id} 应用'), 403
+        grant = self._grants.get(plan_id)
+        if grant is None:
+            return _error('GRANT_UNKNOWN', f'计划 {plan_id} 没有可用 grant'), 409
+        if grant.get('used'):
+            return _error('GRANT_ALREADY_USED', f'计划 {plan_id} 的 grant 已经用过（单次使用）'), 409
+        if self._expired(grant['expires_at']):
+            return _error('GRANT_EXPIRED', f"计划 {plan_id} 的 grant 已在 {grant['expires_at']} 过期"), 409
+        try:
+            journal = source_writes._load_journal(self.state_home, plan['journal_id'])
+        except source_writes.SourceWriteError as error:
+            return _error('JOURNAL_UNKNOWN', str(error)), 409
+        planned_before = {entry['path']: entry['before_sha256'] for entry in plan['files']}
+        journal_before = {entry['path']: entry['before_sha256'] for entry in journal['files']}
+        if journal.get('status') != 'PREPARED' or journal_before != planned_before:
+            return _error('JOURNAL_NOT_PREPARED',
+                          f"journal {plan['journal_id']} 状态 {journal.get('status')}、"
+                          'before 哈希与计划不一致，拒绝应用'), 409
+        stale = [entry['path'] for entry in plan['files']
+                 if _sha256_file(entry['path']) != entry['before_sha256']]
+        if stale:
+            return _error('STALE_SOURCE', f'磁盘字节与计划不符（外部改写）：{", ".join(sorted(stale))}；'
+                                          '拒绝覆盖，一个字节都不写'), 409
+        # 到这儿才是"要写"：grant 立刻记为已用（单次使用），再交给 G3b 的可恢复写入。
+        grant['used'] = True
+        plan['state'] = 'APPLIED'
+        try:
+            applied = source_writes.apply_source_change(plan['journal_id'], state_home=self.state_home)
+        except source_writes.SourceWriteError as error:
+            # 写入前校验失败：磁盘一个字节没动，如实说 NOT_WRITTEN。
+            return {'status': 'STALE_SOURCE' if str(error).startswith('STALE_SOURCE') else 'NOT_WRITTEN',
+                    'commit_state': python_native.NOT_WRITTEN, 'plan_id': plan_id,
+                    'journal_id': plan['journal_id'], 'message': str(error)}, 409
+        commit_state = python_native._journal_commit_state(applied)
+        written = commit_state == python_native.COMMITTED_AND_VERIFIED
+        checkpoint_id, history_error = (None, None)
+        if written:
+            checkpoint_id, history_error = self._append_source_change(plan, applied)
+        answer = {'status': 'OK' if written else commit_state, 'commit_state': commit_state,
+                  'plan_id': plan_id, 'journal_id': plan['journal_id'], 'state': plan['state'],
+                  'checkpoint_id': checkpoint_id}
+        if history_error:
+            answer['history_error'] = history_error
+        return answer, 200 if written else 409
+
+    # 计划：页面或客户端 → Hub（取消）
+
+    def cancel_plan(self, plan_id):
+        """取消＝零写入；已经落盘的计划不可取消（写盘是事实，不能靠状态掩盖）。"""
+        plan = self._plans.get(plan_id)
+        if plan is None:
+            return _error('PLAN_UNKNOWN', f'计划 {plan_id} 不存在'), 409
+        if plan['state'] == 'APPLIED':
+            return _error('PLAN_APPLIED', f'计划 {plan_id} 已经写盘，不能取消（要走历史恢复）'), 409
+        plan['state'] = 'CANCELLED'
+        self._grants.pop(plan_id, None)
+        return {'status': 'OK', 'plan_id': plan_id, 'state': 'CANCELLED',
+                'plan': copy.deepcopy(plan)}, 200
+
     # 内部
+
+    def _append_source_change(self, plan, journal):
+        """写盘已成事实 → 在 history 追加 ``source_change`` 检查点（返回 (检查点 id, 错误)）。
+
+        history 的工作区身份（script/config/scope）来自会话；身份不明时**不伪造**一个
+        工作区，如实回报 ``SOURCE_IDENTITY_UNKNOWN``：检查点缺失是事实，编一个更糟。
+        """
+        config, scope = self.source.get('config'), self.source.get('scope') or 'main'
+        if not config:
+            return None, 'SOURCE_IDENTITY_UNKNOWN'
+        store = None
+        try:
+            store = HistoryStore(plan['script'], config, scope, state_home=self.state_home)
+            head = store.head()
+            checkpoint = store.append_source_change(
+                {'kind': 'source_change', 'reason': plan['reason'], 'gid': plan['gid'],
+                 'plan_id': plan['plan_id'], 'journal_id': journal['id'],
+                 'requested_mm': plan['value'],
+                 'commit_state': python_native.COMMITTED_AND_VERIFIED,
+                 'file_changes': python_native._journal_file_changes(journal)},
+                expected_head=None if head is None else head['id'],
+                expected_file_sha256={entry['path']: entry['after_sha256']
+                                      for entry in journal['files']})
+            return checkpoint['id'], None
+        except (HistoryError, OSError, ValueError) as error:
+            return None, f'{type(error).__name__}: {error}'
+        finally:
+            if store is not None:
+                store.close()
+
+    @staticmethod
+    def _expired(stamp):
+        """过期判定按**事实**：时间戳读不出来（形状非法）也判为过期，不放行。"""
+        try:
+            when = datetime.fromisoformat(stamp)
+        except (TypeError, ValueError):
+            return True
+        if when.tzinfo is None:
+            when = when.replace(tzinfo=timezone.utc)
+        return when <= datetime.now(timezone.utc)
 
     def _record(self, body, *, task_status, target_gid=None, evaluate_status=None):
         """只登记成功的任务；被拒的任务不进入 Hub 状态。"""

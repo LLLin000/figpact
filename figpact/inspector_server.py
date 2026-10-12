@@ -6,30 +6,52 @@ local caller, never to HTTP requests. UI assets stay in tools/inspector/.
 G5a adds read-only selection and task coordination (``/api/selection``,
 ``/api/tasks``) through an in-memory SessionHub. It still grants neither source
 writes nor publishing.
+
+G5b adds a constrained source-write path (``/api/plans`` series): a plan is minted
+by the server (zero bytes written to user source), the *page* consents with the
+per-served-page token the server injects into ``/frame.js`` (``window.FIGPACT_UI_TOKEN``),
+and the *client that requested that plan* applies it only while every file still
+matches the plan's ``before_sha256``. Body fields never authorize anything: this is
+single-machine, single-user consent (loopback + same-origin + page session token),
+not multi-user authentication.
 """
 from __future__ import annotations
 
 import argparse
 import http.server
 import json
+import secrets
 from pathlib import Path
 from urllib.parse import urlsplit
 from typing import cast
 
-from .hub import SessionHub
+from .hub import CLIENT_HEADER, UI_TOKEN_HEADER, SessionHub
 from .intents import IntentSession
 
 FRONTEND = Path(__file__).resolve().parents[1] / 'tools' / 'inspector'
 MAX_REQUEST_BYTES = 65536
+#: ``/api/plans/<plan_id>/<action>``：只有这三个动作，其它一律 404。
+PLAN_ACTIONS = ('authorize', 'apply', 'cancel')
+
+
+def _plan_route(path: str):
+    """``/api/plans/<id>/<action>`` → (plan_id, action)；不是这个形状返回 None。"""
+    parts = path.strip('/').split('/')
+    if len(parts) == 4 and parts[:2] == ['api', 'plans'] and parts[3] in PLAN_ACTIONS:
+        return parts[2], parts[3]
+    return None
 
 
 class InspectorServer(http.server.HTTPServer):
     # Single request owner: Matplotlib and the accepted set are never concurrently mutated.
-    def __init__(self, session: IntentSession, address: tuple[str, int] = ('127.0.0.1', 0), *, frontend=FRONTEND):
+    def __init__(self, session: IntentSession, address: tuple[str, int] = ('127.0.0.1', 0), *,
+                 frontend=FRONTEND, state_home=None, source=None):
         if address[0] != '127.0.0.1':
             raise ValueError('Inspector 只允许绑定 127.0.0.1')
         self.session = session
-        self.hub = SessionHub()
+        # 页面会话令牌：服务这个页面时签发、注入 /frame.js；授权请求必须原样带回来。
+        self.ui_token = secrets.token_urlsafe(32)
+        self.hub = SessionHub(state_home=state_home, source=source, ui_token=self.ui_token)
         self.frontend = Path(frontend).resolve()
         super().__init__(address, _Handler)
 
@@ -89,8 +111,10 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             self._send(self._app.session.snapshot())
             return
         if path == '/frame.js':
-            body = 'window.FIGPACT_INSPECTOR_FRAME=' + json.dumps(
+            # 既有 frame 行为字节不变，只追加一行：页面会话令牌（授权请求必须带回来的那个）。
+            body = ('window.FIGPACT_INSPECTOR_FRAME=' + json.dumps(
                 self._app.session.snapshot(), ensure_ascii=True, allow_nan=False) + ';\n'
+                'window.FIGPACT_UI_TOKEN=' + json.dumps(self._app.ui_token) + ';\n')
             self._send(body, media='text/javascript; charset=utf-8')
             return
         if path == '/api/selection':
@@ -98,6 +122,9 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return
         if path == '/api/tasks':
             self._send(*self._app.hub.read_tasks())
+            return
+        if path == '/api/plans':
+            self._send(*self._app.hub.read_plans())
             return
         assets = {'/': ('index.html', 'text/html; charset=utf-8'),
                   '/index.html': ('index.html', 'text/html; charset=utf-8'),
@@ -143,25 +170,50 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return None
         return body
 
+    def _plan_body(self):
+        """计划动作路由的输入在路径与 header 上：body 可选，给了仍走既有 JSON 校验。
+
+        body 里的任何字段都不参与授权判定——``{"authorized": true}`` 在这里只是一段被忽略
+        的 JSON，授权来自注入页面的会话令牌与 grant。
+        """
+        lengths = self.headers.get_all('Content-Length', [])
+        if not lengths or (len(lengths) == 1 and lengths[0] == '0'):
+            self._body_consumed = True
+            return {}
+        return self._json_body()
+
+    def _plan_action(self, plan_id, action):
+        if action == 'authorize':
+            return self._app.hub.authorize_plan(plan_id, self.headers.get(UI_TOKEN_HEADER))
+        if action == 'apply':
+            return self._app.hub.apply_plan(plan_id, self.headers.get(CLIENT_HEADER))
+        return self._app.hub.cancel_plan(plan_id)
+
     def do_POST(self):
         if not self._allowed():
             return
         path = urlsplit(self.path).path
+        plan = _plan_route(path)
         routes = {'/api/intents/evaluate': self._app.session.evaluate,
                   '/api/intents/decision': self._app.session.decide,
                   '/api/frame/quality': self._app.session.set_quality}
         route = routes.get(path)
-        if route is None and path not in ('/api/selection', '/api/tasks'):
+        if route is None and plan is None and path not in ('/api/selection', '/api/tasks',
+                                                           '/api/plans'):
             self._send({'status': 'NOT_FOUND'}, 404)
             return
-        body = self._json_body()
+        body = self._json_body() if plan is None else self._plan_body()
         if body is None:
             return
         try:
-            if path == '/api/selection':
+            if plan is not None:
+                result, code = self._plan_action(*plan)
+            elif path == '/api/selection':
                 result, code = self._app.hub.publish_selection(body)
             elif path == '/api/tasks':
                 result, code = self._app.hub.submit_task(body, self._app.session)
+            elif path == '/api/plans':
+                result, code = self._app.hub.create_plan(body)
             else:
                 result, code = route(body), 200
         except (ValueError, RuntimeError, OSError) as error:
@@ -189,20 +241,27 @@ def main():
     import matplotlib.pyplot as plt
     from tools.inspector_demo import plain_figure
     figure = None
+    source = None
     if args.script is not None:
         session = IntentSession(script=args.script, config=args.config, scope=args.scope, dpi=args.dpi)
+        # history 工作区身份：G5b 授权写入的 source_change 检查点落在同一个工作区里。
+        source = {'script': str(args.script), 'config': str(args.config), 'scope': args.scope}
     elif args.example == 'plain':
         figure = plain_figure()
         figure.set_dpi(args.dpi)
         session = IntentSession(figure=figure, scope='measurement')
     else:
         folder = Path(__file__).resolve().parents[1] / 'examples' / args.example
-        session = IntentSession(script=folder / ('08 NMR.py' if args.example == 'nmr' else 'plot_ftir.py'),
-                                config=folder / (args.example + '.yaml'), scope=args.scope, dpi=args.dpi)
+        script = folder / ('08 NMR.py' if args.example == 'nmr' else 'plot_ftir.py')
+        config = folder / (args.example + '.yaml')
+        session = IntentSession(script=script, config=config, scope=args.scope, dpi=args.dpi)
+        source = {'script': str(script), 'config': str(config), 'scope': args.scope}
     try:
-        with session, InspectorServer(session, ('127.0.0.1', args.port), frontend=args.frontend) as server:
+        with session, InspectorServer(session, ('127.0.0.1', args.port), frontend=args.frontend,
+                                      source=source) as server:
             print(f'Inspector: http://127.0.0.1:{server.server_address[1]}', flush=True)
-            print('G2: session acceptance only; no source writes or publication', flush=True)
+            print('G2/G5a: session acceptance only; G5b source writes land only after the page '
+                  'session token consents to a minted plan', flush=True)
             try:
                 server.serve_forever()
             except KeyboardInterrupt:
