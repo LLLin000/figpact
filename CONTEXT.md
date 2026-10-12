@@ -124,6 +124,14 @@ _Avoid_: edited figure, render-checked candidate
 A render-checked geometric change explicitly accepted for the current session. Acceptance alone does not save source files or approve publication.
 _Avoid_: saved draft, published result
 
+**Preview Resolution**:
+The pixel density of the measured figure shown for inspection. It is separate from the source image's sampling density and the intended publication resolution.
+_Avoid_: original resolution, publication approval
+
+**Publication Resolution**:
+The intended pixel density of a raster publication artifact. Matching it in a preview does not establish publication acceptance or add detail to protected source images.
+_Avoid_: preview accuracy, scientific image enhancement
+
 **Scientific Payload**:
 Protected data, processing choices, scientific text and assignments, image content, display windows, and scale-bar meaning. Permitted layout changes do not authorize changes to this payload.
 _Avoid_: editable plot data

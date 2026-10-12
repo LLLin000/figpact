@@ -152,6 +152,8 @@ def main():
     parser.add_argument('--config', type=Path)
     parser.add_argument('--scope', default='main')
     parser.add_argument('--port', type=int, default=0)
+    parser.add_argument('--dpi', type=int, choices=(120, 240, 600), default=600,
+                        help='Display resolution only; originals and publication files are never changed')
     parser.add_argument('--frontend', type=Path, default=FRONTEND,
                         help='Trusted local Inspector assets (development worktree only)')
     args = parser.parse_args()
@@ -163,14 +165,15 @@ def main():
     from tools.inspector_demo import plain_figure
     figure = None
     if args.script is not None:
-        session = IntentSession(script=args.script, config=args.config, scope=args.scope)
+        session = IntentSession(script=args.script, config=args.config, scope=args.scope, dpi=args.dpi)
     elif args.example == 'plain':
         figure = plain_figure()
+        figure.set_dpi(args.dpi)
         session = IntentSession(figure=figure, scope='measurement')
     else:
         folder = Path(__file__).resolve().parents[1] / 'examples' / args.example
         session = IntentSession(script=folder / ('08 NMR.py' if args.example == 'nmr' else 'plot_ftir.py'),
-                                config=folder / (args.example + '.yaml'), scope=args.scope)
+                                config=folder / (args.example + '.yaml'), scope=args.scope, dpi=args.dpi)
     try:
         with session, InspectorServer(session, ('127.0.0.1', args.port), frontend=args.frontend) as server:
             print(f'Inspector: http://127.0.0.1:{server.server_address[1]}', flush=True)

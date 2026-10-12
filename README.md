@@ -54,11 +54,15 @@ python -m figpact.inspector_server --example plain
 关闭服务后这些操作丢失，不是 YAML 草稿、源码 History 或正式发布。
 
 普通无 YAML Figure 可以测量和展示期望位置，不能在 G2 写回 Python。
-120/240 DPI 必须重新生成完整图片和几何；在开始试算/接受之前选择 DPI。
+本机入口默认 600 DPI；可加 `--dpi 120` 或 `--dpi 240`。切换清晰度会重新生成完整
+图片和测量坐标，请在开始试算/接受之前选择。不会修改源码或正式图的导出设置。
 跨 scope 绑定、没有明确映射或存在多个同样合法映射时拒绝，不自动改源码或科学数据。
 既有 YAML Agent API、草稿保存和独立 strict 出图入口保持原样。
 本次真实测试、毫米数值、耗时、失败记录和未支持范围见
 [G2 Geometry Intent 交付记录](docs/G2_GEOMETRY_INTENT.md)。
+界面布局与用词见 [Inspector UI/UX](docs/INSPECTOR_UI_UX.md)；
+为什么默认高清、SVG 如何安全接入及真实成本见
+[显示清晰度与 SVG 调研](docs/INSPECTOR_DISPLAY_QUALITY.md)。
 
 ## CLI 命令与使用
 ```bash

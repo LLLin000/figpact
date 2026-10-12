@@ -356,3 +356,41 @@ def test_requested_tolerance_cannot_allow_scientific_guide_anchor_to_move(tmp_pa
         assert session.snapshot()['frame_revision'] == before
         assert decision(session, request['operation_id'], 'accept')['status'] != 'OK'
     assert_unchanged(protected)
+
+
+def test_publication_resolution_keeps_trial_physics_and_quality_lock(tmp_path):
+    original, protected = make_session(tmp_path)
+    original.close()
+    with IntentSession(script=tmp_path / 'intent_plot.py',
+                       config=tmp_path / 'intent.yaml', scope='main', dpi=600) as session:
+        frame = session.snapshot()
+        assert scene(frame)['measurement']['dpi'] == 600
+        assert scene(frame)['image']['width_px'] == int(60 * 600 / 25.4)
+        assert scene(frame)['image']['height_px'] == int(40 * 600 / 25.4)
+        for dpi in (240, 600):
+            result = session.set_quality({**session.snapshot()['session'], 'dpi': dpi})
+            assert result['status'] == 'OK', result
+            assert scene(result['frame'])['measurement']['dpi'] == dpi
+            assert result['frame']['frame_revision'] == result['frame']['geometry_revision']
+        request = intent(session)
+        result = session.evaluate(request)
+        assert result['status'] == 'OK', result
+        assert result['measured_delta_mm'] == pytest.approx([0., 0.15], abs=1e-8)
+        assert result['guide_checks'][0]['scientific_endpoint_error_mm'] <= 1e-8
+        assert decision(session, request['operation_id'], 'accept')['status'] == 'OK'
+        accepted = session.snapshot()['frame_revision']
+        assert session.set_quality({**session.snapshot()['session'], 'dpi': 120})['status'] == 'QUALITY_LOCKED'
+        assert session.snapshot()['frame_revision'] == accepted
+    assert_unchanged(protected)
+
+
+def test_display_quality_cannot_change_caller_owned_plain_figure():
+    fig = plt.figure(dpi=173)
+    try:
+        canvas = fig.canvas
+        with pytest.raises(ValueError):
+            IntentSession(figure=fig, dpi=600)
+        assert fig.dpi == 173
+        assert fig.canvas is canvas
+    finally:
+        plt.close(fig)

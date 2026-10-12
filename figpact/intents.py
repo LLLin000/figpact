@@ -75,7 +75,11 @@ class IntentSession:
     """Single-owner, single-pending-candidate Inspector session; never publishes/saves."""
 
     def __init__(self, *, script=None, config=None, scope='measurement', figure=None,
-                 registry=None, contract=None, science_manifest=None):
+                 registry=None, contract=None, science_manifest=None, dpi=None):
+        if dpi is not None and (type(dpi) is not int or dpi not in (120, 240, 600)):
+            raise ValueError('显示清晰度只支持 120、240 或 600 DPI')
+        if figure is not None and dpi is not None:
+            raise ValueError('不能为了显示清晰度修改传入的原始 Figure；请在创建图时设置 DPI')
         self.session_id = str(uuid.uuid4())
         self.scope = scope
         self._core: FigureSession | None = None
@@ -83,7 +87,7 @@ class IntentSession:
         self._pending: dict[str, Any] | None = None
         self._frame: dict[str, Any]
         self._closed = False
-        self._dpi = None
+        self._dpi = float(dpi) if dpi is not None else None
         self._source = None
         self._contract_override = contract
         self._rc_style = None
@@ -421,8 +425,8 @@ class IntentSession:
         if refused:
             return self._response(refused, request, '图帧或源文件已经改变')
         dpi = request.get('dpi')
-        if type(dpi) is not int or dpi not in (120, 240):
-            return self._response('INVALID_INTENT', request, '仅支持 120/240 DPI 同帧重建')
+        if type(dpi) is not int or dpi not in (120, 240, 600):
+            return self._response('INVALID_INTENT', request, '显示清晰度只支持 120、240 或 600 DPI')
         if self._core is None:
             return self._response('NEEDS_AUTHORING', request, '静态 Figure 没有可信重建入口，不能单独更换 PNG')
         if self._pending is not None or self._accepted:

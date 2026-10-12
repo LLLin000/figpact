@@ -358,15 +358,12 @@
   };
 
   function formatScientificText(raw) {
-    if (!raw || typeof raw !== 'string') return '';
-    const subMap = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉', '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎', 'a': 'ₐ', 'e': 'ₑ', 'o': 'ₒ', 'x': 'ₓ', 'h': 'ₕ', 'k': 'ₖ', 'l': 'ₗ', 'm': 'ₘ', 'n': 'ₙ', 'p': 'ₚ', 's': 'ₛ', 't': 'ₜ' };
-    const superMap = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾', 'n': 'ⁿ', 'i': 'ⁱ' };
-    return raw
-      .replace(/_\{([^}]+)\}/g, (_, chars) => chars.split('').map(c => subMap[c] || c).join(''))
-      .replace(/\^\{([^}]+)\}/g, (_, chars) => chars.split('').map(c => superMap[c] || c).join(''))
-      .replace(/_([0-9a-zA-Z])/g, (_, c) => subMap[c.toLowerCase()] || c)
-      .replace(/\^([0-9])/g, (_, c) => superMap[c] || c)
-      .replace(/\$/g, '');
+    if (typeof raw !== 'string') return '';
+    const sub = '₀₁₂₃₄₅₆₇₈₉₊₋', sup = '⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻';
+    // Only format supported numeric math spans; keep identifiers, case and literal $ intact.
+    return raw.replace(/\$([_^])(?:\{([0-9+-]+)\}|([0-9+-]))\$/g,
+      (_, op, group, single) => [...(group || single)]
+        .map(c => (op === '_' ? sub : sup)['0123456789+-'.indexOf(c)]).join(''));
   }
 
   function displayTitle(node) {
@@ -384,13 +381,8 @@
       }
       return '峰位引线';
     }
-    if (node.gid) {
-      if (node.gid.includes('3p91') || node.gid.includes('3.91')) {
-        return `${node.type === 'guide' ? '引线' : '对象'} · 3.91 ppm`;
-      }
-      return node.gid;
-    }
-    return node.descriptor || `${node.type}: ${node.id}`;
+    const ordinal = (state.scene?.nodes.findIndex(n => n.id === node.id) ?? -1) + 1;
+    return `${displayType(node)} ${ordinal || ''}`.trim();
   }
 
   function displayType(node) {
@@ -399,8 +391,11 @@
     if (node.type === 'text') return '文本';
     if (node.type === 'curve') return '曲线';
     if (node.type === 'image') return '图像';
-    if (node.type === 'panel') return '画板';
-    return node.type || '对象';
+    if (node.type === 'panel') return '子图';
+    if (node.type === 'group') return '对象组';
+    if (node.type === 'legend') return '图例';
+    if (node.type === 'figure') return '整张图';
+    return '对象';
   }
 
   function formatBounds(b) {
@@ -487,14 +482,14 @@
       statusClass = 'tag tag-warning';
     } else if (state.lastEvaluation) {
       if (canAcceptEvaluation(state.lastEvaluation, snap.intent)) {
-        plainStatus = '真实渲染几何检验通过（可保留调整）';
+        plainStatus = '已重新绘图，位置检查通过';
         statusClass = 'tag tag-success';
       } else {
         plainStatus = `试算未通过 (${state.lastEvaluation.status || '未通过'})`;
         statusClass = 'tag tag-warning';
       }
     } else if (hasDelta) {
-      plainStatus = '示范中（未进行排版试算）';
+      plainStatus = '位置示范，尚未验证';
       statusClass = 'tag';
     }
     byId('intent-status-badge').textContent = plainStatus;
@@ -513,10 +508,10 @@
       byId('btn-evaluate').title = '该对象不支持位置微调';
       byId('btn-accept').title = '该对象不支持位置微调';
     } else if (!snap.canEvaluate) {
-      byId('btn-evaluate').title = '本次临时编号对象仅供预览，不支持排版试算';
-      byId('btn-accept').title = '需先通过试算验证，且仅能保留到当前会话，不写回文件';
+      byId('btn-evaluate').title = '这个对象可以示范位置，但无法重新绘图验证';
+      byId('btn-accept').title = '先检查实际位置；保留后也不会写入文件';
     } else {
-      byId('btn-evaluate').title = '对当前示范位移执行真实排版重建与几何安全性检验';
+      byId('btn-evaluate').title = '按这个位置重新绘图，并检查实际位移和安全限制';
       byId('btn-accept').title = '保留这次调整（仅本次打开有效，未保存到文件）';
     }
     byId('btn-undo').disabled = !canUndo;
@@ -559,7 +554,9 @@
         ['对象类型', typeText],
         ['位置与尺寸', formatBounds(node.bounds_mm)],
         ['编号属性', node.identity_stability === 'stable' ? '固定编号' : '本次临时编号'],
-        ['微调权限', (node.registered && canRebuild && canGhost) ? '支持本次微调' : '仅供查看（不支持试调）']
+        ['位置调整', (node.registered && canRebuild && canGhost)
+          ? '可以试调，检查通过后才能保留'
+          : canGhost ? '可以示范位置，不能保留修改' : '仅查看']
       ]);
 
       // 2. 二级折叠：高级技术细节与凭证（收起在 details 内，不淹没首屏）
@@ -589,12 +586,12 @@
       }
 
       byId('detail-ephemeral').hidden = node.identity_stability !== 'ephemeral';
-      byId('detail-ephemeral').textContent = '该对象属于本次临时编号元素，仅在当前画面有效；不支持试调。';
+      byId('detail-ephemeral').textContent = '这个编号只在当前图上有效。重新生成图后，请重新选择对象。';
 
       byId('detail-readonly').hidden = false;
       byId('detail-readonly').textContent = canRebuild
-        ? '会话试调模式：可试调位置并预览排版；原 Python 源码与 YAML 配置文件处于受保护状态，不会被改动。'
-        : '只读测量模式：本图件为普通图形或静态快照，仅供测量与查看，不可改动。';
+        ? '可以预览位置调整；不会修改原始脚本、配置或正式图片。'
+        : '不会修改原图。可移动对象的轮廓来示范位置，但不能保留到图中。';
 
       if (node.annotation || node.linked_guide_gid || node.type === 'guide') {
         byId('detail-annotation').hidden = false;
@@ -931,7 +928,7 @@
       state.lastEvaluation = data;
       byId('intent-eval-results').hidden = false;
       const statusText = data.status === 'OK' ? '通过' : (data.status === 'TARGET_MISMATCH' ? '位移不匹配' : (data.status === 'IMPACT_MISMATCH' ? '产生非预期碰撞' : data.status));
-      const verifyText = data.verification_level === 'RENDER_CHECKED' ? '真实渲染几何检验通过' : data.verification_level;
+      const verifyText = data.verification_level === 'RENDER_CHECKED' ? '已重新绘图，位置检查通过' : data.verification_level;
       byId('eval-state-text').textContent = `状态：${statusText} · 验证：${verifyText}`;
       fields(byId('eval-fields'), [
         ['目标位移', `Δ [${data.target_delta_mm?.join(', ')}] mm`],
@@ -1189,11 +1186,11 @@
         ['帧校验哈希', frame.frame_revision ? frame.frame_revision.slice(0, 16) : '无']
       ]);
       byId('calibration-note').hidden = false;
-      byId('calibration-note').textContent = '物理标尺基于图件导出页面尺寸（毫米），非显示屏幕实际物理毫米。折线采用中心线几何模型，文字采用保守外包络。';
+      byId('calibration-note').textContent = '标尺显示图片在论文中的尺寸，不是屏幕上的实际长度。线条按中心线测量；文字按外围矩形测量。';
 
       if (isNewAccepted) {
         byId('frame-revision').textContent = frame.frame_revision.slice(0, 12);
-        status(canRebuild ? '图片已加载 · 尺寸核对一致' : '图片已加载 · 尺寸核对一致', 'ok');
+        status('图片已加载 · 尺寸核对一致', 'ok');
         wrap.scrollLeft = wrap.scrollTop = 0;
         fit();
         objectList();

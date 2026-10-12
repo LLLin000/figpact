@@ -12,10 +12,8 @@
       <div class="brand">
         <h1>figpact 检查器</h1>
         <span class="tag" id="badge-readonly">仅查看</span>
-        <span class="tag" id="frame-scope"></span>
-        <span class="tag mono" id="frame-revision"></span>
       </div>
-      <p id="integrity-status" class="status status-pending" role="status" aria-live="polite">正在校验数据完整性…</p>
+      <p id="integrity-status" class="status status-pending" role="status" aria-live="polite">正在加载并核对图片…</p>
     </header>
 
     <div id="toolbar">
@@ -121,6 +119,7 @@
       <p id="calibration-note" class="notice notice-warning" hidden></p>
       <details class="technical-details" id="footer-tech-wrap">
         <summary>系统与校验凭证</summary>
+        <p class="hint">输出版本：<span id="frame-scope"></span> · 图片版本：<span class="mono" id="frame-revision"></span></p>
         <dl id="state-fields"></dl>
       </details>
     </footer>
