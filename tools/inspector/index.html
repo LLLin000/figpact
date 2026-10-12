@@ -3,93 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>figpact Inspector（只读 Scene 检查器）</title>
+  <title>figpact 检查器（图形与布局预览）</title>
   <link rel="stylesheet" href="inspector.css">
 </head>
 <body>
   <div id="inspector-root" data-selected-id="" data-hover-id="" data-ready="false" data-frame-state="loading">
     <header id="inspector-header">
       <div class="brand">
-        <h1>figpact Inspector</h1>
-        <span class="tag" id="badge-readonly">READ_ONLY</span>
+        <h1>figpact 检查器</h1>
+        <span class="tag" id="badge-readonly">只读测量</span>
         <span class="tag" id="frame-scope"></span>
         <span class="tag mono" id="frame-revision"></span>
       </div>
-      <p id="integrity-status" class="status status-pending" role="status" aria-live="polite">正在校验帧完整性…</p>
+      <p id="integrity-status" class="status status-pending" role="status" aria-live="polite">正在校验数据完整性…</p>
     </header>
 
-    <main id="inspector-main">
-      <section id="stage" aria-label="画布视图">
-        <div id="toolbar">
-          <form id="search-form" role="search" autocomplete="off">
-            <label for="search-input">搜索对象</label>
-            <input id="search-input" type="search" placeholder="gid / 文本 / 类型 / id" aria-describedby="search-hint">
-            <span id="search-hint" class="hint">对象列表可作为选中兜底</span>
-          </form>
-          <div id="view-controls" role="group" aria-label="视图控制">
-            <button id="zoom-in" type="button" aria-label="放大视图">放大</button>
-            <button id="zoom-out" type="button" aria-label="缩小视图">缩小</button>
-            <button id="view-reset" type="button" aria-label="重置视图">重置视图</button>
-            <button id="toggle-list" type="button" aria-expanded="false" aria-controls="object-list-panel">对象列表</button>
-            <span class="sep" aria-hidden="true">|</span>
-            <button id="btn-dpi-120" type="button" aria-label="120 DPI">120 DPI</button>
-            <button id="btn-dpi-240" type="button" aria-label="240 DPI">240 DPI</button>
-          </div>
-        </div>
+    <div id="toolbar">
+      <div class="toolbar-left">
+        <button id="toggle-list" type="button" aria-expanded="false" aria-controls="object-list-panel">图元列表</button>
+        <form id="search-form" role="search" autocomplete="off">
+          <label for="search-input" class="sr-only">搜索图元</label>
+          <input id="search-input" type="search" placeholder="搜索图元名称、标签文字或类型…" aria-describedby="search-hint">
+          <span id="search-hint" class="hint sr-only">可在图元列表中查看与点选</span>
+        </form>
+      </div>
 
+      <div id="view-controls" role="group" aria-label="视图控制">
+        <button id="zoom-out" type="button" aria-label="缩小视图" title="缩小视图 (Ctrl + 滚轮下滚 或 -)">缩小</button>
+        <button id="zoom-in" type="button" aria-label="放大视图" title="放大视图 (Ctrl + 滚轮上滚 或 +)">放大</button>
+        <button id="view-reset" type="button" aria-label="适应窗口" title="重置缩放并适应窗口">适应窗口</button>
+        <span class="sep" aria-hidden="true">|</span>
+        <div class="segmented-dpi" role="group" aria-label="渲染清晰度">
+          <button id="btn-dpi-120" type="button" aria-label="标准清晰度 120 DPI" title="标准清晰度 (120 DPI)">标准 (120 DPI)</button>
+          <button id="btn-dpi-240" type="button" aria-label="高清清晰度 240 DPI" title="高清打印清晰度 (240 DPI)">高清 (240 DPI)</button>
+          <button id="btn-dpi-600" type="button" aria-label="出版清晰度 600 DPI" title="出版清晰度 (600 DPI)">出版清晰度 (600 DPI)</button>
+        </div>
+      </div>
+    </div>
+
+    <main id="inspector-main">
+      <aside id="object-list-panel" aria-label="图元大纲列表" hidden>
+        <div class="panel-header">
+          <h2>图元列表</h2>
+          <span id="object-list-count" class="hint">0 个图元</span>
+        </div>
+        <ul id="object-list"></ul>
+      </aside>
+
+      <section id="stage" aria-label="画布视图">
         <div id="viewport-wrap">
           <div id="ruler-top" class="ruler ruler-h" aria-hidden="true"></div>
           <div id="ruler-left" class="ruler ruler-v" aria-hidden="true"></div>
           <svg id="viewport" tabindex="0" role="application"
-               aria-label="只读图像视图：悬停高亮，单击选中，Alt+单击轮换，空格拖拽平移"></svg>
+               aria-label="图件视图：鼠标悬停查看轮廓，单击选中，Alt+单击轮换重叠图元，空格拖拽平移"></svg>
           <p id="viewport-empty" class="empty" hidden></p>
         </div>
 
         <p id="stage-hint">
-          悬停只看不改；单击选中；Alt+单击在重叠对象间轮换；Esc 取消选择。
-          滚轮平移，Ctrl+滚轮或 +/- 缩放，空格+拖拽平移，只影响视图，不移动任何图元。
+          悬停查看轮廓 · 单击选中 · Alt+单击切换重叠图元 · 方向键微调位置 · Esc 取消候选 · 空格拖拽或滚轮平移 · Ctrl+滚轮缩放 · 视图操作不影响源文件
         </p>
       </section>
 
-      <aside id="detail-panel" aria-label="选中对象详情">
-        <h2>选中对象</h2>
-        <p id="detail-empty" class="hint">未选中对象。点选图像中的对象，或从对象列表选择。</p>
+      <aside id="detail-panel" aria-label="检查器">
+        <div class="panel-header">
+          <h2>属性检查器</h2>
+        </div>
+        <p id="detail-empty" class="hint">未选中任何图元。在画面中点击图元，或从左侧图元列表中点选。</p>
         <dl id="detail-fields" hidden></dl>
         <p id="detail-ephemeral" class="notice notice-ephemeral" hidden></p>
         <p id="detail-readonly" class="notice notice-readonly" hidden></p>
         <p id="detail-annotation" class="notice notice-science" hidden></p>
-        <section id="intent-section" aria-label="意图与示范" hidden>
-          <h3>意图示范与试算</h3>
-          <p id="intent-hint" class="hint">方向键：默认 0.1mm | Alt 0.01mm | Shift 0.5mm</p>
+
+        <section id="intent-section" aria-label="位置调整与试算" hidden>
+          <div class="section-header">
+            <h3>位置微调与会话试算</h3>
+            <span id="intent-status-badge" class="tag">示范中</span>
+          </div>
+          <p id="intent-hint" class="hint">方向键：平移 0.1 mm · Alt 微调 0.01 mm · Shift 0.5 mm</p>
           <div class="intent-inputs">
-            <label for="intent-dx">dx (mm)</label>
-            <input id="intent-dx" type="number" step="0.01" value="0">
-            <label for="intent-dy">dy (mm)</label>
-            <input id="intent-dy" type="number" step="0.01" value="0">
-            <button id="btn-apply-delta" type="button">设置位移</button>
+            <div class="input-group">
+              <label for="intent-dx">水平 ΔX</label>
+              <input id="intent-dx" type="number" step="0.01" value="0">
+              <span class="unit">mm</span>
+            </div>
+            <div class="input-group">
+              <label for="intent-dy">垂直 ΔY</label>
+              <input id="intent-dy" type="number" step="0.01" value="0">
+              <span class="unit">mm</span>
+            </div>
+            <button id="btn-apply-delta" type="button">应用位移</button>
           </div>
           <div class="intent-status-row">
-            <span id="intent-status-badge" class="tag">DESIRED_ONLY</span>
-            <span id="intent-displacement" class="mono">Δ [0, 0] mm</span>
+            <span id="intent-displacement" class="mono">位移：ΔX 0 mm, ΔY 0 mm</span>
           </div>
           <div id="intent-eval-results" class="eval-results" hidden>
             <p id="eval-state-text" class="hint"></p>
             <dl id="eval-fields"></dl>
           </div>
           <div class="intent-actions">
-            <button id="btn-evaluate" type="button">试算 / Evaluate</button>
-            <button id="btn-accept" type="button" disabled>接受 / Accept</button>
-            <button id="btn-cancel-intent" type="button">取消 / Cancel</button>
-            <button id="btn-undo" type="button">撤销 / Undo</button>
+            <button id="btn-evaluate" type="button">试算排版</button>
+            <button id="btn-accept" type="button" disabled>接受到会话</button>
+            <button id="btn-cancel-intent" type="button">取消候选</button>
+            <button id="btn-undo" type="button">撤销操作</button>
           </div>
           <p id="intent-notice" class="notice notice-warning" hidden></p>
         </section>
-      </aside>
-
-      <aside id="object-list-panel" aria-label="对象列表" hidden>
-        <h2>对象列表</h2>
-        <p id="object-list-count" class="hint"></p>
-        <ul id="object-list"></ul>
       </aside>
     </main>
 
