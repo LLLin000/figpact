@@ -146,21 +146,36 @@ def _source_evidence(script, config, scope, *, exclude=(), required=(), source_r
     inputs = [Path(item) for item in required]
     skip = outputs - {Path(item).resolve() for item in inputs}
     files: dict[str, Any] = {}
+    records: dict[str, dict[str, Any]] = {}
+
+    def record(path: Path, resolved: str) -> dict[str, Any]:
+        """One read per path **inside this call only**: overlapping walks (script dir vs.
+        declared inputs vs. engine dir) and duplicate spellings reuse the same result.
+        Never memoised across calls — every fresh evidence check still reads real bytes."""
+        known = records.get(resolved)
+        if known is None:
+            records[resolved] = known = _file_record(path)
+        return known
+
     for path in sorted(script_path.parent.rglob('*')):
         if not path.is_file() or '__pycache__' in path.parts or path.suffix.lower() == '.pyc':
             continue
         resolved = path.resolve()
         if resolved in skip or resolved == config_resolved:
             continue
-        files[str(resolved)] = _file_record(path)
+        files[str(resolved)] = record(path, str(resolved))
     for path in inputs:
         if path.is_file():
-            files[str(path.resolve())] = _file_record(path)
+            resolved = str(path.resolve())
+            files[resolved] = record(path, resolved)
     if Path(config).is_file() and config_resolved not in skip:
-        files[str(config_resolved)] = _file_record(Path(config))
-    engine_files = {str(path.resolve()): _file_record(path)
-                    for path in sorted(Path(__file__).parent.rglob('*.py'))
-                    if '__pycache__' not in path.parts}
+        files[str(config_resolved)] = record(Path(config), str(config_resolved))
+    engine_files: dict[str, Any] = {}
+    for path in sorted(Path(__file__).parent.rglob('*.py')):
+        if '__pycache__' in path.parts:
+            continue
+        resolved = str(path.resolve())
+        engine_files[resolved] = record(path, resolved)
     return {'schema': HISTORY_SCHEMA, 'script': str(script_path.resolve()),
             'config': str(config_resolved), 'scope': scope, 'source_revision': source_revision,
             'module_revision': module_revision, 'engine': engine_fingerprint(),
