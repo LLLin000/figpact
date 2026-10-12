@@ -692,3 +692,37 @@ test('G3 arrow keys need the viewport in full mode but accept a focused host in 
   assert.equal(acceptsArrowKeys({ minimal: true, activeElementIsViewport: true, hasDocumentFocus: true, inputActive: true }), false);
   assert.equal(acceptsArrowKeys({ minimal: true, activeElementIsViewport: false, hasDocumentFocus: true, inputActive: true }), false);
 });
+
+test('G5b selection sequence seeds above everything the hub already knows', () => {
+  const { seedSelectionSeq } = loadHelper();
+  // 刷新后计数器从 0 重来：hub_revision 与上次 selection_seq 里更大的那个必须被越过
+  assert.equal(seedSelectionSeq({ hub_revision: 7, selection: { selection_seq: 5 } }, 0), 8);
+  assert.equal(seedSelectionSeq({ hub_revision: 2, selection: { selection_seq: 9 } }, 0), 10);
+  assert.equal(seedSelectionSeq({ hub_revision: 7, selection: null }, 3), 8);
+  // 播种只上不下：本地已经在更高处时不许被 Hub 拉回去
+  assert.equal(seedSelectionSeq({ hub_revision: 1 }, 500), 501);
+  // 取不到 / 字段缺失 / 脏数据：本地计数器仍然递增（较大随机起点由调用方给）
+  assert.equal(seedSelectionSeq(null, 4), 5);
+  assert.equal(seedSelectionSeq({}, 4), 5);
+  assert.equal(seedSelectionSeq(undefined, -5), 1);
+  assert.equal(seedSelectionSeq({ hub_revision: null, selection: { selection_seq: '9' } }, 4), 5);
+  assert.equal(seedSelectionSeq({ hub_revision: -3, selection: { selection_seq: 1.9 } }, 4), 5);
+  // 重播前用 GET 的最新值再播种一次，结果必须严格大于刚读到的值
+  const fresh = { hub_revision: 12, selection: { selection_seq: 11 } };
+  const retry = seedSelectionSeq(fresh, 10);
+  assert.equal(retry, 13);
+  assert.ok(retry > fresh.hub_revision && retry > fresh.selection.selection_seq);
+});
+
+test('G5b reseed is attempted only for a real INVALID_SELECTION rejection', () => {
+  const { shouldReseed } = loadHelper();
+  assert.equal(shouldReseed(400, { status: 'INVALID_SELECTION', message: 'selection_seq 必须严格递增（当前 3）' }), true);
+  assert.equal(shouldReseed(409, { status: 'INVALID_SELECTION' }), true);
+  // 服务端其它拒绝理由重播也没用：不许瞎重试
+  assert.equal(shouldReseed(400, { status: 'INVALID_INTENT', message: '必须使用 application/json' }), false);
+  assert.equal(shouldReseed(415, { status: 'INVALID_INTENT' }), false);
+  assert.equal(shouldReseed(409, { status: 'STALE_SELECTION' }), false);
+  assert.equal(shouldReseed(500, { status: 'INVALID_SELECTION' }), false);
+  assert.equal(shouldReseed(404, null), false);
+  assert.equal(shouldReseed(200, { status: 'OK', selection_seq: 4 }), false);
+});

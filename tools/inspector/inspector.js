@@ -381,7 +381,77 @@
     return !!minimal && !!hasDocumentFocus;
   }
 
-  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys };
+  // ---------- G5b 计划（同意 / 取消）----------
+  // 页面只是「同意」的通道：它回传的是服务端铸造的 plan_id + 服务端注入页面的会话令牌。
+  // 页面侧的动作只有 authorize / cancel：apply（写盘）由申请该计划的客户端做，这里没有这条路。
+  const PLAN_ACTIONS = ['authorize', 'cancel'];
+
+  function planRequest(planId, action, token) {
+    requireFact(typeof planId === 'string' && planId, 'Invalid plan id');
+    requireFact(PLAN_ACTIONS.includes(action), `Plan action ${action} is not available to the Inspector page`);
+    // 不带 body：授权不是请求体里的布尔字段，而是 header 里的页面会话令牌。
+    return { url: `/api/plans/${encodeURIComponent(planId)}/${action}`,
+             init: { method: 'POST', headers: { 'X-Figpact-Ui': typeof token === 'string' ? token : '' } } };
+  }
+  function plansFromPayload(payload) {
+    const list = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.plans) ? payload.plans : null);
+    return list ? list.filter(plan => plan && typeof plan.plan_id === 'string' && plan.plan_id) : [];
+  }
+  function pendingPlans(payload) {
+    return plansFromPayload(payload).filter(plan => plan.state === 'PENDING');
+  }
+  function planValueText(value) {
+    return Array.isArray(value) && value.length && value.every(finite)
+      ? `[${value.map(v => Number(v.toFixed(4))).join(', ')}]`
+      : '（无值）';
+  }
+  function planFilesText(plan) {
+    const paths = (Array.isArray(plan?.files) ? plan.files : []).map(file => file?.path).filter(Boolean);
+    return paths.length ? paths.join(', ') : '（无文件）';
+  }
+  function planSummaryText(plan) {
+    if (!plan) return '';
+    const count = Array.isArray(plan.files) ? plan.files.length : 0;
+    return `${plan.gid ?? '?'} ← ${planValueText(plan.value)} · ${count} 个文件：${planFilesText(plan)}`;
+  }
+  function planDiffText(plan) {
+    const files = Array.isArray(plan?.files) ? plan.files : [];
+    if (!files.length) return '（没有可显示的改动）';
+    return files.map(file => {
+      const diff = typeof file?.diff === 'string' && file.diff.trim() ? file.diff.replace(/\s+$/, '') : '（无 unified diff）';
+      return `--- ${file?.path ?? '?'}\n${diff}`;
+    }).join('\n');
+  }
+  // 失败必须可读：HTTP 状态 + 服务端信封文案，一个都不许吞。
+  function planFailureText(status, payload) {
+    const code = payload && typeof payload.status === 'string' ? payload.status : `HTTP ${status}`;
+    const message = payload && typeof payload.message === 'string' && payload.message ? `：${payload.message}` : '';
+    return `${status} ${code}${message}`;
+  }
+
+  // G5b：选区序号。Hub 要求 selection_seq 跨页面会话严格递增，而模块级计数器每次刷新都
+  // 从 0 重来——所以发布前先按 GET /api/selection 的 hub_revision / selection_seq 播种；
+  // 被 400 INVALID_SELECTION 拒掉时按最新值再播种一次并重播。
+  // 返回本地计数器应当采用的下一序号：严格大于 Hub 已知值与本地现值。
+  function seedSelectionSeq(payload, current) {
+    const local = typeof current === 'number' && Number.isFinite(current) && current >= 0
+      ? Math.floor(current)
+      : 0;
+    const known = [payload && payload.hub_revision, payload && payload.selection && payload.selection.selection_seq]
+      .filter(value => typeof value === 'number' && Number.isFinite(value) && value >= 0)
+      .map(value => Math.floor(value));
+    return Math.max(local, ...known) + 1;
+  }
+
+  // 只有服务端明确说"序号非法"才值得重播；其它拒绝（415 不是 JSON、409 STALE_SELECTION…）重播也是白搭。
+  function shouldReseed(status, payload) {
+    const code = payload && typeof payload.status === 'string' ? payload.status : '';
+    if (code !== 'INVALID_SELECTION') return false;
+    const http = Number(status);
+    return Number.isFinite(http) ? http >= 400 && http < 500 : true;
+  }
+
+  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys, planRequest, plansFromPayload, pendingPlans, planSummaryText, planDiffText, planFailureText, seedSelectionSeq, shouldReseed };
   const globalScope = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : root);
   globalScope.FigpactInspector = api;
   root.FigpactInspector = api;
@@ -417,7 +487,13 @@
     lastEvaluation: null,
     operationStack: createOperationStack(),
     inFlightGuard: createInFlightGuard(),
-    pendingOperationId: null
+    pendingOperationId: null,
+    plans: [],
+    plansSignature: '',
+    plansError: '',
+    planNotice: '',
+    planErrors: new Map(),
+    selectionError: ''
   };
   const svg = (tag, attrs = {}) => {
     const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -499,6 +575,155 @@
     }
   }
 
+  // ---------- G5b 待授权计划：极简一条 + 授权 / 取消 ----------
+  // 这一块只读 /api/plans、只发 authorize / cancel；写盘（apply）永远由申请计划的客户端做。
+  function uiToken() {
+    return typeof root.FIGPACT_UI_TOKEN === 'string' ? root.FIGPACT_UI_TOKEN : '';
+  }
+
+  function planStrip(plan) {
+    const strip = document.createElement('article');
+    strip.className = 'plan-strip';
+    strip.setAttribute('data-plan-id', plan.plan_id);
+
+    const head = document.createElement('div');
+    head.className = 'plan-head';
+    const title = document.createElement('span');
+    title.className = 'plan-title';
+    title.textContent = planSummaryText(plan);
+    head.append(title);
+
+    const actions = document.createElement('span');
+    actions.className = 'plan-actions';
+    for (const [action, label] of [['authorize', '授权'], ['cancel', '取消']]) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.setAttribute('data-plan-action', action);
+      button.textContent = label;
+      button.addEventListener('click', () => planAction(plan.plan_id, action));
+      actions.append(button);
+    }
+    head.append(actions);
+
+    const line = document.createElement('span');
+    line.className = 'plan-status';
+    line.setAttribute('data-plan-status', '');
+    line.setAttribute('role', 'status');
+    line.setAttribute('aria-live', 'polite');
+    line.textContent = state.planErrors.get(plan.plan_id) || '';
+    head.append(line);
+
+    // diff 摘要可折叠：默认展开（节点始终有内容），极简模式靠 CSS 压成细条，点 summary 收起
+    const details = document.createElement('details');
+    details.className = 'plan-diff-wrap';
+    details.open = true;
+    const summary = document.createElement('summary');
+    summary.textContent = 'unified diff';
+    const diff = document.createElement('pre');
+    diff.className = 'plan-diff';
+    diff.setAttribute('data-plan-diff', '');
+    diff.textContent = planDiffText(plan);
+    details.append(summary, diff);
+
+    strip.append(head, details);
+    return strip;
+  }
+
+  function renderPlans() {
+    const holder = byId('agent-plans');
+    if (!holder) return;
+    holder.replaceChildren();
+    const notice = state.plansError || state.planNotice;
+    if (notice) {
+      const line = document.createElement('p');
+      line.className = 'plan-notice';
+      line.setAttribute('data-plans-notice', '');
+      line.setAttribute('role', 'status');
+      line.setAttribute('aria-live', 'polite');
+      line.textContent = notice;
+      holder.append(line);
+    }
+    // 选区通道失败和计划失败共用这条可见通道，但各有自己的标记属性
+    if (state.selectionError) {
+      const line = document.createElement('p');
+      line.className = 'plan-notice';
+      line.setAttribute('data-selection-error', '');
+      line.setAttribute('role', 'status');
+      line.setAttribute('aria-live', 'polite');
+      line.textContent = state.selectionError;
+      holder.append(line);
+    }
+    for (const plan of pendingPlans(state.plans)) holder.append(planStrip(plan));
+  }
+
+  function setSelectionError(text) {
+    if (text === state.selectionError) return;
+    state.selectionError = text;
+    renderPlans();
+  }
+
+  async function refreshPlans() {
+    if (typeof fetch !== 'function') return;
+    try {
+      const response = await fetch('/api/plans', { headers: { Accept: 'application/json' } });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const plans = plansFromPayload(await response.json());
+      const wasError = !!state.plansError;
+      state.plansError = '';
+      // 内容没变就不重画：轮询不能把用户展开的 diff 收回去，也不能打断点击
+      const signature = plans.map(plan => `${plan.plan_id}:${plan.state}`).join('|');
+      if (signature === state.plansSignature && !wasError) return;
+      state.plansSignature = signature;
+      state.plans = plans;
+    } catch (error) {
+      // 拉不到就保留上一版列表，但如实说出拉不到；同一条错误不重复重画
+      const text = `无法获取待授权计划：${error.message}`;
+      if (text === state.plansError) return;
+      state.plansError = text;
+    }
+    renderPlans();
+  }
+
+  async function planAction(planId, action) {
+    const label = action === 'authorize' ? '授权' : '取消';
+    const strip = byId('agent-plans')?.querySelector(`[data-plan-id="${planId}"]`);
+    let request;
+    try {
+      request = planRequest(planId, action, uiToken());
+    } catch (error) {
+      state.planErrors.set(planId, `${label}失败 · ${error.message}`);
+      renderPlans();
+      return;
+    }
+    // 本条先锁住，避免同一条细条被连点两次
+    if (strip) {
+      for (const button of strip.querySelectorAll('button')) button.disabled = true;
+      strip.querySelector('[data-plan-status]').textContent = '请求中…';
+    }
+    try {
+      const response = await fetch(request.url, request.init);
+      let payload = null;
+      try { payload = await response.json(); } catch (error) { payload = null; }
+      if (!response.ok || !payload || payload.status !== 'OK') {
+        const failure = new Error(planFailureText(response.status, payload));
+        failure.http = true;
+        throw failure;
+      }
+      state.planErrors.delete(planId);
+      state.planNotice = action === 'authorize'
+        ? `已授权 · 计划 ${planId.slice(0, 8)}（等待申请它的客户端应用，本页不写盘）`
+        : `已取消 · 计划 ${planId.slice(0, 8)}`;
+      await refreshPlans();
+    } catch (error) {
+      const text = `${label}失败 · ${error.http ? error.message : `网络异常：${error.message}`}`;
+      state.planErrors.set(planId, text);
+      await refreshPlans();
+      // 计划已经不再是 PENDING（细条会消失）时，失败只能落在容器这一行，不许静默
+      if (!pendingPlans(state.plans).some(plan => plan.plan_id === planId)) state.planNotice = text;
+      renderPlans();
+    }
+  }
+
   // 机器可读快照：极简模式看不到的细节都写进这个不可见元素，供 agent 读取（完整模式同样写入）
   function publishAgentDetail() {
     const node = state.nodes.get(state.selected) || null;
@@ -522,47 +747,94 @@
   }
 
   // G5a：把当前选区上下文发布给 Hub（只读取选区；不授予源码写入或发布权限）。
-  // 只在选区/微调/试算/决定/加载时随 publishAgentDetail 发出，hover 不发布；失败静默。
-  let selectionSeq = 0;
-  function publishSelection() {
+  // 只在选区/微调/试算/决定/加载时随 publishAgentDetail 发出，hover 不发布。
+  // G5b：刷新后计数器从 0 重来会被 Hub 按"严格递增"拒掉，所以先播种；失败不静默。
+  const selectionRandomBase = 1 + Math.floor(Math.random() * 1e9); // 读不到 Hub 时才用的较大随机起点
+  let selectionSeq = 0; // 下一个要用的序号：先播种，再发布
+  let selectionSeeded = null;
+  let selectionChain = Promise.resolve(); // 串行发送：并发 POST 乱序到达会被 Hub 拒掉
+
+  async function fetchSelectionSnapshot() {
+    if (typeof fetch !== 'function') return null;
     try {
-      const node = state.nodes.get(state.selected) || null;
-      const snapshot = state.intentSession ? state.intentSession.snapshot() : null;
-      const frame = state.acceptedFrame || state.frame;
-      const delta = snapshot?.intent?.delta_mm || [0, 0];
-      const guideNode = node?.linked_guide_gid
-        ? (state.scene?.nodes || []).find(n => n.gid === node.linked_guide_gid || n.id === node.linked_guide_gid)
-        : null;
-      selectionSeq += 1;
-      fetch('/api/selection', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          selection_seq: selectionSeq,
-          session_id: frame?.session?.session_id ?? null,
-          scene_revision: frame?.frame_revision ?? null,
-          source_revision: state.scene?.source_revision ?? null,
-          scope: state.scene?.scope ?? null,
-          mode: 'canvas',
-          selected: node ? {
-            gid: node.gid || node.id,
-            title: displayTitle(node),
-            type: displayType(node),
-            bounds_mm: node.bounds_mm ?? null,
-            linked_guide_gid: node.linked_guide_gid ?? null,
-            registered: !!node.registered,
-            identity_stability: node.identity_stability ?? null,
-            can_evaluate: !!snapshot?.canEvaluate
-          } : null,
-          delta_mm: [delta[0], delta[1]],
-          status: node ? (snapshot?.status || 'DESIRED_ONLY') : 'NO_SELECTION',
-          related: guideNode ? [{ gid: guideNode.gid || guideNode.id, relation: 'guide', bounds_mm: guideNode.bounds_mm ?? null }] : [],
-          constraints: ['preserve_science']
-        })
-      }).catch(() => {});
+      const response = await fetch('/api/selection', { headers: { Accept: 'application/json' } });
+      if (!response.ok) return null;
+      return await response.json();
     } catch (error) {
-      // Hub 不在或选区异常都不影响检查器
+      return null; // 取不到 Hub 就退化成随机起点，发布照样递增
     }
+  }
+
+  function ensureSelectionSeeded() {
+    if (!selectionSeeded) {
+      selectionSeeded = fetchSelectionSnapshot().then(payload => {
+        // 读到 Hub 就按它的 hub_revision / 上次 seq 播种（空 Hub 就是 1）；读不到才退化成随机起点
+        selectionSeq = Math.max(selectionSeq, payload ? seedSelectionSeq(payload, 0) : selectionRandomBase);
+        return payload;
+      });
+    }
+    return selectionSeeded;
+  }
+
+  // 每次发送时重建 body：排队中的发布永远带最新选区，不重放旧状态。
+  function selectionBody(seq) {
+    const node = state.nodes.get(state.selected) || null;
+    const snapshot = state.intentSession ? state.intentSession.snapshot() : null;
+    const frame = state.acceptedFrame || state.frame;
+    const delta = snapshot?.intent?.delta_mm || [0, 0];
+    const guideNode = node?.linked_guide_gid
+      ? (state.scene?.nodes || []).find(n => n.gid === node.linked_guide_gid || n.id === node.linked_guide_gid)
+      : null;
+    return {
+      selection_seq: seq,
+      session_id: frame?.session?.session_id ?? null,
+      scene_revision: frame?.frame_revision ?? null,
+      source_revision: state.scene?.source_revision ?? null,
+      scope: state.scene?.scope ?? null,
+      mode: 'canvas',
+      selected: node ? {
+        gid: node.gid || node.id,
+        title: displayTitle(node),
+        type: displayType(node),
+        bounds_mm: node.bounds_mm ?? null,
+        linked_guide_gid: node.linked_guide_gid ?? null,
+        registered: !!node.registered,
+        identity_stability: node.identity_stability ?? null,
+        can_evaluate: !!snapshot?.canEvaluate
+      } : null,
+      delta_mm: [delta[0], delta[1]],
+      status: node ? (snapshot?.status || 'DESIRED_ONLY') : 'NO_SELECTION',
+      related: guideNode ? [{ gid: guideNode.gid || guideNode.id, relation: 'guide', bounds_mm: guideNode.bounds_mm ?? null }] : [],
+      constraints: ['preserve_science']
+    };
+  }
+
+  async function postSelection(seq) {
+    const response = await fetch('/api/selection', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(selectionBody(seq))
+    });
+    let payload = null;
+    try { payload = await response.json(); } catch (error) { payload = null; }
+    return { ok: response.ok, status: response.status, payload };
+  }
+
+  async function publishSelectionOnce() {
+    await ensureSelectionSeeded();
+    let result = await postSelection(selectionSeq++);
+    if (!result.ok && shouldReseed(result.status, result.payload)) {
+      // 序号非法：按 Hub 现值重新播种，重播一次
+      selectionSeq = seedSelectionSeq(await fetchSelectionSnapshot(), selectionSeq);
+      result = await postSelection(selectionSeq++);
+    }
+    setSelectionError(result.ok ? '' : `选区发布失败 · ${planFailureText(result.status, result.payload)}`);
+  }
+
+  function publishSelection() {
+    selectionChain = selectionChain
+      .then(publishSelectionOnce)
+      .catch(error => setSelectionError(`选区发布失败 · 网络异常：${error.message}`));
   }
 
   function updateIntentUI() {
@@ -1383,6 +1655,11 @@
     }
   }
   api.loadFrame = loadFrame;
+  // G5b：首次发布之前先按 Hub 现值播种（取不到就退化成较大的本地随机起点）。
+  ensureSelectionSeeded();
+  // G5b：待授权计划条。轮询是为了让客户端刚铸造的计划自动出现；服务器仍是本机回环。
+  refreshPlans();
+  setInterval(refreshPlans, 3000);
   if (root.FIGPACT_INSPECTOR_FRAME) {
     loadFrame(root.FIGPACT_INSPECTOR_FRAME, root.FIGPACT_INSPECTOR_EXPECTED_SOURCE_REVISION);
   } else if (typeof fetch === 'function') {
