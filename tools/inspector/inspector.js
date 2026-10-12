@@ -509,7 +509,7 @@
       byId('btn-accept').title = '该对象不支持位置微调';
     } else if (!snap.canEvaluate) {
       byId('btn-evaluate').title = '这个对象可以示范位置，但无法重新绘图验证';
-      byId('btn-accept').title = '该图件无配置文件，不能保留修改';
+      byId('btn-accept').title = '这张图只能查看和示范，不能保留修改';
     } else {
       byId('btn-evaluate').title = '按这个位置重新绘图，并检查实际位移和安全限制';
       byId('btn-accept').title = '保留这次调整（只保留在当前服务中，未保存到文件）';
@@ -581,6 +581,9 @@
         }
         if (state.frame?.frame_revision) {
           techPairs.push(['图像校验哈希', state.frame.frame_revision.slice(0, 16)]);
+        }
+        if (state.lastEvaluation?.checks) {
+          techPairs.push(['原始检查结果', state.lastEvaluation.checks]);
         }
         fields(byId('detail-tech-fields'), techPairs);
       }
@@ -934,7 +937,11 @@
         ['目标位移', `Δ [${data.target_delta_mm?.join(', ')}] mm`],
         ['实测位移', `Δ [${data.measured_delta_mm?.map(v => Number(v.toFixed(4))).join(', ')}] mm`],
         ['位移误差', data.error_mm != null ? `${Number(data.error_mm.toFixed(4))} mm` : '无'],
-        ['安全检查', (data.checks || []).map(c => `${c.check}:${c.status === 'OK' ? '合格' : c.status}`).join('， ') || '全部合格']
+        ['安全检查', (data.checks || []).map(c => {
+          const name = { science: '科学内容', qa: '排版安全', target: '目标位置', impact: '其他对象' }[c.check] || '其他检查';
+          const outcome = { OK: '通过', PASS: '通过', FAIL: '未通过' }[c.status] || '未确认，请查看详细技术参数';
+          return `${name}：${outcome}`;
+        }).join('；') || '未返回检查明细']
       ]);
       const acceptable = canAcceptEvaluation(data, currentSnap.intent);
       byId('btn-accept').disabled = !acceptable;
@@ -995,7 +1002,7 @@
     const current = state.acceptedFrame || state.frame;
     const canRebuild = !!(current?.session && current.session.can_evaluate !== false && current.session.source_revision);
     if (!canRebuild) {
-      status('当前图件无对应配置，无法撤销', 'error');
+      status('这张图只能查看和示范，没有可撤销的已保留调整', 'error');
       return;
     }
     if (!state.operationStack.canUndo()) {
@@ -1040,7 +1047,7 @@
     const current = state.acceptedFrame || state.frame;
     const canRebuild = !!(current?.session && current.session.can_evaluate !== false && current.session.source_revision);
     if (!canRebuild) {
-      status('当前图件不支持切换显示清晰度：无对应配置', 'error');
+      status('这张图暂不支持重新绘制，不能切换显示清晰度', 'error');
       return;
     }
     status(`正在切换至 ${dpi} DPI 显示清晰度…`, 'pending');
