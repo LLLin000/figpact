@@ -433,11 +433,18 @@ def _apply_config(cfg: dict) -> None:
     **这是布局全局量的唯一初始化路径**：legacy 导入与 native
     `build_scene(science, config, scope)` 都只走这里，不存在第二处「又把 YAML
     读进另一套全局」的分歧约定。
+
+    排版全局量里还有 matplotlib 的 rcParams（字体族、mathtext、figure.dpi）——
+    它们同样决定文字实测宽度与避让结果，所以**在这里一起装**，不能只在导入时
+    `fs.apply()` 一次。否则构建结果会偷偷取决于调用方当时的 rcParams：同一个
+    `(science, config, scope)` 换个环境（例如宿主用 `rc_context()` 隔离、或第二
+    次进程内构造时导入期样式已被回滚）就会排版出另一张图，契约与实图随之对不上。
     """
     global _CFG, CANVAS, Y_OFFSET_STEP, Y_MAX_EXPAND, LABEL_LIFT, LINEWIDTH
     global FONTSIZE_PEAK, FONTSIZE_LEGEND, FONTSIZE_NOTE, FONTSIZE_AXIS, FONTSIZE_TICK
     global LEGEND_COLS, LEGEND_ANCHOR_X, LABEL_MIN_GAP_MM, LABEL_MAX_DX_MM, LABEL_LANES
     global PEAK_LABEL_SHIFTS, SHOW_PPM, SHIFTS_MM
+    fs.apply()
     _CFG = cfg
     ref = cfg["layout_reference"]["main"]
     CANVAS = (cfg["canvas_w_mm"], cfg["canvas_h_mm"])
