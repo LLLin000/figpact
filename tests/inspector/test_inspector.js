@@ -676,3 +676,19 @@ test('G3 stage resize triggers a refit only when the stage size really changed',
   assert.equal(stageSizeChanged({ width: 880, height: 719 }, 880, 745), true);
   assert.equal(stageSizeChanged({ width: 880, height: 719 }, 700, 719), true);
 });
+
+test('G3 arrow keys need the viewport in full mode but accept a focused host in minimal mode', () => {
+  const { acceptsArrowKeys } = loadHelper();
+  // full mode: unchanged judge — the canvas itself must hold focus
+  assert.equal(acceptsArrowKeys({ activeElementIsViewport: true }), true);
+  assert.equal(acceptsArrowKeys({ activeElementIsViewport: false }), false);
+  assert.equal(acceptsArrowKeys({ activeElementIsViewport: false, hasDocumentFocus: true }), false);
+  assert.equal(acceptsArrowKeys({}), false);
+  // minimal mode: the host may keep focus on body/WebView after a native click
+  assert.equal(acceptsArrowKeys({ minimal: true, activeElementIsViewport: true, hasDocumentFocus: true }), true);
+  assert.equal(acceptsArrowKeys({ minimal: true, activeElementIsViewport: false, hasDocumentFocus: true }), true);
+  assert.equal(acceptsArrowKeys({ minimal: true, activeElementIsViewport: false, hasDocumentFocus: false }), false);
+  // a focused field always wins, in both modes
+  assert.equal(acceptsArrowKeys({ minimal: true, activeElementIsViewport: true, hasDocumentFocus: true, inputActive: true }), false);
+  assert.equal(acceptsArrowKeys({ minimal: true, activeElementIsViewport: false, hasDocumentFocus: true, inputActive: true }), false);
+});

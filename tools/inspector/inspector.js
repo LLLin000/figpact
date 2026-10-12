@@ -373,7 +373,15 @@
     return !previous || previous.width !== width || previous.height !== height;
   }
 
-  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged };
+  // 方向键是否可用：完整模式仍要求画布聚焦；极简模式额外接受“宿主给了焦点且没有输入框聚焦”
+  function acceptsArrowKeys(input) {
+    const { minimal = false, activeElementIsViewport = false, hasDocumentFocus = false, inputActive = false } = input || {};
+    if (inputActive) return false;
+    if (activeElementIsViewport) return true;
+    return !!minimal && !!hasDocumentFocus;
+  }
+
+  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys };
   const globalScope = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : root);
   globalScope.FigpactInspector = api;
   root.FigpactInspector = api;
@@ -510,6 +518,51 @@
     }
     const line = byId('min-status');
     if (line) line.textContent = minimalStatusText({ node, snapshot, evaluation: state.lastEvaluation });
+    publishSelection();
+  }
+
+  // G5a：把当前选区上下文发布给 Hub（只读取选区；不授予源码写入或发布权限）。
+  // 只在选区/微调/试算/决定/加载时随 publishAgentDetail 发出，hover 不发布；失败静默。
+  let selectionSeq = 0;
+  function publishSelection() {
+    try {
+      const node = state.nodes.get(state.selected) || null;
+      const snapshot = state.intentSession ? state.intentSession.snapshot() : null;
+      const frame = state.acceptedFrame || state.frame;
+      const delta = snapshot?.intent?.delta_mm || [0, 0];
+      const guideNode = node?.linked_guide_gid
+        ? (state.scene?.nodes || []).find(n => n.gid === node.linked_guide_gid || n.id === node.linked_guide_gid)
+        : null;
+      selectionSeq += 1;
+      fetch('/api/selection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          selection_seq: selectionSeq,
+          session_id: frame?.session?.session_id ?? null,
+          scene_revision: frame?.frame_revision ?? null,
+          source_revision: state.scene?.source_revision ?? null,
+          scope: state.scene?.scope ?? null,
+          mode: 'canvas',
+          selected: node ? {
+            gid: node.gid || node.id,
+            title: displayTitle(node),
+            type: displayType(node),
+            bounds_mm: node.bounds_mm ?? null,
+            linked_guide_gid: node.linked_guide_gid ?? null,
+            registered: !!node.registered,
+            identity_stability: node.identity_stability ?? null,
+            can_evaluate: !!snapshot?.canEvaluate
+          } : null,
+          delta_mm: [delta[0], delta[1]],
+          status: node ? (snapshot?.status || 'DESIRED_ONLY') : 'NO_SELECTION',
+          related: guideNode ? [{ gid: guideNode.gid || guideNode.id, relation: 'guide', bounds_mm: guideNode.bounds_mm ?? null }] : [],
+          constraints: ['preserve_science']
+        })
+      }).catch(() => {});
+    } catch (error) {
+      // Hub 不在或选区异常都不影响检查器
+    }
   }
 
   function updateIntentUI() {
@@ -885,6 +938,8 @@
   viewport.addEventListener('pointerup', event => {
     if (!state.ready) return;
     if (state.pan) { state.pan = null; viewport.classList.remove('panning'); return; }
+    // 宿主可能在点击后把焦点收回去，极简模式在选中前再确认一次画布焦点
+    if (minimal && document.activeElement !== viewport) viewport.focus({ preventScroll: true });
     if (event.button === 0) select(cycleSelection(candidates(event).map(n => n.id), state.selected, event.altKey));
   });
   viewport.addEventListener('pointercancel', () => { state.pan = null; viewport.classList.remove('panning'); });
@@ -920,11 +975,14 @@
       cancelIntent(true);
       return;
     }
-    if (document.activeElement !== viewport) return;
-    if (event.code === 'Space') { event.preventDefault(); state.space = true; }
-    if (event.key === '+' || event.key === '=') { event.preventDefault(); zoom(1.25); }
-    if (event.key === '-') { event.preventDefault(); zoom(0.8); }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      // 极简模式宿主（Tern / WebView2）里 SVG 点击后 activeElement 可能停在 body，方向键仍应生效
+      if (!acceptsArrowKeys({
+        minimal,
+        activeElementIsViewport: document.activeElement === viewport,
+        hasDocumentFocus: document.hasFocus(),
+        inputActive: ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)
+      })) return;
       if (state.intentSession && state.selected) {
         event.preventDefault();
         state.inFlightGuard.cancel();
@@ -944,7 +1002,12 @@
           highlights();
         }
       }
+      return;
     }
+    if (document.activeElement !== viewport) return;
+    if (event.code === 'Space') { event.preventDefault(); state.space = true; }
+    if (event.key === '+' || event.key === '=') { event.preventDefault(); zoom(1.25); }
+    if (event.key === '-') { event.preventDefault(); zoom(0.8); }
   });
   document.addEventListener('keyup', event => { if (event.code === 'Space') state.space = false; });
   byId('btn-apply-delta').addEventListener('click', () => {
