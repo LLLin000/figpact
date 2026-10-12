@@ -32,9 +32,18 @@ from .history import HistoryStore
 from .source_writes import (FileChange, apply_source_change, plan_source_change,
                             restore_project)
 
-__all__ = ['LayoutBindingError', 'VERIFY_TOL_MM', 'apply_planned_edit',
+__all__ = ['COMMITTED_AND_VERIFIED', 'COMMITTED_BUT_UNVERIFIED', 'LayoutBindingError',
+           'NOT_WRITTEN', 'RECOVERY_REQUIRED', 'VERIFY_TOL_MM', 'apply_planned_edit',
            'edit_layout_and_verify', 'locate_layout_literal', 'plan_layout_edit',
            'read_layout_binding', 'restore_layout_from_history']
+
+#: ``commit_state`` 的取值。它是**磁盘此刻的事实**，与 ``status``（失败原因）分开：
+#: ``NOT_WRITTEN`` 源码一个字节没变；``COMMITTED_*`` 写盘已成事实；``RECOVERY_REQUIRED``
+#: 状态不可判定（第三方改动、半截内容、或 journal 与磁盘互相矛盾），既不许猜也不许覆盖。
+NOT_WRITTEN = 'NOT_WRITTEN'
+COMMITTED_AND_VERIFIED = 'COMMITTED_AND_VERIFIED'
+COMMITTED_BUT_UNVERIFIED = 'COMMITTED_BUT_UNVERIFIED'
+RECOVERY_REQUIRED = 'RECOVERY_REQUIRED'
 
 #: 声明布局位移的模块级映射名。**不是配置项**：定位按名字找，改名等于没有声明。
 LAYOUT_NAME = 'LAYOUT_MM'
@@ -412,6 +421,32 @@ def _journal_file_changes(journal: dict) -> list[dict]:
              'diff': entry.get('diff')} for entry in journal['files']]
 
 
+def _disk_verdict(script: Path, before_sha256: str, after_sha256: str) -> tuple[str | None, str]:
+    """磁盘此刻咬死的事实：``('after', sha)`` 表示这次写入**已成事实**。
+
+    ``before``＝磁盘逐字节等于改写前（受控回滚成功，或压根没写）；两者都不是（含读不出来）
+    就是不许猜的状态。判定只认字节，不认任何"我写成功了"的自述。
+    """
+    try:
+        actual = hashlib.sha256(script.read_bytes()).hexdigest()
+    except OSError:
+        return None, 'unknown'
+    if actual == after_sha256:
+        return actual, 'after'
+    if actual == before_sha256:
+        return actual, 'before'
+    return actual, 'third_party'
+
+
+def _journal_commit_state(journal: dict) -> str:
+    """G3b journal 状态 → 磁盘事实：``COMMITTED`` 是逐字节复核过的写入事实；
+    ``RECOVERY_REQUIRED`` 是回滚判不了；``ROLLED_BACK`` 是逐文件核实已回到 before。"""
+    status = journal.get('status')
+    if status == 'COMMITTED':
+        return COMMITTED_AND_VERIFIED
+    return RECOVERY_REQUIRED if status == 'RECOVERY_REQUIRED' else NOT_WRITTEN
+
+
 def edit_layout_and_verify(script, gid: str, value, *, state_home, config, scope: str,
                            authorized: bool, reason: str) -> dict:
     """计划 → 授权落地 → 另起进程实测 → 记 history 检查点（G4 端到端）。
@@ -419,16 +454,29 @@ def edit_layout_and_verify(script, gid: str, value, *, state_home, config, scope
     未授权只返回 ``status='PLANNED'`` 的计划：用户源码一个字节都不改（只有 G3b 的
     journal/blob 落在 ``state_home`` 里）。授权后每一步都拿事实说话——源码字节必须
     等于 after blob、目标 gid 的实测位移必须在 ``VERIFY_TOL_MM`` 内、其余测量键与科研
-    载荷指纹必须一动不动；任一条不成立就以 ``MISMATCH``/``PROBE_FAILED``/``APPLY_FAILED``
-    如实返回并列出 ``problems``，**绝不**报成功。通过后把这条写入记成 ``source_change``
-    检查点，返回其 id。
+    载荷指纹必须一动不动；任一条不成立就列出 ``problems``，**绝不**报成功。
+
+    **"修改失败"不等于"磁盘没变"**，所以写入之后的结论分两个字段说：
+
+    - ``status``：``'OK'``＝验证全通过；``COMMITTED_BUT_UNVERIFIED``＝写盘已成事实、
+      验证没通过或没法完成（原因在 ``problems``）；``RECOVERY_REQUIRED``＝状态不可判定；
+      ``'APPLY_FAILED'``/计划类状态/``'PLANNED'``/``'PROBE_FAILED'``（写入前基线失败）＝
+      磁盘没变。
+    - ``commit_state``：``COMMITTED_AND_VERIFIED`` / ``COMMITTED_BUT_UNVERIFIED`` /
+      ``RECOVERY_REQUIRED`` / ``NOT_WRITTEN``（磁盘此刻的字节事实，配 ``disk_sha256``）。
+    - ``written``：授权写入动作**是否执行过**。写盘已成事实时必为 ``True``；受控回滚把
+      磁盘还原成 before 时它仍是 ``True``（动作执行过），此时 ``commit_state`` 说
+      ``NOT_WRITTEN``——两个字段合起来才是完整的实话。
+
+    写盘一旦成为事实就在 history 里留下这条事实（哪怕验证没通过），否则 history 描述的
+    "磁盘现状"与真实磁盘对不上，连"恢复到 before"都没有依据。
     """
     script, config = Path(script).resolve(), Path(config).resolve()
     requested = _requested_pair(value)
     plan = plan_layout_edit(script, gid, value, state_home=state_home, reason=reason)
     answer = {'script': str(script), 'gid': gid, 'requested_mm': requested,
               'tolerance_mm': VERIFY_TOL_MM, 'plan_status': plan.get('status'),
-              'written': False}
+              'written': False, 'commit_state': NOT_WRITTEN}
     if plan.get('status') != 'OK':
         return {**answer, 'status': plan.get('status'), 'plan': plan,
                 'message': plan.get('message', '计划未通过，未写任何文件')}
@@ -444,46 +492,72 @@ def edit_layout_and_verify(script, gid: str, value, *, state_home, config, scope
         try:
             baseline = _measure_geometry(script, config, scope)
         except LayoutBindingError as error:
-            return {**answer, 'status': 'PROBE_FAILED', 'problems': [str(error)]}
+            # 基线在写入**之前**量：此时源码一个字节都没动，`NOT_WRITTEN` 是事实。
+            return {**answer, 'status': 'PROBE_FAILED', 'problems': [str(error)],
+                    'message': '写入前基线测量失败：源码一个字节未改'}
         applied = apply_planned_edit(journal['id'], state_home=state_home, authorized=True)
+        journal_status = applied.get('status')
+        actual, verdict = _disk_verdict(script, plan['before_sha256'], plan['after_sha256'])
         written = {**answer, 'written': True, 'journal_id': journal['id'],
-                   'journal_status': applied.get('status')}
-        if applied.get('status') != 'COMMITTED':
-            return {**written, 'status': 'APPLY_FAILED',
+                   'journal_status': journal_status, 'disk_sha256': actual}
+        if journal_status == 'RECOVERY_REQUIRED' or verdict not in ('before', 'after'):
+            return {**written, 'status': RECOVERY_REQUIRED, 'commit_state': RECOVERY_REQUIRED,
                     'journal': applied.get('journal'),
-                    'problems': [f"源码写入未提交：{applied.get('status')}"]}
-        actual = hashlib.sha256(script.read_bytes()).hexdigest()
+                    'problems': [f'源码写入状态不可判定：journal {journal_status}，'
+                                 f'磁盘 {actual}（{verdict}）——不猜、不覆盖']}
+        if verdict == 'before':
+            if journal_status == 'COMMITTED':
+                # journal 说提交了、磁盘却是 before：两边互相矛盾，哪边都不许当成真相。
+                return {**written, 'status': RECOVERY_REQUIRED,
+                        'commit_state': RECOVERY_REQUIRED, 'journal': applied.get('journal'),
+                        'problems': [f'journal 自称 {journal_status}，磁盘字节却等于 before blob：'
+                                     '状态不可判定']}
+            return {**written, 'status': 'APPLY_FAILED', 'commit_state': NOT_WRITTEN,
+                    'journal': applied.get('journal'),
+                    'problems': [f'源码写入没在磁盘上留下事实：journal {journal_status}，'
+                                 '磁盘字节等于 before blob']}
+
+        # 到这里 verdict == 'after'：磁盘字节 == after blob，写盘**已成事实**。后面只剩
+        # 两种结局——验证通过，或验证没通过/没法完成。
+        problems: list[str] = []
+        measured: list[float] | None = None
+        verification = None
         try:
             observed = _measure_geometry(script, config, scope)
         except LayoutBindingError as error:
-            return {**written, 'status': 'PROBE_FAILED', 'problems': [str(error)]}
-        measured, problems = _verified_shift(baseline['geometry'], observed['geometry'],
-                                             f'gid:{gid}', requested)
-        if actual != plan['after_sha256']:
-            problems.append(f'源码字节与 after blob 不符：磁盘 {actual}，'
-                            f'after blob {plan["after_sha256"]}')
-        if baseline['gids'] != observed['gids']:
-            problems.append(f'图元身份变了：{baseline["gids"]} → {observed["gids"]}')
-        if baseline['science_sha256'] != observed['science_sha256']:
-            problems.append(f'科研载荷指纹变了：{baseline["science_sha256"]} → '
-                            f'{observed["science_sha256"]}')
+            problems.append(f'写入已成事实（磁盘字节 == after blob），但重建探针没能完成验证：{error}')
+        else:
+            measured, problems = _verified_shift(baseline['geometry'], observed['geometry'],
+                                                 f'gid:{gid}', requested)
+            if actual != plan['after_sha256']:
+                problems.append(f'源码字节与 after blob 不符：磁盘 {actual}，'
+                                f'after blob {plan["after_sha256"]}')
+            if baseline['gids'] != observed['gids']:
+                problems.append(f'图元身份变了：{baseline["gids"]} → {observed["gids"]}')
+            if baseline['science_sha256'] != observed['science_sha256']:
+                problems.append(f'科研载荷指纹变了：{baseline["science_sha256"]} → '
+                                f'{observed["science_sha256"]}')
+            verification = {'science_sha256_before': baseline['science_sha256'],
+                            'science_sha256_after': observed['science_sha256'],
+                            'gids': observed['gids'],
+                            'geometry_keys': len(observed['geometry'])}
 
+        commit_state = COMMITTED_AND_VERIFIED if not problems else COMMITTED_BUT_UNVERIFIED
         head = store.head()
         checkpoint = store.append_source_change(
             {'kind': 'source_change', 'reason': reason, 'gid': gid,
              'requested_mm': requested, 'measured_mm': measured,
              'journal_id': journal['id'], 'problems': problems,
+             'commit_state': commit_state,
              'file_changes': _journal_file_changes(applied['journal'])},
             expected_head=None if head is None else head['id'],
             expected_file_sha256={entry['path']: entry['after_sha256']
                                   for entry in applied['journal']['files']})
-        return {**written, 'status': 'OK' if not problems else 'MISMATCH',
+        return {**written, 'status': 'OK' if not problems else COMMITTED_BUT_UNVERIFIED,
+                'commit_state': commit_state,
                 'measured_mm': measured, 'problems': problems,
                 'checkpoint_id': checkpoint['id'],
-                'verification': {'science_sha256_before': baseline['science_sha256'],
-                                 'science_sha256_after': observed['science_sha256'],
-                                 'gids': observed['gids'],
-                                 'geometry_keys': len(observed['geometry'])}}
+                'verification': verification}
     finally:
         store.close()
 
@@ -497,9 +571,13 @@ def restore_layout_from_history(commit_id: str, *, script, config, scope: str, s
     走 G3b 的 ``restore_project`` 生成**新的 journal**，历史检查点与旧 journal 一个字节
     都不改。恢复本身同样落地，所以也记一个 ``source_change`` 检查点，否则 history 描述的
     "磁盘现状"会与真实磁盘对不上。``authorized`` 不为真时直接拒绝且不碰任何文件。
+
+    ``commit_state`` 与 ``edit_layout_and_verify`` 同一套语义：恢复也是写盘，所以
+    ``RESTORE_FAILED`` 到底有没有在磁盘上留下事实，由它说清楚而不是由调用方猜。
     """
     if not authorized:
         return {'status': 'UNAUTHORIZED', 'commit_id': commit_id,
+                'commit_state': NOT_WRITTEN,
                 'message': f'拒绝恢复 {commit_id}：源码写入需要显式授权'}
     script, config = Path(script).resolve(), Path(config).resolve()
     store = HistoryStore(script, config, scope, state_home=state_home)
@@ -507,6 +585,7 @@ def restore_layout_from_history(commit_id: str, *, script, config, scope: str, s
         changes = store.file_changes(commit_id)
         if not changes:
             return {'status': 'NO_FILE_CHANGES', 'commit_id': commit_id,
+                    'commit_state': NOT_WRITTEN,
                     'message': f'{commit_id}：检查点里没有 file_changes，无从恢复'}
         wanted = [{**record, 'after_blob': record.get('before_blob'),
                    'after_sha256': record['before_sha256']} for record in changes]
@@ -514,6 +593,7 @@ def restore_layout_from_history(commit_id: str, *, script, config, scope: str, s
         restored = {entry['path']: entry['after_sha256'] for entry in journal['files']}
         if journal.get('status') != 'COMMITTED':
             return {'status': 'RESTORE_FAILED', 'commit_id': commit_id,
+                    'commit_state': _journal_commit_state(journal),
                     'journal_id': journal['id'], 'journal_status': journal.get('status'),
                     'journal': journal, 'restored_sha256': restored}
         head = store.head()
@@ -523,6 +603,7 @@ def restore_layout_from_history(commit_id: str, *, script, config, scope: str, s
             expected_head=None if head is None else head['id'],
             expected_file_sha256=restored)
         return {'status': 'COMMITTED', 'commit_id': commit_id, 'journal_id': journal['id'],
+                'commit_state': COMMITTED_AND_VERIFIED,
                 'checkpoint_id': checkpoint['id'], 'restored_sha256': restored,
                 'restored_paths': sorted(restored)}
     finally:

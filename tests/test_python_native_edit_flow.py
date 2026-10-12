@@ -7,6 +7,12 @@
 ``restore_layout_from_history``（授权）把源码恢复成历史 before 内容、产生**新的前向
 journal**，旧检查点与旧 journal 未被改写；歧义脚本（同一 key 出现两次）被拒绝且零写入。
 全部使用真实临时脚本、真实 state_home 与真实重建，不 mock 文件系统。
+
+写入之后的负例单独一组：写盘**已成事实**时状态必须照实说，绝不许让调用方以为"修改
+失败＝磁盘没变"。三条路径各按真实构造触发——①重建探针跑不完（脚本对超界位移抛错）；
+②位移没走到位（脚本把 0.3 mm 钳成 0.05 mm）；③写盘完成但 History 提交前异常退出
+（在 ``append_source_change`` 之前注入异常）。每条都断言 journal 的实际状态、磁盘真实
+字节，以及后续能判定并恢复到 before 内容（新前向 journal）。
 """
 from __future__ import annotations
 
@@ -16,6 +22,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import matplotlib
 
@@ -29,10 +36,14 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 from figpact.history import HistoryStore  # noqa: E402
 from figpact.python_native import (  # noqa: E402
+    COMMITTED_AND_VERIFIED,
+    COMMITTED_BUT_UNVERIFIED,
+    NOT_WRITTEN,
     edit_layout_and_verify,
     restore_layout_from_history,
 )
 from figpact.session import FigureSession, drawn_shapes  # noqa: E402
+from figpact.source_writes import recover_pending, restore_project  # noqa: E402
 
 SCOPE = "main"
 TARGET = "probe.main.label.A"
@@ -92,6 +103,39 @@ AMBIGUOUS_SCRIPT = '''LAYOUT_MM = {
     "probe.main.label.A": [0.0, 0.15],
 }
 '''
+
+#: ② 的请求：源码字面量写成 0.3 mm，脚本自己把它钳到 0.05 mm——"改了点、没改到位"。
+UNREACHED_MM = [0.0, 0.3]
+CLAMP_MM = 0.05
+
+
+def _derive(source: str, needle: str, replacement: str) -> str:
+    """夹具变体：`needle` 必须真的在场——`.replace` 拼错会静默无操作，把负例变成假阳性。"""
+    assert source.count(needle) == 1, needle
+    return source.replace(needle, replacement)
+
+
+#: ① 的探针陷阱：源码本身**合法**（写入随时成功），但重建时标签位移一超过阈值就抛错。
+#: 于是"写盘已成事实、重建却测不出结果"是真实现象，不必伪造探针。
+PROBE_TRAP_SCRIPT = _derive(
+    _derive(SCRIPT, 'SCOPES = ("main",)',
+            'SCOPES = ("main",)\n\n'
+            '#: 探针陷阱阈值（夹具）：位移超过它就抛错，重建测不出结果。\n'
+            'PROBE_TRAP_MM = 0.25'),
+    '        apply_display_shift(label, dx_mm=float(dx), dy_mm=float(dy))\n',
+    '        if float(dy) > PROBE_TRAP_MM:\n'
+    '            raise RuntimeError("探针陷阱：位移越界")\n'
+    '        apply_display_shift(label, dx_mm=float(dx), dy_mm=float(dy))\n')
+
+#: ② 的钳位负例：源码字面量改到位（0.3 mm），脚本自己截到 0.05 mm。
+CLAMPED_SCRIPT = _derive(
+    _derive(SCRIPT, 'SCOPES = ("main",)',
+            'SCOPES = ("main",)\n\n'
+            '#: 位移上限（夹具）：超过就钳位，图上只走 CLAMP_MM。\n'
+            'CLAMP_MM = 0.05'),
+    '        apply_display_shift(label, dx_mm=float(dx), dy_mm=float(dy))\n',
+    '        apply_display_shift(label, dx_mm=float(dx),\n'
+    '                            dy_mm=min(float(dy), CLAMP_MM))\n')
 
 
 def sha256_hex(data: bytes) -> str:
@@ -172,6 +216,7 @@ class PythonNativeEditFlowTest(unittest.TestCase):
 
         self.assertEqual(answer["status"], "PLANNED", answer)
         self.assertFalse(answer["written"])
+        self.assertEqual(answer["commit_state"], NOT_WRITTEN, "未授权时磁盘一个字节没变")
         self.assertEqual(self.script.read_bytes(), before, "未授权不许碰用户源码")
         self.assertEqual(_tree(self.work), tree_before, "未授权不许在源码目录里留下任何东西")
         self.assertFalse((self.state_home / "workspaces").exists(), "未授权不许碰 history")
@@ -293,12 +338,141 @@ class PythonNativeEditFlowTest(unittest.TestCase):
 
         self.assertEqual(answer["status"], "AMBIGUOUS", answer)
         self.assertFalse(answer["written"])
+        self.assertEqual(answer["commit_state"], NOT_WRITTEN, "拒绝时磁盘一个字节没变")
         self.assertEqual(answer["plan"]["confidence"], "low")
         self.assertTrue(answer["plan"]["candidates"], "拒绝必须给出候选")
         self.assertEqual(self.script.read_bytes(), before, "拒绝时必须零写入")
         self.assertEqual(_tree(self.work), tree_before)
         self.assertFalse((self.state_home / "source-journals").exists(), "拒绝不许写 journal")
         self.assertFalse((self.state_home / "workspaces").exists(), "拒绝不许碰 history")
+
+    # ------------------------------------------- 写入之后的负例：写盘事实 ≠ 修改失败
+
+    def test_probe_failure_after_write_is_committed_but_unverified(self):
+        """① 写入已成事实、重建探针却跑不完：状态必须承认写盘，且留下恢复到 before 的依据。"""
+        original = self.script.read_bytes()
+        self.script.write_text(PROBE_TRAP_SCRIPT, encoding="utf8")
+        trapped = self.script.read_bytes()
+        self.assertNotEqual(trapped, original, "夹具变体必须真的改到脚本")
+
+        answer = self._edit(authorized=True, value=UNREACHED_MM, reason="探针异常负例")
+
+        self.assertEqual(answer["status"], COMMITTED_BUT_UNVERIFIED, answer.get("problems"))
+        self.assertEqual(answer["commit_state"], COMMITTED_BUT_UNVERIFIED)
+        self.assertTrue(answer["written"], "写盘已成事实，written 不得为 False")
+        self.assertIsNone(answer["measured_mm"], "探针没跑完就没有实测位移，不许编一个")
+        self.assertTrue(any("探针陷阱" in problem for problem in answer["problems"]),
+                        f"问题清单必须如实说重建子进程为什么失败：{answer['problems']}")
+
+        journal = read_journal(self.state_home, answer["journal_id"])
+        self.assertEqual(journal["status"], "COMMITTED", "journal 状态即磁盘事实")
+        entry = journal["files"][0]
+        self.assertNotEqual(self.script.read_bytes(), trapped, "源码必须真的被改写")
+        self.assertEqual(self.script.read_bytes(), blob_bytes(self.state_home, entry["after_blob"]),
+                         "磁盘真实字节必须等于 after blob")
+        self.assertEqual(answer["disk_sha256"], sha256_hex(self.script.read_bytes()))
+        self.assertEqual(blob_bytes(self.state_home, entry["before_blob"]), trapped)
+
+        # 验证没通过也要在 history 里留下这条**事实**，否则"恢复到 before"没有依据。
+        with HistoryStore(self.script, self.config, SCOPE, state_home=self.state_home) as store:
+            self.assertEqual([record["id"] for record in store.source_changes()],
+                             [answer["checkpoint_id"]])
+            payload = store.get(answer["checkpoint_id"])["payload"]
+            self.assertEqual(payload["commit_state"], COMMITTED_BUT_UNVERIFIED)
+            self.assertEqual(payload["problems"], answer["problems"])
+
+        restored = self._restore(answer["checkpoint_id"], authorized=True)
+
+        self.assertEqual(restored["status"], "COMMITTED", restored)
+        self.assertEqual(restored["commit_state"], COMMITTED_AND_VERIFIED)
+        self.assertEqual(self.script.read_bytes(), trapped, "恢复后必须逐字节等于 before 内容")
+        self.assertNotEqual(restored["journal_id"], answer["journal_id"], "恢复必须是新 journal")
+
+    def test_unreached_shift_after_write_is_committed_but_unverified(self):
+        """② 源码字面量改到位、图上没走到位（0.3 mm 被脚本钳成 0.05 mm）：不许报 OK。"""
+        self.script.write_text(CLAMPED_SCRIPT, encoding="utf8")
+        original = self.script.read_bytes()
+        baseline = measured_geometry(self.script, self.config)
+
+        answer = self._edit(authorized=True, value=UNREACHED_MM, reason="位移不符负例")
+
+        self.assertEqual(answer["status"], COMMITTED_BUT_UNVERIFIED, answer.get("problems"))
+        self.assertEqual(answer["commit_state"], COMMITTED_BUT_UNVERIFIED)
+        self.assertTrue(answer["written"], "写盘已成事实，written 不得为 False")
+        error_mm = [answer["measured_mm"][index] - UNREACHED_MM[index] for index in (0, 1)]
+        self.assertGreater(abs(error_mm[1]), TOL_MM, "自报的实测位移必须与请求差出容差")
+        mismatch = [problem for problem in answer["problems"] if f"gid:{TARGET}" in problem]
+        self.assertTrue(mismatch, f"问题清单必须点名目标 gid：{answer['problems']}")
+        self.assertIn(f"请求 {UNREACHED_MM[1]} mm", mismatch[0])
+
+        # 独立重建（本进程，与子进程探针不同源）：改是真的改了，只是没走到请求的位置。
+        after = measured_geometry(self.script, self.config)
+        self.assertEqual(sorted(after), sorted(baseline), "可见几何的键集合必须一致")
+        observed = [after[f"gid:{TARGET}"][index] - baseline[f"gid:{TARGET}"][index]
+                    for index in (0, 1)]
+        self.assertAlmostEqual(observed[0], 0.0, delta=TOL_MM)
+        self.assertGreater(abs(observed[1] - UNREACHED_MM[1]), TOL_MM,
+                           f"A 的 y 只走了 {observed[1]} mm，请求 {UNREACHED_MM[1]} mm")
+        self.assertLess(observed[1], UNREACHED_MM[1], "错的是「没走到位」，不是走过头")
+        self.assertGreaterEqual(observed[1], -TOL_MM, "钳位只会少走，不会往回走")
+        self.assertAlmostEqual(observed[1], answer["measured_mm"][1], delta=TOL_MM,
+                               msg="两条独立测量路径必须给出同一个位移")
+
+        journal = read_journal(self.state_home, answer["journal_id"])
+        self.assertEqual(journal["status"], "COMMITTED")
+        entry = journal["files"][0]
+        self.assertEqual(self.script.read_bytes(), blob_bytes(self.state_home, entry["after_blob"]))
+        self.assertEqual(answer["disk_sha256"], entry["after_sha256"])
+        self.assertEqual(blob_bytes(self.state_home, entry["before_blob"]), original)
+
+        restored = self._restore(answer["checkpoint_id"], authorized=True)
+
+        self.assertEqual(restored["status"], "COMMITTED", restored)
+        self.assertEqual(self.script.read_bytes(), original, "恢复后必须逐字节等于 before 内容")
+        self.assertNotEqual(restored["journal_id"], answer["journal_id"])
+        self.assertEqual(recover_pending(self.state_home), [],
+                         "两条 journal 都已提交：没有半截写入，恢复走的是前向 journal")
+
+    def test_crash_before_history_commit_leaves_the_journal_as_the_only_evidence(self):
+        """③ 写盘完成、History 提交前异常退出：崩溃那条 journal 自己就是恢复到 before 的依据。
+
+        注入点选在 ``store.head()``：源码写入已经落地、``append_source_change`` 还没跑，
+        等于"写入完成、历史提交前异常退出"。事后没有检查点，能断言的只有 journal 与磁盘。
+        """
+        original = self.script.read_bytes()
+        boom = RuntimeError("模拟 History 提交前异常退出")
+        with mock.patch.object(HistoryStore, "head", side_effect=boom):
+            with self.assertRaises(RuntimeError) as raised:
+                self._edit(authorized=True, reason="崩溃负例")
+        self.assertIs(raised.exception, boom)
+
+        with HistoryStore(self.script, self.config, SCOPE, state_home=self.state_home) as store:
+            self.assertEqual(store.source_changes(), [], "崩在提交之前：没有检查点")
+
+        journals = sorted((self.state_home / "source-journals").glob("*.json"))
+        self.assertEqual(len(journals), 1, f"只该有这条写入的 journal：{journals}")
+        crash_journal = journals[0].read_bytes()
+        journal = json.loads(crash_journal.decode("utf-8"))
+        self.assertEqual(journal["status"], "COMMITTED", "写盘是事实，journal 如实记着")
+        entry = journal["files"][0]
+        self.assertNotEqual(self.script.read_bytes(), original, "源码确实已被改写")
+        self.assertEqual(self.script.read_bytes(), blob_bytes(self.state_home, entry["after_blob"]),
+                         "磁盘真实字节必须等于 after blob")
+        self.assertEqual(blob_bytes(self.state_home, entry["before_blob"]), original)
+
+        # recover_pending 只说"没有半截写入"（这条 journal 已 COMMITTED），崩溃前的内容在
+        # journal 自己身上，所以恢复由它的 before blob 生成**新的前向 journal**。
+        self.assertEqual(recover_pending(self.state_home), [])
+
+        restored = restore_project(
+            [{"path": entry["path"], "after_blob": entry["before_blob"],
+              "after_sha256": entry["before_sha256"]}],
+            state_home=self.state_home, reason="崩溃后按 journal 的 before blob 前向恢复")
+
+        self.assertEqual(restored["status"], "COMMITTED", restored)
+        self.assertNotEqual(restored["id"], journal["id"], "恢复必须是新 journal")
+        self.assertEqual(self.script.read_bytes(), original, "恢复后必须逐字节等于 before 内容")
+        self.assertEqual(journals[0].read_bytes(), crash_journal, "崩溃那条 journal 不许被改写")
 
 
 if __name__ == "__main__":

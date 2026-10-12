@@ -9,9 +9,9 @@
 修改文件：
 
 - **新增** `examples/python_native/simple_figure.py`（119 行）：一条曲线 + 两个标签，模块级 `LAYOUT_MM = {gid: [dx, dy]}`，`build_scene(science, config, scope)` 经既有 `figpact.apply_display_shift` 施加位移；无 YAML、无随机/时间/文件 IO（导入本模块不写任何文件）。
-- **新增** `figpact/python_native.py`（529 行）：`read_layout_binding` / `locate_layout_literal` / `plan_layout_edit` / `apply_planned_edit` / `edit_layout_and_verify` / `restore_layout_from_history`，以及 `LayoutBindingError`、`VERIFY_TOL_MM`。
+- **新增** `figpact/python_native.py`（610 行）：`read_layout_binding` / `locate_layout_literal` / `plan_layout_edit` / `apply_planned_edit` / `edit_layout_and_verify` / `restore_layout_from_history`，以及 `LayoutBindingError`、`VERIFY_TOL_MM` 与 `commit_state` 四个取值（`NOT_WRITTEN` / `COMMITTED_AND_VERIFIED` / `COMMITTED_BUT_UNVERIFIED` / `RECOVERY_REQUIRED`）。
 - **新增** `figpact/authoring.py`（296 行）：`build_repair_spec(*, script, target_gid, session)`，字段对齐设计包 schema；**不执行用户脚本、零写入**；会话里没有的事实写 `unknown`。
-- **新增** `tests/test_python_native_example.py`（3 项）、`tests/test_python_native.py`（14 项）、`tests/test_authoring.py`（9 项）、`tests/test_python_native_edit_flow.py`（4 项）。
+- **新增** `tests/test_python_native_example.py`（3 项）、`tests/test_python_native.py`（14 项）、`tests/test_authoring.py`（9 项）、`tests/test_python_native_edit_flow.py`（7 项）。
 
 未修改 `scene.py`、`geometry.py`、`science.py`、`intents.py`、`history.py`、`source_writes.py`、Inspector HTTP/UI、既有 YAML Agent API 或 `examples/` 下任何既有文件。
 
@@ -34,8 +34,9 @@
 
 - `edit_layout_and_verify` 的顺序是：改前先量一次基线 → 授权落地 → **另起子进程**按 `FigureSession` 的真实接缝重建一次 → 比对。
 - 探针是新解释器 + `PYTHONPATH` + `Agg`，避免模块缓存把"重建"变成"看旧世界"；它把画出来的毫米几何、图元身份（gid 集合）与**科研载荷指纹**（`load_science()` 输出的 SHA256）原样报回，**探针自己不判对错**，判定留在调用方。
-- 三条不变量同时成立才算 `OK`：磁盘字节必须等于 after blob；目标 gid 的实测位移必须在 `VERIFY_TOL_MM = 0.01 mm` 内；其余测量键、gid 集合与科研载荷指纹必须一动不动。任一条不成立就返回 `MISMATCH` / `PROBE_FAILED` / `APPLY_FAILED` 并列出 `problems`，**绝不报成功**。
-- 通过后把这次写入记成 `source_change` 检查点（`file_changes[]` 含 `path` / `before_sha256` / `after_sha256` / `is_binary` / `before_blob` / `after_blob` / `diff`）。
+- 三条不变量同时成立才算 `OK`：磁盘字节必须等于 after blob；目标 gid 的实测位移必须在 `VERIFY_TOL_MM = 0.01 mm` 内；其余测量键、gid 集合与科研载荷指纹必须一动不动。任一条不成立就列出 `problems`，**绝不报成功**。
+- **"修改失败"不等于"磁盘没变"**，所以写入之后的结论分字段说：`status`（`'OK'` / `COMMITTED_BUT_UNVERIFIED` / `RECOVERY_REQUIRED` / `'APPLY_FAILED'` / `'PLANNED'` / `'PROBE_FAILED'` / `'AMBIGUOUS'` …）、`commit_state`（`COMMITTED_AND_VERIFIED` / `COMMITTED_BUT_UNVERIFIED` / `RECOVERY_REQUIRED` / `NOT_WRITTEN`）、`disk_sha256` 与 `written`。`written=True` 只说明授权写入动作执行过；受控回滚把磁盘逐字节还原成 before 时它是 True、`commit_state` 是 `NOT_WRITTEN`，两个字段合起来才是实话。写盘**已成事实**时不得报 `NOT_WRITTEN`、不得让调用方以为磁盘没变。
+- 写盘一旦成为事实就记 `source_change` 检查点（`file_changes[]` 含 `path` / `before_sha256` / `after_sha256` / `is_binary` / `before_blob` / `after_blob` / `diff`），验证没通过（`COMMITTED_BUT_UNVERIFIED`）照样记并把 `problems` 一并归档——否则 history 描述的"磁盘现状"与真实磁盘对不上，连"恢复到 before"都没有依据。
 
 ### 恢复是新的前向写入
 
@@ -90,12 +91,13 @@ pytest tests/test_python_native_edit_flow.py tests/test_python_native.py tests/t
 
 ### 计划 → 授权 → 重建 → history → 恢复
 
-`tests/test_python_native_edit_flow.py` 4 项按真实磁盘行为覆盖：
+`tests/test_python_native_edit_flow.py` 7 项按真实磁盘行为覆盖：
 
-- **未授权**：`status='PLANNED'`、`written=False`，**用户源码字节与目录树不变**（只落 G3b journal/blob 到 `state_home`）。
+- **未授权**：`status='PLANNED'`、`written=False`、`commit_state='NOT_WRITTEN'`，**用户源码字节与目录树不变**（只落 G3b journal/blob 到 `state_home`）。
 - **授权写入**：落盘后磁盘字节 == after blob，并把这条写入记成 `source_change` 检查点；`file_changes[]` 里的 `path` / before/after SHA256 / blob 与磁盘实际字节一致。
 - **前向恢复**：`restore_layout_from_history` 把文件恢复为历史 before 内容，产生**新 journal**；旧 journal 与旧检查点字节未被改写，恢复本身也追加一个新的 `source_change` 检查点。
 - **歧义拒绝**：绑定出现歧义时**即使已授权也零写入**（`AMBIGUOUS` + `candidates` + `confidence='low'`）。
+- **写入之后的负例（写盘已成事实，状态照实说）**：①重建探针跑不完（脚本对超界位移抛错）→ `status='COMMITTED_BUT_UNVERIFIED'`；②位移没走到位（脚本把 0.3 mm 钳成 0.05 mm）→ 同上；③写盘完成但 History 提交前异常退出（在 `append_source_change` 之前注入异常）→ 无检查点，但 journal `COMMITTED`。三条都断言 journal 实际状态、磁盘真实字节，以及后续能判定并恢复到 before 内容（新前向 journal：①②走 `restore_layout_from_history`，③走 `restore_project` + `recover_pending` 判定）。
 
 ### 提案侧
 
@@ -108,6 +110,6 @@ pytest tests/test_python_native_edit_flow.py tests/test_python_native.py tests/t
 - **未接 UI / Hub**：授权只是 API 层的显式布尔，没有浏览器或对话框授权流程。
 - 未在真实 NMR/FTIR 上运行（它们继续走 YAML adapter）；未验证跨 scope 的源码编辑。
 - `restore_layout_from_history` 需额外传 `script` / `config` / `scope`（`HistoryStore` 的工作区索引所限），本轮如实记录，未改存储接口去消除它。
-- 未做崩溃/强杀注入下的恢复验收；未做多写者并发控制（沿用 G3b 单写者假设）。
+- 做了一条**注入式**崩溃验收（写盘完成、History 提交前抛错，随后按 journal 的 before blob 前向恢复）；**未做**真实强杀/断电、多写者并发控制（沿用 G3b 单写者假设），也未把「已提交但未记入 history」的 journal 做成 `recover_pending` 能自动识别的状态。
 - **G6（冻结场景三臂配对 benchmark + profiler）未开始。**
 - 后续若要把这条链路接给用户，应另行验收：授权来源与 UI 链路、legacy 脚本的作者级改写路径、以及跨 scope/真实图件上的源码往返；不能只因本轮单测通过就称"无 YAML 编辑"这条用户链路已完成。
