@@ -29,6 +29,7 @@ __all__ = ['HistoryConflict', 'HistoryCorrupt', 'HistoryError', 'HistoryStore']
 SCHEMA_VERSION = '1'
 _STATE_HOME_ENV = 'FIGPACT_STATE_HOME'
 _APPLICATION_ID = 0x46475048
+_SOURCE_CHANGE_KIND = 'source_change'
 
 Checkpoint = dict[str, Any]
 _SELECT_ROWS = ('SELECT seq, id, parent_id, kind, created_at, payload_sha256 '
@@ -59,6 +60,71 @@ def _is_uuid_hex(value: Any) -> bool:
 
 def _is_sha256_hex(value: Any) -> bool:
     return isinstance(value, str) and len(value) == 64 and _HEX.issuperset(value)
+
+
+def _path_key(value: str) -> str:
+    """路径比较键：``Path``/``str`` 两种写法归一，避免同一文件被判成两条路径。"""
+    return str(Path(value).expanduser())
+
+
+def _validated_file_changes(payload: dict[str, Any]) -> list[tuple[str, str]]:
+    """校验 ``file_changes[]`` 形状，返回 ``[(路径, 路径比较键), ...]``。
+
+    只校验本模块需要的结构：路径与两种 SHA256。``is_binary``/``before_blob``/
+    ``after_blob``/``diff`` 由调用方（源码写入方）负责语义，这里原样记录。
+    """
+    changes = payload.get('file_changes')
+    if not isinstance(changes, list) or not changes:
+        raise HistoryError(f'file_changes 必须是非空列表，得到 {type(changes).__name__}')
+    paths: list[tuple[str, str]] = []
+    for index, change in enumerate(changes):
+        if not isinstance(change, dict):
+            raise HistoryError(
+                f'file_changes 第 {index} 项必须是 JSON 对象，得到 {type(change).__name__}')
+        path = change.get('path')
+        if not isinstance(path, str) or not path:
+            raise HistoryError(f'file_changes 第 {index} 项的 path 必须是非空字符串，得到 {path!r}')
+        for key in ('before_sha256', 'after_sha256'):
+            if not _is_sha256_hex(change.get(key)):
+                raise HistoryError(f'file_changes 第 {index} 项的 {key} 必须是 64 位十六进制 '
+                                   f'SHA256，得到 {change.get(key)!r}')
+        paths.append((path, _path_key(path)))
+    return paths
+
+
+def _validated_expected_file_sha256(expected_file_sha256: Any,
+                                    paths: list[tuple[str, str]]) -> list[tuple[str, str]]:
+    """校验调用方声明的磁盘现状，返回 ``[(路径, 期望 SHA256), ...]``（须精确覆盖所有路径）。"""
+    if not isinstance(expected_file_sha256, dict):
+        raise HistoryError('expected_file_sha256 必须是 {路径: SHA256} 映射，得到 '
+                           f'{type(expected_file_sha256).__name__}')
+    declared: dict[str, str] = {}
+    for raw_path, digest in expected_file_sha256.items():
+        if not isinstance(raw_path, (str, os.PathLike)) or not str(raw_path):
+            raise HistoryError(f'expected_file_sha256 的路径键非法：{raw_path!r}')
+        if not _is_sha256_hex(digest):
+            raise HistoryError(f'expected_file_sha256[{raw_path!r}] 必须是 64 位十六进制 '
+                               f'SHA256，得到 {digest!r}')
+        declared[_path_key(str(raw_path))] = digest
+    wanted = {key for _path, key in paths}
+    missing, unknown = sorted(wanted - declared.keys()), sorted(declared.keys() - wanted)
+    if missing:
+        raise HistoryError('expected_file_sha256 未覆盖 file_changes 的路径：' + '、'.join(missing))
+    if unknown:
+        raise HistoryError('expected_file_sha256 含 file_changes 之外的路径：' + '、'.join(unknown))
+    return [(path, declared[key]) for path, key in paths]
+
+
+def _verified_disk_sha256(expectations: list[tuple[str, str]]) -> None:
+    """逐文件复核磁盘字节；任何不符（含读不到）=> HistoryError，绝不记录成检查点。"""
+    for path, expected in expectations:
+        try:
+            actual = hashlib.sha256(Path(path).expanduser().read_bytes()).hexdigest()
+        except OSError as error:
+            raise HistoryError(f'expected_file_sha256 无法读取 {path}：{error}') from error
+        if actual != expected:
+            raise HistoryError(f'expected_file_sha256 与磁盘不符：{path}（期望 {expected}，'
+                               f'实际 {actual}）：源码已被外部改写，拒绝记录')
 
 
 def _fsync_dir(path: Path) -> None:
@@ -384,6 +450,51 @@ class HistoryStore:
         return {'id': checkpoint_id, 'parent_id': current, 'kind': kind,
                 'created_at': created_at, 'payload_sha256': payload_sha256,
                 'payload': json.loads(data)}
+
+    # ------------------------------------------------------------ 源码写入记录
+
+    def append_source_change(self, payload: dict[str, Any], *, expected_head: str | None,
+                             expected_file_sha256: dict[str, str]) -> Checkpoint:
+        """记录一次源码写入检查点（``kind='source_change'``）。
+
+        ``payload`` 必须自带 ``kind='source_change'`` 与 ``file_changes[]``（每项
+        ``path``/``before_sha256``/``after_sha256``/``is_binary``/``before_blob``/
+        ``after_blob``/``diff``；blob 引用对本模块不透明，原样归档）。校验不通过一律
+        拒绝：不写 blob、不落检查点、head 不动——源码字节由写入方负责，本模块只记录。
+
+        ``expected_file_sha256`` 是调用方声明的「磁盘现状」，必须精确覆盖 ``file_changes``
+        的每条路径且与磁盘实际字节一致；不符即说明源码被外部改写，拒绝覆盖真相。
+        磁盘复核发生在 CAS 事务之前（本模块不持锁：检测与写入之间仍有窗口，靠调用方
+        的写入流程兜底）。
+        """
+        self._ensure_open()
+        if self._read_only:
+            raise HistoryError('只读历史不能新增检查点')
+        if not isinstance(payload, dict):
+            raise HistoryError(f'payload 必须是 JSON 对象，得到 {type(payload).__name__}')
+        if payload.get('kind') != _SOURCE_CHANGE_KIND:
+            raise HistoryError(f'payload 的 kind 必须是 {_SOURCE_CHANGE_KIND!r}，'
+                               f'得到 {payload.get("kind")!r}')
+        _verified_disk_sha256(_validated_expected_file_sha256(
+            expected_file_sha256, _validated_file_changes(payload)))
+        return self.append(payload, expected_head=expected_head, kind=_SOURCE_CHANGE_KIND)
+
+    # ------------------------------------------------------------------ 读出
+
+    def source_changes(self) -> list[Checkpoint]:
+        """按时间顺序返回 ``kind='source_change'`` 的检查点。"""
+        self._ensure_open()
+        return [record for record in self.checkpoints() if record['kind'] == _SOURCE_CHANGE_KIND]
+
+    def file_changes(self, checkpoint_id: str) -> list[dict[str, Any]]:
+        """返回该检查点 payload 里的 ``file_changes[]``；从未记录过的返回空列表。"""
+        self._ensure_open()
+        changes = self.get(checkpoint_id)['payload'].get('file_changes')
+        if changes is None:
+            return []
+        if not isinstance(changes, list):
+            raise HistoryCorrupt(f'检查点的 file_changes 不是列表：{checkpoint_id}')
+        return changes
 
     # ------------------------------------------------------------------ 关闭
 
