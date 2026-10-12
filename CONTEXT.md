@@ -20,6 +20,10 @@ _Avoid_: scope, format
 A bounded region displaying one scientific view, image, or plot within a figure.
 _Avoid_: scope
 
+**Plotting Box**:
+The plotting area inside an enclosing border. Its physical width and height are measured between the border centre lines; axis titles, tick labels, and outer margins are excluded.
+_Avoid_: whole canvas, panel size
+
 **Group**:
 A declared collection of objects that shares a layout intention, such as moving together.
 _Avoid_: incidental collection
@@ -121,8 +125,24 @@ A temporary visual demonstration of a geometry intent. It does not change the me
 _Avoid_: edited figure, render-checked candidate
 
 **Accepted Operation**:
-A render-checked geometric change explicitly accepted for the current session. Acceptance alone does not save source files or approve publication.
-_Avoid_: saved draft, published result
+An explicitly accepted, render-checked geometric change in a figure's working set. Acceptance alone neither changes source files nor approves publication.
+_Avoid_: saved source, published result
+
+**Operation History**:
+An ordered, persistent record of accepted layout operations and their subsequent withdrawal, with the evidence supporting each decision. Historical evidence is not current verification.
+_Avoid_: source revision history, cached preview
+
+**History Checkpoint**:
+A preserved set of accepted operations, tied to the source, scientific content, and measurement conditions against which they were verified. Preserving a checkpoint does not write those changes into source files.
+_Avoid_: source commit, publication artifact
+
+**History Replay**:
+Reconstruction of recorded layout intentions followed by fresh target, scientific-content, impact, and layout checks. Previously recorded measurements do not replace this verification.
+_Avoid_: reopening a cached image, blindly applying old parameters
+
+**History-Only State**:
+A state in which past operations and evidence can be inspected but cannot authorize editing or replay against a changed or unverified figure.
+_Avoid_: restored editing session, verified candidate
 
 **Preview Resolution**:
 The pixel density of the measured figure shown for inspection. It is separate from the source image's sampling density and the intended publication resolution.

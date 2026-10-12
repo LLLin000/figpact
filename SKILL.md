@@ -73,6 +73,17 @@ RENDER_CHECKED` 且实际位移满足要求时才允许接受。失败保留用�
 用户问清晰度、SVG 或字体差异时读 [显示质量调研](docs/INSPECTOR_DISPLAY_QUALITY.md)。
 如果用户要求保存或出正式图，仍用 §2 既有 YAML Agent API；G2 没有新增保存/发布端点。
 
+### 0.2 后端持久操作历史：G3（显式启用）
+
+只有用户明确使用后端持久会话时，才使用
+`IntentSession(..., history=True, state_home=<外部状态目录>)`，沿用现有试算/接受/撤销请求。
+先查看 `snapshot()["session"]["history"]`：只有 `ACTIVE` 且 `can_evaluate` 为真才可试算。
+版本变化后的历史帧不是新验证；`HISTORICAL_ONLY`、缺失/损坏证据或恢复失败时不得继续编辑。
+不要把状态放在绘图源码目录，也不要把持久接受说成 YAML/Python 写回或正式发布。
+
+现有 Inspector 网页未接持久历史，仍遵守 §0.1。只读 CLI、实际恢复证据和未完成项见
+[G3 后端操作历史](docs/G3_OPERATION_HISTORY.md)。本轮不开放 G4 源码编辑、MCP 或 History GUI。
+
 ## 1. 新图接入
 
 **先分家，再接线。** 分家的判据是双向的：

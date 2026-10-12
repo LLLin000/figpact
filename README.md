@@ -64,6 +64,18 @@ python -m figpact.inspector_server --example plain
 为什么默认高清、SVG 如何安全接入及真实成本见
 [显示清晰度与 SVG 调研](docs/INSPECTOR_DISPLAY_QUALITY.md)。
 
+### G3：显式启用的后端操作历史
+
+Python SDK 可以使用 `IntentSession(..., history=True, state_home="I:/figpact-history")`：
+保存接受的操作与几何/科学证据，重开时核对源码和输入版本，实际构图重放；独立撤销也可恢复。
+版本不符则只能查看历史，不执行变更后的绘图脚本，不自动保存 Python/YAML。
+
+**上面的 Inspector 网页入口仍保持 G2 的会话内保留，本轮没有接入持久 History UI/HTTP。**
+普通无 YAML 测量也不因此变成可编辑。真实 NMR 两操作重启、351 项 Python 通过、
+7 项跳过及本轮 8–25 秒的单次路径耗时见
+[G3 后端操作历史验收](docs/G3_OPERATION_HISTORY.md)；不沿用旧预览耗时宣称本轮更快。
+
+
 ## CLI 命令与使用
 ```bash
 # 查看支持的参数清单（按可见对象分组，含单位、范围与调参效果）
