@@ -29,6 +29,8 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 NMR_SCRIPT = REPO_ROOT / 'examples' / 'nmr' / '08 NMR.py'
 NMR_CONFIG = REPO_ROOT / 'examples' / 'nmr' / 'nmr.yaml'
+#: 无绑定的作者化夹具：authoring_edit 门禁服务的是它的**副本**，原件同样一个字节都不许动。
+NATIVE_SCRIPT = REPO_ROOT / 'examples' / 'python_native' / 'legacy_plain.py'
 
 #: 子进程就绪的唯一信号：它自己打印的回环地址。
 URL_RE = re.compile(r'http://127\.0\.0\.1:(\d+)')
@@ -75,11 +77,14 @@ def wait_for(probe, description, *, timeout=15.0, interval=0.1):
 class InspectorProcess:
     """真实 Inspector 子进程 + 确定性 HTTP 客户端。"""
 
-    def __init__(self, port, state_home, process, stderr_path):
+    def __init__(self, port, state_home, process, stderr_path, stderr_file, config=NMR_CONFIG):
         self.port = port
         self.state_home = state_home
         self.process = process
         self.stderr_path = stderr_path
+        self.stderr_file = stderr_file
+        #: 服务端加载的那份配置：history 的工作区身份要用它（与脚本、scope 一起）。
+        self.config = config
         #: 页面令牌由服务端签发、注入 /frame.js；这里按服务端自己的说法读出来（不猜实现）。
         self.ui_token = self.frame_token()
 
@@ -161,8 +166,11 @@ class InspectorProcess:
 
     # ---- 磁盘 / 私有状态的事实读取
 
+    def journal_path(self, plan: dict) -> Path:
+        return self.state_home / 'source-journals' / f"{plan['journal_id']}.json"
+
     def journal(self, plan: dict) -> dict:
-        path = self.state_home / 'source-journals' / f"{plan['journal_id']}.json"
+        path = self.journal_path(plan)
         assert path.exists(), f'journal 文件不存在：{path}'
         return json.loads(path.read_text(encoding='utf-8'))
 
@@ -173,7 +181,7 @@ class InspectorProcess:
         """按服务端记历史时用的同一身份（脚本 + 服务端配置 + scope）读回检查点。"""
         from figpact.history import HistoryStore
 
-        store = HistoryStore(script, NMR_CONFIG, scope, state_home=self.state_home)
+        store = HistoryStore(script, self.config, scope, state_home=self.state_home)
         try:
             return store.source_changes()
         finally:
@@ -197,6 +205,11 @@ class InspectorProcess:
             except subprocess.TimeoutExpired:
                 self.process.kill()
                 self.process.wait(timeout=15)
+        self.stderr_file.close()
+        try:
+            _LIVE_SERVERS.remove(self)
+        except ValueError:
+            pass
 
 
 def _launch(env, command, cwd):
@@ -205,20 +218,21 @@ def _launch(env, command, cwd):
                             errors='replace', env=env)
 
 
-@pytest.fixture(scope='session')
-def server(tmp_path_factory):
-    """真实 nmr 会话子进程 + 临时 state_home；整个会话只起一次（建图秒级）。"""
-    assert NMR_SCRIPT.is_file(), f'缺少被服务的例子源码：{NMR_SCRIPT}'
-    assert NMR_CONFIG.is_file(), f'缺少被服务的例子配置：{NMR_CONFIG}'
-    work_dir = tmp_path_factory.mktemp('figpact-layer1-state')
+def launch_server(work_dir, *, command, cwd=REPO_ROOT, config=NMR_CONFIG):
+    """起一个真实 Inspector 子进程：state_home 与 stderr 都落在 ``work_dir`` 下。
+
+    就绪的唯一信号是它自己打印的回环地址；起不来就把两侧输出一并抛出。成功的实例登记进
+    ``_LIVE_SERVERS``，失败用例由 ``pytest_runtest_makereport`` 打印它的 stderr 尾部。
+
+    ``work_dir`` 由调用方按用例给（不同脚本 / 不同配置各自一份），这就是层 1 台子复用点。
+    """
+    work_dir = Path(work_dir)
     state_home = work_dir / 'state'          # 必须落在任何脚本目录之外（HistoryStore 的硬要求）
-    state_home.mkdir()
+    state_home.mkdir(parents=True, exist_ok=True)
     stderr_path = work_dir / 'server-stderr.log'
     stderr_file = stderr_path.open('w', encoding='utf-8')
     env = {**os.environ, 'FIGPACT_STATE_HOME': str(state_home), 'PYTHONIOENCODING': 'utf-8'}
-    process = _launch(env, [sys.executable, '-m', 'figpact.inspector_server', '--example', 'nmr',
-                            '--scope', 'main', '--dpi', '600', '--port', '0'],
-                      REPO_ROOT)
+    process = _launch(env, command, cwd)
     lines: list[str] = []
 
     def drain():
@@ -257,23 +271,30 @@ def server(tmp_path_factory):
                     f'stdout: {"".join(lines)[-2000:]}\n'
                     f'stderr: {"".join(stderr_lines)[-4000:]}')
 
-    instance = InspectorProcess(port, state_home, process, stderr_path)
+    instance = InspectorProcess(port, state_home, process, stderr_path, stderr_file, config)
     _LIVE_SERVERS.append(instance)
+    return instance
+
+
+@pytest.fixture(scope='session')
+def server(tmp_path_factory):
+    """真实 nmr 会话子进程 + 临时 state_home；整个会话只起一次（建图秒级）。"""
+    assert NMR_SCRIPT.is_file(), f'缺少被服务的例子源码：{NMR_SCRIPT}'
+    assert NMR_CONFIG.is_file(), f'缺少被服务的例子配置：{NMR_CONFIG}'
+    instance = launch_server(tmp_path_factory.mktemp('figpact-layer1-state'),
+                             command=[sys.executable, '-m', 'figpact.inspector_server',
+                                      '--example', 'nmr', '--scope', 'main', '--dpi', '600',
+                                      '--port', '0'])
     try:
         yield instance
     finally:
-        try:
-            _LIVE_SERVERS.remove(instance)
-        except ValueError:
-            pass
         instance.stop()
-        stderr_file.close()
 
 
 @pytest.fixture(scope='session', autouse=True)
 def repo_example_untouched():
     """整轮门禁不许碰线上例子源码：写盘路径必须跑在副本上（收尾再核一次字节）。"""
-    watched = {path: sha256_file(path) for path in (NMR_SCRIPT, NMR_CONFIG)}
+    watched = {path: sha256_file(path) for path in (NMR_SCRIPT, NMR_CONFIG, NATIVE_SCRIPT)}
     yield
     changed = [str(path) for path, digest in watched.items() if sha256_file(path) != digest]
     assert not changed, f'门禁改动了线上例子源码：{changed}'
@@ -437,8 +458,13 @@ def click_label(page, scene, node):
 
 @pytest.hookimpl(wrapper=True)
 def pytest_runtest_makereport(item, call):
-    """失败时打印 Inspector 子进程 stderr 尾部：服务端那一层的问题不藏在 pytest 里。"""
+    """失败时打印 Inspector 子进程 stderr 尾部：服务端那一层的问题不藏在 pytest 里。
+
+    顺手把报告挂在用例上（``item.rep_call`` 之类）：夹具收尾时才知道这个用例是否失败，
+    才有机会打印它自己那一层的现场（比如页面 HTML 尾）。
+    """
     report = yield
+    setattr(item, f'rep_{report.when}', report)
     if report.failed and report.when in ('setup', 'call') and _LIVE_SERVERS:
         text = '\n'.join(f'--- Inspector 子进程 stderr 尾部（端口 {instance.port}）---\n'
                          f'{instance.stderr_tail()}' for instance in _LIVE_SERVERS)
