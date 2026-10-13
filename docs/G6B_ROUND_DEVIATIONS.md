@@ -3,6 +3,9 @@
 冻结项：引擎 `f101113476cf3f0113ccbb5e054d700d8c0a433a`；协议 v2 + v2.1（`dba9114` 及之后仅文档）；题单 T01–T12；三臂权限与判分口径不变。
 归档根：`D:/L/AI/figpact-archive/g6b-v2/`（`I:` 已不存在）。
 
+**条目范围 = `D-1 … D-7`**（共 7 条）。此前本文件只写到 D-6，而 `docs/G6B_JUDGING_DEVIATIONS.md` 与 `docs/G6B_FINAL_ADJUDICATIONS.md` 已按「D-1…D-7」引用 → 索引不一致已在收口时补齐：**D-7 确有其条目**，内容取自臂 V 事件记录的同一编号（`formal/armV-events.md` §2 第 10 条），原文见下，无任何未披露的偏差项。
+另：NMR 科学输入 Manifest 的**覆盖率计数**问题（报告写「18 棵」、实际 27 棵）不属执行期偏差，单列在 `docs/G6B_NMR_MANIFEST_COVERAGE.md`。
+
 ## D-1 三臂并发执行（协议 v2 §4 要求"同一时刻只跑一条 trial"）
 
 - **事实**：三臂并行开跑；臂 L 与臂 A/V 的产物同时出现在同一 `formal/` 目录下。
@@ -37,6 +40,13 @@
 - **事实**：卡称 4 个 scope 各有 `fig2_ftir.<scope>.band.<bid>` 且 `label_edge_margin_mm` 在 4 个 scope 均声明；实测**只有 annotated 有 band 标签**、该参数**只在 annotated 的布局契约里声明**，另 3 个 scope 对同一路径返回 `UNSUPPORTED_PATH`。
 - **裁定**：**卡面描述有误**。按 §11.1.5 判定顺序照实裁定即可（臂 A 记结局①完成：4/4 scope 无新增阻断项、未声明对象 Δ=0.00、只改该一键；臂 L 亦记 completed）。**不**为对齐卡面而改夹具或题面，不重跑。
 - **协议层建议**：后续版本对题卡引用的 gid/参数路径做夹具级存在性校验。
+
+## D-7 赛前侦察在臂 V 提取树内留下 `__pycache__`（收尾已清除，trial 期间树内写入 = 0）
+
+- **事实**（原文出处：臂 V 事件记录 `formal/armV-events.md` §2 第 10 条，编号 `D-7`）：两条**赛前侦察**命令（`figpact list-params` / `FigureSession` 探针）在 `formal/t01-A09/tree` 与 `formal/t07-A13/tree` 内留下 `__pycache__`（时间戳 17:47/17:48，**早于任何 trial 开跑**）；臂 V 在收尾时删除。
+- **影响判定**：① 两棵树的六件夹具 SHA-256 与科学输入 manifest 校验**不受影响**（删除后重跑隔离检查 6/6 OK）；② `<T>/tree` 在 **trial 期间**的新增写入 = **0**（逐 trial 审计 `formal/tree-write-audit.json`：12 条 trial 的 `files_newer_than_trial_start` 与 `pycache_dirs` 全为空）；③ 本轮唯一涉及「树内写入」的结论是「三臂产出的关键状态都在 `<T>/tree` 之外」与「授权写回只落 `<T>/candidate/` 副本」——两者由 36 棵树 × 6 件夹具的 sha256 逐格核对支撑，与本条无冲突。
+- **裁定**：登记为**收尾清理项**（侦察行为在时间上可被时间戳与 trial 起点分开），**不属**三类作废，**不重跑**、不改判分结果。读者须知：这条偏差意味着「树在本轮**任何时刻**都未被写入」是**不成立**的严格说法；成立的表述是「**trial 期间**树内零写入」。
+- **出处与范围**：本条只出现在臂 V 的事件记录里；臂 L/A 的事件记录未登记同类条目（本次检索 `formal/armL-events.md`、`formal/armA-events.md` 零命中 `__pycache__`）。
 
 ## 待判分器遵守（来自 §12.3）
 
