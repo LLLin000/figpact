@@ -8,13 +8,21 @@
 取证原则：信息不足时如实留空或标 `unknown`，绝不编造科学基线、源码位置或「已确认」的
 编辑入口。源码位置只用 `ast` 静态判定，**不执行**用户脚本（执行就是副作用）——运行时的
 绑定读取由 G4 适配器负责，这里是它的静态对应物，两者不共用执行路径。
+
+`plan_authoring_binding` 是同一份取证的**写入侧**：给「一个绑定都没有」的脚本生成**最小**
+作者化补丁（插入一个模块级位移映射 + 一个取值助手，只改写目标那一个 `xytext=` 实参），
+经 G3b 的 journal 出计划——同样**零字节**写用户源码，落盘必须由调用方显式授权。
 """
 from __future__ import annotations
 
 import ast
 import hashlib
+import io
 import math
+import tokenize
 from pathlib import Path
+
+from . import source_writes
 
 #: 设计包 schema 的版本枚举（只有一个值）。
 SCHEMA_VERSION = 'figpact.vnext/1'
@@ -24,9 +32,16 @@ LAYOUT_BINDING_NAME = 'LAYOUT_MM'
 MAX_CANDIDATE_BUILDS = 2
 #: 取不到信息时的诚实字面量。
 UNKNOWN = 'unknown'
+#: 作者化写回插进源码的位移映射名与取值助手名：无绑定脚本靠这两个名字拿到**一个**局部自由度。
+LEGACY_OFFSET_BINDING = 'LEGACY_LABEL_OFFSET_PT'
+LEGACY_OFFSET_HELPER = '_legacy_offset_pt'
+#: 本 kind 的位移单位：**pt**，与目标调用现场的 `textcoords="offset points"` 同一个坐标系
+#: （把 mm 当 pt 用会静默放大 2.8 倍）。
+OFFSET_UNITS = 'pt'
 
-__all__ = ['SCHEMA_VERSION', 'LAYOUT_BINDING_NAME', 'MAX_CANDIDATE_BUILDS', 'UNKNOWN',
-           'build_repair_spec']
+__all__ = ['SCHEMA_VERSION', 'LAYOUT_BINDING_NAME', 'LEGACY_OFFSET_BINDING',
+           'LEGACY_OFFSET_HELPER', 'OFFSET_UNITS', 'MAX_CANDIDATE_BUILDS', 'UNKNOWN',
+           'build_repair_spec', 'plan_authoring_binding']
 
 
 # --------------------------------------------------------------------------- #
@@ -294,3 +309,349 @@ def build_repair_spec(*, script, target_gid: str, session) -> dict:
         'requires_explicit_approval': True,
         'max_candidate_builds': MAX_CANDIDATE_BUILDS,
     }
+
+
+# --------------------------------------------------------------------------- #
+# 作者化写回：无绑定脚本的**最小**补丁（只计划，零字节写用户文件）
+# --------------------------------------------------------------------------- #
+
+def _proposal(status: str, candidates: list[dict], message: str) -> dict:
+    """只给提案：候选 + 低置信度，且不产生任何文件变更（与 `python_native._reject` 同形）。"""
+    return {'status': status, 'candidates': candidates, 'confidence': 'low', 'message': message}
+
+
+def _line_starts(source: str) -> list[int]:
+    """每行行首的字符偏移：`starts[lineno - 1]` 即该行第一个字符的位置。"""
+    starts, total = [0], 0
+    for line in source.splitlines(keepends=True):
+        total += len(line)
+        starts.append(total)
+    return starts
+
+
+def _char_span(starts: list[int], node) -> tuple[int, int] | None:
+    """AST 节点在解码后文本里的字符区间 `[start, end)`；位置信息缺失或越界返回 None。"""
+    lineno, col = getattr(node, 'lineno', None), getattr(node, 'col_offset', None)
+    end_lineno, end_col = getattr(node, 'end_lineno', None), getattr(node, 'end_col_offset', None)
+    if None in (lineno, col, end_lineno, end_col):
+        return None
+    try:
+        start = starts[lineno - 1] + col
+        end = starts[end_lineno - 1] + end_col
+    except IndexError:
+        return None
+    return (start, end) if 0 <= start <= end <= starts[-1] else None
+
+
+def _comments(source: str) -> list[tuple[int, str]]:
+    """源码里的 (行号, 注释文本)；词法本身不成立时如实返回已读到的部分。"""
+    out: list[tuple[int, str]] = []
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            if token.type == tokenize.COMMENT:
+                out.append((token.start[0], token.string))
+    except (tokenize.TokenError, IndentationError, SyntaxError, ValueError):
+        return out
+    return out
+
+
+def _keyword(node: ast.Call, name: str):
+    for keyword in node.keywords:
+        if keyword.arg == name:
+            return keyword.value
+    return None
+
+
+def _offset_pair(node) -> list[float] | None:
+    """纯数字 `(dx, dy)` / `[dx, dy]` 字面量（允许一元负号）；其它形状一律 None。
+
+    变量、调用、字符串、长度不等于 2、非有限值都判为不可安全改写：那段常量可能是排版位移，
+    也可能是数据坐标，本模块不猜。
+    """
+    if not isinstance(node, (ast.List, ast.Tuple)) or len(node.elts) != 2:
+        return None
+    out: list[float] = []
+    for element in node.elts:
+        sign = 1.0
+        if isinstance(element, ast.UnaryOp) and isinstance(element.op, ast.USub):
+            element, sign = element.operand, -1.0
+        if not isinstance(element, ast.Constant) or isinstance(element.value, bool) \
+                or not isinstance(element.value, (int, float)):
+            return None
+        number = sign * float(element.value)
+        if not math.isfinite(number):
+            return None
+        out.append(number)
+    return out
+
+
+def _pair(value) -> list[float] | None:
+    """调用方给的位移：两个有限数字，归一成 `[float, float]`。"""
+    if not isinstance(value, (list, tuple)) or len(value) != 2:
+        return None
+    out: list[float] = []
+    for item in value:
+        if isinstance(item, bool) or not isinstance(item, (int, float)):
+            return None
+        number = float(item)
+        if not math.isfinite(number):
+            return None
+        out.append(number)
+    return out
+
+
+def _annotate_calls(tree) -> list[ast.Call]:
+    """模块里每一次 `*.annotate(...)`（`ast` 顺序即源码顺序，不是行号猜的）。"""
+    calls = [node for node in ast.walk(tree)
+             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+             and node.func.attr == 'annotate']
+    return sorted(calls, key=lambda node: (node.lineno, node.col_offset))
+
+
+def _annotation_text(call: ast.Call) -> str | None:
+    """这次 `annotate(...)` 画出来的标签文本（位置参数或 `text=`；读不出就 None）。"""
+    value = call.args[0] if call.args else _keyword(call, 'text')
+    if isinstance(value, ast.Constant) and isinstance(value.value, str):
+        return value.value
+    return None
+
+
+def _gid_name_links(tree, gid: str) -> set[str]:
+    """与 gid 字面量出现在**同一次调用**里的变量名（如 `reg.register(label_a, "<gid>")`）。
+
+    这是「这次调用画出来的图元就是那个 gid」的静态证据：注册现场把变量与 gid 钉在一起。
+    """
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if not any(isinstance(arg, ast.Constant) and arg.value == gid for arg in node.args):
+            continue
+        names.update(arg.id for arg in node.args if isinstance(arg, ast.Name))
+    return names
+
+
+def _assigned_names(call: ast.Call, parents: dict) -> set[str]:
+    """承载这次调用的赋值目标名（`label_a = ax.annotate(...)` → `{'label_a'}`）。"""
+    node, names = call, set()
+    while node is not None:
+        parent = parents.get(node)
+        if isinstance(parent, (ast.Assign, ast.AnnAssign)):
+            for target in _targets(parent):
+                if isinstance(target, ast.Name):
+                    names.add(target.id)
+            break
+        if not isinstance(parent, (ast.Tuple, ast.List, ast.Starred, ast.Attribute,
+                                   ast.Subscript, ast.Call)):
+            break
+        node = parent
+    return names
+
+
+def _evidence(comments, parents: dict, tree, call: ast.Call, gid: str) -> list[str]:
+    """这次调用与目标 gid 的静态关联证据（按证据类型记名；一条都没有就不算命中）。"""
+    found: list[str] = []
+    last_line = call.end_lineno or call.lineno
+    for line, text in comments:
+        if gid in text and call.lineno - 2 <= line <= last_line:
+            found.append('comment')
+            break
+    if _assigned_names(call, parents) & _gid_name_links(tree, gid):
+        found.append('binding')
+    text = _annotation_text(call)
+    if text is not None and text in {gid, gid.rsplit('.', 1)[-1]}:
+        found.append('label')
+    return found
+
+
+def _candidate(starts, call: ast.Call, evidence: list[str]) -> dict:
+    """一次 `annotate(...)` 调用的如实汇报（含没法改的原因，供人看候选）。"""
+    value = _keyword(call, 'xytext')
+    textcoords = _keyword(call, 'textcoords')
+    span = None if value is None else _char_span(starts, value)
+    why: list[str] = []
+    if value is None:
+        why.append('调用没有 xytext 实参')
+    elif _offset_pair(value) is None:
+        why.append('xytext 不是纯数字 (dx, dy) 字面量')
+    if not (isinstance(textcoords, ast.Constant) and textcoords.value == 'offset points'):
+        why.append('textcoords 不是 "offset points"：pt 语义不成立')
+    if not evidence:
+        why.append(f'没有任何证据把 {call.lineno} 行的调用与目标 gid 联系起来')
+    return {'kind': 'annotate', 'line': call.lineno, 'text': _annotation_text(call),
+            'xytext': None if value is None else _offset_pair(value),
+            'textcoords': textcoords.value if isinstance(textcoords, ast.Constant) else None,
+            'evidence': list(evidence), 'why': why,
+            'start': None if span is None else span[0], 'end': None if span is None else span[1]}
+
+
+def _declares_offset_support(tree) -> bool:
+    """源码里是否已经有本补丁要插入的名字（有就拒绝：本 kind 只从零新增这一处）。"""
+    for node in getattr(tree, 'body', []) or []:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                and node.name == LEGACY_OFFSET_HELPER:
+            return True
+        if any(isinstance(target, ast.Name) and target.id == LEGACY_OFFSET_BINDING
+               for target in _targets(node)):
+            return True
+    return False
+
+
+def _insert_offset(starts: list[int], tree) -> int:
+    """docstring / import 之后那一行的行首偏移：新代码插在这儿，`from __future__` 仍在最前。"""
+    last = 0
+    for node in getattr(tree, 'body', []) or []:
+        docstring = isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) \
+            and isinstance(node.value.value, str)
+        if isinstance(node, (ast.Import, ast.ImportFrom)) or docstring:
+            last = max(last, node.end_lineno or node.lineno)
+    return starts[min(last, len(starts) - 1)]
+
+
+def _problems_in_after(after: str, gid: str, wanted: list[float], base: list[float],
+                       annotate_count: int) -> list[str]:
+    """改写结果的**机械自检**：解析得动、只插了这一处映射、只改了目标那一个实参。"""
+    tree = _parse(after)
+    if tree is None:
+        return ['改写后的源码语法不成立（改写区间算错了），不落任何字节']
+    problems: list[str] = []
+    if len(_annotate_calls(tree)) != annotate_count:
+        problems.append('改写动了 annotate 调用的数量，只能改写目标那一个实参')
+    table = None
+    for node in getattr(tree, 'body', []) or []:
+        if any(isinstance(target, ast.Name) and target.id == LEGACY_OFFSET_BINDING
+               for target in _targets(node)):
+            table = node
+    if not isinstance(getattr(table, 'value', None), ast.Dict):
+        problems.append(f'{LEGACY_OFFSET_BINDING} 没有以字典字面量出现在模块级')
+    elif [(ast.literal_eval(key), _numeric_pair(value))
+          for key, value in zip(table.value.keys, table.value.values)] != [(gid, wanted)]:
+        problems.append(f'{LEGACY_OFFSET_BINDING} 的表内容不等于 {{"{gid}": {wanted}}}')
+    helper = [node for node in getattr(tree, 'body', []) or []
+              if isinstance(node, ast.FunctionDef) and node.name == LEGACY_OFFSET_HELPER]
+    if len(helper) != 1:
+        problems.append(f'模块级 {LEGACY_OFFSET_HELPER} 必须恰好定义一次，实得 {len(helper)} 次')
+    rewired = []
+    for call in _annotate_calls(tree):
+        value = _keyword(call, 'xytext')
+        if isinstance(value, ast.Call) and isinstance(value.func, ast.Name) \
+                and value.func.id == LEGACY_OFFSET_HELPER:
+            rewired.append(value)
+    if len(rewired) != 1:
+        problems.append(f'应当恰好有一处 xytext 走 {LEGACY_OFFSET_HELPER}，实得 {len(rewired)} 处')
+    else:
+        args = rewired[0].args
+        if len(args) != 2 or not (isinstance(args[0], ast.Constant) and args[0].value == gid) \
+                or _offset_pair(args[1]) != base:
+            problems.append(f'{LEGACY_OFFSET_HELPER} 的实参不是 ({gid!r}, {tuple(base)})')
+    return problems
+
+
+def plan_authoring_binding(script, gid: str, value_pt, *, base_offset_pt=None,
+                           state_home, reason: str) -> dict:
+    """无绑定脚本 → 受控作者化补丁的**计划**（写 journal/blob，零字节写用户源码）。
+
+    补丁最小且受限，一共三处：
+
+    ① 模块顶层（docstring/imports 之后）插入 ``LEGACY_LABEL_OFFSET_PT = {"<gid>": [dx, dy]}``；
+    ② 插入取值助手 ``def _legacy_offset_pt(gid, base): return (base[0] + dx, base[1] + dy)``；
+    ③ **只**把目标 gid 那一次 ``ax.annotate(..., xytext=(x, y), ...)`` 的 ``xytext=`` 实参
+       改写成 ``_legacy_offset_pt("<gid>", (x, y))``；其余字节逐位原样。
+
+    目标调用按 ``ast`` 定位，证据只有三类：注释里写了该 gid、该调用画出的图元在注册现场与
+    该 gid 字面量钉在一起、标签文本等于 gid 末段。命中不唯一 → ``AMBIGUOUS``；一次都没命中
+    → ``NEEDS_AUTHORING``；两种情况都附 ``candidates`` 且**零写入**。``value_pt`` 是位移增量，
+    单位 **pt**（目标调用现场的 ``textcoords="offset points"`` 就是这个坐标系）；``value_pt``
+    为 ``[0, 0]`` 时改写后的图与原件逐位相同。``base_offset_pt`` 是调用方声明的现场 ``xytext``
+    现值，对不上就是过期事实 → ``STALE_BASE``，不按旧事实改写。
+    """
+    script = Path(script)
+    if not isinstance(gid, str) or not gid:
+        return _proposal('INVALID', [], f'gid 必须是非空字符串，得到 {gid!r}')
+    wanted = _pair(value_pt)
+    if wanted is None:
+        return _proposal('INVALID', [], f'value_pt 必须是两个有限数字（单位 {OFFSET_UNITS}），'
+                                         f'得到 {value_pt!r}')
+    base_claimed = None if base_offset_pt is None else _pair(base_offset_pt)
+    if base_offset_pt is not None and base_claimed is None:
+        return _proposal('INVALID', [], f'base_offset_pt 必须是两个有限数字（单位 {OFFSET_UNITS}），'
+                                         f'得到 {base_offset_pt!r}')
+    try:
+        source = script.read_bytes().decode('utf-8')
+    except FileNotFoundError:
+        return _proposal('NEEDS_AUTHORING', [], f'{script}：脚本不存在，无法定位标签调用')
+    except UnicodeDecodeError:
+        return _proposal('NEEDS_AUTHORING', [],
+                         f'{script}：源码不是 UTF-8 文本，ast 定位与字节级改写都无法保证')
+    tree = _parse(source)
+    if tree is None:
+        return _proposal('NEEDS_AUTHORING', [], f'{script}：源码语法不成立，无法定位目标调用')
+    if _declares_offset_support(tree):
+        return _proposal('NEEDS_AUTHORING', [],
+                         f'源码已经声明 {LEGACY_OFFSET_BINDING} 或 {LEGACY_OFFSET_HELPER}：'
+                         '本 kind 只从零新增这一处自由度，不叠加第二份')
+    starts = _line_starts(source)
+    comments = _comments(source)
+    parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+    calls = _annotate_calls(tree)
+    candidates = [_candidate(starts, call,
+                             _evidence(comments, parents, tree, call, gid))
+                  for call in calls]
+    matched = [item for item in candidates if item['evidence']]
+    hit = [item for item in matched if item['xytext'] is not None
+           and item['textcoords'] == 'offset points' and item['start'] is not None]
+    if not hit:
+        return _proposal('NEEDS_AUTHORING', candidates,
+                         f'没有可安全改写的 {gid} 目标调用（候选 {len(candidates)} 处）：'
+                         '要改的调用必须唯一地关联到这个 gid、xytext 为纯数字、'
+                         'textcoords="offset points"')
+    if len(hit) > 1:
+        return _proposal('AMBIGUOUS', candidates,
+                         f'{gid}：有 {len(hit)} 处调用都像目标（第 '
+                         f'{", ".join(str(item["line"]) for item in hit)} 行），'
+                         '无法安全判定该改哪一处，只给候选')
+    match = hit[0]
+    if base_claimed is not None and base_claimed != match['xytext']:
+        return _proposal('STALE_BASE', candidates,
+                         f"{gid}：调用现场第 {match['line']} 行的 xytext {match['xytext']} "
+                         f'与调用方声明的 base_offset_pt {base_claimed} 不符，'
+                         '不按过期事实改写')
+
+    key_text = f'"{gid}"' if '"' not in gid and '\\' not in gid else repr(gid)
+    numbers = ', '.join(repr(number) for number in wanted)
+    base_numbers = ', '.join(repr(number) for number in match['xytext'])
+    block = (f'{LEGACY_OFFSET_BINDING} = {{{key_text}: [{numbers}]}}\n'
+             '\n'
+             '\n'
+             f'def {LEGACY_OFFSET_HELPER}(gid, base):\n'
+             f'    dx, dy = {LEGACY_OFFSET_BINDING}.get(gid, (0.0, 0.0))\n'
+             '    return (base[0] + dx, base[1] + dy)')
+    insert_at = _insert_offset(starts, tree)
+    edits = [(insert_at, insert_at, '\n' + block + '\n\n'),
+             (match['start'], match['end'],
+              f'{LEGACY_OFFSET_HELPER}({key_text}, ({base_numbers}))')]
+    after = source
+    for start, end, text in sorted(edits, key=lambda item: item[0], reverse=True):
+        after = after[:start] + text + after[end:]
+    problems = _problems_in_after(after, gid, wanted, match['xytext'], len(calls))
+    if problems:
+        return _proposal('NEEDS_AUTHORING', candidates, '补丁自检未通过（零写入）：'
+                                                        + '；'.join(problems))
+
+    before = source.encode('utf-8')
+    after_bytes = after.encode('utf-8')
+    before_sha256 = hashlib.sha256(before).hexdigest()
+    after_sha256 = hashlib.sha256(after_bytes).hexdigest()
+    journal = source_writes.plan_source_change(
+        [source_writes.FileChange(path=script, before_sha256=before_sha256,
+                                  after_bytes=after_bytes)],
+        state_home=state_home, reason=reason)
+    return {'status': 'OK', 'units': OFFSET_UNITS, 'gid': gid,
+            'value_pt': wanted, 'base_offset_pt': list(match['xytext']),
+            'script': str(script), 'evidence': list(match['evidence']),
+            'target_line': match['line'],
+            'inserted': {'binding': LEGACY_OFFSET_BINDING, 'helper': LEGACY_OFFSET_HELPER,
+                         'at': insert_at},
+            'journal_id': journal['id'], 'journal': journal,
+            'before_sha256': before_sha256, 'after_sha256': after_sha256,
+            'diff': journal['files'][0].get('diff')}

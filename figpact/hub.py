@@ -5,12 +5,15 @@ G5a 的协调层：读选区、收几何任务、调既有 ``IntentSession.evalu
 不落盘；服务器是单线程 ``HTTPServer``，写入天然串行。
 
 G5b 追加一条**被约束的**源码写入路径（``/api/plans`` 系列）：计划由服务端用
-``python_native.plan_layout_edit`` 铸造（**零字节**写用户源码），只有页面带着服务端
+``python_native.plan_layout_edit``（已声明 ``LAYOUT_MM`` 的脚本，单位 mm）或
+``authoring.plan_authoring_binding``（无任何绑定的脚本，最小作者化补丁，单位 pt）铸造
+（**零字节**写用户源码），只有页面带着服务端
 签发、注入 ``/frame.js`` 的会话令牌同意过，且**申请该计划的客户端**在应用时磁盘字节
 仍逐文件等于计划里的 ``before_sha256``，才走 ``source_writes.apply_source_change``
 落盘并追加 history 的 ``source_change`` 检查点。授权主体（``client_id``）、操作范围
 （哪份计划 / 哪些文件 / 哪个 gid）、计划版本（``plan_id`` + before 哈希）与磁盘事实
-四者齐备才写；请求 body 里的布尔字段永远不构成授权。
+四者齐备才写；请求 body 里的布尔字段永远不构成授权。两种 ``kind`` 只在**铸造**时分岔，
+authorize/apply/cancel 走同一条校验链。
 
 诚实边界：这是**本机单用户**的同意绑定（回环 + 同源 + 页面会话令牌），**不是**多用户
 认证。计划与 grant 是内存态、会话级：进程重启即失去所有批准，这是设计意图。
@@ -28,7 +31,7 @@ from collections import deque
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from . import python_native, source_writes
+from . import authoring, python_native, source_writes
 from .history import HistoryError, HistoryStore, default_state_home
 
 FORBIDDEN_KINDS = ('source_write', 'publish', 'delete', 'git')
@@ -41,7 +44,12 @@ PLAN_TTL = timedelta(minutes=15)
 #: 页面会话同意令牌与申请客户端身份的请求头。授权是 header + 服务端令牌，不是 body 布尔字段。
 UI_TOKEN_HEADER = 'X-Figpact-Ui'
 CLIENT_HEADER = 'X-Figpact-Client'
+#: 已声明排版绑定的脚本：改 `LAYOUT_MM` 的**那一个**字面量（单位 mm）。
 PLAN_KIND = 'layout_edit'
+#: 无任何绑定脚本：走 ``authoring.plan_authoring_binding`` 的最小作者化补丁（单位 pt）。
+#: 两种 kind 铸造出的都是**同一种计划**，之后 authorize/apply/cancel 完全同一条校验链。
+AUTHORING_KIND = 'authoring_edit'
+PLAN_KINDS = (PLAN_KIND, AUTHORING_KIND)
 # GET /api/selection 的 stale 判定字段：发布值必须与实时会话一致。
 REVISION_FIELDS = (('session_id', '会话'), ('scene_revision', '图帧'), ('source_revision', '源文件'))
 
@@ -166,36 +174,52 @@ class SessionHub:
 
         服务端铸造的是 ``plan_id`` 与这份计划自己的 ``before_sha256``：授权只对**这一版**
         源码有效，之后磁盘上被任何人改过一个字节，应用都会被 ``STALE_SOURCE`` 挡住。
+
+        ``kind='layout_edit'`` 走 ``python_native.plan_layout_edit``（改已声明的 ``LAYOUT_MM``
+        字面量，单位 mm）；``kind='authoring_edit'`` 走 ``authoring.plan_authoring_binding``
+        （无绑定脚本的最小作者化补丁，单位 pt）。两者都只出计划、零字节写用户源码。
         """
         if not isinstance(body, dict):
             return _error('INVALID_PLAN', '请求必须是 JSON 对象'), 400
         client_id = body.get('client_id')
         if not isinstance(client_id, str) or not client_id:
             return _error('INVALID_PLAN', 'client_id 必须是非空字符串'), 400
-        if body.get('kind') != PLAN_KIND:
-            return _error('INVALID_PLAN', f'kind 只能是 {PLAN_KIND}'), 400
+        kind = body.get('kind')
+        if kind not in PLAN_KINDS:
+            return _error('INVALID_PLAN', f'kind 只能是 {" 或 ".join(PLAN_KINDS)}'), 400
         script, gid = body.get('script'), body.get('gid')
         if not isinstance(script, str) or not script or not isinstance(gid, str) or not gid:
             return _error('INVALID_PLAN', 'script 与 gid 必须是非空字符串'), 400
         reason = body.get('reason')
         if not isinstance(reason, str) or not reason.strip():
             return _error('INVALID_PLAN', 'reason 必须说明这次修改为什么发生'), 400
-        planned = python_native.plan_layout_edit(Path(script), gid, body.get('value'),
-                                                 state_home=self.state_home, reason=reason)
+        if kind == AUTHORING_KIND:
+            planned = authoring.plan_authoring_binding(
+                Path(script), gid, body.get('value_pt'),
+                base_offset_pt=body.get('base_offset_pt'),
+                state_home=self.state_home, reason=reason)
+        else:
+            planned = python_native.plan_layout_edit(Path(script), gid, body.get('value'),
+                                                     state_home=self.state_home, reason=reason)
         if planned.get('status') != 'OK':
-            # 值非法/定位歧义/需要作者级改动：原样透传 python_native 的拒绝，不铸造计划。
+            # 值非法/定位歧义/需要作者级改动：原样透传生成器的拒绝，不铸造计划。
             return planned, 409 if planned.get('status') != 'INVALID' else 400
         journal = planned['journal']
+        requested = planned['value_pt'] if kind == AUTHORING_KIND else body['value']
         now = datetime.now(timezone.utc)
-        plan = {'plan_id': uuid.uuid4().hex, 'client_id': client_id, 'kind': PLAN_KIND,
+        plan = {'plan_id': uuid.uuid4().hex, 'client_id': client_id, 'kind': kind,
                 'script': str(Path(script)), 'gid': gid,
-                'value': [float(item) for item in body['value']], 'reason': reason,
+                'value': [float(item) for item in requested], 'reason': reason,
                 'journal_id': journal['id'],
                 'files': [{field: entry[field]
                            for field in ('path', 'before_sha256', 'after_sha256', 'diff')}
                           for entry in journal['files']],
                 'created_at': now.isoformat(), 'expires_at': (now + PLAN_TTL).isoformat(),
                 'state': 'PENDING'}
+        if kind == AUTHORING_KIND:
+            # 单位是计划的一部分：pt 与 mm 之间差 2.8 倍，读的人不能靠猜。
+            plan['units'] = authoring.OFFSET_UNITS
+            plan['base_offset_pt'] = [float(item) for item in planned['base_offset_pt']]
         self._plans[plan['plan_id']] = plan
         while len(self._plans) > MAX_PLANS:
             oldest = next(iter(self._plans))
@@ -339,12 +363,17 @@ class SessionHub:
         try:
             store = HistoryStore(plan['script'], config, scope, state_home=self.state_home)
             head = store.head()
+            payload = {'kind': 'source_change', 'reason': plan['reason'], 'gid': plan['gid'],
+                       'plan_id': plan['plan_id'], 'journal_id': journal['id'],
+                       'commit_state': python_native.COMMITTED_AND_VERIFIED,
+                       'file_changes': python_native._journal_file_changes(journal)}
+            if plan.get('units'):
+                # 作者化写回的位移是 pt（offset points）；写进 mm 的字段名会骗读历史的人。
+                payload.update({'units': plan['units'], 'requested_pt': plan['value']})
+            else:
+                payload['requested_mm'] = plan['value']
             checkpoint = store.append_source_change(
-                {'kind': 'source_change', 'reason': plan['reason'], 'gid': plan['gid'],
-                 'plan_id': plan['plan_id'], 'journal_id': journal['id'],
-                 'requested_mm': plan['value'],
-                 'commit_state': python_native.COMMITTED_AND_VERIFIED,
-                 'file_changes': python_native._journal_file_changes(journal)},
+                payload,
                 expected_head=None if head is None else head['id'],
                 expected_file_sha256={entry['path']: entry['after_sha256']
                                       for entry in journal['files']})

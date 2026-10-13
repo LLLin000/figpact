@@ -10,7 +10,7 @@ G5b 把 G4 的「先计划、后授权」从 Python API 接成一条**用户可�
 
 修改文件（本轮）：
 
-- **改** `figpact/hub.py`：`SessionHub` 在既有选区/任务协调之上新增计划路径——`create_plan` / `read_plans` / `authorize_plan` / `apply_plan` / `cancel_plan`，以及模块级常量 `PLAN_TTL = timedelta(minutes=15)`、`UI_TOKEN_HEADER = 'X-Figpact-Ui'`、`CLIENT_HEADER = 'X-Figpact-Client'`、`PLAN_KIND = 'layout_edit'`（当前 389 行）。
+- **改** `figpact/hub.py`：`SessionHub` 在既有选区/任务协调之上新增计划路径——`create_plan` / `read_plans` / `authorize_plan` / `apply_plan` / `cancel_plan`，以及模块级常量 `PLAN_TTL = timedelta(minutes=15)`、`UI_TOKEN_HEADER = 'X-Figpact-Ui'`、`CLIENT_HEADER = 'X-Figpact-Client'`、`PLAN_KIND = 'layout_edit'`（后续 G5c 增加 `PLAN_KINDS = ('layout_edit', 'authoring_edit')`，见 `docs/G6B_THREE_ARM_PROTOCOL_V2_1.md` §10.4）。
 - **改** `figpact/inspector_server.py`：`InspectorServer` 构造时签发页面会话令牌并注入 `/frame.js`（`window.FIGPACT_UI_TOKEN=…`，即 `self._app.ui_token` 的 JSON 字面量）；新增 `GET/POST /api/plans` 与 `/api/plans/<plan_id>/<action>` 路由，**只有 authorize / cancel / apply 三个动作**，其它形状一律 404。
 - **改** `tools/inspector/inspector.js`：`#agent-plans` 计划列表与 `[data-plan-id]` / `[data-plan-diff]` / `[data-plan-action=authorize|cancel]` / `[data-plan-status]` 渲染；authorize/cancel 请求带 `X-Figpact-Ui`（取自 `window.FIGPACT_UI_TOKEN`）。
 - **新增** `tests/test_g5b_authorization.py`（499 行）：13 条授权用例。

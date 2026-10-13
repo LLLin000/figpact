@@ -18,7 +18,7 @@
 
 ---
 
-## 0. 修订索引（七条，一节一对照）
+## 0. 修订索引（七条，一节一对照；第二批 v2.2 见 §10）
 
 | # | 修订项 | 性质 | **替换 v2 的位置** |
 |---|---|---|---|
@@ -32,6 +32,10 @@
 
 **读法**：下文每一节 = 「替换位置」+「替换后文本（逐字）」+「依据」+「正式轮检查方式」。凡标
 **「替换后文本」**的引文，正式轮的记录、报告、冻结清单**按该文本读**，不得沿用 v2 原句。
+
+**第二批修订（v2.2）见 §10**：冻结 commit 重定（`0bcf870…`，替换 v2 §1.1 的 `12e751c…`）、
+提取命令唯一化（删 `worktree add` 备选）、科学输入 SHA-256 manifest 冻结、A16b 的 D1a 裁定待锁定；
+§8 清单新增第 16–19 条对应之。
 
 ---
 
@@ -48,13 +52,15 @@
 **替换后文本（v2 :45 行整行）**：
 
 ```text
-| 提取树生成（**唯一**） | `git -c core.autocrlf=false archive --format=tar <commit> | tar -x -C <trial_root>/tree`（或 `git -c core.autocrlf=false worktree add --detach <trial_root>/wt <commit>`） | 每条 trial 一份（§4）；`-c core.autocrlf=false` 是**强制项**，缺它 = 提取树行尾不确定 = 该轮作废 |
+| 提取树生成（**唯一**） | `git -c core.autocrlf=false archive --format=tar <commit> | tar -x -C <trial_root>/tree` | 每条 trial 一份（§4）；`-c core.autocrlf=false` 是**强制项**，缺它 = 提取树行尾不确定 = 该轮作废。**`<commit>` = §10.1 重定的新基线 `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`**；`worktree add` 备选**已删除**（§10.2） |
 ```
 
 - **命令写法纪律**：`-c` 必须置于子命令之前（`git -c core.autocrlf=false archive …`）。短复验记录里
   写作 `git archive -c core.autocrlf=false`（臂 V 的简写）；写成 `git archive -c …` 会被 `git archive`
   当作未知选项而失败，故正式轮一律以本节命令为准，简写不再出现。
 - §4 第 1 条（:278–279）与 §10「提取树生成命令」行同样按本行读。
+- **基线重定（§10.1）**：v2 §1.1 :42 行的统一 commit `12e751c…` **作废**，三臂改用
+  `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`（含 A16b 夹具）；`worktree add` 备选**删除**（§10.2）。
 
 **依据**：短复验 §4.1、§4 处置 1；`D:/L/AI/figpact-archive/g6b-v2/armV-summary.md` §5.1；
 `armL/harness-hashes-and-eol.md`、`armL/hashes-eol.md`；`criteria-lineending-table.txt`。
@@ -331,8 +337,8 @@ archive 行尾模式 + 拼接方式**，内容一致。**统一口径前不得�
 |---|---|---|---|
 | 1 | 短复验四项通过条件成立、12 trial 0 丢弃、四项证据可复核 | v2 §8.2（1–12） | ✅ 已完成 |
 | 2 | 正式轮题目清单冻结：≥10 条配对，四层均有代表，**必含 A16a 与 A16b**，D2 题数 ≥8 | v2 §8.3 | 待做 |
-| 3 | **A16b 夹具**已提交并登记 `sha256sum`（含「无 `LAYOUT_MM`」的空输出证据） | v2 §1.2、§8.3 | 已落地：`examples/python_native/legacy_plain.py`，sha256 `dba9f6f9…635b`、`grep -n LAYOUT_MM` 空输出、`plan_layout_edit → NEEDS_AUTHORING`（零写入）、`build_repair_spec` schema 对齐 |
-| 4 | 三臂用 **同一 commit + §1.1 唯一提取命令**（`git -c core.autocrlf=false archive`）各建提取树 | v2 §1.1 + **v2.1 §1.1** | 待做 |
+| 3 | **A16b 夹具**已提交并登记 `sha256sum`（含「无 `LAYOUT_MM`」的空输出证据） | v2 §1.2、§8.3 | 已落地：`examples/python_native/legacy_plain.py`，sha256 `dba9f6f9…635b`、`grep -n LAYOUT_MM` 空输出、`plan_layout_edit → NEEDS_AUTHORING`（零写入）、`build_repair_spec` schema 对齐；**须落在 §10.1 新基线内**（该文件首次进仓库于 `0bcf870`） |
+| 4 | 三臂用 **同一 commit + §1.1 唯一提取命令**（`git -c core.autocrlf=false archive`）各建提取树；commit = **§10.1 的 `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`** | v2 §1.1 + **v2.1 §1.1、§10.1、§10.2** | 待做 |
 | 5 | 夹具哈希按 **`commit` 口径**在树内重算并逐字相等；`worktree` 口径同时登记 | v2 §1.2 + **v2.1 §1.2** | 待做 |
 | 6 | 判据包 12 值（`commit` 口径）+ **§2 唯一拼接命令的原文** + 签名值三件一起登记进冻结清单；每条 trial 的 `criteria_signature` 等于登记值 | v2 §1.3 + **v2.1 §2** | 待做 |
 | 7 | §3.4 模型逐字记录 + 可用性证据；**token 通道按 §6.1 实测**（默认结论「不可测」也须有回执） | v2 §3.4、§5.1 + **v2.1 §6.1** | 待做 |
@@ -344,6 +350,10 @@ archive 行尾模式 + 拼接方式**，内容一致。**统一口径前不得�
 | 13 | 预算/模型/判据签名/D1a 裁定/题目清单**在轮次期内冻结**；需改 = 整轮作废重跑 | v2 §8.3、§9 红线 13 | 待做 |
 | 14 | 人时口径落地：`human_wall_clock_s` 单列、A16a 真人等待计入人侧 | v2 §5.4、§6.3 + **v2.1 §7** | 待做 |
 | 15 | 作废条件写明并可执行：判据放宽 / 模型或预算不一致 / 隔离破坏 / 冻结项事后修改 → 整轮作废 | v2 §8.3、§9 | 待做 |
+| 16 | **冻结 commit 重定**：三臂统一基线 = `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`（含 A16b 夹具）；六件夹具哈希与判据包签名在**该基线提取树内重算**；禁止「旧 commit 提取 + 手工补文件」 | **v2.1 §10.1** | 待做（基线值已定；重算与登记待做） |
+| 17 | **提取命令唯一化**：只用 `git -c core.autocrlf=false archive`；`worktree add` 备选删除 | **v2.1 §1.1、§10.2** | 文本已定（命令唯一化已落文）；执行待做 |
+| 18 | **科学输入冻结**：NMR 未跟踪原始科学文件建 SHA-256 manifest（relpath/size/sha256），三臂复制后逐文件校验一致 | **v2.1 §10.3** | 待做（manifest 由独立单元产出，路径见 §10.3） |
+| 19 | **A16b 的 D1a 裁定**：作者化写回 Gate 完成后锁定 | **v2.1 §10.4** | **已锁定**：Gate 已落地（`authoring.plan_authoring_binding` + hub `kind="authoring_edit"`，authorize/apply 复用同一校验链，测试 7 用例 + 3 subTest 通过）→ **臂 V 路径存在**；臂 L（无授权写回）与臂 A（白名单无源码写回入口）为 `structural_unsupported`。正式轮按此裁定记录，不得临时扩大任何臂的写权限 |
 
 ---
 
@@ -351,8 +361,113 @@ archive 行尾模式 + 拼接方式**，内容一致。**统一口径前不得�
 
 - **未改任何其它文件**：v1 / pilot / v2 / 短复验记录逐字节不动；本文件是新增文件。
 - **未新增条款**：§1–§7 全部是 v2 已有位置的**替换或收紧**（H4 是把 v2 §4 第 3 条的括注升级为
-  硬约束并附引擎原因；无新指标、无新分母、无新任务）。
+  硬约束并附引擎原因；无新指标、无新分母、无新任务）。**唯一的新增条款节 = §10**（基线重定、
+  提取命令唯一化、科学输入冻结、A16b 裁定待锁定），同样不新增任务/分母/指标。
 - **未宣称**：不对三臂做能力/效率结论；不用短复验数值做臂间胜负；不声称已对 `I:` 上的 pilot 原件
   做逐字节复核；不声称 token 已可测；不声称构建数已可跨臂比较。
 - **未定义项**：本文件不引入任何 v2 未出现过的术语；`discarded` / `structural_unsupported` /
   `correct_refusal` / `mis_accept` / `mis_refusal` 全部沿用 v2 §3.3 的既有枚举。
+
+---
+
+## 10. v2.2 补充（基线重定 + 科学输入冻结）
+
+**地位**：本节是 v2.1 相对 v2 的**第二批修订**（按用户裁定 2026-10-13 第 1–4 条落地）。以下四条
+**逐字替换/新增**对应位置；与 §1–§9 或 v2 冲突处以本节为准。本节只改「正式轮用哪个基线、怎么提取、
+科学输入怎么冻结、A16b 裁定何时锁」，**不新增任务、不新增分母、不新增指标**。
+
+### 10.1 冻结 commit 重定（替换 v2 §1.1 :42「三臂统一引擎 commit」行与 :509 行）
+
+**问题**：v2 §1.1 把三臂统一 commit 固定为 `12e751cdeab699078a4f5a1835ca41f28af27b3b`，但
+**A16b 夹具 `examples/python_native/legacy_plain.py` 直到 `0bcf870` 才首次进仓库** → 严格按
+「v2 + v2.1」执行会出现「A16b 必须在场、但冻结树里没有该文件」的矛盾。
+
+**替换后文本（v2 §1.1 :42 行整行）**：
+
+```text
+| **三臂统一引擎 commit（v2.2 重定）** | `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf` | 含 A16b 夹具 `examples/python_native/legacy_plain.py`；冻结时若改用明确后续提交，须在冻结清单登记**同一提交全值**且三臂一致 |
+```
+
+- **旧值作废**：`12e751cdeab699078a4f5a1835ca41f28af27b3b` 不再作为三臂统一基线；任何臂**不得**
+  混用 `12e751c` 或其派生树。v2 §1.1 :509 行（§10 表「三臂统一引擎 commit」）与 v2 §1.1 其余
+  引用同样按本行读。
+- **三臂全部使用同一新基线**：`0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`（或冻结时登记的**明确
+  后续提交全值**）。
+- **六件夹具哈希（§1.2 表）与判据包签名（§2）必须在该新基线的提取树内重算**，重算值登记进
+  冻结清单并**逐字**充当判等对象；本节不预填重算值。
+- **禁止**：从旧 commit（如 `12e751c`）提取树、再手工补入 `legacy_plain.py` 等文件，却仍声称
+  「三臂同一冻结 commit」——该做法判为冻结清单未成立，**不得开跑**。
+- **依据**：用户裁定（2026-10-13）第 1 条；A16b 夹具首次进仓库于 `0bcf870`。
+
+### 10.2 提取命令唯一化：删除 `worktree add` 备选（替换 §1.1 表行与其括注）
+
+**替换后文本**：§1.1 的提取命令**唯一**为
+
+```text
+git -c core.autocrlf=false archive --format=tar <commit> | tar -x -C <trial_root>/tree
+```
+
+- `git -c core.autocrlf=false worktree add --detach <trial_root>/wt <commit>` **备选已删除**，
+  正式轮任何位置不得出现。
+- **理由**：`worktree add` 走检出路径，会重新施加检出过滤规则（本机 `core.autocrlf=true`），
+  **重新引入行尾差异** → 与 §1.2 的 `commit` 口径判等冲突。
+- **写法纪律不变**：`-c` 必须置于子命令之前；不得写作 `git archive -c core.autocrlf=false`。
+- 三臂提取树**只能**由本命令生成；其它路径生成的树不得用于判等。
+
+### 10.3 科学输入冻结：未跟踪原始科学文件必须建 SHA-256 manifest（新增进入条件）
+
+**问题**：NMR 例子的原始科学文件（`examples/nmr/` 下未被 git 跟踪者）**未被 git 跟踪**，
+`git archive` 带不出来。§1.2「随附收编」只写「从工作树只读复制」**不足以**冻结科学输入——必须有
+**逐文件哈希证据**，不得只靠「复制自同一目录」的文字声明。
+
+**要求**：
+
+- 为这批文件建立 **SHA-256 manifest**，逐文件登记 **相对路径（relpath）/ 大小（字节）/ SHA-256**。
+- **manifest 路径**：`D:/L/AI/figpact-archive/g6b-v2/nmr-science-manifest.json`（由独立单元产出，
+  本文件只引用该路径）。
+- **manifest 格式**：JSON，`files` 为按 relpath 排序的数组，每项 `{relpath, size, sha256}`
+  （relpath 相对 `--root`、POSIX 分隔符；size 字节；sha256 小写 hex）；另有
+  `file_count` / `total_bytes` / `root` / `algorithm` / `chunk_bytes` / `include_untracked_only` /
+  `skip_dirs` / **`ignored_relpaths`**（建表时被 git 跟踪而排除的 5 个路径：
+  `08 NMR.py` / `NMR_generate_all.py` / `figure_style.py` / `nmr.yaml` / `SKILL.md`）；**无时间戳**，
+  同树重建字节一致。
+- **范围（口径）**：`examples/nmr/` 下**全部未被 git 跟踪**且未被忽略规则排除的文件，排除
+  `.git/` 与 `__pycache__/` —— 即 88 个 `核磁原始数据/` 仪器文件 + 11 个 `Fig2_*/Fig_S*` 导出图件，
+  合计 **99 个文件 / 4,278,572 字节**；被 git 跟踪的 5 个源文件（`08 NMR.py` / `NMR_generate_all.py` /
+  `figure_style.py` / `nmr.yaml` / `SKILL.md`）**不在内**（它们走 §1.2 夹具哈希），2 个
+  `__pycache__/*.pyc` 被剪枝排除（非科学输入，各臂会重新生成，纳入会假失败）。
+- **校验命令（工具：`D:/L/AI/figpact/tools/science_manifest.py`，stdlib 无第三方包）**：
+
+  ```bash
+  python tools/science_manifest.py --verify \
+    D:/L/AI/figpact-archive/g6b-v2/nmr-science-manifest.json \
+    --root <该臂的 examples/nmr 副本>
+  ```
+
+  任何缺失 / 多出 / size 或内容不同 → 退出码 1；退出码 **0 = 一致、2 = 用法或 IO 错**。
+  **verify 端不需要 git、也不要求副本处于仓库内**（排除规则已固化进 manifest，校验只按 relpath 比对），
+  故三臂把科学输入拷到任意目录（worktree 或裸目录）都能直接跑；`--root` 省略时用 manifest 里记录的
+  原始根；**relpath 是身份**，故副本换绝对路径仍可校验。
+- **判等**：三臂把该集合只读复制进各自 NMR 提取树后，**逐文件 SHA-256 必须与 manifest 一致**；
+  任一处不一致 = 科学输入未冻结，**不得开跑**。若各臂会在自己树里重跑出图（`Fig2_*` / `Fig_S*`
+  是示例**产物**而非输入），则对**拷贝那一刻**的树校验，或只校验 `核磁原始数据/` 子树。
+- 复制动作发生在**夹具哈希核对之后**，且不得修改工作树或仓库（§1.2 随附收编不变）。
+
+### 10.4 A16b 的 D1a 裁定：**待作者化写回 Gate 完成后锁定**
+
+- **状态：已锁定（Gate 已落地）**——`authoring.plan_authoring_binding` + hub `kind="authoring_edit"` 已实现并通过测试（7 用例 + 3 subTest），authorize/apply 复用同一校验链。
+- **能力边界结论**：臂 V 具备 A16b 的完整路径（提案 → 计划 → 页面授权 → 写入 → 独立重建验证 → history）；臂 L 无授权写回、臂 A 白名单无源码写回入口 → 两者在 D1a 记 `structural_unsupported`。正式轮不得临时扩大任何臂的写权限。
+- **当前能力边界（实测，Gate 已落地后）**：`hub.create_plan()` 支持 `kind="layout_edit"`（`LAYOUT_MM` 绑定，经 `python_native.plan_layout_edit`）与 **`kind="authoring_edit"`**（无绑定脚本的最小显式绑定补丁，经 `authoring.plan_authoring_binding`，journal 由 `source_writes` 管理）；两者的 authorize/apply/cancel 复用同一校验链。当目标无
+  `LAYOUT_MM` 时返回 **`NEEDS_AUTHORING`**，**不铸造计划**（零写入）。
+- 因此 A16b 的 D1a 判据（`correct_refusal` / `mis_accept` / `mis_refusal` 的归类）在 Gate 完成前
+  **不得写入冻结清单**；Gate 完成后按 v2 §2.4 的 16 行裁定口径锁定，并在冻结清单登记锁定时刻与证据。
+- **已落地证据（§8 第 3 条）**：`examples/python_native/legacy_plain.py` 无 `LAYOUT_MM`
+  （`grep -n LAYOUT_MM` 空输出）、`plan_layout_edit → NEEDS_AUTHORING`（零写入）、
+  `build_repair_spec` schema 对齐。
+
+### 10.5 对 §1–§9 的影响
+
+- §1.1 表行的 `worktree add` 括注**已删**（§10.2）；`<commit>` 占位符 = §10.1 的新基线。
+- §1.2 六件夹具哈希与 §2 判据包签名：**须在新基线内重算**（本节不预填值）。
+- §8 清单新增第 16–19 条（对应本节四条）。
+- §9「未新增条款」：§10 是本文件唯一的新增条款节。
