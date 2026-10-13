@@ -6,6 +6,7 @@ Fig.2 FTIR —— 五样品透过率叠图
 """
 from pathlib import Path
 import argparse
+import copy
 import json
 import math
 import shutil
@@ -272,8 +273,13 @@ if ARGS.list_params:
     raise SystemExit(0)
 
 
-#: 当前生效的配置。legacy 导入 = ftir.yaml；native = build_scene 收到的候选配置。
+#: 本次构图的配置**工作副本**。legacy 导入 = ftir.yaml；native = build_scene 收到的
+#: 候选配置；两者都由 `_apply_config()` **深拷**进来（不是调用方的字典）。
 _CFG: dict = {}
+#: 本次构图的**派生布局量**：实测冻结视口 + 实测净距，按 scope 分档。与 `_CFG`
+#: （用户声明参数）生命周期分开——每次构图开始时清空、只活在这一次构图里、**不回写
+#: `_CFG`**。唯一读它的地方是 `--migrate-config`（迁移产出的 YAML 要固化实测视口）。
+_DERIVED: dict = {"layout_reference": {}, "clearance_mm": {}}
 #: 受保护的科研载荷缓存（load_science 只算一次；warm 布局不再读 CSV）。
 _SCIENCE: dict | None = None
 
@@ -284,11 +290,19 @@ def _apply_config(cfg: dict) -> None:
     **这是布局全局量的唯一初始化路径**：legacy 导入与 native
     `build_scene(science, config, scope)` 都只走这里，不存在第二处
     「又把 YAML 读进另一套全局」的分歧约定。
+
+    **装进来的是独立工作副本，不是调用方的字典**：构图过程对配置**只读**，
+    同 (science, config, scope) 因此恒等重建，同进程连续构图也不会互相串味。
     """
     global _CFG, LABEL_FS, LEGEND_FS, EDGE_MARGIN_MM, LABEL_GAP_TOP_MM, CURVE_GAP_MM
     global SHIFTS_MM, AXIS_FS, TICK_FS, NOTE_FS, LINE_WIDTH, LEGEND_COLS, LEGEND_ANCHOR_X
     global FTIR_CANVAS
-    _CFG = cfg
+    # 以前这里是 `_CFG = cfg`（直接绑上调用方的字典）。`draw_panel()` 会把实测视口与
+    # 实测净距写回 `_CFG`，于是「构图」顺手改掉了调用方的 config，同进程第二次构图
+    # 读到的还是上一次写进去的中间结果。深拷一份之后，下面所有全局量都从副本取，
+    # 不存在「一半读调用方、一半读副本」。
+    _CFG = copy.deepcopy(cfg)
+    cfg = _CFG
     # 归属标签与图例的字号是**同一份**：测量（_tier_geometry）与实际落字
     # （draw_bands）分开写死两个数，字号一改就会「量出来三层、画出来两层」。
     LABEL_FS = cfg["label_font_pt"]
@@ -528,13 +542,10 @@ def preview_qa(fig, scope):
 
 def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg: GidRegistry | None = None):
     """画一格。`scope` 是输出版本作用域（见 SCOPES），gid 与显示位移都按它隔离。"""
-    global CURVES
     if scope not in SCOPES:
         raise ValueError(f"未知作用域 {scope!r}；可用：{list(SCOPES)}")
     reference = _CFG["layout_reference"][scope]
     offsets = compute_offsets(spectra, gap=reference["gap_data"])
-    CURVES = [(np.asarray(x, dtype=float), np.asarray(y + o, dtype=float))
-              for (x, y), o in zip(spectra, offsets)]
     lines: list[tuple] = []
     for (x, y), (_, _, color, sid), offset in zip(spectra, SAMPLES, offsets):
         line, = ax.plot(x, y + offset, color=color, lw=LINE_WIDTH)
@@ -595,18 +606,24 @@ def draw_panel(ax, spectra, *, scope: str, processed: bool, annotate=False, reg:
             title.set_gid(t_gid)
             reg.register(title, t_gid, params=["note_font_pt"])
     ax.grid(False)
+    # 冻结视口与相邻曲线净距：配置里**声明**的是用户参数，直接用；没声明（`units_per_mm`
+    # 为 None）时，本次构图的**实测值**就是这一次的值——它是派生量，进 `_DERIVED`，
+    # **不写回 `_CFG`**：写回去等于把这一次的中间结果留给下一次构图（D-5 伪位移的来源），
+    # 也等于构图顺手改掉了调用方的配置。
     if reference["units_per_mm"] is None:
-        reference["axis_bottom_data"] = float(ax.get_ylim()[0])
-        reference["units_per_mm"] = float(np.diff(ax.get_ylim())[0] / axes_h_mm)
-        _CFG["clearance_mm"][scope] = {
+        _DERIVED["layout_reference"][scope] = {
+            "axis_bottom_data": float(ax.get_ylim()[0]),
+            "units_per_mm": float(np.diff(ax.get_ylim())[0] / axes_h_mm)}
+        clearance_mm = _DERIVED["clearance_mm"][scope] = {
             sid: measure_relation("vertical_clearance", lines[i-1][0], line)
             for i, (line, sid) in enumerate(lines) if i}
     else:
+        clearance_mm = _CFG["clearance_mm"][scope]
         bottom = reference["axis_bottom_data"]
         ax.set_ylim(bottom, bottom + reference["units_per_mm"] * axes_h_mm)
     for i in range(1, len(lines)):
         set_relation_target(kind="vertical_clearance", object_a=lines[i-1][0], object_b=lines[i][0],
-                            target_mm=_CFG["clearance_mm"][scope][lines[i][1]],
+                            target_mm=clearance_mm[lines[i][1]],
                             move=[line for line, _ in lines[i:]])
     for line, sid in lines:
         apply_display_shift(line, dy_mm=SHIFTS_MM[scope][sid])
@@ -641,6 +658,16 @@ def _panel_gid(scope: str) -> str:
 
 def _build(science: dict, scope_target: str):
     """按 scope 建图。**legacy 与 native 共用这一份构建路径**（不存在第二套约定）。"""
+    # 样式是**这张图**的属性，不是导入的副作用：每次构图都重新套一遍。native runtime
+    # 装载脚本时把 rcParams 恢复成导入前的值（`figpact.intents` 的 `rc_context()`），
+    # 而模块导入只会 apply 一次——于是同一个进程里的第二次构图会掉回 matplotlib
+    # 默认样式（figure.dpi 100、DejaVu 字体、默认线宽），整张图的几何随之改变。
+    # D-5 在 FTIR annotated 上报出的「两份字节相同的配置，却有 0.36 mm 位移」就是这个：
+    # 判分工具同进程里 baseline 先建（Arial/120 dpi）、candidate 后建（默认样式）。
+    fs.apply()
+    # 派生量跟着构图走：上一次的实测视口/净距不带进这一次（同进程连续构图的隔离点）。
+    _DERIVED["layout_reference"].clear()
+    _DERIVED["clearance_mm"].clear()
     reg = GidRegistry()
     raw, proc = science["raw"], science["processed"]
 
@@ -682,8 +709,10 @@ def build_scene(science: dict, config: dict, scope: str):
     """native 入口：候选配置 + 已缓存科研载荷 → (Figure, GidRegistry)。
 
     候选配置先过 `prepare_config`（与 legacy 同一份标准化：缺 shifts_mm 补 0），
-    全部排版全局量再由 `_apply_config` 一次装好，因此同一 (science, config, scope)
-    永远得到同一张图；纯布局试算不重读 CSV、不重算谱线。**传入的 config 不被修改**。
+    再由 `_apply_config` 把**副本**装成全部排版全局量（样式也由 `_build` 重新套一遍），
+    因此同一 (science, config, scope) 永远得到同一张图；纯布局试算不重读 CSV、不重算谱线。
+    **传入的 config 不被修改、也不被记住**：构图对配置只读，实测出来的派生量（冻结视口、
+    实测净距）只属于这一次调用。
     """
     _apply_config(prepare_config(config))
     return _build(science, scope)
@@ -952,11 +981,25 @@ def science_manifest(science: dict) -> dict:
     }
 
 
+def _adopt_measured_layout(config: dict) -> None:
+    """把本次构图的**实测**视口与实测净距固化进配置（`--migrate-config` 专用）。
+
+    构图本身不再写配置：派生量先落在 `_DERIVED`，由这里显式取走。迁移要用「构图顺手
+    改全局」那种隐式副作用——那正是 D-5 的根因，不能留。一次构图可能同时测出两个
+    scope（对照图的上下两格），所以这里按 `_DERIVED` 里实际有的记录逐条固化。
+    """
+    for scope, reference in _DERIVED["layout_reference"].items():
+        config["layout_reference"][scope].update(reference)
+    for scope, clearance in _DERIVED["clearance_mm"].items():
+        config["clearance_mm"][scope] = dict(clearance)
+
+
 def make_figure():
     if ARGS.migrate_config:
         for scope in ("main", "annotated", "compare_raw"):
             fig, _ = build_figure_and_registry(scope)
             plt.close(fig)
+            _adopt_measured_layout(CONFIG)
         validate_layout(CONFIG, scopes=SCOPES, ids=CURVE_IDS[1:], parameter="clearance_mm",
                         reference_fields=("gap_data", "lift_mm", "axis_bottom_data", "units_per_mm"))
         output = Path(ARGS.migrate_config).resolve()
