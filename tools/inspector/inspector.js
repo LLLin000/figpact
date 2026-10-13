@@ -429,6 +429,49 @@
     return `${status} ${code}${message}`;
   }
 
+  // P0a：**两个独立状态**——源码提交（写盘与否）与图形验证（独立重建与否），谁也推不出谁。
+  const SOURCE_COMMIT_TEXT = {
+    COMMITTED: '源码已提交',
+    NOT_WRITTEN: '源码未写入',
+    RECOVERY_REQUIRED: '源码写入状态不可判定（需人工恢复）',
+  };
+  const FIGURE_VERIFICATION_TEXT = {
+    PASS: '独立重建验证通过',
+    FAIL: '独立重建验证失败',
+    ERROR: '独立重建验证未完成',
+    NOT_RUN: '尚未独立重建验证',
+  };
+  // 只有 COMMITTED + PASS 才允许说这句话；写盘已成事实而验证没过/没跑完时必须照实说。
+  function planCommitText(plan) {
+    const source = plan && plan.source_commit_state;
+    const verify = plan && plan.figure_verification_state;
+    if (source === 'COMMITTED' && verify === 'PASS') return '修改已保存并通过验证';
+    if (source === 'COMMITTED') return '源码已提交，图形验证失败/未完成';
+    if (source === 'RECOVERY_REQUIRED') return SOURCE_COMMIT_TEXT.RECOVERY_REQUIRED;
+    return '源码未写入，图形未验证';
+  }
+  function commitDetailText(plan) {
+    const source = plan && plan.source_commit_state;
+    const verify = plan && plan.figure_verification_state;
+    const parts = [
+      `写入：${SOURCE_COMMIT_TEXT[source] || source || '（未知）'}`,
+      `验证：${FIGURE_VERIFICATION_TEXT[verify] || verify || '（未知）'}`,
+    ];
+    const measured = plan && plan.figure_verification && plan.figure_verification.measured_mm;
+    if (Array.isArray(measured) && measured.length === 2 && measured.every(finite)) {
+      parts.push(`实测位移 [${measured.map(v => Number(v.toFixed(4))).join(', ')}] mm`);
+    }
+    if (plan && plan.figure_verification_stale) {
+      parts.push('源码在验证之后又被改动，旧结论已失效');
+    }
+    return parts.join(' · ');
+  }
+  // 已经碰过磁盘的计划（写盘是事实 / 状态不可判定）才进"事后状态"区；待授权的仍走计划条。
+  function committedPlans(payload) {
+    return plansFromPayload(payload).filter(plan => plan.source_commit_state === 'COMMITTED'
+      || plan.source_commit_state === 'RECOVERY_REQUIRED');
+  }
+
   // G5b：选区序号。Hub 要求 selection_seq 跨页面会话严格递增，而模块级计数器每次刷新都
   // 从 0 重来——所以发布前先按 GET /api/selection 的 hub_revision / selection_seq 播种；
   // 被 400 INVALID_SELECTION 拒掉时按最新值再播种一次并重播。
@@ -451,7 +494,7 @@
     return Number.isFinite(http) ? http >= 400 && http < 500 : true;
   }
 
-  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys, planRequest, plansFromPayload, pendingPlans, planSummaryText, planDiffText, planFailureText, seedSelectionSeq, shouldReseed };
+  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys, planRequest, plansFromPayload, pendingPlans, planSummaryText, planDiffText, planFailureText, planCommitText, commitDetailText, committedPlans, seedSelectionSeq, shouldReseed };
   const globalScope = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : root);
   globalScope.FigpactInspector = api;
   root.FigpactInspector = api;
@@ -629,6 +672,37 @@
     return strip;
   }
 
+  // 已写盘计划的事后状态：写入与验证分别说，**只有 COMMITTED+PASS** 才出现"已保存并通过验证"。
+  function commitStrip(plan) {
+    const strip = document.createElement('article');
+    strip.className = 'plan-strip commit-strip';
+    strip.setAttribute('data-commit-id', plan.plan_id);
+    strip.setAttribute('data-source-commit-state', String(plan.source_commit_state || ''));
+    strip.setAttribute('data-figure-verification-state', String(plan.figure_verification_state || ''));
+    if (plan.figure_verification_stale) strip.setAttribute('data-figure-verification-stale', 'true');
+
+    const head = document.createElement('div');
+    head.className = 'plan-head';
+    const title = document.createElement('span');
+    title.className = 'plan-title';
+    title.setAttribute('data-commit-status', '');
+    title.textContent = planCommitText(plan);
+    const detail = document.createElement('span');
+    detail.className = 'plan-status';
+    detail.setAttribute('data-commit-detail', '');
+    detail.textContent = commitDetailText(plan);
+    head.append(title, detail);
+    strip.append(head);
+    return strip;
+  }
+
+  function renderCommits() {
+    const holder = byId('agent-commits');
+    if (!holder) return;
+    holder.replaceChildren();
+    for (const plan of committedPlans(state.plans)) holder.append(commitStrip(plan));
+  }
+
   function renderPlans() {
     const holder = byId('agent-plans');
     if (!holder) return;
@@ -654,6 +728,7 @@
       holder.append(line);
     }
     for (const plan of pendingPlans(state.plans)) holder.append(planStrip(plan));
+    renderCommits();
   }
 
   function setSelectionError(text) {
@@ -670,8 +745,10 @@
       const plans = plansFromPayload(await response.json());
       const wasError = !!state.plansError;
       state.plansError = '';
-      // 内容没变就不重画：轮询不能把用户展开的 diff 收回去，也不能打断点击
-      const signature = plans.map(plan => `${plan.plan_id}:${plan.state}`).join('|');
+      // 内容没变就不重画：轮询不能把用户展开的 diff 收回去，也不能打断点击。
+      // 两个状态字段也算内容：写盘/验证结果变了就必须重画。
+      const signature = plans.map(plan => [plan.plan_id, plan.state, plan.source_commit_state,
+        plan.figure_verification_state, plan.figure_verification_stale].join(':')).join('|');
       if (signature === state.plansSignature && !wasError) return;
       state.plansSignature = signature;
       state.plans = plans;

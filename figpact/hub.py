@@ -18,6 +18,15 @@ authorize/apply/cancel 走同一条校验链。
 诚实边界：这是**本机单用户**的同意绑定（回环 + 同源 + 页面会话令牌），**不是**多用户
 认证。计划与 grant 是内存态、会话级：进程重启即失去所有批准，这是设计意图。
 
+**P0a：写入语义与验证语义是两个字段，互不推导。**
+``commit_state``（``COMMITTED_AND_VERIFIED`` 等）是**兼容字段**，名字里的 ``VERIFIED``
+只指 journal 与逐文件磁盘字节的核对——它**不是**科学/几何验证结论。写盘成功之后，本模块
+另起进程重建一次（``python_native.verify_committed_source``），把结论放进
+``figure_verification_state``；写入与否放进 ``source_commit_state``。界面只有在
+``source_commit_state='COMMITTED'`` **且** ``figure_verification_state='PASS'`` 时才允许
+说"修改已保存并通过验证"；写盘已成事实而验证没过/没跑完，只能说"源码已提交，图形验证
+失败/未完成"。验证证据绑定当时脚本的 sha256，源码事后再变一个字节，旧结论即失效。
+
 公开方法返回 ``(payload, http_status)`` 以便 HTTP 路由直接回包，但本模块
 不依赖 HTTP，也不依赖 matplotlib。
 """
@@ -56,6 +65,25 @@ REVISION_FIELDS = (('session_id', '会话'), ('scene_revision', '图帧'), ('sou
 
 def _error(status, message):
     return {'status': status, 'message': message}
+
+
+def _not_run_verification():
+    """没写盘就没图可验：``NOT_RUN`` 是事实，不是失败（也**不是**未验证的通过）。"""
+    return {'state': python_native.FIGURE_NOT_RUN, 'measured_mm': None, 'evidence': None,
+            'problems': []}
+
+
+def _refuse(code, message, http_status):
+    """写盘路径的拒绝：**磁盘一个字节都没动**，两个状态照实说。
+
+    "拒绝"不等于"验证过的成功"，也不等于"写了但没验"——它连写都没写。把这两个字段
+    一并在拒绝里说清楚，调用方才不用从 ``status`` 反推磁盘事实。
+    """
+    return {**_error(code, message),
+            'commit_state': python_native.NOT_WRITTEN,
+            'source_commit_state': python_native.SOURCE_NOT_WRITTEN,
+            'figure_verification_state': python_native.FIGURE_NOT_RUN,
+            'figure_verification': None}, http_status
 
 
 def _sha256_file(path):
@@ -215,7 +243,11 @@ class SessionHub:
                            for field in ('path', 'before_sha256', 'after_sha256', 'diff')}
                           for entry in journal['files']],
                 'created_at': now.isoformat(), 'expires_at': (now + PLAN_TTL).isoformat(),
-                'state': 'PENDING'}
+                'state': 'PENDING',
+                # 两个**独立**状态（互不推导）：铸造时源码一个字节没写，图也没验过。
+                'source_commit_state': python_native.SOURCE_NOT_WRITTEN,
+                'figure_verification_state': python_native.FIGURE_NOT_RUN,
+                'figure_verification': None}
         if kind == AUTHORING_KIND:
             # 单位是计划的一部分：pt 与 mm 之间差 2.8 倍，读的人不能靠猜。
             plan['units'] = authoring.OFFSET_UNITS
@@ -228,7 +260,13 @@ class SessionHub:
         return {'status': 'OK', 'plan': copy.deepcopy(plan)}, 200
 
     def read_plans(self):
-        """任意本地客户端 ← Hub：最近 50 条计划及其状态（含 grant 是否还活着）。"""
+        """任意本地客户端 ← Hub：最近 50 条计划及其状态（含 grant 是否还活着）。
+
+        每条计划带上两个独立状态。``figure_verification_state`` 是**此刻**的答案：验证证据
+        绑定了当时那份脚本的 sha256，磁盘字节事后再变一个字节，旧的 ``PASS`` 就不再是当前
+        文件的验证结果（``figure_verification_stale`` + 原因，旧证据原样保留在
+        ``figure_verification`` 里供审计）。
+        """
         plans = []
         for plan_id, plan in self._plans.items():
             public = copy.deepcopy(plan)
@@ -237,6 +275,7 @@ class SessionHub:
                 'plan_id': grant['plan_id'], 'authorized_at': grant['authorized_at'],
                 'expires_at': grant['expires_at'], 'single_use': True,
                 'used': bool(grant.get('used'))}
+            public.update(self._verification_view(public))
             plans.append(public)
         return {'status': 'OK', 'plans': plans}, 200
 
@@ -275,64 +314,96 @@ class SessionHub:
         校验顺序：计划存在且 ``AUTHORIZED`` → 计划未过期 → 请求方就是申请该计划的
         ``client_id`` → grant 存在、未过期、未使用 → 底层 journal 仍 ``PREPARED`` 且
         before 哈希与计划一致 → **磁盘每个文件仍逐字节等于计划的 ``before_sha256``**。
+
+        写盘是事实之后，回执**两个独立状态，谁也不从谁推导**：
+
+        - ``source_commit_state``（``NOT_WRITTEN`` / ``COMMITTED`` /
+          ``RECOVERY_REQUIRED``）：源码是否安全提交；
+        - ``figure_verification_state``（``NOT_RUN`` / ``PASS`` / ``FAIL`` / ``ERROR``）：
+          写盘**之后**另起进程重建一次得到的图形验证结论，证据（脚本 sha256 / gid /
+          scope / 请求与实测位移 / 残差 / 科学指纹）绑在这次提交的版本上；
+        - ``commit_state`` 是**兼容字段**，只表达原有写入语义，**不含**科学/几何结论。
         """
         if not isinstance(client_id, str) or not client_id:
-            return _error('FORBIDDEN', f'写盘必须带 {CLIENT_HEADER} 表明自己是申请该计划的客户端'), 403
+            return _refuse('FORBIDDEN',
+                           f'写盘必须带 {CLIENT_HEADER} 表明自己是申请该计划的客户端', 403)
         plan = self._plans.get(plan_id)
         if plan is None:
-            return _error('PLAN_UNKNOWN', f'计划 {plan_id} 不存在'), 409
+            return _refuse('PLAN_UNKNOWN', f'计划 {plan_id} 不存在', 409)
         if plan['state'] != 'AUTHORIZED':
             code = {'PENDING': 'PLAN_NOT_PENDING', 'CANCELLED': 'PLAN_CANCELLED',
                     'APPLIED': 'PLAN_APPLIED'}.get(plan['state'], 'PLAN_NOT_PENDING')
-            return _error(code, f"计划 {plan_id} 当前状态 {plan['state']}，不能应用"), 409
+            return _refuse(code, f"计划 {plan_id} 当前状态 {plan['state']}，不能应用", 409)
         if self._expired(plan['expires_at']):
-            return _error('PLAN_EXPIRED', f"计划 {plan_id} 已在 {plan['expires_at']} 过期"), 409
+            return _refuse('PLAN_EXPIRED', f"计划 {plan_id} 已在 {plan['expires_at']} 过期", 409)
         if client_id != plan['client_id']:
-            return _error('FORBIDDEN', f'计划 {plan_id} 是客户端 {plan["client_id"]} 申请的；'
-                                       f'拒绝客户端 {client_id} 应用'), 403
+            return _refuse('FORBIDDEN', f'计划 {plan_id} 是客户端 {plan["client_id"]} 申请的；'
+                                        f'拒绝客户端 {client_id} 应用', 403)
         grant = self._grants.get(plan_id)
         if grant is None:
-            return _error('GRANT_UNKNOWN', f'计划 {plan_id} 没有可用 grant'), 409
+            return _refuse('GRANT_UNKNOWN', f'计划 {plan_id} 没有可用 grant', 409)
         if grant.get('used'):
-            return _error('GRANT_ALREADY_USED', f'计划 {plan_id} 的 grant 已经用过（单次使用）'), 409
+            return _refuse('GRANT_ALREADY_USED',
+                           f'计划 {plan_id} 的 grant 已经用过（单次使用）', 409)
         if self._expired(grant['expires_at']):
-            return _error('GRANT_EXPIRED', f"计划 {plan_id} 的 grant 已在 {grant['expires_at']} 过期"), 409
+            return _refuse('GRANT_EXPIRED',
+                           f"计划 {plan_id} 的 grant 已在 {grant['expires_at']} 过期", 409)
         try:
             journal = source_writes._load_journal(self.state_home, plan['journal_id'])
         except source_writes.SourceWriteError as error:
-            return _error('JOURNAL_UNKNOWN', str(error)), 409
+            return _refuse('JOURNAL_UNKNOWN', str(error), 409)
         planned_before = {entry['path']: entry['before_sha256'] for entry in plan['files']}
         journal_before = {entry['path']: entry['before_sha256'] for entry in journal['files']}
         if journal.get('status') != 'PREPARED' or journal_before != planned_before:
-            return _error('JOURNAL_NOT_PREPARED',
-                          f"journal {plan['journal_id']} 状态 {journal.get('status')}、"
-                          'before 哈希与计划不一致，拒绝应用'), 409
+            return _refuse('JOURNAL_NOT_PREPARED',
+                           f"journal {plan['journal_id']} 状态 {journal.get('status')}、"
+                           'before 哈希与计划不一致，拒绝应用', 409)
         stale = [entry['path'] for entry in plan['files']
                  if _sha256_file(entry['path']) != entry['before_sha256']]
         if stale:
-            return _error('STALE_SOURCE', f'磁盘字节与计划不符（外部改写）：{", ".join(sorted(stale))}；'
-                                          '拒绝覆盖，一个字节都不写'), 409
+            return _refuse('STALE_SOURCE',
+                           f'磁盘字节与计划不符（外部改写）：{", ".join(sorted(stale))}；'
+                           '拒绝覆盖，一个字节都不写', 409)
         # 到这儿才是"要写"：grant 立刻记为已用（单次使用），再交给 G3b 的可恢复写入。
         grant['used'] = True
         plan['state'] = 'APPLIED'
+        # 写盘**之前**先量基线：位移是"改后减改前"，没有基线就证明不了任何事。量不到也照写，
+        # 因为授权与写入不依赖验证——那时验证如实报 ERROR，不许冒充通过。
+        baseline = self._baseline_geometry(plan)
         try:
             applied = source_writes.apply_source_change(plan['journal_id'], state_home=self.state_home)
         except source_writes.SourceWriteError as error:
-            # 写入前校验失败：磁盘一个字节没动，如实说 NOT_WRITTEN。
-            return {'status': 'STALE_SOURCE' if str(error).startswith('STALE_SOURCE') else 'NOT_WRITTEN',
-                    'commit_state': python_native.NOT_WRITTEN, 'plan_id': plan_id,
-                    'journal_id': plan['journal_id'], 'message': str(error)}, 409
+            # 写入前校验失败：磁盘一个字节没动，如实说 NOT_WRITTEN（写入动作执行过这件事
+            # 在 journal 里，回执只报磁盘此刻的事实）。
+            refused = _refuse(
+                'STALE_SOURCE' if str(error).startswith('STALE_SOURCE') else 'NOT_WRITTEN',
+                str(error), 409)[0]
+            return {**refused, 'plan_id': plan_id, 'journal_id': plan['journal_id']}, 409
         commit_state = python_native._journal_commit_state(applied)
-        written = commit_state == python_native.COMMITTED_AND_VERIFIED
+        source_state = python_native.source_commit_state_of(commit_state)
+        verification = (self._figure_verification(plan, baseline)
+                        if source_state == python_native.SOURCE_COMMITTED
+                        else _not_run_verification())
+        plan.update({'source_commit_state': source_state,
+                     'figure_verification_state': verification['state'],
+                     'figure_verification': verification['evidence']})
         checkpoint_id, history_error = (None, None)
-        if written:
-            checkpoint_id, history_error = self._append_source_change(plan, applied)
-        answer = {'status': 'OK' if written else commit_state, 'commit_state': commit_state,
+        if source_state == python_native.SOURCE_COMMITTED:
+            checkpoint_id, history_error = self._append_source_change(plan, applied, verification)
+        answer = {'status': 'OK' if source_state == python_native.SOURCE_COMMITTED else commit_state,
+                  # 兼容字段：**只**表达写入语义（journal + 逐文件字节核对），已验证的字节
+                  # 不包含任何科学/几何结论；新前端读下面两个独立字段，不从它推导。
+                  'commit_state': commit_state,
+                  'source_commit_state': source_state,
+                  'figure_verification_state': verification['state'],
+                  'figure_verification': verification['evidence'],
+                  'measured_mm': verification['measured_mm'],
+                  'problems': verification['problems'],
                   'plan_id': plan_id, 'journal_id': plan['journal_id'], 'state': plan['state'],
                   'checkpoint_id': checkpoint_id}
         if history_error:
             answer['history_error'] = history_error
-        return answer, 200 if written else 409
+        return answer, 200 if source_state == python_native.SOURCE_COMMITTED else 409
 
     # 计划：页面或客户端 → Hub（取消）
 
@@ -350,13 +421,68 @@ class SessionHub:
 
     # 内部
 
-    def _append_source_change(self, plan, journal):
+    def _workspace(self):
+        """history 的工作区身份（config/scope）；服务端不知道身份时 config 为 None。"""
+        return self.source.get('config'), self.source.get('scope') or 'main'
+
+    def _baseline_geometry(self, plan):
+        """写盘**之前**在自己的重建探针上量一次（另起进程）；量不到返回 None。
+
+        量不到**不拦写盘**：授权与写入不依赖验证，验证没跑完就如实报 ERROR——把用户
+        授权过的写入卡在一个探针上，是拿验证去要挟写入。
+        """
+        config, scope = self._workspace()
+        if not config:
+            return None
+        try:
+            return python_native._measure_geometry(Path(plan['script']), Path(config), scope)
+        except python_native.LayoutBindingError:
+            return None
+
+    def _figure_verification(self, plan, baseline):
+        """写盘已成事实之后的**独立**验证：另起进程重建，证据绑定这次提交的脚本 sha256。"""
+        config, scope = self._workspace()
+        if not config:
+            return {'state': python_native.FIGURE_ERROR, 'measured_mm': None, 'evidence': None,
+                    'problems': ['SOURCE_IDENTITY_UNKNOWN：不知道 config/scope，无法独立重建']}
+        requested, tolerance = self._requested_mm(plan)
+        return python_native.verify_committed_source(
+            script=plan['script'], config=config, scope=scope, gid=plan['gid'],
+            requested_mm=requested, tolerance_mm=tolerance, baseline=baseline)
+
+    @staticmethod
+    def _requested_mm(plan):
+        """计划里请求的位移 → ``(毫米, 该用的容差)``。
+
+        ``layout_edit`` 的 ``value`` 本来就是毫米；``authoring_edit`` 的 ``value`` 是 pt
+        （调用现场 ``textcoords="offset points"``），1 pt = 25.4/72 mm，容差按
+        ``VERIFY_TOL_PT_MM`` 那一档（与 ``tests/test_authoring_writeback.py`` 同一档）。
+        """
+        if plan.get('units') == authoring.OFFSET_UNITS:
+            return [value * 25.4 / 72.0 for value in plan['value']], python_native.VERIFY_TOL_PT_MM
+        return [float(value) for value in plan['value']], python_native.VERIFY_TOL_MM
+
+    @staticmethod
+    def _verification_view(plan):
+        """报告**此刻**的验证状态：证据绑定的不是当前磁盘字节，旧结论就不算数。"""
+        state = plan.get('figure_verification_state') or python_native.FIGURE_NOT_RUN
+        evidence = plan.get('figure_verification')
+        if plan.get('source_commit_state') != python_native.SOURCE_COMMITTED or not evidence:
+            return {'figure_verification_state': state, 'figure_verification_stale': False}
+        if python_native.verification_is_current(evidence, plan['script']):
+            return {'figure_verification_state': state, 'figure_verification_stale': False}
+        # 源码在验证之后又变过：旧的 PASS/FAIL 都不是这份磁盘字节的结论。
+        return {'figure_verification_state': python_native.FIGURE_NOT_RUN,
+                'figure_verification_stale': True,
+                'figure_verification_stale_reason': 'SOURCE_CHANGED'}
+
+    def _append_source_change(self, plan, journal, verification):
         """写盘已成事实 → 在 history 追加 ``source_change`` 检查点（返回 (检查点 id, 错误)）。
 
         history 的工作区身份（script/config/scope）来自会话；身份不明时**不伪造**一个
         工作区，如实回报 ``SOURCE_IDENTITY_UNKNOWN``：检查点缺失是事实，编一个更糟。
         """
-        config, scope = self.source.get('config'), self.source.get('scope') or 'main'
+        config, scope = self._workspace()
         if not config:
             return None, 'SOURCE_IDENTITY_UNKNOWN'
         store = None
@@ -365,7 +491,11 @@ class SessionHub:
             head = store.head()
             payload = {'kind': 'source_change', 'reason': plan['reason'], 'gid': plan['gid'],
                        'plan_id': plan['plan_id'], 'journal_id': journal['id'],
+                       # 兼容字段：只表达写入语义；两个新字段各自独立，见模块文档。
                        'commit_state': python_native.COMMITTED_AND_VERIFIED,
+                       'source_commit_state': python_native.SOURCE_COMMITTED,
+                       'figure_verification_state': verification['state'],
+                       'figure_verification': verification['evidence'],
                        'file_changes': python_native._journal_file_changes(journal)}
             if plan.get('units'):
                 # 作者化写回的位移是 pt（offset points）；写进 mm 的字段名会骗读历史的人。

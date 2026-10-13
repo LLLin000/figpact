@@ -741,6 +741,25 @@ button[aria-expanded="true"] {
 
 #agent-plans:empty { display: none; }
 
+/* P0a：已写盘计划的**两个独立状态**（源码提交 / 图形验证）。区块独立于 #agent-plans，
+   页面把"待授权"和"已写盘的事后状态"分开说，两者的文案不互相冒充。 */
+#agent-commits { display: flex; flex-direction: column; gap: 4px; margin: 4px 0; padding: 0 8px; }
+
+#agent-commits:empty { display: none; }
+
+.commit-strip { border-left-color: var(--accent); background: var(--panel-bg); }
+
+.commit-strip .plan-title { flex: 0 1 auto; font-family: inherit; font-weight: 600; }
+.commit-strip .plan-status { color: var(--text-muted); }
+
+.commit-strip[data-figure-verification-state="FAIL"],
+.commit-strip[data-figure-verification-state="ERROR"] { border-left-color: var(--danger); }
+
+.commit-strip[data-figure-verification-state="FAIL"] .plan-title,
+.commit-strip[data-figure-verification-state="ERROR"] .plan-title { color: var(--danger); }
+
+.commit-strip[data-figure-verification-stale="true"] { border-left-color: var(--warning); }
+
 .plan-strip {
   display: flex;
   flex-direction: column;
@@ -823,6 +842,8 @@ button[aria-expanded="true"] {
 #inspector-root[data-panel="min"] .plan-title { flex-basis: 140px; }
 #inspector-root[data-panel="min"] .plan-diff-wrap > summary { font-size: 11px; }
 #inspector-root[data-panel="min"] .plan-diff { max-height: 3.2em; margin-top: 2px; padding: 2px 6px; }
+#inspector-root[data-panel="min"] #agent-commits { margin: 0; padding: 2px 8px; gap: 2px; }
+#inspector-root[data-panel="min"] .commit-strip { padding: 2px 6px; border-radius: 0; }
 
 /* ---------- 极简面板模式 / Minimal panel (?panel=min) ---------- */
 #inspector-root[data-panel="min"] #inspector-header,

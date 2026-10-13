@@ -100,12 +100,12 @@ History 可单独恢复）。**No-Go**：任何一条用例"看起来成功了�
 | 3 | 未授权写入 | 客户端直接 `apply`（无 `authorize`），或伪造 `{"authorized":true}` 在同一 body 里 | `POST apply` 无 `X-Figpact-Client` 或缺 `grant` → 拒绝；页面侧缺/错 `X-Figpact-Ui` → `403 FORBIDDEN`；**磁盘字节与调用前逐字节相同**，`GET /api/plans` 里该计划仍为 `PENDING` |
 | 4 | 用户取消 | 页面 `POST /api/plans/<id>/cancel` | `state=CANCELLED`，**零写入**；此后 `authorize`/`apply` 均被拒（`409`）；已 `APPLIED` 的计划不可取消（`409`） |
 | 5 | 科学数据改变 | 铸造计划后、`apply` 前改动被保护的科学载荷（数据/参数/科学文本） | `apply` 前哈希校验失败 → `409 STALE_SOURCE`，**一个字节都不写**；底层 journal 非 `PREPARED` 或 before 哈希与计划不符时同样拒绝 |
-| 6 | 修改后探针失败 | 计划通过并写入，但重建后的探针 / 科学不变量检查失败 | `commit_state` 必须是 `COMMITTED_BUT_UNVERIFIED` 或 `RECOVERY_REQUIRED`，**不得**把已写盘说成未写；页面与任一本地客户端显示同一验证等级；History 保留可回退检查点 |
+| 6 | 修改后探针失败 | 计划通过并写入，但重建后的探针 / 科学不变量检查失败 | `source_commit_state` 必须是 `COMMITTED`（**不得**把已写盘说成未写），失败只体现在 `figure_verification_state`（`FAIL` / `ERROR`，配 `figure_verification` 证据）；兼容字段 `commit_state` 仍是 `COMMITTED_AND_VERIFIED`（它只表达写入语义）；页面与任一本地客户端显示同一组状态；History 保留可回退检查点 |
 | 7 | 写入期间崩溃 | 在 `apply_source_change` 中途杀进程（客户端或服务端） | 重启后 `GET /api/plans` 无可用批准（grant 内存态即失，计划不复活）；磁盘处于可判定状态（完整 `after` 或原 `before`，**不得**半写）；`history` 能给出 `RECOVERY_REQUIRED`/检查点，恢复路径可判定 |
 | 8 | 关闭浏览器后 History 不损 | 授权 → 应用 → 关闭页面/浏览器 → 重新打开 | 重新打开后 `state` 内存计划清空（会话级，不落盘），但 `history` 中 `source_change` 检查点仍在，可单独恢复；`GET /api/plans` 不因页面关闭而丢磁盘产物 |
 | 9 | 两客户端竞争 | 两个 `client_id` 同时读同一份计划 / 争同一 gid 的授权 | 单线程 `HTTPServer` 串行：只有申请该计划的那个 `client_id` 可 `apply`（另一个 → 拒绝）；`grant` 单次使用，第二次 `apply` 拒绝；两个客户端不会各建独立候选并各写一份（`selection_seq`/计划一致性与 `STALE_SOURCE` 兜住） |
 
-每条用例都必须同时记录：**HTTP 状态 + 错误信封文案 + 磁盘 before/after 哈希 + `commit_state` + history 检查点**。
+每条用例都必须同时记录：**HTTP 状态 + 错误信封文案 + 磁盘 before/after 哈希 + `source_commit_state` / `figure_verification_state`（兼容字段 `commit_state` 一并记，它只表达写入语义）+ history 检查点**。
 只记"页面看起来成功了"不算证据。
 
 ---

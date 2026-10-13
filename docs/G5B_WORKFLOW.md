@@ -43,14 +43,34 @@ G5b 把 G4 的「先计划、后授权」从 Python API 接成一条**用户可�
 5. journal 仍 `PREPARED` 且 before 哈希与计划一致（`JOURNAL_*`）；
 6. **逐文件磁盘 sha256 == 计划的 `before_sha256`**（否则 `STALE_SOURCE`）。
 
-全部通过后才标记 grant 已用 / `APPLIED`，走既有的 `source_writes.apply_source_change`，并返回诚实的 `commit_state`（`COMMITTED_AND_VERIFIED` / `COMMITTED_BUT_UNVERIFIED` / `RECOVERY_REQUIRED` / `NOT_WRITTEN`）——写盘已成事实时不得报 `NOT_WRITTEN`。
+全部通过后才标记 grant 已用 / `APPLIED`，走既有的 `source_writes.apply_source_change`，并返回诚实的
+`commit_state`（`COMMITTED_AND_VERIFIED` / `COMMITTED_BUT_UNVERIFIED` / `RECOVERY_REQUIRED` / `NOT_WRITTEN`）——写盘已成事实时不得报 `NOT_WRITTEN`。**`commit_state` 现在是兼容字段**：名字里的 `VERIFIED` 只指
+「journal + 逐文件磁盘字节核对」，回执另有下面两个**互不推导**的字段。
 
-> **已知语义限制（逐字登记在别处）**：`COMMITTED_AND_VERIFIED` **只**表示「源码已写盘 + journal 与
-> 逐文件磁盘字节比较通过」，**不含**目标位移 / 科学内容的验证；本条 HTTP 路径自身不重新构图、不跑
-> Target/Science Oracle——科学与几何验证**只有另行独立重建才能给出**。正式轮判分口径（独立判分器必须
-> 自建重建；`completed` 只由自建结果判定；A16b / A17 不得把该返回值计为科学验证通过；产品层拆分
-> `source_commit_state` / `figure_verification_state` 待开票、本轮不改 `f101113`）见
-> `docs/G6B_THREE_ARM_PROTOCOL_V2_1.md` **§12 已知语义限制：Hub 的 `COMMITTED_AND_VERIFIED`**。
+### P0a：写盘之后回两个独立状态（不再让"字节已提交"冒充"图已验证"）
+
+写盘成为事实之后，Hub **自己另起一个进程**重建一次（`python_native.verify_committed_source` →
+`_measure_geometry`），回执拆成两条通路：
+
+|字段|取值|回答|
+|---|---|---|
+|`source_commit_state`|`NOT_WRITTEN` / `COMMITTED` / `RECOVERY_REQUIRED`|源码是否安全提交？|
+|`figure_verification_state`|`NOT_RUN` / `PASS` / `FAIL` / `ERROR`|提交后的图是否通过**独立**验证？|
+
+- 验证证据**绑定这次提交的版本**：脚本 `sha256`、目标 `gid`、`scope`、请求与实测位移、实测残差、
+  科学指纹（`figure_verification`）。源码事后再变一个字节，`GET /api/plans` 就把旧结论撤下
+  （`figure_verification_state` 回到 `NOT_RUN` + `figure_verification_stale` / `SOURCE_CHANGED`）。
+- `PASS` 的三个条件与 G4 的 `edit_layout_and_verify` 同一套：目标 gid 实测位移在容差内（源码写毫米
+  字面量 `0.01 mm`；作者化写回的 pt 偏移 `0.2 mm`）、其余可见几何一动不动、科学指纹逐位相同。
+- 页面：只有 `COMMITTED` + `PASS` 才出现「修改已保存并通过验证」；写盘已成事实而验证
+  失败/未完成只能说「源码已提交，图形验证失败/未完成」。
+
+> **仍然成立的语义边界**：旧字段 `commit_state = COMMITTED_AND_VERIFIED` **只**表示「源码已写盘 +
+> journal 与逐文件磁盘字节比较通过」，本身**不含**目标位移 / 科学内容结论（结论在
+> `figure_verification_state` 与它的证据里）。正式轮判分口径（独立判分器必须自建重建；`completed`
+> 只由自建结果判定；A16b / A17 不得把该返回值计为科学验证通过）见
+> `docs/G6B_THREE_ARM_PROTOCOL_V2_1.md` **§12 已知语义限制：Hub 的 `COMMITTED_AND_VERIFIED`**；
+> 该节登记的产品层待开票项（拆分两个字段）已在本单元落地。
 
 ### cancel 与状态寿命
 

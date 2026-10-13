@@ -25,6 +25,7 @@ import os
 import subprocess
 import sys
 from contextlib import redirect_stdout
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -32,18 +33,36 @@ from .history import HistoryStore
 from .source_writes import (FileChange, apply_source_change, plan_source_change,
                             restore_project)
 
-__all__ = ['COMMITTED_AND_VERIFIED', 'COMMITTED_BUT_UNVERIFIED', 'LayoutBindingError',
-           'NOT_WRITTEN', 'RECOVERY_REQUIRED', 'VERIFY_TOL_MM', 'apply_planned_edit',
-           'edit_layout_and_verify', 'locate_layout_literal', 'plan_layout_edit',
-           'read_layout_binding', 'restore_layout_from_history']
+__all__ = ['COMMITTED_AND_VERIFIED', 'COMMITTED_BUT_UNVERIFIED', 'FIGURE_ERROR',
+           'FIGURE_FAIL', 'FIGURE_NOT_RUN', 'FIGURE_PASS', 'LayoutBindingError',
+           'NOT_WRITTEN', 'RECOVERY_REQUIRED', 'SOURCE_COMMITTED', 'SOURCE_NOT_WRITTEN',
+           'SOURCE_RECOVERY_REQUIRED', 'VERIFY_TOL_MM', 'VERIFY_TOL_PT_MM',
+           'apply_planned_edit', 'edit_layout_and_verify', 'locate_layout_literal',
+           'plan_layout_edit', 'read_layout_binding', 'restore_layout_from_history',
+           'source_commit_state_of', 'verification_is_current', 'verification_verdict',
+           'verify_committed_source']
 
 #: ``commit_state`` 的取值。它是**磁盘此刻的事实**，与 ``status``（失败原因）分开：
 #: ``NOT_WRITTEN`` 源码一个字节没变；``COMMITTED_*`` 写盘已成事实；``RECOVERY_REQUIRED``
 #: 状态不可判定（第三方改动、半截内容、或 journal 与磁盘互相矛盾），既不许猜也不许覆盖。
+#:
+#: **它是兼容字段**：名字里的 ``VERIFIED`` 只指 journal 与逐文件磁盘字节的核对，**不含**
+#: 任何科学/几何结论。新调用方读下面两个字段，不要再从 ``commit_state`` 推导验证结果。
 NOT_WRITTEN = 'NOT_WRITTEN'
 COMMITTED_AND_VERIFIED = 'COMMITTED_AND_VERIFIED'
 COMMITTED_BUT_UNVERIFIED = 'COMMITTED_BUT_UNVERIFIED'
 RECOVERY_REQUIRED = 'RECOVERY_REQUIRED'
+
+#: ``source_commit_state``：**只**回答"源码是否安全提交"（写入语义）。
+SOURCE_NOT_WRITTEN = 'NOT_WRITTEN'
+SOURCE_COMMITTED = 'COMMITTED'
+SOURCE_RECOVERY_REQUIRED = 'RECOVERY_REQUIRED'
+#: ``figure_verification_state``：**独立重建**才有的结论，**只**回答"提交后的图是否通过验证"。
+#: ``NOT_RUN`` 没跑（含证据绑定的版本已不是当前磁盘字节）；``ERROR`` 跑了但没跑完/没法判。
+FIGURE_NOT_RUN = 'NOT_RUN'
+FIGURE_PASS = 'PASS'
+FIGURE_FAIL = 'FAIL'
+FIGURE_ERROR = 'ERROR'
 
 #: 声明布局位移的模块级映射名。**不是配置项**：定位按名字找，改名等于没有声明。
 LAYOUT_NAME = 'LAYOUT_MM'
@@ -299,6 +318,9 @@ def apply_planned_edit(journal_id: str, *, state_home: Path, authorized: bool) -
 
 #: 重建实测允许的位移误差（毫米）：与 ``tests/test_python_native_example.py`` 同一约定。
 VERIFY_TOL_MM = 0.01
+#: 作者化写回（``textcoords="offset points"`` 的 pt 偏移）换算成毫米后的实测容差：与
+#: ``tests/test_authoring_writeback.py`` 同一档约定（那里也是 0.2 mm），不另立新标准。
+VERIFY_TOL_PT_MM = 0.2
 #: 重建子进程的超时（秒）：装载 + 建图 + 量测是秒级，给足余量即可。
 _PROBE_TIMEOUT_S = 300
 _PROBE_MARKER = 'FIGPACT_PROBE '
@@ -319,6 +341,24 @@ def emit(payload):
 
 
 def measure(script, config, scope):
+    import importlib.util
+    import os
+
+    # 重建必须看到**磁盘上的这份字节**：字节码缓存按「(mtime 的秒, 源文件大小)」判新鲜，
+    # 同一秒里等长的改写会被判成"没变"，于是重建跑的还是改写前那份代码——验证结论就成了
+    # 假话。缓存是再生品：删掉它，并且本进程不再写回（dont_write_bytecode），下一次重建
+    # 才不会又踩同一个坑。
+    sys.dont_write_bytecode = True
+    try:
+        stale_cache = importlib.util.cache_from_source(script)
+    except (ValueError, NotImplementedError):
+        stale_cache = None
+    if stale_cache:
+        try:
+            os.remove(stale_cache)
+        except OSError:
+            pass
+
     import matplotlib
     matplotlib.use('Agg', force=True)
     import matplotlib.pyplot as plt
@@ -381,10 +421,13 @@ def _measure_geometry(script: Path, config: Path, scope: str) -> dict:
 
 
 def _verified_shift(before: dict, after: dict, target_key: str,
-                    requested: list[float]) -> tuple[list[float] | None, list[str]]:
+                    requested: list[float],
+                    tolerance_mm: float = VERIFY_TOL_MM) -> tuple[list[float] | None, list[str]]:
     """实测目标 gid 的包围盒位移，并逐键核对其余可见几何一动不动。
 
-    返回 ``(实测位移, 问题清单)``；测不出来时位移为 ``None``，问题照记。
+    返回 ``(实测位移, 问题清单)``；测不出来时位移为 ``None``，问题照记。容差按调用方的
+    坐标系给：源码里写毫米字面量的那条路是 ``VERIFY_TOL_MM``；pt 偏移换算成毫米的那条路
+    是 ``VERIFY_TOL_PT_MM``（与 ``tests/test_authoring_writeback.py`` 同一档）。
     """
     problems: list[str] = []
     only_before = sorted(set(before) - set(after))
@@ -398,14 +441,14 @@ def _verified_shift(before: dict, after: dict, target_key: str,
         measured = [after[target_key][index] - before[target_key][index] for index in (0, 1)]
         for axis, (want, got) in enumerate(zip(requested, measured)):
             # 写成 `not (… <= …)`：NaN 也必须落进问题清单，不能靠比较为假冒充通过。
-            if not abs(got - want) <= VERIFY_TOL_MM:
+            if not abs(got - want) <= tolerance_mm:
                 problems.append(f'{target_key} 的 {"xy"[axis]} 实测位移 {got} mm，请求 {want} mm'
-                                f'（容差 {VERIFY_TOL_MM} mm）')
+                                f'（容差 {tolerance_mm} mm）')
     for key in sorted(set(before) & set(after)):
         if key == target_key:
             continue
         for axis, (was, now) in enumerate(zip(before[key], after[key])):
-            if not abs(now - was) <= VERIFY_TOL_MM:
+            if not abs(now - was) <= tolerance_mm:
                 problems.append(f'{key} 跟着动了（{"xyxy"[axis]}：{was} → {now}）')
     return measured, problems
 
@@ -445,6 +488,110 @@ def _journal_commit_state(journal: dict) -> str:
     if status == 'COMMITTED':
         return COMMITTED_AND_VERIFIED
     return RECOVERY_REQUIRED if status == 'RECOVERY_REQUIRED' else NOT_WRITTEN
+
+
+def source_commit_state_of(commit_state: str) -> str:
+    """兼容字段 ``commit_state`` → ``source_commit_state``（**只**翻译写入语义）。
+
+    ``COMMITTED_AND_VERIFIED`` 里的 ``VERIFIED`` 只指 journal 与逐文件磁盘字节的核对；
+    ``COMMITTED_BUT_UNVERIFIED`` 同样是"写盘已成事实，验证没过/没跑完"。翻译到这里为止：
+    这个函数**不产生**任何验证结论——那是 ``figure_verification_state`` 的事，两条通路
+    互不推导。
+    """
+    if commit_state in (COMMITTED_AND_VERIFIED, COMMITTED_BUT_UNVERIFIED):
+        return SOURCE_COMMITTED
+    if commit_state == RECOVERY_REQUIRED:
+        return SOURCE_RECOVERY_REQUIRED
+    return SOURCE_NOT_WRITTEN
+
+
+def verification_is_current(evidence: dict | None, script) -> bool:
+    """这份验证证据还是**当前磁盘上这份源码**的结果吗？只认脚本 sha256 这一个事实。
+
+    源码在验证之后又变过一个字节，旧 ``PASS`` 就不再是当前文件的验证结果——判定因此
+    不需要重跑重建，比对字节即可。
+    """
+    recorded = (evidence or {}).get('script_sha256')
+    if not isinstance(recorded, str) or not recorded:
+        return False
+    try:
+        return hashlib.sha256(Path(script).read_bytes()).hexdigest() == recorded
+    except OSError:
+        return False
+
+
+def verification_verdict(*, gid: str, requested_mm: list[float], baseline: dict, observed: dict,
+                         tolerance_mm: float = VERIFY_TOL_MM) -> dict:
+    """把「写入前基线 + 写入后重建」两份实测裁成 ``{state, measured_mm, problems}``。
+
+    PASS 的三个条件与 ``edit_layout_and_verify`` 同一套：目标 gid 的实测位移在容差内、
+    其余可见几何与其坐标一动不动、科研载荷指纹逐位相同。**探针自己不做判断**，这里也不
+    替它猜：拿不到两份实测就不该调用本函数。
+    """
+    measured, problems = _verified_shift(baseline['geometry'], observed['geometry'],
+                                         f'gid:{gid}', requested_mm, tolerance_mm)
+    if baseline['gids'] != observed['gids']:
+        problems.append(f'图元身份变了：{baseline["gids"]} → {observed["gids"]}')
+    if baseline['science_sha256'] != observed['science_sha256']:
+        problems.append(f'科研载荷指纹变了：{baseline["science_sha256"]} → '
+                        f'{observed["science_sha256"]}')
+    return {'state': FIGURE_FAIL if problems else FIGURE_PASS,
+            'measured_mm': measured, 'problems': problems}
+
+
+def verify_committed_source(*, script, config, scope: str, gid: str, requested_mm: list[float],
+                            tolerance_mm: float = VERIFY_TOL_MM, baseline: dict | None) -> dict:
+    """写盘**之后**的独立验证：另起进程重建一次，返回 ``{state, measured_mm, evidence, problems}``。
+
+    ``baseline`` 是写盘**之前**在同一个探针上量到的结果——位移是"改后减改前"，没有基线就
+    证明不了任何事；缺基线只报 ``ERROR``，不猜。
+
+    证据（``evidence``）**绑定这次提交的版本**：脚本 sha256、目标 gid、scope、请求与实测
+    位移、实测残差、科学指纹、容差与测到的时间。源码事后再被改一个字节，
+    ``verification_is_current`` 就能据此判定这份证据失效。
+    """
+    script = Path(script)
+    requested = [float(value) for value in requested_mm]
+    try:
+        digest = hashlib.sha256(script.read_bytes()).hexdigest()
+    except OSError as error:
+        digest = None
+        unreadable = [f'提交之后的源码读不出来：{error}']
+    else:
+        unreadable = []
+    evidence = {'state': None, 'script_sha256': digest, 'gid': gid, 'scope': scope,
+                'requested_mm': requested,
+                'tolerance_mm': tolerance_mm, 'measured_mm': None, 'residual_mm': None,
+                'science_sha256': None, 'gids': None, 'geometry_keys': None,
+                'measured_at': datetime.now(timezone.utc).isoformat(),
+                'tool': 'python_native._measure_geometry'}
+
+    def unfinished(*problems):
+        """没跑完就是 ``ERROR``（含"根本没基线可依"）；证据照样写下，用它判失效。"""
+        evidence['state'] = FIGURE_ERROR
+        return {'state': FIGURE_ERROR, 'measured_mm': None, 'evidence': evidence,
+                'problems': list(problems)}
+
+    if unreadable:
+        return unfinished(*unreadable)
+    if baseline is None:
+        return unfinished('写入前没有量到基线，位移与科学指纹都无从判定')
+    try:
+        observed = _measure_geometry(script, config, scope)
+    except LayoutBindingError as error:
+        return unfinished(f'写盘已成事实，但重建没能完成：{error}')
+    verdict = verification_verdict(gid=gid, requested_mm=requested, baseline=baseline,
+                                   observed=observed, tolerance_mm=tolerance_mm)
+    measured = verdict['measured_mm']
+    evidence.update({'measured_mm': measured,
+                     'residual_mm': None if measured is None else
+                     [got - want for got, want in zip(measured, requested)],
+                     'science_sha256': observed['science_sha256'],
+                     'science_sha256_before': baseline['science_sha256'],
+                     'gids': observed['gids'],
+                     'geometry_keys': len(observed['geometry'])})
+    evidence['state'] = verdict['state']
+    return {**verdict, 'evidence': evidence}
 
 
 def edit_layout_and_verify(script, gid: str, value, *, state_home, config, scope: str,
@@ -527,16 +674,12 @@ def edit_layout_and_verify(script, gid: str, value, *, state_home, config, scope
         except LayoutBindingError as error:
             problems.append(f'写入已成事实（磁盘字节 == after blob），但重建探针没能完成验证：{error}')
         else:
-            measured, problems = _verified_shift(baseline['geometry'], observed['geometry'],
-                                                 f'gid:{gid}', requested)
+            verdict = verification_verdict(gid=gid, requested_mm=requested,
+                                           baseline=baseline, observed=observed)
+            measured, problems = verdict['measured_mm'], list(verdict['problems'])
             if actual != plan['after_sha256']:
                 problems.append(f'源码字节与 after blob 不符：磁盘 {actual}，'
                                 f'after blob {plan["after_sha256"]}')
-            if baseline['gids'] != observed['gids']:
-                problems.append(f'图元身份变了：{baseline["gids"]} → {observed["gids"]}')
-            if baseline['science_sha256'] != observed['science_sha256']:
-                problems.append(f'科研载荷指纹变了：{baseline["science_sha256"]} → '
-                                f'{observed["science_sha256"]}')
             verification = {'science_sha256_before': baseline['science_sha256'],
                             'science_sha256_after': observed['science_sha256'],
                             'gids': observed['gids'],
