@@ -27,7 +27,7 @@ from pathlib import Path
 import pytest
 
 from .conftest import (CLIENT_ID, REPO_ROOT, launch_server, open_page, sha256_bytes, wait_for)
-from .test_g5b_workflow import await_authorized, plan_strip
+from .test_g5b_workflow import await_authorized, click_plan_action, plan_strip
 
 #: 线路上的契约字面量：测试守的是协议本身，不引用实现常量。
 AUTHORING_KIND = 'authoring_edit'
@@ -38,8 +38,8 @@ FIXTURE_SCRIPT = REPO_ROOT / 'examples' / 'python_native' / 'legacy_plain.py'
 TARGET_GID = 'legacy.main.label.A'
 VALUE_PT = [0.0, 2.0]
 BASE_XYTEXT = [0.0, 4.0]
-#: 页面轮询 ``/api/plans`` 的周期是 3 秒；给它两轮的时间。
-PAGE_POLL_TIMEOUT_S = 20.0
+#: 页面轮询 ``/api/plans`` 的周期是 3 秒；负载下 apply 还要跑两次重建，给足余量。
+PAGE_POLL_TIMEOUT_S = 45.0
 
 
 def expected_wording(source_state, verification_state):
@@ -85,15 +85,17 @@ class _Case:
 
     def commit_strip(self, plan_id, *, timeout=PAGE_POLL_TIMEOUT_S):
         """等页面把这条已写盘计划挂到"事后状态"区（页面自己轮询 /api/plans）。"""
-        selector = f'[data-commit-id="{plan_id}"]'
-        found, ok = wait_for(lambda: self.page.query_selector(selector),
+        found, ok = wait_for(lambda: self.page.query_selector(f'[data-commit-id="{plan_id}"]'),
                              f'页面上出现 {plan_id} 的提交/验证状态', timeout=timeout)
         assert ok, (f'页面始终没有显示 {plan_id} 的提交状态'
                     + _evidence(self.page, self.server))
         return found
 
-    @staticmethod
-    def strip_view(strip):
+    def strip_view(self, plan_id):
+        """**现查现读**：页面轮询会整体替换这些细条，握着旧句柄读会读到已脱离的元素。"""
+        strip = self.page.query_selector(f'[data-commit-id="{plan_id}"]')
+        assert strip is not None, (f'页面上没有 {plan_id} 的提交状态'
+                                   + _evidence(self.page, self.server))
         return {'source': strip.get_attribute('data-source-commit-state'),
                 'verification': strip.get_attribute('data-figure-verification-state'),
                 'stale': strip.get_attribute('data-figure-verification-stale'),
@@ -155,9 +157,9 @@ def case(browser, request):
 def _authorize_and_apply(case):
     """铸造 → 页面点「授权」→ 申请它的客户端 apply；返回 (计划, 回执)。"""
     plan = case.mint()
-    strip = plan_strip(case.page, plan['plan_id'])
+    plan_strip(case.page, plan['plan_id'])
     assert case.server.plan(plan['plan_id'])['state'] == 'PENDING', '页面还没点，不该已经授权'
-    strip.query_selector('[data-plan-action="authorize"]').click()
+    click_plan_action(case.page, plan['plan_id'])
     await_authorized(case.server, plan['plan_id'], case.page)
     status, applied = case.server.apply(plan['plan_id'])
     assert status == 200, f'apply 被拒：{status} {applied}'
@@ -168,7 +170,8 @@ def _authorize_and_apply(case):
 def test_page_says_saved_and_verified_only_for_committed_and_pass(case):
     """① 页面显示两个独立状态；"已保存并通过验证"只在 COMMITTED + PASS 时出现。"""
     plan, applied = _authorize_and_apply(case)
-    view = case.strip_view(case.commit_strip(plan['plan_id']))
+    case.commit_strip(plan['plan_id'])
+    view = case.strip_view(plan['plan_id'])
 
     # 页面显示的必须与服务端 /api/plans 的原始字段逐字一致（页面只是显示者）。
     public = case.server.plan(plan['plan_id'])
@@ -197,7 +200,8 @@ def test_page_says_saved_and_verified_only_for_committed_and_pass(case):
 def test_page_drops_an_old_pass_after_the_source_changes(case):
     """② 事后改盘 → 页面撤下旧的 PASS：验证状态不再是 PASS，且带上失效标记。"""
     plan, applied = _authorize_and_apply(case)
-    first = case.strip_view(case.commit_strip(plan['plan_id']))
+    case.commit_strip(plan['plan_id'])
+    first = case.strip_view(plan['plan_id'])
 
     # 绕过 Hub 改盘：验证证据绑定的字节已经不是磁盘上的字节。
     case.script.write_bytes(case.script.read_bytes() + '# 事后外部改动\n'.encode('utf-8'))
@@ -206,7 +210,7 @@ def test_page_drops_an_old_pass_after_the_source_changes(case):
         strip = case.page.query_selector(f'[data-commit-id="{plan["plan_id"]}"]')
         if strip is None or strip.get_attribute('data-figure-verification-stale') != 'true':
             return False
-        return case.strip_view(strip)
+        return case.strip_view(plan['plan_id'])
 
     view, ok = wait_for(stale, '页面把旧的验证结论标成失效', timeout=PAGE_POLL_TIMEOUT_S)
     assert ok, f'页面没有撤下旧结论：{first}' + _evidence(case.page, case.server)

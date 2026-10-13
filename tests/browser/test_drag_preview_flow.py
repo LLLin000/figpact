@@ -22,13 +22,14 @@ import re
 import shutil
 import sys
 import tempfile
+import time
 from pathlib import Path
 from urllib.parse import urlparse
 
 import pytest
 
-from .conftest import (NMR_CONFIG, NMR_SCRIPT, launch_server, node_by_gid, open_page,
-                       scene_of, wait_for)
+from .conftest import (HOVER_TIMEOUT_S, NMR_CONFIG, NMR_SCRIPT, launch_server, node_by_gid,
+                       open_page, scene_of, wait_for)
 
 #: 被服务的例子源码与配置：只读，用例不碰它们。
 assert NMR_SCRIPT.is_file() and NMR_CONFIG.is_file()
@@ -80,6 +81,25 @@ class ApiLog:
         return [call for call in self.calls if call[1] == EVALUATE_PATH]
 
 
+def settle_quiet(log: ApiLog, *, quiet=0.5, timeout=10.0) -> bool:
+    """等页面安静下来：连续 ``quiet`` 秒没有新的 ``/api/*`` 调用，才算上一轮异步发布落地。
+
+    固定 sleep 在负载下要么不够（残余调用混进拖动窗口）要么白等；这里等的是"不再有新调用"
+    这个明确状态。
+    """
+    deadline = time.monotonic() + timeout
+    seen = len(log.calls)
+    stable_since = time.monotonic()
+    while time.monotonic() < deadline:
+        if len(log.calls) != seen:
+            seen = len(log.calls)
+            stable_since = time.monotonic()
+        elif time.monotonic() - stable_since >= quiet:
+            return True
+        time.sleep(0.05)
+    return False
+
+
 def viewport_box(page) -> dict:
     """页面自己那块画布矩形的真实尺寸（CSS px）：毫米换算的倍数只能来自它。"""
     return page.evaluate("""() => { const r = document.getElementById('viewport').getBoundingClientRect();
@@ -101,7 +121,10 @@ def grab_point(page, scene, node):
         for fy in (0.5, 0.3, 0.7):
             x, y = to_client(scene, rect, left + fx * (right - left), bottom + fy * (top - bottom))
             page.mouse.move(x, y)
-            if page.get_attribute('#inspector-root', 'data-hover-id') == node['id']:
+            # hover 是异步的：等页面自己承认这个命中（而不是读一眼就走）。
+            _, hit = wait_for(lambda: page.get_attribute('#inspector-root', 'data-hover-id') == node['id'],
+                              f'指针停在 {node["id"]} 上', timeout=HOVER_TIMEOUT_S, interval=0.05)
+            if hit:
                 return x, y
     raise AssertionError(f'标签 {node.get("gid")} 内部找不到页面自己承认的命中点')
 
@@ -160,6 +183,8 @@ def test_drag_previews_locally_then_verifies_exactly_once_on_release(drag_server
         # 先选中：拖动只对"当前选中且可 ghost"的对象生效
         x, y = grab_point(page, scene, node)
         page.mouse.click(x, y)
+        wait_for(lambda: page.get_attribute('#inspector-root', 'data-selected-id') == node['id'],
+                 f'选中 {node["id"]}', timeout=10.0)
         assert page.get_attribute('#inspector-root', 'data-selected-id') == node['id']
 
         rect = viewport_box(page)
@@ -170,9 +195,9 @@ def test_drag_previews_locally_then_verifies_exactly_once_on_release(drag_server
 
         # 选区发布是异步的：先让它在按下之前落地，之后出现的每一个 POST 都属于这次拖动
         published = wait_for(lambda: any(call[1] == SELECTION_PATH for call in log.calls),
-                             '选区发布', timeout=10.0)[1]
+                             '选区发布', timeout=30.0)[1]
         assert published, log.calls
-        page.wait_for_timeout(200)
+        assert settle_quiet(log), f'选区发布之后还有 /api 调用没落地：{log.calls}'
         log.clear()
 
         # ---- 按住并移动：预览阶段（读数 / ghost 轮廓 / 引线 ghost）一个后端调用都不许有
@@ -210,7 +235,7 @@ def test_drag_previews_locally_then_verifies_exactly_once_on_release(drag_server
             page.mouse.up()
             immediate = badge(page)
             assert '通过' not in immediate and '已验证' not in immediate and '已保存' not in immediate, immediate
-            seen = wait_for(lambda: badge(page) == VERIFYING_TEXT, '验证中', timeout=5.0)[1]
+            seen = wait_for(lambda: badge(page) == VERIFYING_TEXT, '验证中', timeout=15.0)[1]
             assert seen, f'松开后应先进入"验证中"，而不是直接下结论：{immediate}'
         receipt = waiting.value.json()
 
@@ -224,7 +249,7 @@ def test_drag_previews_locally_then_verifies_exactly_once_on_release(drag_server
         # ---- 最终文案与回执一致：这个夹具是"真重建通过"，所以必须落到 PASS 那句
         expected = expected_badge(receipt)
         assert expected == PASS_TEXT, receipt
-        settled = wait_for(lambda: badge(page) == expected, f'最终文案 {expected}', timeout=60.0)[1]
+        settled = wait_for(lambda: badge(page) == expected, f'最终文案 {expected}', timeout=120.0)[1]
         assert settled, f'{badge(page)} != {expected}；回执 {receipt}'
         assert not page.is_visible('#drag-readout'), '松手后读数框该收起'
         assert page.get_attribute('#inspector-root', 'data-selected-id') == node['id']
@@ -255,8 +280,10 @@ def test_drag_layer_leaves_the_existing_selection_paths_alone(drag_server, brows
         # ① 点选照旧
         other_x, other_y = grab_point(page, scene, other)
         page.mouse.click(other_x, other_y)
+        wait_for(lambda: page.get_attribute('#inspector-root', 'data-selected-id') == other['id'],
+                 f'选中 {other["id"]}', timeout=10.0)
         assert page.get_attribute('#inspector-root', 'data-selected-id') == other['id']
-        page.wait_for_timeout(200)
+        assert settle_quiet(log), f'点选之后还有 /api 调用没落地：{log.calls}'
         log.clear()
 
         # ② 拖了但净位移为零：不发请求，也不留 ghost

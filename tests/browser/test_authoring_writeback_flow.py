@@ -46,7 +46,7 @@ from figpact import python_native
 
 from .conftest import (CLIENT_ID, NO_HEADER, REPO_ROOT, UI_HEADER, launch_server,
                        node_by_gid, open_page, scene_of, sha256_bytes, sha256_file)
-from .test_g5b_workflow import await_authorized, plan_strip, publish_label
+from .test_g5b_workflow import await_authorized, click_plan_action, plan_strip, publish_label
 
 #: 线上契约的字面量：测试守的是协议本身，不是实现里的常量。
 AUTHORING_KIND = 'authoring_edit'
@@ -310,10 +310,10 @@ def test_page_authorize_then_apply_writes_the_planned_bytes_and_appends_history(
     """⑤ 页面点授权 → AUTHORIZED；客户端 apply → 200 + COMMITTED_AND_VERIFIED；
     磁盘 sha256 == 计划的 after；history 出现一条 source_change 且哈希与磁盘/计划一致。"""
     plan = trial.mint()
-    strip = plan_strip(trial.page, plan['plan_id'])
+    plan_strip(trial.page, plan['plan_id'])
     assert trial.server.plan(plan['plan_id'])['state'] == 'PENDING', '页面还没点，不该已经授权'
 
-    strip.query_selector('[data-plan-action="authorize"]').click()
+    click_plan_action(trial.page, plan['plan_id'])
     authorized = await_authorized(trial.server, plan['plan_id'], trial.page)
     grant = authorized['grant']
     assert grant is not None and grant['single_use'] is True and grant['used'] is False, grant
@@ -357,7 +357,7 @@ def test_rebuild_moves_only_the_target_and_the_patch_touches_one_place(trial):
 
     plan = trial.mint()
     plan_strip(trial.page, plan['plan_id'])
-    trial.page.click(f'[data-plan-id="{plan["plan_id"]}"] [data-plan-action="authorize"]')
+    click_plan_action(trial.page, plan['plan_id'])
     await_authorized(trial.server, plan['plan_id'], trial.page)
     status, applied = trial.server.apply(plan['plan_id'])
     assert (status, applied['commit_state']) == (200, COMMITTED_AND_VERIFIED), applied
@@ -400,7 +400,7 @@ def test_apply_after_an_external_rewrite_is_stale_and_writes_nothing(trial):
     """⑦ 授权之后、写盘之前文件被外部改写 → 409 STALE_SOURCE：拒绝覆盖，零写入。"""
     plan = trial.mint()
     plan_strip(trial.page, plan['plan_id'])
-    trial.page.click(f'[data-plan-id="{plan["plan_id"]}"] [data-plan-action="authorize"]')
+    click_plan_action(trial.page, plan['plan_id'])
     await_authorized(trial.server, plan['plan_id'], trial.page)
 
     external = trial.original + '# 外部改写：这一版计划作废\n'.encode('utf-8')
@@ -425,7 +425,7 @@ def test_backend_session_selection_and_history_survive_a_browser_restart(trial, 
     同一个 gid 仍能把同一份历史读回来。"""
     plan = trial.mint()
     plan_strip(trial.page, plan['plan_id'])
-    trial.page.click(f'[data-plan-id="{plan["plan_id"]}"] [data-plan-action="authorize"]')
+    click_plan_action(trial.page, plan['plan_id'])
     await_authorized(trial.server, plan['plan_id'], trial.page)
     status, applied = trial.server.apply(plan['plan_id'])
     assert (status, applied['commit_state']) == (200, COMMITTED_AND_VERIFIED), applied

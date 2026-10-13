@@ -37,7 +37,8 @@ DIFF_OLD = '[0.0, 0.0]'
 OTHER_CLIENT = 'someone-else'
 #: 重开/新开页面后把选区推回 Hub 的最大点击次数（见 publish_label 的说明）。
 PUBLISH_ATTEMPTS = 5
-PUBLISH_ATTEMPT_TIMEOUT_S = 3.0
+#: 一次发布会话的落地预算：负载下 Hub 往返 + 页面异步发布需要更大的余量。
+PUBLISH_ATTEMPT_TIMEOUT_S = 10.0
 
 
 def new_binding_line(gid: str) -> bytes:
@@ -88,7 +89,7 @@ def publish_label(page, server, scene, node, *, attempts=PUBLISH_ATTEMPTS):
                 f'{server.selection()["selection"]}' + _evidence(page))
 
 
-def plan_strip(page, plan_id: str, *, timeout=20.0):
+def plan_strip(page, plan_id: str, *, timeout=45.0):
     """等页面自己长出这条计划（页面每 3 秒轮询一次 ``/api/plans``）。"""
     assert page.query_selector('#agent-plans') is not None, \
         '页面里没有 #agent-plans 计划容器（授权 UI 未落地）' + _evidence(page)
@@ -100,7 +101,18 @@ def plan_strip(page, plan_id: str, *, timeout=20.0):
     return page.query_selector(f'[data-plan-id="{plan_id}"]')
 
 
-def await_authorized(server, plan_id: str, page=None, *, timeout=15.0):
+def click_plan_action(page, plan_id: str, action='authorize', *, timeout=30.0):
+    """点计划条上的按钮：按**选择器**点而不是持有句柄——重渲染会换掉元素，句柄会失效。
+
+    页面轮询（以及授权后的 ``renderPlans``）会整体替换 ``#agent-plans`` 的孩子；
+    先等按钮出现在页面上，再交给 Playwright 自己按选择器定位并重试，负载下才稳。
+    """
+    selector = f'[data-plan-id="{plan_id}"] [data-plan-action="{action}"]'
+    page.wait_for_selector(selector, timeout=timeout * 1000)
+    page.click(selector, timeout=timeout * 1000)
+
+
+def await_authorized(server, plan_id: str, page=None, *, timeout=30.0):
     """等服务端承认这次页面授权。"""
     def probe():
         plan = server.plan(plan_id)
@@ -112,7 +124,7 @@ def await_authorized(server, plan_id: str, page=None, *, timeout=15.0):
     return plan
 
 
-def await_page_settled(page, plan_id: str, *, timeout=15.0):
+def await_page_settled(page, plan_id: str, *, timeout=30.0):
     """页面必须不再把这条计划挂在「待授权」位上：撤条或如实写 AUTHORIZED 都算，报失败不算。"""
     def probe():
         strip = page.query_selector(f'[data-plan-id="{plan_id}"]')
@@ -187,7 +199,7 @@ def test_page_authorize_promotes_the_plan(page, server, plan_project, served_lab
     strip = plan_strip(page, plan['plan_id'])
     assert server.plan(plan['plan_id'])['state'] == 'PENDING', '页面还没点，不该已经授权'
 
-    strip.query_selector('[data-plan-action="authorize"]').click()
+    click_plan_action(page, plan['plan_id'])
     authorized = await_authorized(server, plan['plan_id'], page)
 
     grant = authorized['grant']
@@ -209,7 +221,7 @@ def test_authorized_apply_changes_source_and_appends_a_checkpoint(page, server, 
 
     plan = server.mint(plan_project.script, served_label['gid'])
     plan_strip(page, plan['plan_id'])
-    page.click(f'[data-plan-id="{plan["plan_id"]}"] [data-plan-action="authorize"]')
+    click_plan_action(page, plan['plan_id'])
     await_authorized(server, plan['plan_id'], page)
 
     # 授权只绑给申请它的客户端：换一个客户端来 apply，必须被挡，而且一个字节都不写。
@@ -297,7 +309,7 @@ def test_apply_after_an_external_rewrite_is_stale_and_writes_nothing(page, serve
     baseline = plan_project.bytes()
     plan = server.mint(plan_project.script, served_label['gid'])
     plan_strip(page, plan['plan_id'])
-    page.click(f'[data-plan-id="{plan["plan_id"]}"] [data-plan-action="authorize"]')
+    click_plan_action(page, plan['plan_id'])
     await_authorized(server, plan['plan_id'], page)
 
     external = baseline + '# 外部改写：这一版计划作废\n'.encode('utf-8')
@@ -323,7 +335,7 @@ def test_backend_session_and_history_survive_a_browser_restart(browser, server, 
     context, page = open_page(browser, server.base_url)
     try:
         plan_strip(page, plan['plan_id'])
-        page.click(f'[data-plan-id="{plan["plan_id"]}"] [data-plan-action="authorize"]')
+        click_plan_action(page, plan['plan_id'])
         await_authorized(server, plan['plan_id'], page)
         status, applied = server.apply(plan['plan_id'])
         assert (status, applied['commit_state']) == (200, COMMITTED_AND_VERIFIED), applied

@@ -48,9 +48,23 @@ NO_HEADER = object()
 PAGE_TOKEN = object()
 STDERR_TAIL_LINES = 80
 #: 单条请求的超时：服务端是单线程 HTTPServer，页面每 3 秒还会来拉一次计划。
-HTTP_TIMEOUT_S = 30.0
+#: 负载下 apply 里那两次 NMR 重建要各花几秒，这条线要留够余量。
+HTTP_TIMEOUT_S = 60.0
+#: 指针落下后等页面承认命中的预算：hover 是异步的，固定 sleep 在负载下会读到旧值。
+HOVER_TIMEOUT_S = 5.0
 
 _LIVE_SERVERS: list['InspectorProcess'] = []
+
+#: Chromium 拒绝连接的端口（``net::ERR_UNSAFE_PORT``）。OS 随机分配的临时端口可能落在
+#: 里面（本机上就见过 4045），那时 ``page.goto`` 直接失败——这不是被测行为，换一个端口。
+CHROMIUM_BLOCKED_PORTS = frozenset({
+    1, 7, 9, 11, 13, 15, 17, 19, 20, 21, 22, 23, 25, 37, 42, 43, 53, 69, 77, 79, 87, 95, 101,
+    102, 103, 104, 109, 110, 111, 113, 115, 117, 119, 123, 135, 137, 139, 143, 161, 179, 389,
+    427, 465, 512, 513, 514, 515, 526, 530, 531, 532, 540, 548, 554, 556, 563, 587, 601, 636,
+    989, 990, 992, 993, 995, 1719, 1720, 1723, 2049, 3659, 4045, 4190, 5060, 5061, 6000, 6566,
+    6665, 6666, 6667, 6668, 6669, 6679, 6697, 10080})
+#: 端口撞上黑名单时的重试上限：每次都会重新起一个子进程（建图秒级），够用就好。
+PORT_RETRY_ATTEMPTS = 5
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -61,7 +75,7 @@ def sha256_file(path: Path) -> str:
     return sha256_bytes(Path(path).read_bytes())
 
 
-def wait_for(probe, description, *, timeout=15.0, interval=0.1):
+def wait_for(probe, description, *, timeout=30.0, interval=0.1):
     """轮询一个事实直到成立；超时把最后看到的样子一并说出来，不吞。"""
     deadline = time.monotonic() + timeout
     last = None
@@ -218,13 +232,14 @@ def _launch(env, command, cwd):
                             errors='replace', env=env)
 
 
-def launch_server(work_dir, *, command, cwd=REPO_ROOT, config=NMR_CONFIG):
+def launch_server(work_dir, *, command, cwd=REPO_ROOT, config=NMR_CONFIG, _attempt=0):
     """起一个真实 Inspector 子进程：state_home 与 stderr 都落在 ``work_dir`` 下。
 
     就绪的唯一信号是它自己打印的回环地址；起不来就把两侧输出一并抛出。成功的实例登记进
     ``_LIVE_SERVERS``，失败用例由 ``pytest_runtest_makereport`` 打印它的 stderr 尾部。
 
     ``work_dir`` 由调用方按用例给（不同脚本 / 不同配置各自一份），这就是层 1 台子复用点。
+    端口由 OS 随机分配；若撞上 Chromium 的黑名单（``ERR_UNSAFE_PORT``）就杀掉重起一个。
     """
     work_dir = Path(work_dir)
     state_home = work_dir / 'state'          # 必须落在任何脚本目录之外（HistoryStore 的硬要求）
@@ -270,6 +285,14 @@ def launch_server(work_dir, *, command, cwd=REPO_ROOT, config=NMR_CONFIG):
         pytest.fail(f'Inspector 子进程没有打印可连的地址（退出码 {process.returncode}）：\n'
                     f'stdout: {"".join(lines)[-2000:]}\n'
                     f'stderr: {"".join(stderr_lines)[-4000:]}')
+
+    if port in CHROMIUM_BLOCKED_PORTS and _attempt < PORT_RETRY_ATTEMPTS:
+        # Chromium 拒连这些端口（ERR_UNSAFE_PORT）：这不是被测行为，换一个再来。
+        process.kill()
+        process.wait(timeout=15)
+        stderr_file.close()
+        return launch_server(work_dir, command=command, cwd=cwd, config=config,
+                             _attempt=_attempt + 1)
 
     instance = InspectorProcess(port, state_home, process, stderr_path, stderr_file, config)
     _LIVE_SERVERS.append(instance)
@@ -397,9 +420,9 @@ def open_page(browser, base_url, *, width=1600, height=1000):
     raw.on('console', lambda message: errors.append(f'{message.type}: {message.text}')
            if message.type == 'error' else None)
     raw.on('pageerror', lambda error: errors.append(f'pageerror: {error}'))
-    raw.set_default_timeout(30_000)
+    raw.set_default_timeout(60_000)
     raw.goto(base_url + '/', wait_until='load')
-    raw.wait_for_selector(READY_SELECTOR, timeout=90_000)
+    raw.wait_for_selector(READY_SELECTOR, timeout=180_000)
     return context, BrowserPage(raw, errors)
 
 
@@ -447,10 +470,15 @@ def label_hit_point(page, scene, node):
 
 
 def click_label(page, scene, node):
-    """把指针压到标签中心、记下页面的命中事实，再真点一下；返回命中 id。"""
+    """把指针压到标签中心、**等到页面自己承认命中这个对象**，再真点一下；返回命中 id。
+
+    hover 是异步的：固定 sleep 在负载下会读到上一个对象的 hover。这里等的是明确状态
+    （``data-hover-id`` 变成这个对象），超时就按最后看到的值返回，断言照样会把话说清楚。
+    """
     x, y = label_hit_point(page, scene, node)
     page.mouse.move(x, y)
-    page.wait_for_timeout(150)
+    wait_for(lambda: page.get_attribute('#inspector-root', 'data-hover-id') == node['id'],
+             f'指针停在 {node["id"]} 上', timeout=HOVER_TIMEOUT_S, interval=0.05)
     hovered = page.get_attribute('#inspector-root', 'data-hover-id')
     page.mouse.click(x, y)
     return hovered
