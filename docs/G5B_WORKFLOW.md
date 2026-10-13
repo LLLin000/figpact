@@ -45,6 +45,13 @@ G5b 把 G4 的「先计划、后授权」从 Python API 接成一条**用户可�
 
 全部通过后才标记 grant 已用 / `APPLIED`，走既有的 `source_writes.apply_source_change`，并返回诚实的 `commit_state`（`COMMITTED_AND_VERIFIED` / `COMMITTED_BUT_UNVERIFIED` / `RECOVERY_REQUIRED` / `NOT_WRITTEN`）——写盘已成事实时不得报 `NOT_WRITTEN`。
 
+> **已知语义限制（逐字登记在别处）**：`COMMITTED_AND_VERIFIED` **只**表示「源码已写盘 + journal 与
+> 逐文件磁盘字节比较通过」，**不含**目标位移 / 科学内容的验证；本条 HTTP 路径自身不重新构图、不跑
+> Target/Science Oracle——科学与几何验证**只有另行独立重建才能给出**。正式轮判分口径（独立判分器必须
+> 自建重建；`completed` 只由自建结果判定；A16b / A17 不得把该返回值计为科学验证通过；产品层拆分
+> `source_commit_state` / `figure_verification_state` 待开票、本轮不改 `f101113`）见
+> `docs/G6B_THREE_ARM_PROTOCOL_V2_1.md` **§12 已知语义限制：Hub 的 `COMMITTED_AND_VERIFIED`**。
+
 ### cancel 与状态寿命
 
 - `cancel` **零写入**；已 `APPLIED` 的计划不可取消（409，要走历史恢复）。
