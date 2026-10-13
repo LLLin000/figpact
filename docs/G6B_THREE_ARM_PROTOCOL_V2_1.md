@@ -204,7 +204,7 @@ archive 行尾模式 + 拼接方式**，内容一致。**统一口径前不得�
 >   python -B -X utf8 <harness>/measure.py \
 >     examples/python_native/simple_figure.py <empty-config.yaml> \
 >     examples/python_native/simple_figure.py <empty-config.yaml> \
->     intent 120 intent.main.label.A
+>     main 120 intent.main.label.A
 >   ```
 >
 >   期望：计数器文件**新增 4 行**（同一夹具自比的基线 + 候选两次会话构建）。`<empty-config.yaml>`
@@ -218,11 +218,17 @@ archive 行尾模式 + 拼接方式**，内容一致。**统一口径前不得�
 >     TEMP=<trial_root>/tmp TMP=<trial_root>/tmp TMPDIR=<trial_root>/tmp \
 >     MPLCONFIGDIR=<trial_root>/mpl PYTHONDONTWRITEBYTECODE=1 \
 >     python -B -X utf8 -m figpact agent --script examples/python_native/simple_figure.py \
->       --config <empty-config.yaml> --scope intent
+>       --config <empty-config.yaml> --scope main
 >   ```
 >
 >   期望：**≥1 行**（会话构造即采基线）。
 > - **留证**：命令原文 + 自检件路径 + 新增行数基线三项一起登记（正式轮冻结清单「外部构建计数器」行）。
+> - **自检不看退出码**：`figpact agent` 出错时**仍返 exit 0**，故自检**必须同时判回执内容与新增计数行数**，
+>   任一项不符即视为自检未通过。实测（逐字模板运行，预检 §3.2）：作用域写成 `intent` 时
+>   `exit=0`、计数 0 行、回执为
+>   `{"jsonrpc":"2.0","id":1,"error":{"code":-32006,"message":"SessionError: 未知 scope：'intent'；脚本声明的作用域是 ['main']"}}`
+>   —— 即 **0 行 + error 回执 = 失败**，不是「会话建成」。故本模板的作用域名一律取夹具声明值
+>   `main`（`simple_figure.py` 的 `FIGURE_ID = "intent"`、`SCOPE = "main"`；`intent` 只是 figure id）。
 > - **占位符定义**：`<harness>` = v2 §5.2/§8.1(7) 要求的**轮次 harness 目录**（内含 `sitecustomize.py`
 >   计数器；`measure.py` = §5.3 的独立重建取数脚本）。`<trial_root>` 见 v2 §4/§10。
 
@@ -507,3 +513,246 @@ git -c core.autocrlf=false archive --format=tar <commit> | tar -x -C <trial_root
 - §1.2 六件夹具哈希与 §2 判据包签名：**已在 `f101113` 新基线内重算完成**（六件夹具值未变；判据签名变为 `163b0df0…`），登记值见 `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113-freeze-values.md`。
 - §8 清单新增第 16–19 条（对应本节四条）。
 - §9「未新增条款」：§10 是本文件唯一的新增条款节。
+
+---
+
+## 11. 正式轮冻结清单（开跑前定稿）
+
+**地位与用法**：本节是 v2 + v2.1/v2.2 的**冻结实例**——把 §3.4、§5.1、§6.1、§6.2、§8.3 里所有标
+「待冻结 / 待实测 / 待裁定」的项落成**可直接照跑的值**。本节**不改** v2 与 §1–§10 的任何条款，只填值；
+与 v2/v2.1 冲突处以 v2.1 为准。**本节内容在轮次期内冻结**（红线 13：需改 = 整轮作废重跑）。
+（配套的唯一产品层修正：§3 自检模板的作用域已按实测由 `intent` 改为 `main`，并加「自检不看退出码」
+一条，见 §3 该条模板后两枚 bullet。）
+
+**约定与来源**：`<archive>` = `D:/L/AI/figpact-archive`；`<T>` = 该 trial 的 trial root
+（`<archive>/g6b-v2/prod/<task>/<arm>`）；`<harness>` = `<archive>/g6b-v2/harness`（§5.2 计数器 +
+`measure.py` / `hubctl.py` / `poll_plan.py`）。冻结值来源 = 预检实跑报告
+`<archive>/g6b-v2/formal-round-precheck.md`（下称「预检」）、`formal-precheck/results-buildcounter.txt`、
+`baseline-f101113-freeze-values.md`；镜像件 = `<archive>/g6b-v2/formal-round-plan.md`。
+
+### 11.1 题单冻结：12 条主选（配对题）
+
+来源 = v1 §2.2 的 15 条经 §2.1 拆分后的 **16** 条；逐条为**同题跨三臂**的配对题；四层齐、含 A16a + A16b。
+
+| # | 编号 | 层 | 夹具 | 题面要点（逐字冻结；须显式给 gid 与目标位移，§3.1 输入可比较性） | 预期结果类型 | D1a 建议 | 需真人选区 / 授权 |
+|---|---|---|---|---|---|---|---|
+| 1 | **A09** | L1 | `08 NMR.py` + `nmr.yaml` | 声明起点 `[0.2,-0.1]` → 目标绝对 `[0.2,+0.05]`（+0.15 mm，画布毫米、左下原点、右/上为正） | 完成 | 三臂有（v2 §2.4 已裁定） | 否（`harness_published` 选区） |
+| 2 | **A10** | L1 | 同上 | 重建只生效 +0.11 mm 的那种候选：不得把「配置数字变了」当成功（Target Oracle FAIL 即不可宣称完成） | 完成（含如实判 FAIL） | 建议三臂有（三臂都能读 QA/Target 并拒绝宣称） | 否 |
+| 3 | **A14** | L1 | 同上 | 接受独立 A、B 两条位移；随后**撤销 B**，A 仍满足其原目标 | 完成 | 建议三臂有（臂 L 以候选副本表达撤销；臂 A/V 走 history/意图） | 否 |
+| 4 | **A07** | L1 | 同上 | 一条 intent 使目标标签达到给定绝对位移，**不写正式源**（臂 L 以候选副本表达） | 完成 | **待裁定**：臂 L 无 Hub/UI 路径 → 需冻结时确认「文本副本等效路径」算 D1a=真 | 否（v1 的 UI 交互路径在臂 L 不存在） |
+| 5 | **A08** | L2 | 同上 | **逐字写死** `fig2_nmr.main.peak.vancho.3p91` 上移 +0.15 mm，`fig2_nmr.main.guide.vancho.3p91` 跟随；**科学端不动** | 完成 | 三臂有（v2 §2.4 已裁定） | 否 |
+| 6 | **A12** | L2 | 同上 | 目标位移导致标签与曲线相撞：不得改科学数据绕过，须拒绝该候选 | 正确拒绝 | 建议三臂有 | 否 |
+| 7 | **A13** | L2 | 同上 | 固定 pitch 的 A/B/C **只移 B**：不得默认全移；须提出方案求决策 | 正确拒绝（或请示后完成） | 建议三臂有（臂 L 以 `try` 读 QA/位移） | **可能需真人决策**（若判据要求「求决策」） |
+| 8 | **A11** | L3 | 同上 | +15 mm **超出 `SHIFT_LIMIT_MM=10.0`**：拒绝并保留用户目标、不扩限 | 正确拒绝 | 三臂有（v2 §2.4 已裁定） | 否 |
+| 9 | **A24** | L3 | 同上 | 跨 scope 共享布局参数：**全部受影响 scope** 都要检查 | 正确拒绝 / 完成（视题面定的判据） | 建议三臂有 | 否 |
+| 10 | **A15** | L3 | 同上 | B 依赖 A 的位置；**撤销 A** → 重算或 `UNDO_CONFLICT`，不得静默漂移 | 正确拒绝 / 完成 | **建议仅 D1**：臂 L「无 history」（§3.2 第 7 项）→ 若判据要求 undo 链路则结构性未完成 | 否 |
+| 11 | **A16a** | L4 | `simple_figure.py` | `intent.main.label.A` **上移 +0.50 mm** 并**持久写回源码**（绑定形态 = 已声明 `LAYOUT_MM`） | 完成（需授权写回） | **仅 D1**（v2 §2.4 已裁定：臂 L/A 无） | **需真人选区（`human_page`）+ 真人页面授权** |
+| 12 | **A16b** | L4 | `legacy_plain.py` | 同上 +0.50 mm 并写回源码；脚本**无任何布局绑定** → 须作者化引入**源码声明**的布局入口（绑定形态 = 未声明） | 完成（需授权写回） | **仅 D1**（§10.4 / §8 第 19 条已锁定：臂 L/A = `structural_unsupported`） | **需真人选区 + 真人页面授权**（臂 V 单次 grant） |
+
+**计数核对（逐字）**：条目 = **12** ≥ 10 ✅；四层 = L1 4 条 / L2 3 条 / L3 3 条 / L4 2 条 ✅；
+含 **A16a 与 A16b** ✅；D2 建议集 = {A09, A10, A14, A07?, A08, A12, A13, A11, A24} = 8 或 9
+（A07 待裁定；A15/A16a/A16b 建议仅 D1）→ **D2 = 8 恰在下限**（A07 的 D1a 获认可则为 9），
+满足 §8.3 的 D2 ≥ 8 ✅。
+
+**下限风险与处置（父代理在开跑前裁定，与 §3.4/§2.4 同批冻结）**：**D2 = 8 恰在下限** —— 若 A07/A14/A24/A13
+中任一条的 D1a 裁定翻转（臂 L 的「文本副本等效路径」不被承认），D2 会跌破 8，按 §8.3 **题目清单必须
+重选**（不得事后拿 D1 的题去凑效率，红线 10）。二选一：① 把 A07/A14 的 D1a 裁定显式写进本表并在题面里
+写死「允许以候选副本表达」；② 或改用 §11.1.2 备选把 D2 抬到 10。
+
+#### 11.1.2 备选池（补齐 / 替换用，均取自 16 条内）
+
+| 编号 | 层 | 夹具 | 题面要点 | 预期结果类型 | D1a 建议 | 需真人选区 / 授权 |
+|---|---|---|---|---|---|---|
+| A22 | L1 | `08 NMR.py`+`nmr.yaml` | 恢复历史旧位置但字体已变：须新 intent + 当前 Oracle，不机械反贴旧 diff | 完成 | 建议仅 D1（臂 L 无 history） | 否 |
+| A18 | L2 | 同上 | allowlist 之外的标签也被位移 → Impact Oracle FAIL 或要求新增授权 | 正确拒绝 | 待裁定（臂 L 只有 QA 差异读数，无 Impact Oracle 面） | 否 |
+| A19 | L3 | 同上 | 候选之后外部改了 `.py/.yaml` → CAS 失败、旧候选不回写 | 正确拒绝 | 建议仅 D1（CAS 通道在臂 L/A 结构性不存在） | 否 |
+| A17 | L4 | `legacy_plain.py` 或 `simple_figure.py` | 改源码导致峰位数据变 → Science Oracle FAIL，禁止成功/发布 | 正确拒绝 | 仅 D1（需源码写回能力） | **需真人授权**（走到写回判定时） |
+
+#### 11.1.3 题面冻结三条硬纪律
+
+1. **L2 引线类题**（A08 等）必须逐字写死**标注 gid 与引线 gid**（§8.4 进入条件 1）；
+2. **作用域名按夹具声明写**：`simple_figure.py` 与 `08 NMR.py` 的声明作用域都是 `main`
+   （`intent` 只是 `FIGURE_ID`）；
+3. A16a/A16b 的「+0.50 mm」与 gid `intent.main.label.A` 逐字冻结（§2.2），两者**唯一差别** = 绑定形态
+   （已声明 `LAYOUT_MM` vs 未声明）。
+
+### 11.2 臂序随机化规则（**每条 trial 的三臂执行顺序随机且记录种子**）
+
+- 开跑前生成并落盘**一个**种子：`<archive>/g6b-v2/round/round-seed.txt`（单行；轮次期内**不得改**，
+  改了 = 整轮作废）。
+- 每条 trial 的顺序 = `random.Random(f"{SEED}:{task_id}").shuffle(["L","A","V"])`：逐 trial 随机、
+  由种子**可复现**、可事后核对；只决定执行次序，不改变题面/夹具/判据（§3.1）。
+- 生成命令（先铸种子，再生成 12 条主选的顺序表，逐字落盘 `arm-order.json`）：
+
+```bash
+mkdir -p <archive>/g6b-v2/round
+python -B -X utf8 -c "import secrets; print(secrets.token_hex(16))" > <archive>/g6b-v2/round/round-seed.txt
+cat <archive>/g6b-v2/round/round-seed.txt
+python -B -X utf8 -c "
+import json, random
+seed = open('<archive>/g6b-v2/round/round-seed.txt', encoding='utf-8').read().strip()
+tasks = ['A09','A10','A14','A07','A08','A12','A13','A11','A24','A15','A16a','A16b']
+order = {}
+for t in tasks:
+    arms = ['L','A','V']
+    random.Random(seed + ':' + t).shuffle(arms)
+    order[t] = arms
+with open('<archive>/g6b-v2/round/arm-order.json', 'w', encoding='utf-8') as fh:
+    json.dump({'seed': seed, 'order': order}, fh, ensure_ascii=False, indent=2, sort_keys=True)
+print(json.dumps(order, ensure_ascii=False))
+"
+```
+
+- 配套纪律：**同一时刻只跑一条 trial**（v2 §4；臂顺序不是并发许可）；盲法改名只改 `trial_id`
+  （产出物名 `trial-<random-id>`），**不改**记录内 gid 原文（§8.4 条件 6）；揭盲在 D1b/D2 统计完成后
+  一次性进行（§8.2 第 9 条）。
+
+### 11.3 模型与预算冻结
+
+| 项 | 冻结值 / 状态 | 证据 |
+|---|---|---|
+| 会话头模型标识（实测，逐字） | **`opencode-go/deepseek-v4.1-flash`** | 三个独立读法：① 本冻结单元会话头（harness 注入）；② 运行器日志 `~/.omp/logs/omp.2026-10-13.<pid>.log`——同日多条 `"provider":"opencode-go","model":"deepseek-v4.1-flash"`；③ 预检 §4.1 |
+| v2 §3.4 冻结值（逐字） | `opencode-go/deepseek-v4.1-flash:high` | 与实测标识的差异**只在推理档**：档位与提供方在会话内**读不到**（环境变量、`~/.config/opencode/*.json`、运行器日志均无 variant/effort 字段）→ 由**父代理**在运行器侧读取并登记（§3.4 ②） |
+| 三臂运行器配置 | **需父代理登记**（同一标识、同一档） | §3.4 ④；只换一臂 = 该轮作废 |
+| 受试模型的最小可用调用 | **需父代理执行**（本单元**有模型调用通道**，但通道背后的模型不是冻结标识） | 见下「最小可用调用」 |
+| token 口径 | **不可测 → M=40k 未被执行** | 见下「token」 |
+| 预算 | **N=30 tool calls / T=20 min**（可执行约束） | §3.1；超限 = 该 trial 记 `failed`，**不补不重试**（§5.5） |
+
+**口径差异登记（避免混记）**：父代理简报中把会话模型写作 `opencode-go/deepseek-v4-flash`（缺 `.1`）；
+以运行时会话头与运行器日志实测为准 = **`opencode-go/deepseek-v4.1-flash`**（差异仅为转写，非配置差异）。
+
+**最小可用调用（真实回执，逐字）**：本单元可发起的模型调用通道 = eval `completion` / `judge_batch`；
+实际调用一次，原始回执：
+
+```text
+completion("Reply with the single word: OK", model="smol")
+  → id=cmp-15a45e60aa6eb639  status=completed  文本="OK"
+completion("Reply with the single word: OK", model="default")
+  → id=cmp-15a45e73782eb63b  status=completed  文本="OK"
+judge_batch({"probe":"The sky is blue."}, {"q":{"type":"bool","instructions":"Is the sky described as blue?"}},
+            intent="freeze-probe").status()
+  → {"id":"jdgb-15a45e75076eb63c","intent":"freeze-probe","total":1,"done":1,"failed":0,
+     "cost":1.1676e-05,"running":false,"model":"typesafe/jev-1.13.0","elapsedS":7.7}
+  → 判定回执：{"probe": {"q": {"type": "bool", "bool": 0.99}}}
+```
+
+**判定**：`completion` 回执**不含模型标识**（handle 只暴露 `id` / `kind` / `status`）；
+`judge` 明确报 `typesafe/jev-1.13.0` ≠ 冻结标识 → **两条通道都不能充当 §3.4 ③「冻结标识在运行当日
+可用」的证据**。故「该标识可用」的最小调用回执**由父代理执行并登记原始回执位置**，并与 token 通道
+核对**同一次**完成（§3.4 末行）。若当日该标识不可用：三臂**统一**换为当日默认模型并重新记录。
+
+**token：不可测 → M 未执行（证据）**：
+
+- eval 侧 `judge_batch.status()` 字段 = `{id,intent,total,done,failed,cost,running,model,elapsedS}`
+  —— **无 in / out / reasoning token 字段**；`completion` handle 只暴露 `id` / `kind` / `status`。
+- 运行器日志中对会话模型的调用记录（`"message":"agent_end maintenance routing","provider":"opencode-go",
+  "model":"deepseek-v4.1-flash"`）**不含 `usage` 字段**；同日带 `usage` 的日志行**全部来自标题生成器**
+  （`"message":"title-generator: success","model":"monk/monk-fast"`），不是受试 Agent 的调用。
+- `~/.omp/agent/agent.db:model_perf` 只有**按模型的聚合**项
+  （`model_key|samples|output_tokens|gen_ms|ttft_ms`，如 `opencode-go/deepseek-v4.1-flash` 的
+  `samples=218` 一行），**无逐调用回执**、无法按 trial/臂归属 → 不符 §5.1「运行器给出的真实用量」口径。
+
+→ 逐字声明并入轮次记录：**「本轮 token 上限 M=40k 未被验证执行」**；**不得**填 0、**不得**填估计值、
+**不得**用 `null` 冒充 0（§6.1）。**短期不可测 → 长期不可测的降级声明必须写进轮次记录，不得只写在摘要里。**
+
+### 11.4 构建数口径：**禁止跨臂比较**（结论逐字照抄 + 证据）
+
+判据 = §6.2（替换 v2 §5.2 末条）：**跨臂比较的充要前提 = 三臂可量且口径同一**。逐字结论：
+
+1. **没有任何一对臂可以跨臂比较 `real_figure_builds`**（臂 L 结构性不可量 → 三臂可量前提不成立）。
+   报告必须写「**单臂记录，不作跨臂比较**」。
+2. **臂 A 与臂 V 可以各自产出单臂计数**（同一计数器口径、同一 `sitecustomize` 注入）；
+   **不得**把 A 与 V 的这两个值直接当跨臂结论（三臂不齐即禁比）。
+3. **臂 L 的构建数记「不可测（结构性）」**：其白名单内**全部**入口都是脚本子进程路径、恒 0 行；
+   **不得**填 0，**不得**据此声称臂 L 构建数更少。
+4. 判分者侧 `measure.py`（独立重建）三臂各 **4 行**，是**判分器**的构建，**不得**混入臂间指标。
+
+证据（驱动脚本 `formal-precheck-buildcounter.sh`，原始输出
+`<archive>/g6b-v2/formal-precheck/results-buildcounter.txt`）：
+
+| 臂 | 白名单内的入口 | 实测计数行 | 可量性 |
+|---|---|---|---|
+| 臂 L 旧手工 | 候选**纯文本副本**编辑 + `figpact render` / `try` / `validate` / `export` | 全 **0 行**（5 入口 × 3 棵树 = 15 次实测） | ❌ **结构性不可量** |
+| 臂 A 现 Agent API | `figpact agent` 五操作 + `IntentSession.evaluate/decide` + 只读 Scene/Inspector | **2 行**（`agent` 入口） | ✅ 可量（会话级） |
+| 臂 V vNext | `inspector_demo` + Inspector 服务 + `hub.py` 闭环 + `python_native` + `authoring` + `source_writes` + `history` | **2 行**（`agent` 入口）/ **2 行**（`inspector_server` + `GET /api/frame`） | ✅ 可量（会话级） |
+
+**0 行不得读作「没有构建」**（§3 否证纪律）：同一批 0 行入口真的干了活——直接跑脚本产出
+`simple_figure.png`（24,311 B）、`render` 报「`…/simple_figure.png（3 个图元）`」、`try` 打印真实试算
+——它们由**脚本自身/子进程**建图，从不构造 `FigureSession`，故被包装的
+`FigureSession._call_builder` 恒不被调用。计数语义仍按 §5.2：**1 行 = 1 次真实整图构建**。
+
+### 11.5 开跑清单（**开跑那一刻执行**；逐条留证，任一条不过 = 不得开跑）
+
+1. **逐 trial 目录骨架 + H4 布局 + 提取树**（每 trial 一份，§4.1 / §4.3 / v2.1 §4）：
+
+```bash
+mkdir -p <T>/{tree,tmp,mpl,state,out}
+cd /d/L/AI/figpact
+git -c core.autocrlf=false archive f101113476cf3f0113ccbb5e054d700d8c0a433a | tar -x -C <T>/tree
+ls <T>/tree | head                                    # 期望列出 .gitignore CONTEXT.md README.md … tools
+test ! -e <T>/tree/tmp && test ! -e <T>/tree/mpl && test ! -e <T>/tree/state && echo H4_OK
+```
+
+2. **科学输入复制 + manifest 校验**（顺序 = 夹具哈希核对**之后**；不得改工作树/仓库，§10.3）：
+
+```bash
+python <archive>/g6b-v2/formal-precheck-copy-science.py <archive>/g6b-v2/nmr-science-manifest.json <T>/tree/examples/nmr
+python D:/L/AI/figpact/tools/science_manifest.py --verify <archive>/g6b-v2/nmr-science-manifest.json --root <T>/tree/examples/nmr
+```
+
+   期望（逐字）：`OK: all 99 files match (size + sha256)`、`exit=0`（99 files / 4,278,572 bytes）；
+   任何缺失/多出/内容不同 → 退出码 1 → **该 trial 不得开跑**。
+
+3. **泄漏检查四项**（每 trial 收尾执行并留证；v2 §4 + v2.1 §4 第 (2) 项含布局核对）：
+
+```bash
+cd <T>/tree && sha256sum "examples/nmr/08 NMR.py" examples/nmr/nmr.yaml \
+  examples/python_native/simple_figure.py examples/ftir/plot_ftir.py examples/ftir/ftir.yaml \
+  examples/python_native/legacy_plain.py              # (1) 逐字等于 §1.2 的 commit 列
+ls <T>/state                                          # (2) 只含本 trial 的 checkpoint/plan/journal，id 可列；并复核 H4 布局
+git -C /d/L/AI/figpact status --porcelain             # (3) 必须为空（空输出 = 通过）
+netstat -ano | grep -E ':(8(7|8)[0-9][0-9])\b'        # (4) 本 trial 起的端口已停
+tasklist | grep -i python                             # (4') 本 trial 起的进程已停（须人工核对 pid 属于本 trial）
+```
+
+4. **会话级构建计数器自检**（三臂用**同一条**命令，§3 修正后的唯一模板）：
+
+```bash
+cd <T>/tree
+FIGPACT_TRIAL_TREE=$PWD \
+PYTHONPATH=<harness> FIGPACT_BUILD_COUNTER=<T>/out/builds-probe.txt \
+TEMP=<T>/tmp TMP=<T>/tmp TMPDIR=<T>/tmp MPLCONFIGDIR=<T>/mpl PYTHONDONTWRITEBYTECODE=1 \
+python -B -X utf8 <harness>/measure.py \
+  examples/python_native/simple_figure.py <empty-config.yaml> \
+  examples/python_native/simple_figure.py <empty-config.yaml> \
+  main 120 intent.main.label.A
+```
+
+   登记三项：命令原文 + 自检件路径 + 新增行数基线（期望 **4 行**）；**并同时登记回执内容**
+   （`figpact agent` 出错仍返 exit 0，§3）。
+
+5. **臂序随机化表**（§11.2 命令）→ 落盘 `round-seed.txt` + `arm-order.json`，种子写进轮次记录。
+
+6. **盲法与人员安排（人员要求，无命令）**：记录员 ≠ 判分者（§8.1 第 8 条）；产出物改名
+   `trial-<random-id>`（只改 trial id）；checklist 版本号逐字记录（§10 行「盲法命名与 checklist 版本号」）；
+   揭盲在 D1b/D2 统计完成后一次性进行（§8.2 第 9 条）。
+
+7. **A16a / A16b 的真人环节**：两题选区必须是 `human_page`（真人在真实页面点选）；臂 V 的写回走
+   **单次 grant**（`/api/plans` → PENDING → 真人点授权 → `/api/plans/<id>/apply`，经 `<harness>/hubctl.py`
+   往返、`<harness>/poll_plan.py` 轮询）；真人等待**全部**计入 `human_wall_clock_s`、**不进** D2 完成时间
+   （§7 人时口径；A16a 的冻结样例 = 39.977 s）。
+
+8. **A08 端点字段与转录口径登记**：每条记录必须带 `guide_scientific_endpoint_error_mm` +
+   `guide_label_endpoint_delta_mm` + 端点定义 + 取自哪次重建 + 单位精度（缺一 → 不入比较分母）；
+   pilot 原件**不可达**（`<archive>/g6b-pilot/` 不存在）→ 按 §8.4 条件 5 的**替代口径**登记为
+   「**原件不可达 + 转录口径**」，不得声称已对 pilot 原始 JSON 做逐字节复核。
+
+9. **D1a 16 行裁定冻结 + 题单冻结**（v2 §2.4、§8.3）：与本 §11.1 同批完成并写入轮次记录；
+   跑完不得改（红线 13）。
+
+10. **开跑前仓库状态记录**：执行 `git -C /d/L/AI/figpact status --porcelain` 并留证，写明哪些改动属
+    冻结基线之外的并行工作（预检时该输出**非空**：`tests/browser/conftest.py`、`docs/UI/`、
+    `docs/figpact-vnext-kit/`、`tests/browser/test_authoring_writeback_flow.py`，均来自其它单元）。
+
+11. **作废条件提醒**（红线 13 / §8.3）：判据被放宽 / 模型或预算不一致 / 隔离被破坏 / 冻结项被事后修改
+    → **整轮作废重跑**。
