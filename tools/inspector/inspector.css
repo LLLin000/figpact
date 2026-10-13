@@ -376,6 +376,27 @@ button[aria-expanded="true"] {
 
 #viewport.panning { cursor: grabbing; }
 
+/* P1：拖动选中的对象。光标用手型而不是十字，跟"按住并移动"这件事对上 */
+#viewport.dragging { cursor: grabbing; }
+
+/* 拖动期间的毫米读数：跟着光标走，纯预览文案（未验证） */
+.drag-readout {
+  position: absolute;
+  z-index: 6;
+  transform: translate(12px, -50%);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(23, 32, 46, 0.92);
+  color: #f2f4f7;
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.drag-readout[hidden] { display: none; }
+
 #viewport image { pointer-events: none; }
 
 #viewport .outline {

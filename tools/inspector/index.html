@@ -57,12 +57,14 @@
           <div id="ruler-top" class="ruler ruler-h" aria-hidden="true"></div>
           <div id="ruler-left" class="ruler ruler-v" aria-hidden="true"></div>
           <svg id="viewport" tabindex="0" role="application"
-               aria-label="图件视图：鼠标悬停查看轮廓，单击选中，Alt+单击轮换重叠对象，空格拖拽平移"></svg>
+               aria-label="图件视图：鼠标悬停查看轮廓，单击选中，Alt+单击轮换重叠对象，拖动选中的对象预览位移，空格拖拽平移"></svg>
           <p id="viewport-empty" class="empty" hidden></p>
+          <!-- P1：拖动期间贴着光标的毫米读数。纯预览，不是验证结论；由 inspector.js 填字 -->
+          <div id="drag-readout" class="drag-readout" aria-hidden="true" hidden></div>
         </div>
 
         <p id="stage-hint">
-          悬停查看 · 单击选中 · Alt+单击切换重叠对象 · 方向键微调位置 · Esc 取消本次微调 · 空格拖拽平移 · Ctrl+滚轮缩放 · 视图操作不影响源文件
+          悬停查看 · 单击选中 · Alt+单击切换重叠对象 · 拖动选中的对象预览位移（松开后检查） · 方向键微调位置 · Esc 取消本次微调 · 空格拖拽平移 · Ctrl+滚轮缩放 · 视图操作不影响源文件
         </p>
       </section>
 

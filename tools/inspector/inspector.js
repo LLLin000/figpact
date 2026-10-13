@@ -5,6 +5,7 @@
   const point = (p) => Array.isArray(p) && p.length === 2 && p.every(finite);
   const box = (b) => Array.isArray(b) && b.length === 4 && b.every(finite) && b[2] >= b[0] && b[3] >= b[1];
   const hex = (v) => typeof v === 'string' && /^[0-9a-f]{64}$/.test(v);
+  const round4 = (v) => Math.round(v * 10000) / 10000;
   function requireFact(condition, message) { if (!condition) throw new Error(message); }
 
   function validateFrame(frame, expectedSourceRevision) {
@@ -66,6 +67,12 @@
     requireFact(finite(clientX) && finite(clientY), 'Invalid pointer coordinates');
     return { x: bounds[0] + (clientX - rect.left) / rect.width * (bounds[2] - bounds[0]), y: bounds[3] - (clientY - rect.top) / rect.height * (bounds[3] - bounds[1]) };
   }
+  // 拖动的像素位移 → 毫米位移。右 / 上为正：screenToMm 的 y 轴朝上，差值天然就是这个符号。
+  function dragDeltaMm(rect, bounds, from, to) {
+    const a = screenToMm(rect, bounds, from.x, from.y);
+    const b = screenToMm(rect, bounds, to.x, to.y);
+    return { dx: round4(b.x - a.x), dy: round4(b.y - a.y) };
+  }
   function distanceSquared(p, a, b) {
     const dx = b[0] - a[0], dy = b[1] - a[1];
     const length = dx * dx + dy * dy;
@@ -106,6 +113,44 @@
     if (!ids.length) return null;
     const current = ids.indexOf(selected);
     return altKey && current >= 0 ? ids[(current + 1) % ids.length] : ids[0];
+  }
+
+  // ---------- P1：图上直接拖动（预览留在本地，验证仍归引擎）----------
+  //: 按下后超过这个像素位移才算拖动；否则仍旧按"单击选中"处理（与空格平移同一阈值）。
+  const DRAG_THRESHOLD_PX = 3;
+
+  // 能被当作刚体示范位置的对象：曲线与引线受保护、未测量或被裁掉的对象没有可比对的轮廓。
+  // 只做平移：缩放/改尺寸需要引擎侧新的 operation kind，不在本切片。
+  function canGhostNode(node) {
+    if (!node) return false;
+    return !(node.type === 'guide' || node.type === 'curve' || node.type === 'panel' || node.annotation
+      || node.gid?.includes('guide') || !node.measured || node.fully_clipped);
+  }
+
+  // 预览 ≠ 验证：只有引擎回执（状态 OK 且逐项检查 PASS）才能说"检查通过"。
+  // 拖动期间、写盘、以及任何本地 overlay 都不得借用"已验证 / 已保存"这类文案。
+  function previewStatusText(input) {
+    const { dragging = false, evaluating = false, hasDelta = false, outOfRange = false,
+            evaluation = null, acceptable = false } = input || {};
+    if (dragging) return { text: '拖动预览，尚未验证', className: 'tag' };
+    if (evaluating) return { text: '验证中…', className: 'tag' };
+    if (outOfRange) return { text: '超出允许范围 (±10 mm)', className: 'tag tag-warning' };
+    if (evaluation) {
+      return acceptable
+        ? { text: '已重新绘图，位置检查通过', className: 'tag tag-success' }
+        : { text: `检查未通过 (${evaluation.status || '未通过'})`, className: 'tag tag-warning' };
+    }
+    return hasDelta ? { text: '位置示范，尚未验证', className: 'tag' } : { text: '未调整', className: 'tag' };
+  }
+
+  // 拖动期间的状态机：pointermove 只能走到预览，**任何**鼠标移动都不许发出后端请求；
+  // 只有"松手 + 位移非零 + 这个对象可重新绘图验证"才允许走一次真实 evaluate。
+  function dragPointerAction(event, input) {
+    const { dragging = false, hasDelta = false, canEvaluate = false } = input || {};
+    if (!dragging) return 'ignore';
+    if (event === 'pointermove') return 'preview';
+    if (event === 'pointerup') return hasDelta && canEvaluate ? 'evaluate' : 'end';
+    return 'end';
   }
   function niceTickStep(mmPerCssPx) {
     requireFact(finite(mmPerCssPx) && mmPerCssPx > 0, 'Invalid ruler scale');
@@ -163,7 +208,6 @@
     let currentDelta = [0, 0];
     let operationId = null;
     let selectionBlocked = false;
-    function round4(v) { return Math.round(v * 10000) / 10000; }
     function getSelectedNode() { return selectedId ? nodesMap.get(selectedId) || null : null; }
     function canNodeGhost(node) {
       if (!node || !node.measured || node.fully_clipped) return false;
@@ -324,8 +368,12 @@
   }
   const signedMm = v => `${v >= 0 ? '+' : '-'}${Math.abs(v).toFixed(3)}`;
   function minimalStatusText(input) {
-    const { node = null, snapshot = null, evaluation = null } = input || {};
+    const { node = null, snapshot = null, evaluation = null, dragging = false } = input || {};
     if (!node) return '未选择对象';
+    if (dragging) {
+      const preview = snapshot?.intent?.delta_mm || [0, 0];
+      return `预览 ${signedMm(preview[0])} · ${signedMm(preview[1])} mm（未验证）`;
+    }
     if (evaluation) {
       if (canAcceptEvaluation(evaluation, snapshot?.intent)) {
         const measured = Array.isArray(evaluation.measured_delta_mm) ? (evaluation.measured_delta_mm[0] || evaluation.measured_delta_mm[1]) : null;
@@ -494,7 +542,7 @@
     return Number.isFinite(http) ? http >= 400 && http < 500 : true;
   }
 
-  const api = { validateFrame, verifyFrame, screenToMm, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys, planRequest, plansFromPayload, pendingPlans, planSummaryText, planDiffText, planFailureText, planCommitText, commitDetailText, committedPlans, seedSelectionSeq, shouldReseed };
+  const api = { validateFrame, verifyFrame, screenToMm, dragDeltaMm, canGhostNode, previewStatusText, dragPointerAction, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys, planRequest, plansFromPayload, pendingPlans, planSummaryText, planDiffText, planFailureText, planCommitText, commitDetailText, committedPlans, seedSelectionSeq, shouldReseed };
   const globalScope = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : root);
   globalScope.FigpactInspector = api;
   root.FigpactInspector = api;
@@ -526,6 +574,8 @@
     epoch: 0,
     space: false,
     pan: null,
+    drag: null,
+    evaluating: false,
     intentSession: null,
     lastEvaluation: null,
     operationStack: createOperationStack(),
@@ -946,7 +996,7 @@
       return;
     }
 
-    const canGhost = !(node.type === 'guide' || node.type === 'curve' || node.type === 'panel' || node.annotation || node.gid?.includes('guide') || !node.measured || node.fully_clipped);
+    const canGhost = canGhostNode(node);
     byId('intent-dx').disabled = !canGhost;
     byId('intent-dy').disabled = !canGhost;
     byId('btn-apply-delta').disabled = !canGhost;
@@ -967,20 +1017,15 @@
         plainStatus = '对象不支持位置调整';
         byId('btn-apply-delta').title = '该对象不支持位置调整';
       }
-    } else if (snap.status === 'OUT_OF_RANGE') {
-      plainStatus = '超出允许范围 (±10 mm)';
-      statusClass = 'tag tag-warning';
-    } else if (state.lastEvaluation) {
-      if (canAcceptEvaluation(state.lastEvaluation, snap.intent)) {
-        plainStatus = '已重新绘图，位置检查通过';
-        statusClass = 'tag tag-success';
-      } else {
-        plainStatus = `检查未通过 (${state.lastEvaluation.status || '未通过'})`;
-        statusClass = 'tag tag-warning';
-      }
-    } else if (hasDelta) {
-      plainStatus = '位置示范，尚未验证';
-      statusClass = 'tag';
+    } else {
+      ({ text: plainStatus, className: statusClass } = previewStatusText({
+        dragging: !!state.drag,
+        evaluating: state.evaluating,
+        hasDelta,
+        outOfRange: snap.status === 'OUT_OF_RANGE',
+        evaluation: state.lastEvaluation,
+        acceptable: !!(state.lastEvaluation && canAcceptEvaluation(state.lastEvaluation, snap.intent))
+      }));
     }
     byId('intent-status-badge').textContent = plainStatus;
     byId('intent-status-badge').className = statusClass;
@@ -989,7 +1034,7 @@
     byId('intent-dx').value = delta[0];
     byId('intent-dy').value = delta[1];
     const canEval = state.ready && snap.canEvaluate && canGhost;
-    byId('btn-evaluate').disabled = !canEval || (delta[0] === 0 && delta[1] === 0);
+    byId('btn-evaluate').disabled = !canEval || state.evaluating || (delta[0] === 0 && delta[1] === 0);
     byId('btn-accept').disabled = !state.ready || !(state.lastEvaluation && canAcceptEvaluation(state.lastEvaluation, snap.intent));
     const hasCancelable = (delta[0] !== 0 || delta[1] !== 0) || !!state.pendingOperationId || !!state.lastEvaluation || !!state.candidateFrame;
     byId('btn-cancel-intent').disabled = !hasCancelable;
@@ -1036,7 +1081,7 @@
       const cleanTitle = displayTitle(node);
       const rawText = node.text || null;
       const typeText = displayType(node);
-      const canGhost = !(node.type === 'guide' || node.type === 'curve' || node.type === 'panel' || node.annotation || node.gid?.includes('guide') || !node.measured || node.fully_clipped);
+      const canGhost = canGhostNode(node);
 
       // 1. 第一视线：通俗易懂的核心对象属性
       fields(byId('detail-fields'), [
@@ -1259,14 +1304,75 @@
     return hitCandidates(state.scene, p, rect.width / (state.scene.canvas_bounds_mm[2] - state.scene.canvas_bounds_mm[0]));
   }
 
+  // ---------- P1 拖动：预览留在本地，松开才向引擎要回执 ----------
+  function dragReadout(delta, clientX, clientY) {
+    const readout = byId('drag-readout');
+    if (!readout) return;
+    if (!delta) { readout.hidden = true; return; }
+    const rect = wrap.getBoundingClientRect();
+    readout.hidden = false;
+    readout.textContent = `ΔX ${signedMm(delta.dx)} mm · ΔY ${signedMm(delta.dy)} mm（右/上为正）· 预览未验证`;
+    // 绝对定位落在 wrap 的 padding box 里，滚动量要补回来，读数才贴着指针
+    readout.style.left = `${clientX - rect.left - wrap.clientLeft + wrap.scrollLeft}px`;
+    readout.style.top = `${clientY - rect.top - wrap.clientTop + wrap.scrollTop}px`;
+  }
+
+  // 拖动期间只改看得见的那几格：**不碰** publishAgentDetail（它会 POST /api/selection）。
+  function renderDragPreview(delta, clientX, clientY) {
+    const { text, className } = previewStatusText({ dragging: true });
+    const badge = byId('intent-status-badge');
+    if (badge) { badge.textContent = text; badge.className = className; }
+    const line = byId('intent-displacement');
+    if (line) line.textContent = `本次调整：ΔX ${delta.dx} mm, ΔY ${delta.dy} mm`;
+    const dx = byId('intent-dx'), dy = byId('intent-dy');
+    if (dx) dx.value = delta.dx;
+    if (dy) dy.value = delta.dy;
+    const minLine = byId('min-status');
+    if (minLine) {
+      minLine.textContent = minimalStatusText({
+        node: state.nodes.get(state.selected),
+        snapshot: state.intentSession ? state.intentSession.snapshot() : null,
+        dragging: true
+      });
+    }
+    dragReadout(delta, clientX, clientY);
+  }
+
+  function endDrag() {
+    state.drag = null;
+    viewport.classList.remove('dragging');
+    dragReadout(null);
+  }
+
+  // 纯预览：这里没有 fetch，也没有重建；真实验证只在指针松开后发生。
+  function dragMove(event) {
+    const drag = state.drag;
+    if (event.pointerId !== drag.pointerId) return;
+    if (!drag.moved) {
+      if (Math.abs(event.clientX - drag.x) + Math.abs(event.clientY - drag.y) <= DRAG_THRESHOLD_PX) return;
+      drag.moved = true;
+      // 新的位移一出现，上一份回执就不再描述眼前这张图
+      state.lastEvaluation = null;
+      byId('intent-eval-results').hidden = true;
+      viewport.classList.add('dragging');
+    }
+    const delta = dragDeltaMm(drag.rect, state.scene.canvas_bounds_mm, { x: drag.x, y: drag.y }, { x: event.clientX, y: event.clientY });
+    if (delta.dx === drag.delta[0] && delta.dy === drag.delta[1]) return;
+    drag.delta = [delta.dx, delta.dy];
+    state.intentSession.setDelta(delta.dx, delta.dy);
+    renderDragPreview(delta, event.clientX, event.clientY);
+    highlights();
+  }
+
   viewport.addEventListener('pointermove', event => {
-    if (!state.ready) return;
+    if (!state.ready) { if (state.drag) endDrag(); return; }
     if (state.pan) {
       wrap.scrollLeft = state.pan.left - (event.clientX - state.pan.x);
       wrap.scrollTop = state.pan.top - (event.clientY - state.pan.y);
       state.pan.moved ||= Math.abs(event.clientX - state.pan.x) + Math.abs(event.clientY - state.pan.y) > 3;
       rulers(); return;
     }
+    if (state.drag) { dragMove(event); return; }
     const hovered = candidates(event)[0]?.id || null;
     if (hovered === state.hover) return;
     state.hover = hovered;
@@ -1274,7 +1380,10 @@
     viewport.setAttribute('aria-description', state.hover ? displayTitle(state.nodes.get(state.hover)) : '无对象命中');
     highlights();
   });
-  viewport.addEventListener('pointerleave', () => { state.hover = null; container.dataset.hoverId = ''; highlights(); });
+  viewport.addEventListener('pointerleave', () => {
+    if (state.drag) return;
+    state.hover = null; container.dataset.hoverId = ''; highlights();
+  });
   viewport.addEventListener('pointerdown', event => {
     if (!state.ready) return;
     viewport.focus({ preventScroll: true });
@@ -1282,16 +1391,43 @@
       event.preventDefault(); viewport.setPointerCapture(event.pointerId);
       state.pan = { x: event.clientX, y: event.clientY, left: wrap.scrollLeft, top: wrap.scrollTop, moved: false };
       viewport.classList.add('panning');
+      return;
     }
+    // 只拖"当前选中且可 ghost"的对象：指针按在别处时仍旧走点选 / Alt 轮换那条老路
+    const node = state.nodes.get(state.selected);
+    if (event.button !== 0 || event.altKey || !state.intentSession || !canGhostNode(node)) return;
+    if (candidates(event)[0]?.id !== state.selected) return;
+    viewport.setPointerCapture(event.pointerId);
+    state.drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, rect: viewport.getBoundingClientRect(), delta: [0, 0], moved: false };
   });
   viewport.addEventListener('pointerup', event => {
-    if (!state.ready) return;
+    if (!state.ready) { if (state.drag) endDrag(); return; }
     if (state.pan) { state.pan = null; viewport.classList.remove('panning'); return; }
+    const drag = state.drag;
+    if (drag) {
+      endDrag();
+      if (event.pointerId !== drag.pointerId) return; // 另一根手指的抬起：这次拖动不归它收尾
+      // 真拖动过：选区不动，松开即验证（同一个 evaluate 流程，不另写一套）
+      if (drag.moved) {
+        const snap = state.intentSession.snapshot();
+        const action = dragPointerAction('pointerup', {
+          dragging: true,
+          hasDelta: drag.delta[0] !== 0 || drag.delta[1] !== 0,
+          canEvaluate: snap.canEvaluate
+        });
+        if (action === 'evaluate') evaluateCurrentIntent();
+        else { updateIntentUI(); highlights(); }
+        return;
+      }
+    }
     // 宿主可能在点击后把焦点收回去，极简模式在选中前再确认一次画布焦点
     if (minimal && document.activeElement !== viewport) viewport.focus({ preventScroll: true });
     if (event.button === 0) select(cycleSelection(candidates(event).map(n => n.id), state.selected, event.altKey));
   });
-  viewport.addEventListener('pointercancel', () => { state.pan = null; viewport.classList.remove('panning'); });
+  viewport.addEventListener('pointercancel', () => {
+    state.pan = null; viewport.classList.remove('panning');
+    if (state.drag) { endDrag(); updateIntentUI(); highlights(); }
+  });
   wrap.addEventListener('scroll', rulers);
   wrap.addEventListener('wheel', event => {
     if ((event.ctrlKey || event.metaKey) && state.ready) {
@@ -1321,6 +1457,7 @@
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
     if (event.key === 'Escape') {
       event.preventDefault();
+      if (state.drag) endDrag();
       cancelIntent(true);
       return;
     }
@@ -1418,14 +1555,16 @@
     cancelIntent(true);
   });
 
-  byId('btn-evaluate').addEventListener('click', async () => {
+  // 唯一的"松开即验证"路径：按钮点击与拖动松开都走它，回执是唯一的成功证据。
+  async function evaluateCurrentIntent() {
     if (!state.intentSession) return;
     const snap = state.intentSession.snapshot();
     if (!snap.intent || !snap.canEvaluate) return;
     state.pendingOperationId = snap.intent.operation_id;
     const token = state.inFlightGuard.start(snap.intent.operation_id, snap.intent.delta_mm);
-    byId('btn-evaluate').disabled = true;
+    state.evaluating = true;
     status('正在重新绘图并检查新位置…', 'pending');
+    updateIntentUI();
     try {
       const res = await fetch('/api/intents/evaluate', {
         method: 'POST',
@@ -1466,9 +1605,11 @@
     } catch (e) {
       status(`检查请求失败：${e.message}`, 'error');
     } finally {
+      state.evaluating = false;
       updateIntentUI();
     }
-  });
+  }
+  byId('btn-evaluate').addEventListener('click', () => { evaluateCurrentIntent(); });
 
   byId('btn-accept').addEventListener('click', async () => {
     if (!state.intentSession || !state.lastEvaluation) return;
@@ -1594,7 +1735,7 @@
   byId('btn-dpi-240').addEventListener('click', () => changeQuality(240));
   if (byId('btn-dpi-600')) byId('btn-dpi-600').addEventListener('click', () => changeQuality(600));
 
-  root.addEventListener('blur', () => { state.space = false; state.pan = null; viewport.classList.remove('panning'); });
+  root.addEventListener('blur', () => { state.space = false; state.pan = null; viewport.classList.remove('panning'); if (state.drag) endDrag(); });
   root.addEventListener('resize', fit);
 
   async function loadFrame(frame, expectedSourceRevision, isNewAccepted = true) {

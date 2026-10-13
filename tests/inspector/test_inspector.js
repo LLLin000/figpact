@@ -726,3 +726,102 @@ test('G5b reseed is attempted only for a real INVALID_SELECTION rejection', () =
   assert.equal(shouldReseed(404, null), false);
   assert.equal(shouldReseed(200, { status: 'OK', selection_seq: 4 }), false);
 });
+
+// ---------- P1：图上直接拖动（预览在本地，验证只有引擎回执才算数）----------
+
+test('P1 a drag turns a pointer stroke into a right/up positive millimetre offset', () => {
+  const { dragDeltaMm } = loadHelper();
+  const rect = { left: 100, top: 60, width: 400, height: 200 };
+  const bounds = [0, 0, 100, 50]; // 4 px/mm 两个方向
+  // 向右下拖：ΔX 正、ΔY 负（屏幕往下 = 图上往下）
+  assert.deepEqual(dragDeltaMm(rect, bounds, { x: 200, y: 100 }, { x: 240, y: 140 }), { dx: 10, dy: -10 });
+  // 向左上拖：ΔX 负、ΔY 正
+  assert.deepEqual(dragDeltaMm(rect, bounds, { x: 240, y: 140 }, { x: 200, y: 100 }), { dx: -10, dy: 10 });
+  // 松手落回按下点：零位移（这不是"没拖动"，是拖了但净位移为零）
+  assert.deepEqual(dragDeltaMm(rect, bounds, { x: 133, y: 77 }, { x: 133, y: 77 }), { dx: 0, dy: 0 });
+  // 视口放大到两倍：同样的屏幕位移换算出更小的毫米数（按实际矩形算，不按 DPR 猜）
+  assert.deepEqual(dragDeltaMm({ left: 0, top: 0, width: 800, height: 400 }, bounds,
+    { x: 100, y: 100 }, { x: 140, y: 140 }), { dx: 5, dy: -5 });
+  // 亚像素位移也有确定的 4 位读数
+  assert.deepEqual(dragDeltaMm({ left: 0, top: 0, width: 300, height: 300 }, bounds,
+    { x: 0, y: 300 }, { x: 1, y: 299 }), { dx: 0.3333, dy: 0.1667 });
+  // 退化矩形不猜：直接拒绝（读数宁可报错也不给个假毫米）
+  assert.throws(() => dragDeltaMm({ left: 0, top: 0, width: 0, height: 10 }, bounds,
+    { x: 0, y: 0 }, { x: 1, y: 1 }), /display rectangle/i);
+});
+
+test('P1 only measured rigid objects can be dragged; curves and guides stay protected', () => {
+  const { canGhostNode } = loadHelper();
+  assert.equal(canGhostNode(labelNode()), true);
+  assert.equal(canGhostNode(labelNode({ type: 'legend' })), true);
+  assert.equal(canGhostNode(labelNode({ type: 'curve' })), false);
+  assert.equal(canGhostNode(labelNode({ type: 'guide' })), false);
+  assert.equal(canGhostNode(labelNode({ gid: 'fig.main.guide.a' })), false);
+  assert.equal(canGhostNode(labelNode({ type: 'panel' })), false);
+  assert.equal(canGhostNode(labelNode({ annotation: { linked_label_gid: 'label.391' } })), false);
+  assert.equal(canGhostNode(labelNode({ measured: false })), false);
+  assert.equal(canGhostNode(labelNode({ fully_clipped: true })), false);
+  assert.equal(canGhostNode(null), false);
+});
+
+test('P1 status wording never borrows "verified" before the engine has answered', () => {
+  const { previewStatusText } = loadHelper();
+  assert.deepEqual(previewStatusText({ dragging: true, hasDelta: true }),
+    { text: '拖动预览，尚未验证', className: 'tag' });
+  assert.deepEqual(previewStatusText({ evaluating: true, hasDelta: true }),
+    { text: '验证中…', className: 'tag' });
+  assert.equal(previewStatusText({ hasDelta: true }).text, '位置示范，尚未验证');
+  assert.equal(previewStatusText({}).text, '未调整');
+  assert.equal(previewStatusText({ hasDelta: true, outOfRange: true }).className, 'tag tag-warning');
+  // 拖动优先于"验证中"：指针还按着的时候不许显示任何结论
+  assert.equal(previewStatusText({ dragging: true, evaluating: true, hasDelta: true }).text, '拖动预览，尚未验证');
+  // 引擎回执说了算：状态与逐项检查都过关才叫"检查通过"，否则只报回执里的失败状态
+  assert.equal(previewStatusText({ hasDelta: true, evaluation: { status: 'OK' }, acceptable: true }).text,
+    '已重新绘图，位置检查通过');
+  assert.equal(previewStatusText({ hasDelta: true, evaluation: { status: 'OK' }, acceptable: false }).text, '检查未通过 (OK)');
+  assert.equal(previewStatusText({ hasDelta: true, evaluation: { status: 'TARGET_MISMATCH' } }).text, '检查未通过 (TARGET_MISMATCH)');
+  assert.equal(previewStatusText({ hasDelta: true, evaluation: {} }).text, '检查未通过 (未通过)');
+  // 环绕断言：没有 PASS 回执的任何一格都不许出现"已验证 / 已保存"
+  for (const input of [{ dragging: true }, { evaluating: true }, { hasDelta: true }, { outOfRange: true },
+    { dragging: true, evaluating: true },
+    { hasDelta: true, evaluation: { status: 'OK' }, acceptable: false },
+    { hasDelta: true, evaluation: { status: 'NEEDS_AUTHORING' }, acceptable: false }]) {
+    const text = previewStatusText(input).text;
+    assert.doesNotMatch(text, /已验证|已保存|保存成功/, `${JSON.stringify(input)} → ${text}`);
+  }
+});
+
+test('P1 the drag state machine never asks the engine while the pointer is moving', () => {
+  const { dragPointerAction } = loadHelper();
+  const armed = { dragging: true, hasDelta: true, canEvaluate: true };
+  // 拖动中的每一次指针移动都只是预览
+  assert.equal(dragPointerAction('pointermove', armed), 'preview');
+  assert.equal(dragPointerAction('pointermove', { dragging: true }), 'preview');
+  assert.equal(dragPointerAction('pointermove', { dragging: true, hasDelta: false }), 'preview');
+  // 松手：净位移非零且能重新绘图 → 恰好一次 evaluate；否则什么都不发
+  assert.equal(dragPointerAction('pointerup', armed), 'evaluate');
+  assert.equal(dragPointerAction('pointerup', { ...armed, hasDelta: false }), 'end');
+  assert.equal(dragPointerAction('pointerup', { ...armed, canEvaluate: false }), 'end');
+  assert.equal(dragPointerAction('pointercancel', armed), 'end');
+  // 没有拖动会话时，指针事件仍旧走既有的点选 / Alt 轮换那条路
+  assert.equal(dragPointerAction('pointermove', {}), 'ignore');
+  assert.equal(dragPointerAction('pointerup', {}), 'ignore');
+  assert.equal(dragPointerAction('pointermove', { dragging: false, hasDelta: true, canEvaluate: true }), 'ignore');
+  // 环绕断言：拖动期间的任何指针移动都不可能是 evaluate
+  for (const input of [{}, { dragging: true }, armed, { ...armed, hasDelta: false }]) {
+    assert.notEqual(dragPointerAction('pointermove', input), 'evaluate');
+  }
+});
+
+test('P1 the minimal line shows a drag as an unverified millimetre preview', () => {
+  const { createIntentSession, minimalStatusText } = loadHelper();
+  const frame = liveBundle();
+  const node = JSON.parse(frame.scene_json).nodes[0];
+  const session = createIntentSession(frame);
+  session.select('label');
+  session.setDelta(1.2, -0.9);
+  assert.equal(minimalStatusText({ node, snapshot: session.snapshot(), dragging: true }),
+    '预览 +1.200 · -0.900 mm（未验证）');
+  // 松手之后（同一份位移）仍旧只是示范，不升级成验证
+  assert.equal(minimalStatusText({ node, snapshot: session.snapshot() }), '已下移 0.9 mm · 已右移 1.2 mm');
+});
