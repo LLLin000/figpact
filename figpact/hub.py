@@ -29,12 +29,21 @@ authorize/apply/cancel 走同一条校验链。
 
 公开方法返回 ``(payload, http_status)`` 以便 HTTP 路由直接回包，但本模块
 不依赖 HTTP，也不依赖 matplotlib。
+
+**P1-b：Agent 上下文（只读）。** ``read_agent_context`` 把选定图元的一次
+``scene`` / ``constraints`` / ``impact`` 交给 Agent：全部取自既有真值（帧的 canonical
+scene、Hub 的选区通道、会话背后 ``FigureSession`` 的契约声明与归属闭包），不另建真值副本、
+不产生候选、不写盘、不改选区。它**同样不是授权**：能改什么、改到什么程度仍由既有通道裁决
+（``submit_task`` → ``evaluate``，或计划 → apply → 验证）。ghost 只是预览资格；预览≠验证、
+写盘≠科学验证这两条边界见上面 P0a 与 ``docs/AGENT_LAYOUT_PROTOCOL.md``。
 """
 from __future__ import annotations
 
 import copy
 import hashlib
 import hmac
+import json
+import math
 import uuid
 from collections import deque
 from datetime import datetime, timedelta, timezone
@@ -61,6 +70,91 @@ AUTHORING_KIND = 'authoring_edit'
 PLAN_KINDS = (PLAN_KIND, AUTHORING_KIND)
 # GET /api/selection 的 stale 判定字段：发布值必须与实时会话一致。
 REVISION_FIELDS = (('session_id', '会话'), ('scene_revision', '图帧'), ('source_revision', '源文件'))
+
+#: 只读 Agent 上下文通道（P1-b）的 schema 名：scene / constraints / impact 三部分。
+AGENT_CONTEXT_SCHEMA = 'figpact.hub.agent_context/1'
+#: ghost（预览轮廓）资格的唯一规则在页面侧；hub 只按它读**既有** Scene 字段，不另立判据。
+GHOST_RULE_SOURCE = 'tools/inspector/inspector.js:canGhostNode（预览资格，不构成可写结论）'
+#: 三部分各自的既有真值来源，随回执一起给：读的人不必猜谁说了算。
+CONTEXT_SOURCES = {
+    'scene': 'session.snapshot() 的 canonical scene（scene_json：既有 Scene 构建 + Inspector 投影）',
+    'selection': 'Hub 的 /api/selection 通道（页面发布的选区）',
+    'bindings': 'FigureSession.parameters()：契约声明的参数范围/单位/可变性/作用域/objects',
+    'closure': 'FigureSession.owned_closure()：契约 nodes/groups 的权威归属闭包',
+    'science': 'IntentSession._science 的 digest（引擎 evaluate 科学冻结用的同一份捕获）',
+    'ghost': GHOST_RULE_SOURCE,
+}
+
+
+def _finite_pair(value):
+    """两个有限数字的位移 ``[dx, dy]``（毫米）；其它形状（含 NaN/inf/布尔）返回 None。"""
+    if isinstance(value, bool) or not isinstance(value, (list, tuple)) or len(value) != 2:
+        return None
+    out = []
+    for item in value:
+        if isinstance(item, bool) or not isinstance(item, (int, float)) or not math.isfinite(item):
+            return None
+        out.append(float(item))
+    return out
+
+
+def _canonical_scene(frame):
+    """帧里的 canonical scene（既有 Scene 构建 + Inspector 投影）；解析不出来返回 None。"""
+    if not isinstance(frame, dict):
+        return None
+    raw = frame.get('scene_json')
+    if not isinstance(raw, str) or not raw:
+        return None
+    try:
+        parsed = json.loads(raw)
+    except ValueError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def _ghost_state(node):
+    """``(可 ghost, 阻止原因)``：按页面唯一规则读既有 Scene 字段，服务端不另立一套判据。
+
+    规则本体是 ``tools/inspector/inspector.js:canGhostNode``（P1-a 的拖动预览）。这里只把
+    同一组**既有字段**翻成可读回执：类型 / 清单附着 annotation / gid 含 guide / 未测量 /
+    被完全裁掉。ghost 是**预览**资格，**不是**"引擎会受理这次改动"的结论。
+    """
+    blockers = []
+    kind = node.get('type')
+    if kind in ('guide', 'curve', 'panel'):
+        blockers.append(f'{kind}：不做刚体轮廓预览')
+    if node.get('annotation'):
+        blockers.append('带清单附着关系的引线：不做独立预览')
+    gid = str(node.get('gid') or '')
+    if 'guide' in gid:
+        blockers.append(f'gid 含 guide（{gid}）')
+    if not node.get('measured'):
+        blockers.append('未测量：没有可比对的轮廓')
+    if node.get('fully_clipped'):
+        blockers.append('被完全裁掉：没有可见轮廓')
+    return (not blockers), blockers
+
+
+def _agent_node_entry(node, *, selected):
+    """Scene 节点 → 上下文条目：身份/文本/包围盒/可 ghost 性 + 既有判定字段，原样不补。"""
+    ghostable, blockers = _ghost_state(node)
+    entry = {'gid': node.get('gid'), 'type': node.get('type'), 'text': node.get('text'),
+             'bounds_mm': node.get('bounds_mm'), 'measured': bool(node.get('measured')),
+             'fully_clipped': bool(node.get('fully_clipped')), 'ghostable': ghostable,
+             'scope': node.get('scope'), 'registered': bool(node.get('registered')),
+             'parent': node.get('parent'), 'hit_mode': node.get('hit_mode'),
+             'science_policy': node.get('science_policy'),
+             'controlled_by': [list(path) for path in (node.get('controlled_by') or ())],
+             'selected': selected}
+    if blockers:
+        entry['ghost_blockers'] = blockers
+    if node.get('hit_note'):
+        entry['hit_note'] = node['hit_note']
+    if node.get('linked_guide_gid'):
+        entry['linked_guide_gid'] = node['linked_guide_gid']
+    if isinstance(node.get('annotation'), dict):
+        entry['annotation'] = copy.deepcopy(node['annotation'])
+    return entry
 
 
 def _error(status, message):
@@ -194,6 +288,271 @@ class SessionHub:
     def read_tasks(self):
         return {'status': 'OK', 'hub_revision': self.hub_revision,
                 'tasks': [copy.deepcopy(task) for task in self.tasks]}, 200
+
+    # Agent 上下文：任意本地客户端 ← Hub（**只读**；不建第二套真值）
+
+    def read_agent_context(self, session, body=None):
+        """只读上下文：``scene`` / ``constraints`` / ``impact``，供 Agent 起草多目标改动。
+
+        输入（``body``，字段全可选）：``gid``（缺省用已发布选区的 GID）、``delta_mm``（候选
+        位移，两个毫米数）、``intent``（自然语言意图文本，**只原样回显**，本通道不解释它）。
+
+        三部分全部来自既有真值：``session.snapshot()`` 的 canonical scene（既有 Scene 构建 +
+        Inspector 投影）、Hub 的 selection 通道、会话背后 ``FigureSession`` 的契约与
+        ``owned_closure``。本方法**不**调用 ``evaluate``（那会铸造候选并改会话状态）、
+        **不**写盘、**不**改选区、**不**另算科学或几何，也不在前端之外重推一遍判据。
+
+        这不是审批：能改什么、改到什么程度，仍由既有通道裁决（``submit_task`` → ``evaluate``，
+        或计划 → apply → verify）。ghost 只是预览资格；写盘与科学验证仍是两个独立状态。
+        """
+        if body is not None and not isinstance(body, dict):
+            return _error('INVALID_CONTEXT', '请求必须是 JSON 对象（或省略）'), 400
+        body = body or {}
+        wanted = body.get('gid')
+        if wanted is not None and (not isinstance(wanted, str) or not wanted):
+            return _error('INVALID_CONTEXT', 'gid 给了就必须是非空字符串'), 400
+        delta = None if body.get('delta_mm') is None else _finite_pair(body.get('delta_mm'))
+        if body.get('delta_mm') is not None and delta is None:
+            return _error('INVALID_CONTEXT', 'delta_mm 必须是两个有限数字 [dx, dy]（毫米）'), 400
+        intent_text = body.get('intent')
+        if intent_text is not None and not isinstance(intent_text, str):
+            return _error('INVALID_CONTEXT', 'intent 必须是字符串'), 400
+        try:
+            frame = session.snapshot()
+        except RuntimeError as error:
+            return _error('SESSION_CLOSED', f'会话不可读：{error}'), 409
+        scene = _canonical_scene(frame)
+        if scene is None:
+            return _error('SCENE_UNAVAILABLE', '帧里没有可解析的 canonical scene（scene_json）'), 409
+        nodes = [node for node in (scene.get('nodes') or ()) if isinstance(node, dict)]
+        registered = [node for node in nodes if node.get('gid')]
+        selection = self.selection or {}
+        published = selection.get('selected')
+        asked = wanted or (published.get('gid') if isinstance(published, dict) else None)
+        target = next((node for node in nodes if node.get('gid') == asked), None) if asked else None
+        live = self._live(session)
+        stale = self._stale_reason(live)
+        engine = self._engine(session)
+        scope = str((target or {}).get('scope') or selection.get('scope')
+                    or scene.get('scope') or '')
+        in_scope = [node for node in registered if str(node.get('scope')) == scope]
+        outside = {}
+        for node in registered:
+            if str(node.get('scope')) != scope:
+                outside[str(node.get('scope'))] = outside.get(str(node.get('scope')), 0) + 1
+
+        # --- scene：该图元 scope 内的清单 + 当前选中的那条 ---------------------- #
+        scene_view = {
+            'source': CONTEXT_SOURCES['scene'],
+            'scene_revision': frame.get('frame_revision'),
+            'scene_sha256': frame.get('scene_sha256'),
+            'scope': scope,
+            'scope_source': ('target_node' if target is not None
+                             else 'selection' if selection.get('scope') else 'frame'),
+            'unit': scene.get('unit'),
+            'coordinate_reference': scene.get('coordinate_reference'),
+            'canvas_bounds_mm': scene.get('canvas_bounds_mm'),
+            'image': scene.get('image'),
+            'measurement': scene.get('measurement'),
+            'ghost_rule': GHOST_RULE_SOURCE,
+            'selected': (target or {}).get('gid'),
+            'nodes': [_agent_node_entry(node, selected=node is target) for node in in_scope],
+            'nodes_outside_scope': outside,
+            'diagnostics': list(scene.get('diagnostics') or ()),
+        }
+
+        # --- constraints：允许/禁止、坐标空间与硬限、冻结科学指纹、不可微调项 ------ #
+        follow = [target['linked_guide_gid']] if target and target.get('linked_guide_gid') else []
+        allow = sorted({target['gid'], *follow}) if target is not None else []
+        deny = sorted(node['gid'] for node in registered
+                      if node['gid'] not in allow and not node.get('structural'))
+        bindings = self._agent_bindings(engine, allow)
+        hard_limits = {
+            'declared_bindings': bindings,
+            'delta_requested_mm': delta,
+            'canvas_bounds_mm': scene.get('canvas_bounds_mm'),
+            'source': CONTEXT_SOURCES['bindings'],
+            'rule': '范围与画布硬限由引擎在受理期裁决（OUT_OF_RANGE / GEOMETRY_REJECTED）；'
+                    '绑定要成为候选，其声明的 objects 必须整体落在许可集合内'
+                    '（objects_within_allow=false 的绑定不服务于本次选择）',
+            'note': '本通道只回声明与集合关系，不另立算式',
+        }
+        if engine is None:
+            hard_limits['engine_unavailable'] = (
+                'SOURCE_IDENTITY_UNKNOWN：这次会话没有可读的 FigureSession（普通 Figure 会话），'
+                '契约声明读不到，不猜范围')
+        constraints = {
+            'source': {'allow': CONTEXT_SOURCES['selection'],
+                       'hard_limits': CONTEXT_SOURCES['bindings'],
+                       'frozen_science': CONTEXT_SOURCES['science']},
+            'scope': scope,
+            'allow_gids': allow,
+            'deny_gids': deny,
+            'follow_gids': follow,
+            'fixed_gids': [],
+            'rule': '许可集合 = {选中 GID} ∪ {清单显式关联的引线}；集合外非结构图元的任何几何'
+                    '变化都判 IMPACT_MISMATCH（structural 图元由引擎排除在外）',
+            'coordinate_space': {
+                'unit': scene.get('unit'),
+                'reference': scene.get('coordinate_reference'),
+                'canvas_bounds_mm': scene.get('canvas_bounds_mm'),
+                'calibrated': bool((scene.get('measurement') or {}).get('calibrated')),
+                'note': '毫米是渲染器栅格量；本引擎不声称已做物理标定',
+            },
+            'hard_limits': hard_limits,
+            'frozen_science': self._science_facts(session, frame, in_scope),
+            'not_independently_tunable': self._untunable(target, in_scope),
+        }
+        if target is not None and selection.get('scope') \
+                and str(selection.get('scope')) != scope:
+            constraints['scope_mismatch'] = {
+                'selection_scope': selection.get('scope'), 'target_scope': scope,
+                'why': '引擎只受理与当前 scope 一致的平移意图；跨 scope 候选会被拒绝'}
+
+        # --- impact：候选改动会牵动谁，以及为什么 ------------------------------ #
+        attached = [{'gid': guide, 'relation': 'guide',
+                     'why': '清单声明的标签↔引线附着：标签端随动、科学端固定'}
+                    for guide in follow]
+        target_paths = {tuple(path) for path in ((target or {}).get('controlled_by') or ())}
+        co_bound, cross_scope = [], []
+        for node in registered:
+            if node is target:
+                continue
+            shared = sorted({tuple(path) for path in (node.get('controlled_by') or ())}
+                            & target_paths)
+            if not shared:
+                continue
+            entry = {'gid': node['gid'], 'path': [list(path) for path in shared],
+                     'why': '与选中对象同一条声明绑定：该绑定被重建时它们一起动'}
+            (cross_scope if str(node.get('scope')) != scope else co_bound).append(entry)
+        for binding in bindings:
+            scopes = {str(item) for item in (binding.get('scopes') or ())}
+            if scopes - {scope}:
+                cross_scope.append({
+                    'binding': binding.get('path'), 'scopes': sorted(scopes),
+                    'why': '该绑定声明的作用域不止本 scope：跨输出版本的候选会被引擎拒绝'
+                           '（NEEDS_AUTHORING）'})
+        closure = []
+        if engine is not None and target is not None:
+            try:
+                closure = list(engine.owned_closure([target['gid']]))
+            except (AttributeError, TypeError):
+                closure = []
+        impact = {
+            'candidate': ({'gid': target['gid'], 'delta_mm': delta, 'intent_text': intent_text}
+                          if target is not None and (delta is not None or intent_text) else None),
+            'attached': attached,
+            'ownership_closure': closure,
+            'co_bound': co_bound,
+            'cross_scope': cross_scope,
+            'unchanged_rule': '许可集合外非结构图元变化一点即 IMPACT_MISMATCH；'
+                              'structural 图元由引擎排除在外',
+            'rules': [
+                '本通道只描述、不审批：改动仍走既有通道（submit_task → evaluate，或计划 → '
+                'apply → 验证）。',
+                '引擎只受理当前 scope 的明确平移（translate），且只对本帧已测量的稳定 GID；'
+                '科学曲线、引线端点与非刚体不被受理为整体平移。',
+                '引线跟随只能是清单显式关联的那一条：follow_gids 必须恰好等于 '
+                '[linked_guide_gid]，fixed_gids 必须为空。',
+                '科学保护不能关闭：即便位移达标，科学载荷指纹变了也一律拒绝（SCIENCE_CHANGED）。',
+                '画布边界是硬限：候选造成新的画布越界即 GEOMETRY_REJECTED。',
+            ],
+            'sources': {'attached': CONTEXT_SOURCES['scene'],
+                        'ownership_closure': CONTEXT_SOURCES['closure'],
+                        'co_bound': CONTEXT_SOURCES['bindings'],
+                        'cross_scope': CONTEXT_SOURCES['bindings']},
+        }
+
+        if asked and target is None:
+            status, http = 'UNKNOWN_GID', 404
+        elif not asked:
+            status, http = 'NO_SELECTION', 200
+        else:
+            status, http = 'OK', 200
+        payload = {'status': status, 'schema': AGENT_CONTEXT_SCHEMA,
+                   'hub_revision': self.hub_revision, 'selection_seq': self.selection_seq,
+                   'session_id': live.get('session_id'),
+                   'frame_revision': frame.get('frame_revision'),
+                   'scene_sha256': frame.get('scene_sha256'),
+                   'source_revision': live.get('source_revision'),
+                   'stale': stale is not None, 'stale_reason': stale,
+                   'scope': scope, 'target_gid': (target or {}).get('gid'),
+                   'intent_text': intent_text,
+                   'intent_note': 'intent 只原样回显：本通道不把它解释成任何改动，多目标改动仍由'
+                                  ' Agent 起草、由既有通道裁决',
+                   'scene': scene_view, 'constraints': constraints, 'impact': impact}
+        if status == 'UNKNOWN_GID':
+            payload['message'] = f'{asked!r} 不在本帧场景里；scene.nodes 是本帧已知的图元清单'
+        return payload, http
+
+    # 上下文内部：读既有对象，不造真值
+
+    @staticmethod
+    def _engine(session):
+        """会话背后的 ``FigureSession``（契约/归属的唯一真值）；拿不到返回 None，不伪造。"""
+        return getattr(session, '_core', None)
+
+    @staticmethod
+    def _agent_bindings(engine, allow):
+        """与许可集合相关的**声明**参数（契约 parameters）；读不到就不猜，返回 []。"""
+        if engine is None or not allow:
+            return []
+        try:
+            records = engine.parameters()
+        except (AttributeError, TypeError):
+            return []
+        wanted = set(allow)
+        out = []
+        for record in records:
+            objects = {str(item) for item in (record.get('objects') or ())}
+            if not objects & wanted:
+                continue
+            out.append({'path': list(record.get('path') or ()), 'key': record.get('key'),
+                        'unit': record.get('unit'), 'operation': record.get('operation'),
+                        'axis': record.get('axis'), 'scale': record.get('scale'),
+                        'mutability': record.get('mutability'), 'min': record.get('min'),
+                        'max': record.get('max'), 'scopes': list(record.get('scopes') or ()),
+                        'objects': sorted(objects),
+                        # 引擎铸造候选的前置条件（objects 必须整体落在许可集合内），
+                        # 只做集合比较，不重算任何几何。
+                        'objects_within_allow': objects <= wanted})
+        return out
+
+    @staticmethod
+    def _science_facts(session, frame, nodes):
+        """冻结科学载荷的指纹与逐图元策略；拿不到就说拿不到，不伪造一个指纹。"""
+        captured = getattr(session, '_science', None)
+        digest = captured.get('digest') if isinstance(captured, dict) else None
+        facts = {'manifest_declared': bool((frame.get('session') or {}).get('can_evaluate')),
+                 'digest': digest,
+                 'policy_by_gid': {node['gid']: node.get('science_policy') for node in nodes
+                                   if node.get('science_policy')},
+                 'source': CONTEXT_SOURCES['science']}
+        if digest is None:
+            facts['reason'] = ('SCIENCE_CAPTURE_UNAVAILABLE：此会话没有可读的科学载荷捕获'
+                               '（普通 Figure 会话或历史只读会话），不伪造指纹')
+        return facts
+
+    @staticmethod
+    def _untunable(target, nodes):
+        """已知不可独立微调项：引线端点、科学曲线本体；选中项本身不可 ghost 时一并说明。"""
+        out = []
+        for node in nodes:
+            annotation = node.get('annotation')
+            if isinstance(annotation, dict) and annotation.get('independent_endpoint_editable') is False:
+                out.append({'gid': node.get('gid'),
+                            'why': '引线端点不可独立微调（清单声明）：只随标签整体平移'})
+            elif node.get('type') == 'curve':
+                out.append({'gid': node.get('gid'),
+                            'why': '科学曲线不是刚体：不被受理为整体平移，只能按声明为 EDITABLE '
+                                   '的曲线位移参数整体移动'})
+        if target is not None:
+            ghostable, blockers = _ghost_state(target)
+            if not ghostable:
+                out.append({'gid': target.get('gid'),
+                            'why': '选中项不能作为刚体轮廓预览（' + '；'.join(blockers)
+                                   + '）：这是**预览**资格，引擎是否受理仍以 evaluate 回执为准'})
+        return out
 
     # 计划：Agent → Hub（铸造；零字节写用户源码）
 
