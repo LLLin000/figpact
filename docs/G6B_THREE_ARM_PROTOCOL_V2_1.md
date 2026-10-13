@@ -33,7 +33,7 @@
 **读法**：下文每一节 = 「替换位置」+「替换后文本（逐字）」+「依据」+「正式轮检查方式」。凡标
 **「替换后文本」**的引文，正式轮的记录、报告、冻结清单**按该文本读**，不得沿用 v2 原句。
 
-**第二批修订（v2.2）见 §10**：冻结 commit 重定（`0bcf870…`，替换 v2 §1.1 的 `12e751c…`）、
+**第二批修订（v2.2）见 §10**：冻结 commit 重定（`f101113…`，替换 v2 §1.1 的 `12e751c…`；先由 `12e751c…` 重定为 `0bcf870…`，再**二次重定**为 `f101113…`，因作者化 Gate 到 `f101113` 才存在）、
 提取命令唯一化（删 `worktree add` 备选）、科学输入 SHA-256 manifest 冻结、A16b 的 D1a 裁定待锁定；
 §8 清单新增第 16–19 条对应之。
 
@@ -52,7 +52,7 @@
 **替换后文本（v2 :45 行整行）**：
 
 ```text
-| 提取树生成（**唯一**） | `git -c core.autocrlf=false archive --format=tar <commit> | tar -x -C <trial_root>/tree` | 每条 trial 一份（§4）；`-c core.autocrlf=false` 是**强制项**，缺它 = 提取树行尾不确定 = 该轮作废。**`<commit>` = §10.1 重定的新基线 `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`**；`worktree add` 备选**已删除**（§10.2） |
+| 提取树生成（**唯一**） | `git -c core.autocrlf=false archive --format=tar <commit> | tar -x -C <trial_root>/tree` | 每条 trial 一份（§4）；`-c core.autocrlf=false` 是**强制项**，缺它 = 提取树行尾不确定 = 该轮作废。**`<commit>` = §10.1 重定的新基线 `f101113476cf3f0113ccbb5e054d700d8c0a433a`**；`worktree add` 备选**已删除**（§10.2） |
 ```
 
 - **命令写法纪律**：`-c` 必须置于子命令之前（`git -c core.autocrlf=false archive …`）。短复验记录里
@@ -60,7 +60,8 @@
   当作未知选项而失败，故正式轮一律以本节命令为准，简写不再出现。
 - §4 第 1 条（:278–279）与 §10「提取树生成命令」行同样按本行读。
 - **基线重定（§10.1）**：v2 §1.1 :42 行的统一 commit `12e751c…` **作废**，三臂改用
-  `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`（含 A16b 夹具）；`worktree add` 备选**删除**（§10.2）。
+  `f101113476cf3f0113ccbb5e054d700d8c0a433a`（含 A16b 夹具 **与作者化写回 Gate**；
+  `0bcf870…` 为一次重定、`f101113…` 为二次重定，理由见 §10.1）；`worktree add` 备选**删除**（§10.2）。
 
 **依据**：短复验 §4.1、§4 处置 1；`D:/L/AI/figpact-archive/g6b-v2/armV-summary.md` §5.1；
 `armL/harness-hashes-and-eol.md`、`armL/hashes-eol.md`；`criteria-lineending-table.txt`。
@@ -81,6 +82,13 @@
 > ```text
 > sha256sum "<path>"
 > ```
+>
+> **新基线复算（2026-10-13，`f101113476cf3f0113ccbb5e054d700d8c0a433a` 提取树内实测）**：下表
+> `commit` 列的六个值已在 `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113/tree/` 内**逐格逐字复现，
+> 无任何数值变更**（`worktree` 列同日亦 6/6 复现）。原因：六件夹具在 `0bcf870 → f101113` 之间**未被
+> 改动**（该区间只改 `figpact/authoring.py`、`figpact/hub.py` 与 `docs/`/`tools/`/`tests/`）。
+> 命令原文、三口径原始输出见
+> `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113-freeze-values.md` §2。
 
 | 夹具路径 | `worktree` 口径（v2 §1.2 原登记值） | `commit` 口径（**正式轮判等对象**） | 默认 archive（CRLF 化，仅追溯） |
 |---|---|---|---|
@@ -89,7 +97,7 @@
 | `examples/python_native/simple_figure.py` | `fe298676aa8277db9420c61483ede491fef16c0ef1a7ca53392f589e2642b663` | `fe298676aa8277db9420c61483ede491fef16c0ef1a7ca53392f589e2642b663` | `9cdf99f7974515f0ae431ccfda97131a1a20d2e200453a88eb3371e174dcf960` |
 | `examples/ftir/plot_ftir.py` | `524b1c86d6a5018abb1f561f32e960f15a5f2fddde80ac6935d141ea14150362` | `fd29ea3ba2eb165c6722c936beb8ef401d13181f6b2724c01a3a8f1ffe7b827e` | = `worktree` |
 | `examples/ftir/ftir.yaml` | `d6946d9286ffc3f9bdebf519006e6e437500c9158634aad641e81323fec03d49` | `50ce21b5c9847a2f23bf308d0bc1304e3050feee3230dd4c55d49db26c8e484c` | = `worktree` |
-| **A16b 夹具** `examples/python_native/legacy_plain.py` | `dba9f6f95c3707e94403137f1844fa67c2806c74cea9dba3ababc8d0de88635b` | 同上（新增文件：工作树字节 = commit 字节；blob `d25d58136aa7cbc32b13e2c9d1c1d9f50439f252`；`grep -n LAYOUT_MM` 空输出） | —— |
+| **A16b 夹具** `examples/python_native/legacy_plain.py` | `dba9f6f95c3707e94403137f1844fa67c2806c74cea9dba3ababc8d0de88635b` | 同上（新增文件：工作树字节 = commit 字节；blob `d25d58136aa7cbc32b13e2c9d1c1d9f50439f252`；`grep -n LAYOUT_MM` 空输出） | `4763bc9a35e1fdf72de940ab502ed6d1110d40c52a24beec5f9eca12af56e51b` |
 
 - **「以执行时树内重算为准」的唯一含义**（替换 v2 §1.3 :82 的表头重算句）：判等发生在**执行时**
   （冻结那一刻）的**提取树字节**上，且该树必须由 §1.1 的**唯一命令**生成；因此判等口径 ≡
@@ -137,14 +145,31 @@ archive 行尾模式 + 拼接方式**，内容一致。**统一口径前不得�
 
 | 口径 | 拼接签名值 | 来源 |
 |---|---|---|
-| `commit` 原始字节（= 正式轮判等口径） | `ef070f56047568cd99c71e3d55f3813599de9ac2932e78b6d5693dc473341200` | `criteria-hashes-commit-bytes.txt` / `criteria-lineending-table.txt` |
-| `worktree` 字节（= v2 §1.3 原登记值口径） | `005fe9626019ec93b2e087066f57d957ada06c270b2cec443212faf31617c5e3` | `criteria-hashes-worktree.txt` / `armV.json` |
+| `commit` 原始字节（= 正式轮判等口径；**已按新基线 `f101113` 树内重算，2026-10-13**） | `163b0df0852ff8f859e54d78c7d0941bfd5e39924e03ff97c09001e1012ffe5d` | `baseline-f101113/criteria-hashes-commit-bytes.txt` / `baseline-f101113-freeze-values.md` §4（旧基线值 `ef070f56…` 见 `criteria-hashes-commit-bytes.txt`，仅追溯） |
+| `worktree` 字节（= v2 §1.3 原登记值口径，**仅追溯；当前工作树已前移故不再等价**） | `005fe9626019ec93b2e087066f57d957ada06c270b2cec443212faf31617c5e3` | `criteria-hashes-worktree.txt` / `armV.json` |
 
-**可复核性（本次实测，非推断）**：把两口径已落盘的 12 行 `sha256sum` 输出流**逐字节**再 `sha256sum`，
-分别得到 `ef070f56…` 与 `005fe962…` —— 即本节命令的**语义与两个登记值一致**，三臂
-`f16105cd…` / `1ededaec…` / `ef070f56…` 的差异被完全定位为「**提取模式 + 拼接方式**」，与文件内容无关。
-（两个输入文件 = `D:/L/AI/figpact-archive/g6b-v2/criteria-hashes-{commit-bytes,worktree}.txt`，
-均为 ASCII/LF、**无表头、12 行**，路径恰好是本节命令里的字节序升序。）
+**新基线复算（2026-10-13，`f101113476cf3f0113ccbb5e054d700d8c0a433a` 提取树内实测）**：正式轮判等口径的
+签名在新基线树内重算为 **`163b0df0…`（相对旧基线 `ef070f56…` 已变）**；12 个逐文件值中
+`figpact/authoring.py`（`e0cf1239…` → `14530e52…`）与 `figpact/hub.py`（`b3b2ccca…` → `1028d743…`）**已变**，
+其余 10 件**未变**。**原因（精确）**：`0bcf870 → f101113` 只改动判据包 12 件里的 2 件 ——
+`git diff --name-status 0bcf870 f101113 -- figpact/` 输出 `M figpact/authoring.py`、`M figpact/hub.py`
+（= 作者化写回 Gate 落地），其余 10 件零改动 → **签名必须变、实测已变**。
+（上一轮：`12e751c → 0bcf870` 之间 `figpact/*.py` **零改动**，故当时签名**预期不变、实测亦不变** = `ef070f56…`；
+该值现降级为旧基线追溯值。）`worktree` 口径登记值 `005fe962…` **不可在当前工作树复现**（现为
+`60ef1206…`）：① 工作树行尾混用（12 件引擎文件中 6 件 CRLF、6 件 LF，而提取树 12/12 纯 LF）；
+② HEAD = `f101113`，`authoring.py`/`hub.py` **内容已变**。该登记值已被复现为「**基线内容 +
+当日工作树行尾混合**」，只作历史证据，**不作判等、不改动**。命令原文与原始输出见
+`D:/L/AI/figpact-archive/g6b-v2/baseline-f101113-freeze-values.md` §4、§6；12 个逐文件值落盘
+`D:/L/AI/figpact-archive/g6b-v2/baseline-f101113/criteria-hashes-commit-bytes.txt`（该文件整体再哈希 =
+`163b0df0…`）。
+
+**可复核性（本次实测，非推断）**：把已落盘的 12 行 `sha256sum` 输出流**逐字节**再 `sha256sum`，
+新基线 `commit` 口径文件得到 `163b0df0…`、旧基线 `worktree` 口径文件得到 `005fe962…` —— 即本节命令的
+**语义与两个登记值一致**，三臂 `f16105cd…` / `1ededaec…` / `ef070f56…` 的差异被完全定位为
+「**提取模式 + 拼接方式**」，与文件内容无关。
+（输入文件 = 新基线 `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113/criteria-hashes-commit-bytes.txt`
+与旧基线 `D:/L/AI/figpact-archive/g6b-v2/criteria-hashes-worktree.txt`，均为 ASCII/LF、**无表头、12 行**，
+路径恰好是本节命令里的字节序升序。）
 
 **正式轮检查**：三臂各算一次该命令 → 签名**逐字相等**；不等 = 该轮不进正式轮（替换 v2 :512
 「待冻结时算出并逐字记录」的状态描述）。短复验的 `f16105cd…` / `1ededaec…` / `ef070f56…` 三个值
@@ -338,7 +363,7 @@ archive 行尾模式 + 拼接方式**，内容一致。**统一口径前不得�
 | 1 | 短复验四项通过条件成立、12 trial 0 丢弃、四项证据可复核 | v2 §8.2（1–12） | ✅ 已完成 |
 | 2 | 正式轮题目清单冻结：≥10 条配对，四层均有代表，**必含 A16a 与 A16b**，D2 题数 ≥8 | v2 §8.3 | 待做 |
 | 3 | **A16b 夹具**已提交并登记 `sha256sum`（含「无 `LAYOUT_MM`」的空输出证据） | v2 §1.2、§8.3 | 已落地：`examples/python_native/legacy_plain.py`，sha256 `dba9f6f9…635b`、`grep -n LAYOUT_MM` 空输出、`plan_layout_edit → NEEDS_AUTHORING`（零写入）、`build_repair_spec` schema 对齐；**须落在 §10.1 新基线内**（该文件首次进仓库于 `0bcf870`） |
-| 4 | 三臂用 **同一 commit + §1.1 唯一提取命令**（`git -c core.autocrlf=false archive`）各建提取树；commit = **§10.1 的 `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`** | v2 §1.1 + **v2.1 §1.1、§10.1、§10.2** | 待做 |
+| 4 | 三臂用 **同一 commit + §1.1 唯一提取命令**（`git -c core.autocrlf=false archive`）各建提取树；commit = **§10.1 的 `f101113476cf3f0113ccbb5e054d700d8c0a433a`** | v2 §1.1 + **v2.1 §1.1、§10.1、§10.2** | 待做 |
 | 5 | 夹具哈希按 **`commit` 口径**在树内重算并逐字相等；`worktree` 口径同时登记 | v2 §1.2 + **v2.1 §1.2** | 待做 |
 | 6 | 判据包 12 值（`commit` 口径）+ **§2 唯一拼接命令的原文** + 签名值三件一起登记进冻结清单；每条 trial 的 `criteria_signature` 等于登记值 | v2 §1.3 + **v2.1 §2** | 待做 |
 | 7 | §3.4 模型逐字记录 + 可用性证据；**token 通道按 §6.1 实测**（默认结论「不可测」也须有回执） | v2 §3.4、§5.1 + **v2.1 §6.1** | 待做 |
@@ -350,10 +375,10 @@ archive 行尾模式 + 拼接方式**，内容一致。**统一口径前不得�
 | 13 | 预算/模型/判据签名/D1a 裁定/题目清单**在轮次期内冻结**；需改 = 整轮作废重跑 | v2 §8.3、§9 红线 13 | 待做 |
 | 14 | 人时口径落地：`human_wall_clock_s` 单列、A16a 真人等待计入人侧 | v2 §5.4、§6.3 + **v2.1 §7** | 待做 |
 | 15 | 作废条件写明并可执行：判据放宽 / 模型或预算不一致 / 隔离破坏 / 冻结项事后修改 → 整轮作废 | v2 §8.3、§9 | 待做 |
-| 16 | **冻结 commit 重定**：三臂统一基线 = `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`（含 A16b 夹具）；六件夹具哈希与判据包签名在**该基线提取树内重算**；禁止「旧 commit 提取 + 手工补文件」 | **v2.1 §10.1** | 待做（基线值已定；重算与登记待做） |
+| 16 | **冻结 commit 重定**：三臂统一基线 = `f101113476cf3f0113ccbb5e054d700d8c0a433a`（含 A16b 夹具 **与作者化写回 Gate**；由 `0bcf870…` 二次重定，理由见 §10.1）；六件夹具哈希与判据包签名在**该基线提取树内重算**；禁止「旧 commit 提取 + 手工补文件」 | **v2.1 §10.1** | 已重算并登记（`f101113` 树内值见 `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113-freeze-values.md`）；判据包签名已变（`ef070f56…` → `163b0df0…`，因 `authoring.py`/`hub.py` 改动），六件夹具值未变 |
 | 17 | **提取命令唯一化**：只用 `git -c core.autocrlf=false archive`；`worktree add` 备选删除 | **v2.1 §1.1、§10.2** | 文本已定（命令唯一化已落文）；执行待做 |
 | 18 | **科学输入冻结**：NMR 未跟踪原始科学文件建 SHA-256 manifest（relpath/size/sha256），三臂复制后逐文件校验一致 | **v2.1 §10.3** | 待做（manifest 由独立单元产出，路径见 §10.3） |
-| 19 | **A16b 的 D1a 裁定**：作者化写回 Gate 完成后锁定 | **v2.1 §10.4** | **已锁定**：Gate 已落地（`authoring.plan_authoring_binding` + hub `kind="authoring_edit"`，authorize/apply 复用同一校验链，测试 7 用例 + 3 subTest 通过）→ **臂 V 路径存在**；臂 L（无授权写回）与臂 A（白名单无源码写回入口）为 `structural_unsupported`。正式轮按此裁定记录，不得临时扩大任何臂的写权限 |
+| 19 | **A16b 的 D1a 裁定**：作者化写回 Gate 完成后锁定 | **v2.1 §10.4** | **已锁定**：Gate 已落地（`authoring.plan_authoring_binding` + hub `kind="authoring_edit"`，authorize/apply 复用同一校验链，测试 7 用例 + 3 subTest 通过）→ **臂 V 路径存在**；臂 L（无授权写回）与臂 A（白名单无源码写回入口）为 `structural_unsupported`。**且 Gate 已在冻结基线 `f101113…` 内**（`f101113` 提取树内 `grep` 命中 `figpact/authoring.py:550`、`figpact/hub.py:51`；理由见 §10.1，证据见 `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113-freeze-values.md` §3），故该「已锁定」在冻结基线下证据成立。正式轮按此裁定记录，不得临时扩大任何臂的写权限 |
 
 ---
 
@@ -382,22 +407,32 @@ archive 行尾模式 + 拼接方式**，内容一致。**统一口径前不得�
 **A16b 夹具 `examples/python_native/legacy_plain.py` 直到 `0bcf870` 才首次进仓库** → 严格按
 「v2 + v2.1」执行会出现「A16b 必须在场、但冻结树里没有该文件」的矛盾。
 
+**二次重定理由（2026-10-13 用户裁定）**：A16b 的 D1a 裁定（§10.4 / §8 第 19 条）依赖
+**作者化写回 Gate**（`authoring.plan_authoring_binding` + hub `kind="authoring_edit"`），而该 Gate
+**到 `f101113` 才落地**（`0bcf870` 树内 `grep -rn "plan_authoring_binding" figpact/` 与
+`grep -rn "authoring_edit" figpact/` **均空输出**）→ 若冻结在 `0bcf870`，臂 V 的 A16b 完整路径在冻结树内
+**不存在**。故按 v2.1 §10.1 允许的「冻结时的明确后续提交」把基线由 `0bcf870…` **二次重定**为 `f101113…`。
+
 **替换后文本（v2 §1.1 :42 行整行）**：
 
 ```text
-| **三臂统一引擎 commit（v2.2 重定）** | `0bcf870d29e1b3d9e683fd3ce806efdb0947fccf` | 含 A16b 夹具 `examples/python_native/legacy_plain.py`；冻结时若改用明确后续提交，须在冻结清单登记**同一提交全值**且三臂一致 |
+| **三臂统一引擎 commit（v2.2 重定）** | `f101113476cf3f0113ccbb5e054d700d8c0a433a` | 含 A16b 夹具 `examples/python_native/legacy_plain.py` **与作者化写回 Gate**；冻结时若改用明确后续提交，须在冻结清单登记**同一提交全值**且三臂一致 |
 ```
 
 - **旧值作废**：`12e751cdeab699078a4f5a1835ca41f28af27b3b` 不再作为三臂统一基线；任何臂**不得**
   混用 `12e751c` 或其派生树。v2 §1.1 :509 行（§10 表「三臂统一引擎 commit」）与 v2 §1.1 其余
-  引用同样按本行读。
-- **三臂全部使用同一新基线**：`0bcf870d29e1b3d9e683fd3ce806efdb0947fccf`（或冻结时登记的**明确
+  引用同样按本行读。`0bcf870…` 为**一次重定（已被本行二次重定取代）**，仅作历史记录。
+- **三臂全部使用同一新基线**：`f101113476cf3f0113ccbb5e054d700d8c0a433a`（或冻结时登记的**明确
   后续提交全值**）。
 - **六件夹具哈希（§1.2 表）与判据包签名（§2）必须在该新基线的提取树内重算**，重算值登记进
-  冻结清单并**逐字**充当判等对象；本节不预填重算值。
+  冻结清单并**逐字**充当判等对象。**重算已完成（2026-10-13，`f101113` 提取树内实测）**：六件夹具
+  `commit` 值**未变**；判据包签名由 `ef070f56…` **变为 `163b0df0…`**（`authoring.py`/`hub.py` 改动所致）。
+  命令原文、原始输出与两基线对比见 `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113-freeze-values.md`；
+  登记文件 `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113/criteria-hashes-commit-bytes.txt`。
 - **禁止**：从旧 commit（如 `12e751c`）提取树、再手工补入 `legacy_plain.py` 等文件，却仍声称
   「三臂同一冻结 commit」——该做法判为冻结清单未成立，**不得开跑**。
-- **依据**：用户裁定（2026-10-13）第 1 条；A16b 夹具首次进仓库于 `0bcf870`。
+- **依据**：用户裁定（2026-10-13）第 1 条 + 二次重定裁定；A16b 夹具首次进仓库于 `0bcf870`，
+  作者化写回 Gate 首次进仓库于 `f101113`。
 
 ### 10.2 提取命令唯一化：删除 `worktree add` 备选（替换 §1.1 表行与其括注）
 
@@ -455,7 +490,7 @@ git -c core.autocrlf=false archive --format=tar <commit> | tar -x -C <trial_root
 
 ### 10.4 A16b 的 D1a 裁定：**待作者化写回 Gate 完成后锁定**
 
-- **状态：已锁定（Gate 已落地）**——`authoring.plan_authoring_binding` + hub `kind="authoring_edit"` 已实现并通过测试（7 用例 + 3 subTest），authorize/apply 复用同一校验链。
+- **状态：已锁定（Gate 已落地）**——`authoring.plan_authoring_binding` + hub `kind="authoring_edit"` 已实现并通过测试（7 用例 + 3 subTest），authorize/apply 复用同一校验链。**且 Gate 现已在冻结基线内**：`f101113` 提取树内 `grep -rn "plan_authoring_binding" figpact/` 与 `grep -rn "authoring_edit" figpact/` 均命中（`figpact/authoring.py:550`、`figpact/hub.py:51`），故本条的「已锁定」在新基线 `f101113…` 下证据成立（证据见 `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113-freeze-values.md` §3）。
 - **能力边界结论**：臂 V 具备 A16b 的完整路径（提案 → 计划 → 页面授权 → 写入 → 独立重建验证 → history）；臂 L 无授权写回、臂 A 白名单无源码写回入口 → 两者在 D1a 记 `structural_unsupported`。正式轮不得临时扩大任何臂的写权限。
 - **当前能力边界（实测，Gate 已落地后）**：`hub.create_plan()` 支持 `kind="layout_edit"`（`LAYOUT_MM` 绑定，经 `python_native.plan_layout_edit`）与 **`kind="authoring_edit"`**（无绑定脚本的最小显式绑定补丁，经 `authoring.plan_authoring_binding`，journal 由 `source_writes` 管理）；两者的 authorize/apply/cancel 复用同一校验链。当目标无
   `LAYOUT_MM` 时返回 **`NEEDS_AUTHORING`**，**不铸造计划**（零写入）。
@@ -468,6 +503,7 @@ git -c core.autocrlf=false archive --format=tar <commit> | tar -x -C <trial_root
 ### 10.5 对 §1–§9 的影响
 
 - §1.1 表行的 `worktree add` 括注**已删**（§10.2）；`<commit>` 占位符 = §10.1 的新基线。
-- §1.2 六件夹具哈希与 §2 判据包签名：**须在新基线内重算**（本节不预填值）。
+- **基线已重定（影响清单）**：冻结 commit 由 `0bcf870…` **二次重定**为 `f101113476cf3f0113ccbb5e054d700d8c0a433a`（§10.1），因为 A16b 的 D1a 裁定（§10.4 / §8 第 19 条）所需的作者化写回 Gate 到 `f101113` 才存在。受影响的登记值：**判据包签名 `ef070f56…` → `163b0df0…`**、逐文件 `authoring.py` 与 `hub.py` 两值；**不受影响**：§1.2 六件夹具 `commit` 值（未变）、判据包其余 10 个逐文件值（未变）。`§10.4`/`§8 第 19 条` 的「已锁定」在新基线下保持有效（§10.4）。
+- §1.2 六件夹具哈希与 §2 判据包签名：**已在 `f101113` 新基线内重算完成**（六件夹具值未变；判据签名变为 `163b0df0…`），登记值见 `D:/L/AI/figpact-archive/g6b-v2/baseline-f101113-freeze-values.md`。
 - §8 清单新增第 16–19 条（对应本节四条）。
 - §9「未新增条款」：§10 是本文件唯一的新增条款节。
