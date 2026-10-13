@@ -190,6 +190,17 @@
 - **当前显示实测**：新服务 NMR 为 **600 DPI、1133 × 1133 px**；普通图为 **600 DPI、1889 × 1181 px**。在本次浏览器窗口中没有放大到超出底图像素。读取用户原有 Chrome 页面超时，无法确认原页面是否有旧缓存或更大缩放；没有替换或清空其现有会话。
 - **低 DPI 与 SVG**：120/240 DPI 保留供大图降低像素缓冲、编码与传输负担；本轮未重跑既有性能比较。已有实际 SVG 导出可行性与 Agg/SVG 字框差异记录见 `INSPECTOR_DISPLAY_QUALITY.md`。仍未启用 SVG 底图，未混用两种 renderer 的几何，也未开发 G3、Python 写回或新保存权限。
 - **完整证据位置**：`I:/figpact-test-archive/Inspector-Apple-Review-aa2f604/final-regression/` 为真实测试 stdout/stderr；`parent-final/` 为主线浏览器结果与截图，包含 `nmr-proof.json`、`plain-proof.json`、`human-feedback.json`、`human-feedback.png`；`parent-preview/` 为实际 DPI 与显示比例记录。
+
+#### F. 图上直接拖动与即时预览 (`9331f69`，G7 P1-a)
+
+- **新增交互**：选中一个可示范的图元后，在视口内按住并拖动即可示范新位置；拖动期间实时显示幽灵轮廓、联动引线幽灵与**贴光标毫米读数**（ΔX/ΔY，右/上为正），并显示 `#drag-readout`。
+- **拖动期间零后端调用**：拖动只更新既有 intent session 的 delta 与幽灵几何，不重建 Matplotlib、不逐帧发布选区。实测断言为**每一次 pointermove 的 POST 数为 0**（不只是 evaluate）。
+- **松开即真实验证**：松开后复用与「检查排版」按钮**同一个** `evaluateCurrentIntent`，只触发**恰好一次** `POST /api/intents/evaluate`，其 `delta_mm` 与读数一致；回执为 `OK / FEASIBLE / RENDER_CHECKED`，四项检查均为真实 `PASS`，面板显示实测位移与位移误差。
+- **四态文案**（不得越界）：拖动中 `拖动预览，尚未验证` → 验证中 `验证中…` → 通过后才显示 `已重新绘图，位置检查通过`。套件里有一条**回绕断言**：任何非 PASS 状态都不得出现 `已保存` 或 `已验证` 字样。
+- **既有交互不变**：hover/点击选中、Alt+click 重叠轮换、方向键微调（0.1 / Alt 0.01 / Shift 0.5）、极简模式、既有 DOM id 与隐藏清单语义均保持；零净位移拖动不触发验证并回到 `未调整`；Alt+拖动不进入预览；已有待决位移时改选其他对象仍被拒绝。
+- **拖动是绝对位移**：以按下点为基准，因此拖回起点会把此前方向键微调的 delta 归零（幽灵跟随指针，属有意行为）。
+- **本切片边界**：**只有平移**。缩放/尺寸调整需要引擎侧新的 operation kind 与 Oracle，本轮**未**实现。
+- **测试**：`tests/inspector/test_inspector.js` **52 通过 / 0 失败**（新增 5 条纯逻辑用例）；`tests/browser/test_drag_preview_flow.py` 真 Chromium + 真服务子进程、使用**未改动的** `examples/nmr` 夹具。
 ---
 
 ## 4. 产物与截图归档清单
@@ -214,3 +225,7 @@
    - 同一真实 Figure 的导出试验中，Agg 与 SVG renderer 测得的对象 bbox 最大差为 0.238 mm；这不是科学峰位变动，也不是完整精度校准。检查器仍以配帧 Agg PNG 为底图，SVG 只作为现有高亮覆盖；尚未实现 SVG 底图显示。
 3. **引线不可独立移动**：
    - 引线的科学起点锚定在分子光谱的物理峰位上，其位置由科学数据清单保护，不开放端点自由拖拽，只允许跟随关联标签的重排而联动调整。
+4. **预览不构成验证**：
+   - 拖动/微调只产生「示范」与「预览」；拖动过程不发起任何后端请求、不重建 Matplotlib。只有松开后经真实重建、且引擎回执通过，才允许出现通过类文案；写盘（源码已提交）与图形验证（独立重建 PASS）是两个互不推导的状态（见 G7 P0a 的 `source_commit_state` / `figure_verification_state`）。
+5. **每次构图重放全局初始化**：
+   - 绘图脚本的样式/全局初始化**不得**只在模块导入时生效一次：加载器在临时 `rc_context` 内导入脚本，退出即还原 rcParams，同进程第二次会话会掉回 matplotlib 默认样式并整体改变几何。已在 NMR 与 FTIR 各实测到一次同类缺陷，修法与复现数据见 `docs/G6B_D5_ROOTCAUSE_CORRECTION.md`；新脚本接入时必须每次构图重放。
