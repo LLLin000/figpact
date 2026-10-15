@@ -88,7 +88,17 @@ def _overflow(node, canvas):
         return math.inf
     return max(0., canvas[0] - bounds[0], canvas[1] - bounds[1],
                bounds[2] - canvas[2], bounds[3] - canvas[3])
-
+def _runtime_noise_path_intents(path: Path) -> bool:
+    parts = path.parts
+    if '__pycache__' in parts or path.suffix.lower() == '.pyc':
+        return True
+    name = path.name
+    if name.startswith('.figpact-') or name.startswith('.tmp_'):
+        return True
+    for part in parts:
+        if '-stage-' in part or part.endswith('-stage') or part.endswith('_stage'):
+            return True
+    return False
 
 def _file_digest(path: Path) -> str:
     digest = hashlib.sha256()
@@ -99,8 +109,7 @@ def _file_digest(path: Path) -> str:
 
 
 def _file_record(path: Path) -> dict[str, Any]:
-    stat = path.stat()
-    return {'sha256': _file_digest(path), 'size': stat.st_size, 'mtime_ns': stat.st_mtime_ns}
+    return {'sha256': _file_digest(path)}
 
 
 def _validate_history_frame(frame, scope):
@@ -157,10 +166,14 @@ def _source_evidence(script, config, scope, *, exclude=(), required=(), source_r
             records[resolved] = known = _file_record(path)
         return known
 
+    declared_resolved = {Path(item).resolve() for item in inputs if Path(item).is_file()} 
+    declared_all = {Path(item).resolve() for item in inputs}
     for path in sorted(script_path.parent.rglob('*')):
-        if not path.is_file() or '__pycache__' in path.parts or path.suffix.lower() == '.pyc':
+        if not path.is_file():
             continue
         resolved = path.resolve()
+        if resolved not in declared_all and _runtime_noise_path_intents(path):
+            continue
         if resolved in skip or resolved == config_resolved:
             continue
         files[str(resolved)] = record(path, str(resolved))
@@ -203,6 +216,8 @@ class IntentSession:
         self._closed = False
         self._dpi = float(dpi) if dpi is not None else None
         self._source = None
+        self._frozen_outputs = None
+        self._frozen_inputs = None
         self._contract_override = contract
         self._rc_style = None
         self._history = bool(history)
@@ -236,6 +251,8 @@ class IntentSession:
                     self._rc_style = matplotlib.rcParams.copy()
                     try:
                         self._source = self._core.state()['source_revision']
+                        self._frozen_outputs = list(self._core.state().get('artifact_outputs', []))
+                        self._frozen_inputs = list(self._core.state().get('science_inputs', []))
                         if self._history:
                             self._source_files = self._live_source()
                         self._frame, self._science = self._capture(self._core)
@@ -320,9 +337,11 @@ class IntentSession:
     def _live_source(self):
         assert self._core is not None
         state = cast(dict[str, Any], self._core.state())
+        outputs = self._frozen_outputs if self._frozen_outputs is not None else state['artifact_outputs']
+        inputs = self._frozen_inputs if self._frozen_inputs is not None else state['science_inputs']
         return _source_evidence(state['script'], state['config'], state['scope'],
-            exclude=[Path(item) for item in state['artifact_outputs']],
-            required=[Path(item) for item in state['science_inputs']],
+            exclude=[Path(item) for item in outputs],
+            required=[Path(item) for item in inputs],
             source_revision=state['source_revision'], module_revision=state['module_revision'])
 
     def _source_fresh(self):
@@ -614,8 +633,9 @@ class IntentSession:
     def _current_source(self):
         assert self._core is not None
         state = cast(dict[str, Any], self._core.state())
-        return source_revision(state['script'], state['config'],
-            exclude=state['artifact_outputs'], required=state['science_inputs'])
+        outputs = self._frozen_outputs if self._frozen_outputs is not None else state['artifact_outputs']
+        inputs = self._frozen_inputs if self._frozen_inputs is not None else state['science_inputs']
+        return source_revision(state['script'], state['config'], exclude=outputs, required=inputs)
 
     def _guard(self, request):
         if self._closed:

@@ -114,43 +114,69 @@ class ContractError(SessionError):
 # 源指纹与模块装载
 # --------------------------------------------------------------------------- #
 
-def script_fingerprint(script, config=None, *, exclude=(), required=()) -> str:
-    """脚本目录的**源码元数据**指纹（排掉配置本身）。
+def _runtime_noise_path(path) -> bool:
+    """运行时可识别的临时物/工作目录/缓存，不参与源身份；按路径身份，不按后缀。"""
+    parts = path.parts
+    if '__pycache__' in parts or path.suffix.lower() == '.pyc':
+        return True
+    name = path.name
+    if name.startswith('.figpact-') or name.startswith('.tmp_'):
+        return True
+    for part in parts:
+        if '-stage-' in part or part.endswith('-stage') or part.endswith('_stage'):
+            return True
+    return False
 
-    只按「精确声明的产物路径」排除，不按后缀一刀切：`.png/.json/.pdf` 也可能是
-    科学输入（显微原图、仪器报告、处理元数据）。声明为输入的文件即使同时被声明
-    为产物也照样计入。
+
+def _file_content_hash(path) -> str:
+    digest = hashlib.sha256()
+    with open(path, 'rb') as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def script_fingerprint(script, config=None, *, exclude=(), required=()) -> str:
+    """脚本目录的**源码内容**指纹（排掉配置本身）。
+
+    身份以文件内容 SHA-256 为准，不使用 size/mtime。只按精确声明的产物路径排除；
+    `.png/.json/.pdf` 仍可能是科学输入。运行时临时物与 stage 目录按路径身份排除。
     """
     script = Path(script).resolve()
     config = Path(config).resolve() if config else None
     skip = {Path(p).resolve() for p in exclude} - {Path(p).resolve() for p in required}
     h = hashlib.sha256()
     for p in sorted(script.parent.rglob('*')):
-        if not p.is_file() or '__pycache__' in p.parts or p.suffix.lower() == '.pyc':
+        if not p.is_file() or _runtime_noise_path(p):
             continue
         resolved = p.resolve()
         if resolved in skip:
             continue
+        if resolved in {Path(x).resolve() for x in required}:
+            pass
         if config is not None and resolved == config and resolved not in skip:
             continue
-        stat = p.stat()
-        h.update(f'{p}:{stat.st_size}:{stat.st_mtime_ns}'.encode('utf8'))
+        digest = _file_content_hash(p)
+        h.update(f'{resolved}:{digest}'.encode('utf-8'))
     for p in sorted(required):
         path = Path(p)
         if path.is_file():
-            stat = path.stat()
-            h.update(f'{path.resolve()}:{stat.st_size}:{stat.st_mtime_ns}'.encode('utf8'))
+            digest = _file_content_hash(path)
+            h.update(f'{path.resolve()}:{digest}'.encode('utf-8'))
+    for p in sorted(script.parent.rglob('*')):
+        pass
     return h.hexdigest()
 
+    return h.hexdigest()
 
 def engine_fingerprint() -> str:
-    """引擎自身实现（figpact/*.py）的源码元数据指纹。"""
+    """引擎自身实现（figpact/*.py）的内容指纹。"""
     h = hashlib.sha256()
     for p in sorted(Path(__file__).parent.rglob('*')):
-        if not p.is_file() or '__pycache__' in p.parts or p.suffix.lower() == '.pyc':
+        if not p.is_file() or _runtime_noise_path(p):
             continue
-        stat = p.stat()
-        h.update(f'{p}:{stat.st_size}:{stat.st_mtime_ns}'.encode('utf8'))
+        digest = _file_content_hash(p)
+        h.update(f'{p.resolve()}:{digest}'.encode('utf-8'))
     return h.hexdigest()
 
 
@@ -196,8 +222,8 @@ def module_revision(script, config, *, exclude=(), required=()) -> str:
     """
     h = hashlib.sha256()
     h.update(script_fingerprint(script, config, exclude=exclude,
-                                required=required).encode('ascii'))
-    h.update(engine_fingerprint().encode('ascii'))
+                                required=required).encode('utf-8'))
+    h.update(engine_fingerprint().encode('utf-8'))
     return h.hexdigest()
 
 
@@ -209,7 +235,7 @@ def source_revision(script, config, *, exclude=(), required=()) -> str:
     """
     config = Path(config).resolve()
     h = hashlib.sha256(config.read_bytes())
-    h.update(module_revision(script, config, exclude=exclude, required=required).encode('ascii'))
+    h.update(module_revision(script, config, exclude=exclude, required=required).encode('utf-8'))
     return h.hexdigest()
 
 
