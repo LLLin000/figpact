@@ -3,10 +3,10 @@
     {
       "slug": "series-01-ugly",
       "file": "docs\\readme\\series-01-ugly.png",
-      "bytes": 167944,
+      "bytes": 172234,
       "action": "starting config",
-      "elapsed_s": 0.088,
-      "audit_elapsed_s": 0.152,
+      "elapsed_s": 0.298,
+      "audit_elapsed_s": 0.194,
       "canvas_mm": [
         66.0,
         40.0
@@ -19,48 +19,113 @@
       "infeasible": [
         "legend_font_pt effective 4.5pt < 5pt"
       ],
-      "spatial_risk_count": 5,
-      "text_overlap_entries": 1,
-      "font_roles": [
+      "text_bbox_overlaps": 0,
+      "text_bbox_overlap_pairs": [],
+      "text_curve_overlaps": 7,
+      "text_curve_overlap_pairs": [
         {
-          "role": "axis_font_pt",
-          "nominal": 6.0,
-          "effective": 6.0,
-          "infeasible": false
+          "text": "Cluster I (a/b)",
+          "text_gid": "figdemo.main.peak.alpha.2p06",
+          "curve_gid": "figdemo.main.curve.alpha"
         },
         {
-          "role": "tick_font_pt",
-          "nominal": 5.0,
-          "effective": 5.0,
-          "infeasible": false
+          "text": "Cluster I (a/b)",
+          "text_gid": "figdemo.main.peak.alpha.2p06",
+          "curve_gid": "figdemo.main.curve.beta"
         },
         {
-          "role": "peak_font_pt",
-          "nominal": 5.0,
-          "effective": 5.0,
-          "infeasible": false
+          "text": "Cluster I (a/b)",
+          "text_gid": "figdemo.main.peak.alpha.2p06",
+          "curve_gid": "figdemo.main.curve.gamma"
         },
         {
-          "role": "legend_font_pt",
-          "nominal": 4.5,
-          "effective": 4.5,
-          "infeasible": true
+          "text": "Cluster II (a/b)",
+          "text_gid": "figdemo.main.peak.gamma.7p46",
+          "curve_gid": "figdemo.main.curve.gamma"
         },
         {
-          "role": "note_font_pt",
-          "nominal": 5.0,
-          "effective": 5.0,
-          "infeasible": false
+          "text": "Sample A\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        },
+        {
+          "text": "Sample B\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        },
+        {
+          "text": "Sample C\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        }
+      ],
+      "text_outside_canvas": 1,
+      "text_outside_canvas_gids": [],
+      "legend_data_intersection": true,
+      "clipped_texts": 0,
+      "clipped_artists": 4,
+      "clipped_artist_gids": [],
+      "label_peak_offset_ppm": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "label_peak_offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.beta.5p00",
+          "label_peak_offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "label_peak_offset_ppm": 0.0
+        }
+      ],
+      "fonts_pt": {
+        "axis_font_pt": 6.0,
+        "tick_font_pt": 5.0,
+        "peak_font_pt": 5.0,
+        "legend_font_pt": 4.5,
+        "note_font_pt": 5.0
+      },
+      "line_widths": [
+        0.4,
+        0.8,
+        1.5
+      ],
+      "spatial_risk_count": 4,
+      "rendered_labels": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "text": "Cluster I (a/b)",
+          "present": true,
+          "center_px": 195.163,
+          "center_ppm": 2.06,
+          "offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.beta.5p00",
+          "text": "Peak B",
+          "present": true,
+          "center_px": 132.52,
+          "center_ppm": 5.0,
+          "offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "text": "Cluster II (a/b)",
+          "present": true,
+          "center_px": 80.104,
+          "center_ppm": 7.46,
+          "offset_ppm": 0.0
         }
       ]
     },
     {
       "slug": "series-02-spacing",
       "file": "docs\\readme\\series-02-spacing.png",
-      "bytes": 159264,
+      "bytes": 164178,
       "action": "widen sample pitch",
-      "elapsed_s": 0.058,
-      "audit_elapsed_s": 0.144,
+      "elapsed_s": 0.214,
+      "audit_elapsed_s": 0.177,
       "canvas_mm": [
         66.0,
         40.0
@@ -73,48 +138,113 @@
       "infeasible": [
         "legend_font_pt effective 4.5pt < 5pt"
       ],
-      "spatial_risk_count": 3,
-      "text_overlap_entries": 1,
-      "font_roles": [
+      "text_bbox_overlaps": 0,
+      "text_bbox_overlap_pairs": [],
+      "text_curve_overlaps": 7,
+      "text_curve_overlap_pairs": [
         {
-          "role": "axis_font_pt",
-          "nominal": 6.0,
-          "effective": 6.0,
-          "infeasible": false
+          "text": "Cluster I (a/b)",
+          "text_gid": "figdemo.main.peak.alpha.2p06",
+          "curve_gid": "figdemo.main.curve.alpha"
         },
         {
-          "role": "tick_font_pt",
-          "nominal": 5.0,
-          "effective": 5.0,
-          "infeasible": false
+          "text": "Cluster I (a/b)",
+          "text_gid": "figdemo.main.peak.alpha.2p06",
+          "curve_gid": "figdemo.main.curve.beta"
         },
         {
-          "role": "peak_font_pt",
-          "nominal": 5.0,
-          "effective": 5.0,
-          "infeasible": false
+          "text": "Cluster II (a/b)",
+          "text_gid": "figdemo.main.peak.gamma.7p46",
+          "curve_gid": "figdemo.main.curve.gamma"
         },
         {
-          "role": "legend_font_pt",
-          "nominal": 4.5,
-          "effective": 4.5,
-          "infeasible": true
+          "text": "Sample A\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
         },
         {
-          "role": "note_font_pt",
-          "nominal": 5.0,
-          "effective": 5.0,
-          "infeasible": false
+          "text": "Sample B\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        },
+        {
+          "text": "Sample C\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        },
+        {
+          "text": "Sample C\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.gamma"
+        }
+      ],
+      "text_outside_canvas": 1,
+      "text_outside_canvas_gids": [],
+      "legend_data_intersection": true,
+      "clipped_texts": 0,
+      "clipped_artists": 4,
+      "clipped_artist_gids": [],
+      "label_peak_offset_ppm": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "label_peak_offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.beta.5p00",
+          "label_peak_offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "label_peak_offset_ppm": 0.0
+        }
+      ],
+      "fonts_pt": {
+        "axis_font_pt": 6.0,
+        "tick_font_pt": 5.0,
+        "peak_font_pt": 5.0,
+        "legend_font_pt": 4.5,
+        "note_font_pt": 5.0
+      },
+      "line_widths": [
+        0.4,
+        0.8,
+        1.5
+      ],
+      "spatial_risk_count": 4,
+      "rendered_labels": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "text": "Cluster I (a/b)",
+          "present": true,
+          "center_px": 195.163,
+          "center_ppm": 2.06,
+          "offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.beta.5p00",
+          "text": "Peak B",
+          "present": true,
+          "center_px": 132.52,
+          "center_ppm": 5.0,
+          "offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "text": "Cluster II (a/b)",
+          "present": true,
+          "center_px": 80.104,
+          "center_ppm": 7.46,
+          "offset_ppm": 0.0
         }
       ]
     },
     {
       "slug": "series-03-canvas",
       "file": "docs\\readme\\series-03-canvas.png",
-      "bytes": 159577,
+      "bytes": 156939,
       "action": "larger canvas/margins",
-      "elapsed_s": 0.068,
-      "audit_elapsed_s": 0.182,
+      "elapsed_s": 0.209,
+      "audit_elapsed_s": 0.223,
       "canvas_mm": [
         96.0,
         62.0
@@ -127,48 +257,103 @@
       "infeasible": [
         "legend_font_pt effective 4.501pt < 5pt"
       ],
-      "spatial_risk_count": 2,
-      "text_overlap_entries": 1,
-      "font_roles": [
+      "text_bbox_overlaps": 0,
+      "text_bbox_overlap_pairs": [],
+      "text_curve_overlaps": 5,
+      "text_curve_overlap_pairs": [
         {
-          "role": "axis_font_pt",
-          "nominal": 6.0,
-          "effective": 6.002,
-          "infeasible": false
+          "text": "Cluster I (a/b)",
+          "text_gid": "figdemo.main.peak.alpha.2p06",
+          "curve_gid": "figdemo.main.curve.alpha"
         },
         {
-          "role": "tick_font_pt",
-          "nominal": 5.0,
-          "effective": 5.002,
-          "infeasible": false
+          "text": "Cluster II (a/b)",
+          "text_gid": "figdemo.main.peak.gamma.7p46",
+          "curve_gid": "figdemo.main.curve.gamma"
         },
         {
-          "role": "peak_font_pt",
-          "nominal": 5.0,
-          "effective": 5.002,
-          "infeasible": false
+          "text": "Sample A\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
         },
         {
-          "role": "legend_font_pt",
-          "nominal": 4.5,
-          "effective": 4.501,
-          "infeasible": true
+          "text": "Sample B\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
         },
         {
-          "role": "note_font_pt",
-          "nominal": 5.0,
-          "effective": 5.002,
-          "infeasible": false
+          "text": "Sample C\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        }
+      ],
+      "text_outside_canvas": 0,
+      "text_outside_canvas_gids": [],
+      "legend_data_intersection": true,
+      "clipped_texts": 0,
+      "clipped_artists": 3,
+      "clipped_artist_gids": [],
+      "label_peak_offset_ppm": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "label_peak_offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.beta.5p00",
+          "label_peak_offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "label_peak_offset_ppm": 0.0
+        }
+      ],
+      "fonts_pt": {
+        "axis_font_pt": 6.0,
+        "tick_font_pt": 5.0,
+        "peak_font_pt": 5.0,
+        "legend_font_pt": 4.5,
+        "note_font_pt": 5.0
+      },
+      "line_widths": [
+        0.4,
+        0.8,
+        1.5
+      ],
+      "spatial_risk_count": 3,
+      "rendered_labels": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "text": "Cluster I (a/b)",
+          "present": true,
+          "center_px": 283.873,
+          "center_ppm": 2.06,
+          "offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.beta.5p00",
+          "text": "Peak B",
+          "present": true,
+          "center_px": 192.756,
+          "center_ppm": 5.0,
+          "offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "text": "Cluster II (a/b)",
+          "present": true,
+          "center_px": 116.515,
+          "center_ppm": 7.46,
+          "offset_ppm": 0.0
         }
       ]
     },
     {
       "slug": "series-04-labels",
       "file": "docs\\readme\\series-04-labels.png",
-      "bytes": 159894,
+      "bytes": 159186,
       "action": "label lanes + min gap + shifts",
-      "elapsed_s": 0.069,
-      "audit_elapsed_s": 0.182,
+      "elapsed_s": 0.212,
+      "audit_elapsed_s": 0.23,
       "canvas_mm": [
         96.0,
         62.0
@@ -181,48 +366,108 @@
       "infeasible": [
         "legend_font_pt effective 4.501pt < 5pt"
       ],
-      "spatial_risk_count": 2,
-      "text_overlap_entries": 1,
-      "font_roles": [
+      "text_bbox_overlaps": 0,
+      "text_bbox_overlap_pairs": [],
+      "text_curve_overlaps": 6,
+      "text_curve_overlap_pairs": [
         {
-          "role": "axis_font_pt",
-          "nominal": 6.0,
-          "effective": 6.002,
-          "infeasible": false
+          "text": "Cluster I (a/b)",
+          "text_gid": "figdemo.main.peak.alpha.2p06",
+          "curve_gid": "figdemo.main.curve.alpha"
         },
         {
-          "role": "tick_font_pt",
-          "nominal": 5.0,
-          "effective": 5.002,
-          "infeasible": false
+          "text": "Cluster I (a/b)",
+          "text_gid": "figdemo.main.peak.alpha.2p06",
+          "curve_gid": "figdemo.main.curve.beta"
         },
         {
-          "role": "peak_font_pt",
-          "nominal": 5.0,
-          "effective": 5.002,
-          "infeasible": false
+          "text": "Cluster II (a/b)",
+          "text_gid": "figdemo.main.peak.gamma.7p46",
+          "curve_gid": "figdemo.main.curve.gamma"
         },
         {
-          "role": "legend_font_pt",
-          "nominal": 4.5,
-          "effective": 4.501,
-          "infeasible": true
+          "text": "Sample A\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
         },
         {
-          "role": "note_font_pt",
-          "nominal": 5.0,
-          "effective": 5.002,
-          "infeasible": false
+          "text": "Sample B\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        },
+        {
+          "text": "Sample C\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        }
+      ],
+      "text_outside_canvas": 0,
+      "text_outside_canvas_gids": [],
+      "legend_data_intersection": true,
+      "clipped_texts": 0,
+      "clipped_artists": 3,
+      "clipped_artist_gids": [],
+      "label_peak_offset_ppm": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "label_peak_offset_ppm": 0.152439
+        },
+        {
+          "gid": "figdemo.main.peak.beta.5p00",
+          "label_peak_offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "label_peak_offset_ppm": 0.152439
+        }
+      ],
+      "fonts_pt": {
+        "axis_font_pt": 6.0,
+        "tick_font_pt": 5.0,
+        "peak_font_pt": 5.0,
+        "legend_font_pt": 4.5,
+        "note_font_pt": 5.0
+      },
+      "line_widths": [
+        0.4,
+        0.8,
+        1.5
+      ],
+      "spatial_risk_count": 3,
+      "rendered_labels": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "text": "Cluster I (a/b)",
+          "present": true,
+          "center_px": 288.597,
+          "center_ppm": 1.9076,
+          "offset_ppm": 0.1524
+        },
+        {
+          "gid": "figdemo.main.peak.beta.5p00",
+          "text": "Peak B",
+          "present": true,
+          "center_px": 192.756,
+          "center_ppm": 5.0,
+          "offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "text": "Cluster II (a/b)",
+          "present": true,
+          "center_px": 121.24,
+          "center_ppm": 7.3076,
+          "offset_ppm": 0.1524
         }
       ]
     },
     {
       "slug": "series-05-typography",
       "file": "docs\\readme\\series-05-typography.png",
-      "bytes": 152979,
+      "bytes": 139577,
       "action": "unify fonts and line width",
-      "elapsed_s": 0.071,
-      "audit_elapsed_s": 0.176,
+      "elapsed_s": 0.221,
+      "audit_elapsed_s": 0.24,
       "canvas_mm": [
         96.0,
         62.0
@@ -233,48 +478,109 @@
       ],
       "k": 1.000316,
       "infeasible": [],
-      "spatial_risk_count": 3,
-      "text_overlap_entries": 1,
-      "font_roles": [
+      "text_bbox_overlaps": 1,
+      "text_bbox_overlap_pairs": [
         {
-          "role": "axis_font_pt",
-          "nominal": 8.5,
-          "effective": 8.503,
-          "infeasible": false
+          "pair": [
+            "10",
+            "−1"
+          ],
+          "area_px2": 5.18,
+          "gid_a": null,
+          "gid_b": null
+        }
+      ],
+      "text_curve_overlaps": 3,
+      "text_curve_overlap_pairs": [
+        {
+          "text": "Cluster I (a/b)",
+          "text_gid": "figdemo.main.peak.alpha.2p06",
+          "curve_gid": "figdemo.main.curve.alpha"
         },
         {
-          "role": "tick_font_pt",
-          "nominal": 7.5,
-          "effective": 7.502,
-          "infeasible": false
+          "text": "Sample B\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
         },
         {
-          "role": "peak_font_pt",
-          "nominal": 7.5,
-          "effective": 7.502,
-          "infeasible": false
+          "text": "Sample C\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        }
+      ],
+      "text_outside_canvas": 2,
+      "text_outside_canvas_gids": [
+        "figdemo.main.peak.beta.5p00",
+        "figdemo.main.peak.gamma.7p46"
+      ],
+      "legend_data_intersection": true,
+      "clipped_texts": 0,
+      "clipped_artists": 5,
+      "clipped_artist_gids": [
+        "figdemo.main.peak.beta.5p00",
+        "figdemo.main.peak.gamma.7p46"
+      ],
+      "label_peak_offset_ppm": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "label_peak_offset_ppm": 0.152439
         },
         {
-          "role": "legend_font_pt",
-          "nominal": 7.0,
-          "effective": 7.002,
-          "infeasible": false
+          "gid": "figdemo.main.peak.beta.5p00",
+          "label_peak_offset_ppm": 0.0
         },
         {
-          "role": "note_font_pt",
-          "nominal": 6.5,
-          "effective": 6.502,
-          "infeasible": false
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "label_peak_offset_ppm": 0.152439
+        }
+      ],
+      "fonts_pt": {
+        "axis_font_pt": 7.0,
+        "tick_font_pt": 7.5,
+        "peak_font_pt": 7.5,
+        "legend_font_pt": 7.0,
+        "note_font_pt": 6.5
+      },
+      "line_widths": [
+        0.8,
+        0.9,
+        1.5
+      ],
+      "spatial_risk_count": 5,
+      "rendered_labels": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "text": "Cluster I (a/b)",
+          "present": true,
+          "center_px": 288.597,
+          "center_ppm": 1.9076,
+          "offset_ppm": 0.1524
+        },
+        {
+          "gid": "figdemo.main.peak.beta.5p00",
+          "text": "Peak B",
+          "present": true,
+          "center_px": 192.756,
+          "center_ppm": 5.0,
+          "offset_ppm": 0.0
+        },
+        {
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "text": "Cluster II (a/b)",
+          "present": true,
+          "center_px": 121.24,
+          "center_ppm": 7.3076,
+          "offset_ppm": 0.1524
         }
       ]
     },
     {
-      "slug": "series-06-perfect",
-      "file": "docs\\readme\\series-06-perfect.png",
-      "bytes": 147222,
+      "slug": "series-06-final",
+      "file": "docs\\readme\\series-06-final.png",
+      "bytes": 138177,
       "action": "legend settled, no overflow",
-      "elapsed_s": 0.067,
-      "audit_elapsed_s": 0.179,
+      "elapsed_s": 0.207,
+      "audit_elapsed_s": 0.669,
       "canvas_mm": [
         96.0,
         62.0
@@ -285,38 +591,67 @@
       ],
       "k": 1.000316,
       "infeasible": [],
-      "spatial_risk_count": 3,
-      "text_overlap_entries": 1,
-      "font_roles": [
+      "text_bbox_overlaps": 0,
+      "text_bbox_overlap_pairs": [],
+      "text_curve_overlaps": 0,
+      "text_curve_overlap_pairs": [],
+      "text_outside_canvas": 0,
+      "text_outside_canvas_gids": [],
+      "legend_data_intersection": false,
+      "clipped_texts": 0,
+      "clipped_artists": 0,
+      "clipped_artist_gids": [],
+      "label_peak_offset_ppm": [
         {
-          "role": "axis_font_pt",
-          "nominal": 8.5,
-          "effective": 8.503,
-          "infeasible": false
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "label_peak_offset_ppm": 0.0
         },
         {
-          "role": "tick_font_pt",
-          "nominal": 7.5,
-          "effective": 7.502,
-          "infeasible": false
+          "gid": "figdemo.main.peak.beta.5p00",
+          "label_peak_offset_ppm": 0.0
         },
         {
-          "role": "peak_font_pt",
-          "nominal": 7.5,
-          "effective": 7.502,
-          "infeasible": false
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "label_peak_offset_ppm": 0.0
+        }
+      ],
+      "fonts_pt": {
+        "axis_font_pt": 7.0,
+        "tick_font_pt": 7.5,
+        "peak_font_pt": 7.5,
+        "legend_font_pt": 7.0,
+        "note_font_pt": 6.5
+      },
+      "line_widths": [
+        0.8,
+        0.9,
+        1.5
+      ],
+      "spatial_risk_count": 0,
+      "rendered_labels": [
+        {
+          "gid": "figdemo.main.peak.alpha.2p06",
+          "text": "Cluster I (a/b)",
+          "present": true,
+          "center_px": 229.856,
+          "center_ppm": 2.06,
+          "offset_ppm": 0.0
         },
         {
-          "role": "legend_font_pt",
-          "nominal": 7.0,
-          "effective": 7.002,
-          "infeasible": false
+          "gid": "figdemo.main.peak.beta.5p00",
+          "text": "Peak B",
+          "present": true,
+          "center_px": 158.74,
+          "center_ppm": 5.0,
+          "offset_ppm": 0.0
         },
         {
-          "role": "note_font_pt",
-          "nominal": 6.5,
-          "effective": 6.502,
-          "infeasible": false
+          "gid": "figdemo.main.peak.gamma.7p46",
+          "text": "Cluster II (a/b)",
+          "present": true,
+          "center_px": 99.235,
+          "center_ppm": 7.46,
+          "offset_ppm": 0.0
         }
       ]
     }

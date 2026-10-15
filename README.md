@@ -78,14 +78,14 @@ tests/test_save_loop_g7b.py   （真实 NMR 夹具）    3 passed
 | `series-03-canvas.png` | 画布 66×40→96×62 mm | 越界 3→2；有效字号升至 6.0 pt |
 | `series-04-labels.png` | `label_lanes` / `label_min_gap_mm` / `peak_label_shifts_mm` | 标注分道，重叠缓解 |
 | `series-05-typography.png` | 字号档位与 `line_width` 统一 | 轴 8.5 / 刻度 7.5 / 峰 7.5 pt，无不可行项 |
-| `series-06-perfect.png` | 图例归位、`group_y_mm` 微调 | 审计 `infeasible: []`；**仍有 3 处空间提示与 1 处文字重叠被审计报出**——是否接受由人决定，工具不替人拍板 |
+| `series-06-final.png` | 图例移出数据区、底部拼版 | 审计 `infeasible: []`；文本重叠 0、图例/数据无相交、越界 0、字号均 ≥5 pt |
 
 ![](docs/readme/series-01-ugly.png)
 ![](docs/readme/series-02-spacing.png)
 ![](docs/readme/series-03-canvas.png)
 ![](docs/readme/series-04-labels.png)
 ![](docs/readme/series-05-typography.png)
-![](docs/readme/series-06-perfect.png)
+![](docs/readme/series-06-final.png)
 
 再跑一次：`python tools/readme/render_series.py` 输出确定；本次实测每阶段耗时 ~0.1 s 渲染 + ~0.2 s 审计。
 
