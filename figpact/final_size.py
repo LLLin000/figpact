@@ -350,3 +350,201 @@ def render_report(result: dict) -> str:
     lines.append(f"infeasible: {result['infeasible']}")
     lines.append(f"editable_fields: {result['editable_fields']}")
     return "\n".join(lines)
+
+
+ROLE_TARGETS = {
+    "axis_font_pt": "target_axis_font_pt",
+    "tick_font_pt": "target_tick_font_pt",
+    "line_width": "target_line_pt",
+}
+
+
+def _contract_catalog(module, scope):
+    contract = module.layout_contract(scope)
+    params = []
+    for p in contract.get("parameters", []):
+        typ = "int" if p.get("unit") in ("col", "lane") else "float"
+        if p.get("type") == "[dx,dy]":
+            typ = "[dx,dy]"
+        spec = {
+            "key": p.get("key"),
+            "path": list(p.get("path", [])),
+            "unit": p.get("unit"),
+            "类型": typ,
+            "min": p.get("min", float("-inf")),
+            "max": p.get("max", float("inf")),
+        }
+        params.append(spec)
+    return {"scopes": {scope: {"groups": [{"params": params}]}}, "raw": contract}, contract
+
+
+def safe_editable_fields(script, config=None, scope=None, target_width_mm=None):
+    script = Path(script)
+    module = _import_script(script)
+    cfg = _load_config(module, script, config)
+    if scope is None:
+        scopes = getattr(module, "SCOPES", None)
+        scope = (scopes[0] if scopes else "main")
+    contract = module.layout_contract(scope)
+    editable = []
+    for p in contract.get("parameters", []):
+        if p.get("mutability") == "EDITABLE":
+            editable.append(p.get("key"))
+    return sorted(set(editable)), scope, cfg
+
+
+def apply_final_size(script, config=None, *, target_width_mm=None, target_axis_font_pt=8.0,
+                    target_tick_font_pt=7.0, target_line_pt=0.8, mode="B",
+                    scope=None, state_home=None,
+                    dry_run=False) -> dict:
+    """Controlled final-size style application (mode B only implements; mode A diagnostic)."""
+    script = Path(script)
+    module = _import_script(script)
+    cfg_before = _load_config(module, script, config)
+
+    if scope is None:
+        scopes = getattr(module, "SCOPES", None)
+        scope = (scopes[0] if scopes else "main")
+
+    if target_width_mm is None:
+        target_width_mm = float(cfg_before.get("canvas_w_mm", 42.0))
+
+    catalog, contract = _contract_catalog(module, scope)
+    editable, _, _ = safe_editable_fields(script, config, scope, target_width_mm)
+    editable_set = set(editable)
+
+    targets = {
+        "axis_font_pt": target_axis_font_pt,
+        "tick_font_pt": target_tick_font_pt,
+        "line_width": target_line_pt,
+    }
+
+    # refusal: no safe entry
+    missing = [k for k in targets if k not in editable_set]
+    applied_targets = {k: v for k, v in targets.items() if k in editable_set}
+    if not applied_targets:
+        reasons = {k: "no safe modification entry in layout_contract (not EDITABLE)" for k in missing}
+        return {
+            "status": "REFUSED",
+            "source_commit_state": "NOT_WRITTEN",
+            "figure_verification_state": "NOT_RUN",
+            "message": "无安全修改入口: " + ", ".join(missing),
+            "refused_roles": missing,
+            "refusal_reasons": reasons,
+            "editable_fields": sorted(editable_set),
+        }
+
+    # mode guard: A is diagnostic only; B is implementation
+    if mode not in ("A", "B"):
+        return {"status": "REFUSED", "source_commit_state": "NOT_WRITTEN",
+                "figure_verification_state": "NOT_RUN", "message": "unknown mode"}
+    if mode == "A":
+        # diagnostic only: report scale formula, do not write
+        before = audit_figure(script, config=config, target_width_mm=target_width_mm,
+                              scope=scope)
+        return {"status": "DIAGNOSTIC_ONLY", "source_commit_state": "NOT_WRITTEN",
+                "figure_verification_state": "NOT_RUN", "mode": "A",
+                "message": "mode A is diagnostic only; no write performed",
+                "diagnostic": before}
+
+    before = audit_figure(script, config=config, target_width_mm=target_width_mm,
+                          scope=scope)
+
+    # mode B: scale canvas width to target, preserve aspect ratio
+    old_w = float(cfg_before.get("canvas_w_mm", target_width_mm))
+    old_h = float(cfg_before.get("canvas_h_mm", old_w))
+    scale = target_width_mm / old_w if old_w else 1.0
+    new_w = float(target_width_mm)
+    new_h = float(old_h * scale)
+
+    patch_dict = {"canvas_w_mm": new_w, "canvas_h_mm": new_h}
+    for key, val in applied_targets.items():
+        patch_dict[key] = float(val)
+
+    # no stacking: target values are absolute, not multiplied by old width ratio again.
+
+    if dry_run:
+        return {"status": "DRY_RUN", "source_commit_state": "NOT_WRITTEN",
+                "figure_verification_state": "NOT_RUN", "planned": patch_dict}
+
+    if config is None:
+        # module default CONFIG only; use script's yaml? require config path for write
+        # try sibling .yaml
+        cand = script.with_suffix(".yaml")
+        if not cand.is_file():
+            cand = None
+        config = cand
+    if config is None:
+        return {"status": "REFUSED", "source_commit_state": "NOT_WRITTEN",
+                "figure_verification_state": "NOT_RUN",
+                "message": "no config path available for write"}
+    config = Path(config)
+
+    before_bytes = config.read_bytes()
+    cfg_text = config.read_text(encoding="utf-8")
+    from figpact import patch as patch_mod
+    patched_text = patch_mod.apply_patch_text(cfg_text, patch_dict, catalog)
+    after_bytes = patched_text.encode("utf-8")
+
+    if state_home is None:
+        state_home = config.parent / ".figpact-state"
+    home = Path(state_home)
+
+    from figpact import source_writes
+    change = source_writes.FileChange(str(config), __import__("hashlib").sha256(before_bytes).hexdigest(), after_bytes)
+    journal = source_writes.plan_source_change([change], state_home=home, reason="final-size-apply")
+    applied = source_writes.apply_source_change(journal["id"], state_home=home)
+    committed = applied.get("status") == "COMMITTED"
+    src_state = "COMMITTED" if committed else "NOT_WRITTEN"
+
+    after = None
+    ver_state = "NOT_RUN"
+    message = "write failed"
+    if committed:
+        try:
+            after = audit_figure(script, config=config, target_width_mm=target_width_mm,
+                                 scope=scope)
+            spatial = after.get("spatial_risk", [])
+            if after.get("infeasible"):
+                ver_state = "FAIL"
+                message = "源码已写入，但规格/空间仍不可行: " + "; ".join(after.get("infeasible", []))
+            elif spatial:
+                ver_state = "FAIL"
+                gids = [r.get("object") for r in spatial if isinstance(r, dict)]
+                excess = []
+                for r in spatial:
+                    if isinstance(r, dict) and "overflow" in r:
+                        excess.append(r["overflow"])
+                message = ("源码已写入，但空间不足: objects=" + repr(gids) +
+                           " overflow=" + repr(excess))
+            else:
+                ver_state = "PASS"
+                message = "保存完成并通过验证（重新运行确认）"
+        except Exception as e:
+            ver_state = "ERROR"
+            message = f"源码已写入，但图形验证失败：{type(e).__name__}: {e}"
+
+    result = {
+        "refused_roles": missing if 'missing' in locals() else [],
+        "status": ("OK" if committed else applied.get("status", "FAILED")),
+        "source_commit_state": src_state,
+        "figure_verification_state": ver_state,
+        "message": message,
+        "script": str(script),
+        "config": str(config),
+        "mode": "B",
+        "before": before,
+        "after": after,
+        "changes": {"canvas_w_mm": [old_w, new_w], "canvas_h_mm": [old_h, new_h],
+                    **{k: [cfg_before.get(k), targets[k]] for k in targets}},
+        "journal": applied if committed else None,
+    }
+    # infeasible report text
+    if after is not None:
+        report_bits = []
+        if after.get("infeasible"):
+            report_bits.append("infeasible: " + "; ".join(after["infeasible"]))
+        if after.get("spatial_risk"):
+            report_bits.append("spatial_risk: " + repr(after["spatial_risk"]))
+        result["infeasible_report"] = "\n".join(report_bits)
+    return result

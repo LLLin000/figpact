@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Optional
 import yaml
 from figpact.config import ConfigError, check_schema
-from figpact.final_size import audit_figure, render_report
+from figpact.final_size import audit_figure, render_report, apply_final_size
 
 
 def _find_schema_in_script(script_path: Path) -> Optional[dict]:
@@ -646,6 +646,18 @@ def cmd_final_size(args: argparse.Namespace) -> int:
     else:
         print(render_report(result))
     return 0
+
+def cmd_final_size_apply(args):
+    script = Path(args.script).expanduser().resolve()
+    cfg = Path(args.config).expanduser().resolve() if args.config else None
+    result = apply_final_size(script, config=cfg, target_width_mm=args.target_mm,
+                             target_axis_font_pt=args.axis_pt,
+                             target_tick_font_pt=args.tick_pt,
+                             target_line_pt=args.line_pt, scope=args.scope,
+                             mode=args.mode)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
 def main(argv: Optional[list[str]] = None) -> int:
     """命令行主入口。"""
     if argv is None:
@@ -719,6 +731,17 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_fs.add_argument("--output", default=None, help="输出 JSON 文件")
     p_fs.add_argument("--json", action="store_true", help="JSON 输出")
 
+    # final-size-apply (controlled modification)
+    p_fsa = subparsers.add_parser("final-size-apply", help="受控 final-size 修改")
+    p_fsa.add_argument("--script", required=True)
+    p_fsa.add_argument("--config", default=None)
+    p_fsa.add_argument("--target-mm", type=float, default=None, dest="target_mm")
+    p_fsa.add_argument("--axis-pt", type=float, default=8.0, dest="axis_pt")
+    p_fsa.add_argument("--tick-pt", type=float, default=7.0, dest="tick_pt")
+    p_fsa.add_argument("--line-pt", type=float, default=0.8, dest="line_pt")
+    p_fsa.add_argument("--scope", default=None)
+    p_fsa.add_argument("--mode", default="B", choices=["A","B"])
+
     args = parser.parse_args(argv)
 
     if args.subcommand == "validate":
@@ -741,6 +764,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         return cmd_export_params(args)
     elif args.subcommand in ("final-size", "audit-final-size"):
         return cmd_final_size(args)
+    elif args.subcommand == "final-size-apply":
+        return cmd_final_size_apply(args)
     elif args.subcommand == "agent":
         return cmd_agent(args)
     return 0
