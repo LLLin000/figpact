@@ -40,9 +40,41 @@ def test_reported_only_roles_unchanged(tmp_path):
 
 
 def test_no_safe_entry_refused(tmp_path):
+    # Refusal path: remove the three target roles from the contract so
+    # apply_final_size has no safe entry and must refuse without writing.
     script, cfg = _nmr(tmp_path)
-    r = apply_final_size(str(script), config=str(cfg), target_width_mm=42.0)
-    assert "tick_font_pt" in r.get("refused_roles", [])
+    original = cfg.read_bytes()
+
+    from figpact import final_size as fs_mod
+
+    orig_import = fs_mod._import_script
+
+    def patched(script_path):
+        mod = orig_import(script_path)
+        orig_contract = mod.layout_contract
+
+        def contract(scope):
+            c = orig_contract(scope)
+            c["parameters"] = [
+                p for p in c.get("parameters", [])
+                if p.get("key") not in ("axis_font_pt", "tick_font_pt", "line_width")
+            ]
+            return c
+
+        mod.layout_contract = contract
+        return mod
+
+    fs_mod._import_script = patched
+    try:
+        r = fs_mod.apply_final_size(str(script), config=str(cfg), target_width_mm=42.0)
+    finally:
+        fs_mod._import_script = orig_import
+
+    assert r.get("source_commit_state") == "NOT_WRITTEN"
+    assert r.get("figure_verification_state") == "NOT_RUN"
+    assert "tick_font_pt" in (r.get("refused_roles") or [])
+    assert r.get("refusal_reasons", {}).get("tick_font_pt")
+    assert cfg.read_bytes() == original
 
 
 def test_space_insufficient_report_contains_gid_and_excess(tmp_path):

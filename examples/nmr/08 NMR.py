@@ -1149,6 +1149,12 @@ def _build(science: dict, scope_target: str):
     ax.set_ylabel("Normalized Intensity (a.u.)", fontsize=FONTSIZE_AXIS,
                   labelpad=3.5, weight="bold")
     ax.tick_params(length=2.5, width=0.6, labelsize=FONTSIZE_TICK, pad=2)
+    for _i, _tk in enumerate(ax.get_xticklabels()):
+        if not (_tk.get_text() or "").strip():
+            continue
+        _tk_gid = _gid("tick", str(_i))
+        _tk.set_gid(_tk_gid)
+        reg.register(_tk, _tk_gid, params=["tick_font_pt"])
     for label, name in ((ax.xaxis.label, "xlabel"), (ax.yaxis.label, "ylabel")):
         gid = _gid(name)
         label.set_gid(gid)
@@ -1240,7 +1246,7 @@ def _panel_id(ax, index: int) -> str:
 def _scene_roles(fig, reg) -> tuple[dict[str, list[str]], dict[int, str]]:
     """按语义角色分组注册图元，并给出「图元 → 所属 panel」的映射（按 artist 身份判定）。"""
     roles = {"curves": [], "baselines": [], "guides": [], "peaks": [], "breaks": [],
-             "legends": [], "legend_texts": [], "axis_texts": []}
+             "legends": [], "legend_texts": [], "axis_texts": [], "tick_texts": []}
     owner: dict[int, str] = {}
     role: dict[int, str] = {}
     for i, ax in enumerate(fig.axes):
@@ -1261,6 +1267,8 @@ def _scene_roles(fig, reg) -> tuple[dict[str, list[str]], dict[int, str]]:
         elif kind == "Text":
             if id(art) in owner:
                 roles[role.get(id(art), "axis_texts")].append(gid)
+            elif "tick_font_pt" in params:
+                roles["tick_texts"].append(gid)
             elif "note_font_pt" in params:
                 roles["breaks"].append(gid)
             else:
@@ -1332,6 +1340,7 @@ def layout_contract(scope: str) -> dict:
         _editable(params, scope, key, [key], unit, legend_objects, operation="rebuild",
                   bounds=SCALARS[key][1:], expected={"kind": "style", "objects": legend_objects})
     for key, unit, objects in (("axis_font_pt", "pt", roles["axis_texts"]),
+                               ("tick_font_pt", "pt", roles["tick_texts"]),
                                ("line_width", "pt", roles["curves"]),
                                ("peak_font_pt", "pt", roles["peaks"]),
                                ("note_font_pt", "pt", roles["breaks"]),
