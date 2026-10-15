@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Optional
 import yaml
 from figpact.config import ConfigError, check_schema
-from figpact.params import export_params_catalog, audit_artists_coverage
+from figpact.final_size import audit_figure, render_report
 
 
 def _find_schema_in_script(script_path: Path) -> Optional[dict]:
@@ -630,6 +630,22 @@ def cmd_audit_params(args: argparse.Namespace) -> int:
 
 
 
+def cmd_final_size(args: argparse.Namespace) -> int:
+    script = Path(args.script).expanduser().resolve()
+    cfg = Path(args.config).expanduser().resolve() if args.config else None
+    result = audit_figure(
+        script,
+        config=cfg,
+        target_width_mm=args.target_mm,
+        scope=args.scope,
+        output=args.output,
+    )
+    if args.json or args.output:
+        if args.json:
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print(render_report(result))
+    return 0
 def main(argv: Optional[list[str]] = None) -> int:
     """命令行主入口。"""
     if argv is None:
@@ -694,7 +710,15 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_agent.add_argument("--script", required=True, help="绘图脚本路径")
     p_agent.add_argument("--config", required=True, help="配置文件 YAML 路径")
     p_agent.add_argument("--scope", required=True, help="会话作用域（一张图一个工作进程）")
-    p_agent.add_argument("--output-dir", default=None, help="发布产物目录（默认与脚本同目录）")
+    # final-size (read-only)
+    p_fs = subparsers.add_parser("final-size", aliases=["audit-final-size"], help="只读 final-size 审计")
+    p_fs.add_argument("--script", required=True, help="绘图脚本路径")
+    p_fs.add_argument("--config", default=None, help="配置文件路径")
+    p_fs.add_argument("--target-mm", type=float, default=None, dest="target_mm", help="目标最终宽度 mm")
+    p_fs.add_argument("--scope", default=None, help="作用域")
+    p_fs.add_argument("--output", default=None, help="输出 JSON 文件")
+    p_fs.add_argument("--json", action="store_true", help="JSON 输出")
+
     args = parser.parse_args(argv)
 
     if args.subcommand == "validate":
@@ -715,8 +739,8 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     elif args.subcommand == "export-params":
         return cmd_export_params(args)
-    elif args.subcommand == "audit-params":
-        return cmd_audit_params(args)
+    elif args.subcommand in ("final-size", "audit-final-size"):
+        return cmd_final_size(args)
     elif args.subcommand == "agent":
         return cmd_agent(args)
     return 0
