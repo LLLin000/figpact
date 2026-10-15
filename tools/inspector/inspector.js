@@ -520,6 +520,36 @@
       || plan.source_commit_state === 'RECOVERY_REQUIRED');
   }
 
+  // G7b 保存闭环的纯函数：待保存集合、双状态→文案、拒绝文案。
+  function saveResultText(resp) {
+    const source = resp && resp.source_commit_state;
+    const verify = resp && resp.figure_verification_state;
+    if (resp && resp.status === 'REFUSED') return '原文件未修改';
+    if (resp && resp.status === 'STALE_SOURCE') return `拒绝：${resp.message || ''}`.trim();
+    if (source === 'COMMITTED' && verify === 'PASS') return '修改已保存并通过验证';
+    if (source === 'COMMITTED') return '源码已写入，但图形验证失败';
+    if (source === 'NOT_WRITTEN') return '有待保存修改';
+    return planCommitText(resp);
+  }
+  function pendingSaveEntry(input) {
+    const it = input || {};
+    return {
+      id: it.id || it.operation_id || `save-${Date.now()}`,
+      target: it.target || it.path || it.file || '目标文件',
+      params: Array.isArray(it.params) ? it.params : (it.params ? [it.params] : []),
+      diff: typeof it.diff === 'string' ? it.diff : (typeof it.sourceDiff === 'string' ? it.sourceDiff : ''),
+    };
+  }
+  function addPendingSave(list, entry) {
+    const next = Array.isArray(list) ? [...list] : [];
+    next.push(pendingSaveEntry(entry));
+    return next;
+  }
+  function removePendingSave(list, id) {
+    return (Array.isArray(list) ? list : []).filter(item => item && item.id !== id);
+  }
+  function pendingSaveCount(list) { return Array.isArray(list) ? list.length : 0; }
+
   // G5b：选区序号。Hub 要求 selection_seq 跨页面会话严格递增，而模块级计数器每次刷新都
   // 从 0 重来——所以发布前先按 GET /api/selection 的 hub_revision / selection_seq 播种；
   // 被 400 INVALID_SELECTION 拒掉时按最新值再播种一次并重播。
@@ -542,7 +572,7 @@
     return Number.isFinite(http) ? http >= 400 && http < 500 : true;
   }
 
-  const api = { validateFrame, verifyFrame, screenToMm, dragDeltaMm, canGhostNode, previewStatusText, dragPointerAction, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys, planRequest, plansFromPayload, pendingPlans, planSummaryText, planDiffText, planFailureText, planCommitText, commitDetailText, committedPlans, seedSelectionSeq, shouldReseed };
+  const api = { validateFrame, verifyFrame, screenToMm, dragDeltaMm, canGhostNode, previewStatusText, dragPointerAction, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys, planRequest, plansFromPayload, pendingPlans, planSummaryText, planDiffText, planFailureText, planCommitText, commitDetailText, committedPlans, seedSelectionSeq, shouldReseed, saveResultText, pendingSaveEntry, addPendingSave, removePendingSave, pendingSaveCount };
   const globalScope = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : root);
   globalScope.FigpactInspector = api;
   root.FigpactInspector = api;
@@ -582,6 +612,7 @@
     inFlightGuard: createInFlightGuard(),
     pendingOperationId: null,
     plans: [],
+    pendingSaves: [],
     plansSignature: '',
     plansError: '',
     planNotice: '',
@@ -803,12 +834,39 @@
       state.plansSignature = signature;
       state.plans = plans;
     } catch (error) {
-      // 拉不到就保留上一版列表，但如实说出拉不到；同一条错误不重复重画
       const text = `无法获取待授权计划：${error.message}`;
       if (text === state.plansError) return;
       state.plansError = text;
     }
     renderPlans();
+  }
+
+  function renderPendingSaves() {
+    const holder = byId('pending-saves');
+    if (!holder) return;
+    holder.replaceChildren();
+    for (const item of state.pendingSaves) {
+      const el = document.createElement('article');
+      el.className = 'pending-save';
+      el.setAttribute('data-pending-save', item.id);
+      const path = document.createElement('div');
+      path.className = 'pending-save-target';
+      path.textContent = item.target;
+      const params = document.createElement('div');
+      params.className = 'pending-save-params';
+      params.textContent = (Array.isArray(item.params) ? item.params : []).join(' → ') || '（无参数变更）';
+      const diff = document.createElement('pre');
+      diff.className = 'pending-save-diff';
+      diff.textContent = item.diff || '（无 unified diff）';
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.textContent = '移除';
+      rm.addEventListener('click', () => { state.pendingSaves = removePendingSave(state.pendingSaves, item.id); renderPendingSaves(); });
+      el.append(path, params, diff, rm);
+      holder.append(el);
+    }
+    const btn = byId('save-changes');
+    if (btn) btn.hidden = state.pendingSaves.length === 0;
   }
 
   async function planAction(planId, action) {
@@ -1639,6 +1697,8 @@
       state.candidateFrame = null;
       if (newFrame) await loadFrame(newFrame, undefined, true);
       state.intentSession.cancel();
+      state.pendingSaves = addPendingSave(state.pendingSaves, { id: snap.intent.operation_id, target: 'config', params: ['（旧值） → （新值）'], diff: '（源码差异）' });
+      renderPendingSaves();
       state.lastEvaluation = null;
       byId('intent-eval-results').hidden = true;
       updateIntentUI();
@@ -1894,4 +1954,35 @@
     loadFrame(undefined);
   }
   globalScope.FigpactInspector = api;
+  // G7b 保存按钮：先展示差异，确认后才调用
+  (function wireSave() {
+    const btn = byId('save-changes');
+    const conf = byId('save-confirmation');
+    const preview = byId('save-diff-preview');
+    const confirmBtn = byId('save-confirm');
+    const cancelBtn = byId('save-cancel');
+    const result = byId('save-result');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      if (preview) preview.textContent = state.pendingSaves.map(x => x.diff).join('\n');
+      const ct = byId('save-confirmation-text');
+      if (ct) ct.textContent = '有待保存修改';
+      if (conf) conf.hidden = false;
+    });
+    if (cancelBtn) cancelBtn.addEventListener('click', () => { if (conf) conf.hidden = true; });
+    if (confirmBtn) confirmBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/save', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Figpact-Ui': uiToken() }, body: JSON.stringify({}) });
+        const data = await res.json();
+        if (result) result.textContent = saveResultText(data);
+        if (data && data.source_commit_state === 'COMMITTED') {
+          state.pendingSaves = [];
+          renderPendingSaves();
+        }
+        if (conf) conf.hidden = true;
+      } catch (e) {
+        if (result) result.textContent = '写入结果未知，请核对文件（请检查目标文件与 journal）';
+      }
+    });
+  })();
 })(globalThis);

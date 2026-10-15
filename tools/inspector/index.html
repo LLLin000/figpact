@@ -42,6 +42,15 @@
     <!-- G5b：待授权计划条。由 inspector.js 按 /api/plans 渲染；无计划时 :empty 收起，不占版面 -->
     <section id="agent-plans" aria-label="待授权计划"></section>
     <section id="agent-commits" aria-label="已写盘计划的源码提交状态与图形验证状态"></section>
+    <section id="pending-saves" aria-label="待保存修改"></section>
+    <section id="save-confirmation" aria-label="保存确认" hidden>
+      <pre id="save-diff-preview"></pre>
+      <p id="save-confirmation-text"></p>
+      <button id="save-confirm" type="button">确认保存</button>
+      <button id="save-cancel" type="button">取消</button>
+    </section>
+    <button id="save-changes" type="button" hidden>保存修改</button>
+    <section id="save-result" aria-label="保存结果" role="status"></section>
 
     <main id="inspector-main">
       <aside id="object-list-panel" aria-label="对象大纲列表" hidden>

@@ -197,9 +197,10 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         routes = {'/api/intents/evaluate': self._app.session.evaluate,
                   '/api/intents/decision': self._app.session.decide,
                   '/api/frame/quality': self._app.session.set_quality}
-        route = routes.get(path)
-        if route is None and plan is None and path not in ('/api/selection', '/api/tasks',
-                                                           '/api/plans'):
+        SAVE_PATHS = {'/api/save', '/api/save_changes', '/api/save-accepted',
+                      '/api/accepted/save', '/api/save_accepted_changes'}
+        route = routes.get(path)  # may be None for save routes
+        if route is None and plan is None and path not in SAVE_PATHS and path not in ('/api/selection', '/api/tasks', '/api/plans'):
             self._send({'status': 'NOT_FOUND'}, 404)
             return
         body = self._json_body() if plan is None else self._plan_body()
@@ -214,6 +215,13 @@ class _Handler(http.server.BaseHTTPRequestHandler):
                 result, code = self._app.hub.submit_task(body, self._app.session)
             elif path == '/api/plans':
                 result, code = self._app.hub.create_plan(body)
+            elif path in SAVE_PATHS:
+                authorized = self.headers.get('X-Figpact-Ui') == self._app.ui_token
+                result = self._app.session.save_accepted_changes(
+                    authorized=authorized,
+                    state_home=self._app.hub.state_home,
+                    reason=(body.get('reason') if isinstance(body, dict) and isinstance(body.get('reason'), str) else 'accepted geometry edits'))
+                code = 200
             else:
                 result, code = route(body), 200
         except (ValueError, RuntimeError, OSError) as error:

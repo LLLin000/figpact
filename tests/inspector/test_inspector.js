@@ -825,3 +825,32 @@ test('P1 the minimal line shows a drag as an unverified millimetre preview', () 
   // 松手之后（同一份位移）仍旧只是示范，不升级成验证
   assert.equal(minimalStatusText({ node, snapshot: session.snapshot() }), '已下移 0.9 mm · 已右移 1.2 mm');
 });
+
+
+test('G7b pending save add/remove and diff generation', () => {
+  const { addPendingSave, removePendingSave, pendingSaveCount, pendingSaveEntry } = loadHelper();
+  let list = [];
+  list = addPendingSave(list, { id: 'a', target: 'config.yaml', params: ['1 -> 2'], diff: '--- f\n+ x' });
+  assert.equal(pendingSaveCount(list), 1);
+  assert.equal(list[0].target, 'config.yaml');
+  assert.equal(list[0].diff.includes('+ x'), true);
+  list = removePendingSave(list, 'a');
+  assert.equal(pendingSaveCount(list), 0);
+});
+
+test('G7b save result text follows dual state and never says saved/verified unless PASS', () => {
+  const { saveResultText } = loadHelper();
+  assert.equal(saveResultText({ source_commit_state: 'COMMITTED', figure_verification_state: 'PASS' }), '修改已保存并通过验证');
+  assert.equal(saveResultText({ source_commit_state: 'COMMITTED', figure_verification_state: 'FAIL' }), '源码已写入，但图形验证失败');
+  const notPass = [
+    { status: 'REFUSED', source_commit_state: 'NOT_WRITTEN', figure_verification_state: 'NOT_RUN' },
+    { status: 'STALE_SOURCE', source_commit_state: 'NOT_WRITTEN', figure_verification_state: 'NOT_RUN' },
+    { source_commit_state: 'COMMITTED', figure_verification_state: 'FAIL' },
+  ];
+  for (const r of notPass) {
+    const t = saveResultText(r);
+    assert.equal(t.includes('已验证'), false, t);
+    assert.equal(t.includes('已保存'), false, t);
+  }
+  assert.equal(saveResultText({ status: 'REFUSED' }), '原文件未修改');
+});
