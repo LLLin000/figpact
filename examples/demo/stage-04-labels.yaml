@@ -12,7 +12,7 @@ legend_cols: 1
 legend_anchor_x: 0.5
 label_min_gap_mm: 1.8
 label_max_dx_mm: 8.0
-label_lanes: 3
+label_lanes: 1
 shifts_mm:
   main:
     alpha: 0.0

@@ -19,6 +19,14 @@ STAGES = [
     ("series-05-typography", "stage-05-typography", "unify fonts and line width"),
     ("series-06-final", "stage-06-final", "legend settled, no overflow"),
 ]
+STAGE_META = {
+    "series-01-ugly": {"intent": "基线：记录默认参数下的问题", "change": "—", "expected": "仅记录基线，不修"},
+    "series-02-spacing": {"intent": "拉开样品间距", "change": "pitch_mm 0.32→0.78", "expected": "曲线净距拉开"},
+    "series-03-canvas": {"intent": "放大画布与边距", "change": "canvas_w 66→96, canvas_h 40→62", "expected": "字号≥5 pt"},
+    "series-04-labels": {"intent": "解决近峰标签互叠", "change": "label_min_gap_mm 0→1.8 + peak_label_shifts_mm 分道", "expected": "标签分道互不重叠"},
+    "series-05-typography": {"intent": "统一字号档位与线宽", "change": "font_pt & line_width 统一", "expected": "各角色一档≥5 pt"},
+    "series-06-final": {"intent": "图例移出数据区并收尾", "change": "legend_anchor_x 0.5→0.98", "expected": "无裁切/空白/遮挡"},
+}
 OUT_DIR = ROOT / "docs" / "readme"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 def stage_config_path(name):
@@ -355,7 +363,12 @@ def main():
             "fonts_pt": fonts_pt,
             "line_widths": line_widths,
             "spatial_risk_count": len(res.get("spatial_risk", [])),
-            "rendered_labels": rendered,
+            "intent": STAGE_META.get(slug, {}).get("intent", ""),
+            "change": STAGE_META.get(slug, {}).get("change", ""),
+            "expected": STAGE_META.get(slug, {}).get("expected", ""),
+            "actual": (f"text_bbox_overlaps={len(overlaps)}, text_curve_overlaps={len(curve_overlaps)}, "
+                      f"clipped_artists={clipped_n}, rendered_labels={len([r for r in rendered if r['present']])}/{len(rendered)}, "
+                      f"infeasible={res['infeasible']}"),
         })
     rep = OUT_DIR / "series_report.json"
     rep.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

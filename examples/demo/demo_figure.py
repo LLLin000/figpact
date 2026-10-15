@@ -243,7 +243,7 @@ def _build_fig(science, scope_target, cfg):
     ax.set_xlim(10, 0)
     ax.set_xlabel(r"$\delta$ (ppm)", fontsize=float(cfg["axis_font_pt"]))
     ax.set_ylabel("Intensity (a.u.)", fontsize=float(cfg["axis_font_pt"]))
-    ax.tick_params(axis="both", labelsize=float(cfg["tick_font_pt"]))
+    ax.tick_params(axis="both", labelsize=float(cfg["tick_font_pt"]), pad=2.5)
     # style spines
     for sp in ax.spines.values():
         sp.set_linewidth(0.8)
@@ -257,27 +257,29 @@ def _build_fig(science, scope_target, cfg):
         shift = SHIFTS_MM.get(SCOPE, {}).get(sid, 0.0) if isinstance(SHIFTS_MM, dict) else 0.0
         reg.register(line, curve_gid, params=["line_width", "shifts_mm"])
 
-    # peak labels
-    lanes = int(cfg.get("label_lanes", 1) or 1)
+    # peak labels: anchor each label to the highest point of ALL curves within
+    # its own x-window, then lift by a fixed clearance (mm -> pt). No
+    # guessed per-peak lift, no label moved off its own sample band.
     lift_mm = float(cfg.get("label_lift_mm", 2.0))
     lift_pt = lift_mm * 72.0 / 25.4
+    window_ppm = 0.25
     for pidx, (ppm, sidx, name) in enumerate(PEAK_LABELS_TEMPLATE):
         sid = SAMPLES_CONFIG[sidx][4]
         tag = _gid_tag(ppm)
         peak_gid = _gid("peak", sid, tag)
-        arr = spectra[sidx][1]
-        xi = spectra[sidx][0]
-        yi = float(np.interp(ppm, xi, arr)) + sidx * pitch + GROUP_Y_MM
+        base_ys = []
+        for j, (xi, y) in enumerate(spectra):
+            mask = np.abs(xi - float(ppm)) <= window_ppm
+            if mask.any():
+                base_ys.append(float(np.max(y[mask])) + j * pitch + GROUP_Y_MM)
+        yi = max(base_ys) if base_ys else (float(np.interp(ppm, spectra[sidx][0], spectra[sidx][1])) + sidx * pitch + GROUP_Y_MM)
         dx_mm, dy_mm = PEAK_LABEL_SHIFTS.get(peak_gid, [0.0, 0.0])
         dx_pt = float(dx_mm) * 72.0 / 25.4
         dy_pt = float(dy_mm) * 72.0 / 25.4
-        # lane vertical offset
-        lane = pidx % lanes
-        lane_offset_pt = lane * (lift_pt + max(4.0, float(cfg["peak_font_pt"]) * 1.3))
         txt = ax.annotate(
             name,
             xy=(ppm, yi),
-            xytext=(dx_pt, lift_pt + lane_offset_pt + dy_pt),
+            xytext=(dx_pt, lift_pt + dy_pt),
             textcoords="offset points",
             ha="center",
             va="bottom",
@@ -312,7 +314,7 @@ def _build_fig(science, scope_target, cfg):
         _y0, _y1 = ax.get_ylim()
         _tops = [float(t.get_window_extent(renderer=_renderer).transformed(_inv).y1)
                  for t in ax.texts]
-        _need = max(_tops) + 0.06 * (_y1 - _y0) if _tops else _y1
+        _need = max(_tops) + max(0.02 * (_y1 - _y0), 0.05) if _tops else _y1
         if _pass == 0:
             print(f"[labels] ylim_before=({_y0:.3f},{_y1:.3f}) bbox_tops={[round(v,3) for v in _tops]}")
         ax.set_ylim(_y0, max(_y1, _need))

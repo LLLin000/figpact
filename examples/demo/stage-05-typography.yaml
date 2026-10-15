@@ -1,7 +1,7 @@
 schema_version: 2
 canvas_w_mm: 96.0
 canvas_h_mm: 62.0
-label_lift_mm: 12.0
+label_lift_mm: 2.0
 line_width: 0.9
 peak_font_pt: 7.5
 legend_font_pt: 7.0
@@ -12,7 +12,7 @@ legend_cols: 1
 legend_anchor_x: 0.5
 label_min_gap_mm: 1.8
 label_max_dx_mm: 8.0
-label_lanes: 3
+label_lanes: 1
 shifts_mm:
   main:
     alpha: 0.0

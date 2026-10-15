@@ -3,10 +3,10 @@
     {
       "slug": "series-01-ugly",
       "file": "docs\\readme\\series-01-ugly.png",
-      "bytes": 174622,
+      "bytes": 171897,
       "action": "starting config",
-      "elapsed_s": 0.28,
-      "audit_elapsed_s": 0.198,
+      "elapsed_s": 0.301,
+      "audit_elapsed_s": 0.211,
       "canvas_mm": [
         66.0,
         40.0
@@ -21,28 +21,8 @@
       ],
       "text_bbox_overlaps": 0,
       "text_bbox_overlap_pairs": [],
-      "text_curve_overlaps": 7,
+      "text_curve_overlaps": 3,
       "text_curve_overlap_pairs": [
-        {
-          "text": "Cluster I (a/b)",
-          "text_gid": "figdemo.main.peak.alpha.2p06",
-          "curve_gid": "figdemo.main.curve.alpha"
-        },
-        {
-          "text": "Cluster I (a/b)",
-          "text_gid": "figdemo.main.peak.alpha.2p06",
-          "curve_gid": "figdemo.main.curve.beta"
-        },
-        {
-          "text": "Cluster I (a/b)",
-          "text_gid": "figdemo.main.peak.alpha.2p06",
-          "curve_gid": "figdemo.main.curve.gamma"
-        },
-        {
-          "text": "Cluster II (a/b)",
-          "text_gid": "figdemo.main.peak.gamma.7p46",
-          "curve_gid": "figdemo.main.curve.gamma"
-        },
         {
           "text": "Sample A\n(synthetic)",
           "text_gid": null,
@@ -63,7 +43,7 @@
       "text_outside_canvas_gids": [],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 1,
+      "clipped_artists": 4,
       "clipped_artist_gids": [],
       "label_peak_offset_ppm": [
         {
@@ -91,7 +71,7 @@
         0.8,
         1.5
       ],
-      "spatial_risk_count": 1,
+      "spatial_risk_count": 4,
       "rendered_labels": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -122,10 +102,10 @@
     {
       "slug": "series-02-spacing",
       "file": "docs\\readme\\series-02-spacing.png",
-      "bytes": 166873,
+      "bytes": 161967,
       "action": "widen sample pitch",
-      "elapsed_s": 0.21,
-      "audit_elapsed_s": 0.207,
+      "elapsed_s": 0.228,
+      "audit_elapsed_s": 0.219,
       "canvas_mm": [
         66.0,
         40.0
@@ -140,23 +120,8 @@
       ],
       "text_bbox_overlaps": 0,
       "text_bbox_overlap_pairs": [],
-      "text_curve_overlaps": 7,
+      "text_curve_overlaps": 4,
       "text_curve_overlap_pairs": [
-        {
-          "text": "Cluster I (a/b)",
-          "text_gid": "figdemo.main.peak.alpha.2p06",
-          "curve_gid": "figdemo.main.curve.alpha"
-        },
-        {
-          "text": "Cluster I (a/b)",
-          "text_gid": "figdemo.main.peak.alpha.2p06",
-          "curve_gid": "figdemo.main.curve.beta"
-        },
-        {
-          "text": "Cluster II (a/b)",
-          "text_gid": "figdemo.main.peak.gamma.7p46",
-          "curve_gid": "figdemo.main.curve.gamma"
-        },
         {
           "text": "Sample A\n(synthetic)",
           "text_gid": null,
@@ -182,7 +147,7 @@
       "text_outside_canvas_gids": [],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 1,
+      "clipped_artists": 4,
       "clipped_artist_gids": [],
       "label_peak_offset_ppm": [
         {
@@ -210,7 +175,7 @@
         0.8,
         1.5
       ],
-      "spatial_risk_count": 1,
+      "spatial_risk_count": 4,
       "rendered_labels": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -241,10 +206,10 @@
     {
       "slug": "series-03-canvas",
       "file": "docs\\readme\\series-03-canvas.png",
-      "bytes": 160077,
+      "bytes": 157686,
       "action": "larger canvas/margins",
-      "elapsed_s": 0.216,
-      "audit_elapsed_s": 0.247,
+      "elapsed_s": 0.223,
+      "audit_elapsed_s": 0.246,
       "canvas_mm": [
         96.0,
         62.0
@@ -259,18 +224,8 @@
       ],
       "text_bbox_overlaps": 0,
       "text_bbox_overlap_pairs": [],
-      "text_curve_overlaps": 5,
+      "text_curve_overlaps": 3,
       "text_curve_overlap_pairs": [
-        {
-          "text": "Cluster I (a/b)",
-          "text_gid": "figdemo.main.peak.alpha.2p06",
-          "curve_gid": "figdemo.main.curve.alpha"
-        },
-        {
-          "text": "Cluster II (a/b)",
-          "text_gid": "figdemo.main.peak.gamma.7p46",
-          "curve_gid": "figdemo.main.curve.gamma"
-        },
         {
           "text": "Sample A\n(synthetic)",
           "text_gid": null,
@@ -291,7 +246,7 @@
       "text_outside_canvas_gids": [],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 0,
+      "clipped_artists": 3,
       "clipped_artist_gids": [],
       "label_peak_offset_ppm": [
         {
@@ -319,7 +274,7 @@
         0.8,
         1.5
       ],
-      "spatial_risk_count": 0,
+      "spatial_risk_count": 3,
       "rendered_labels": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -350,10 +305,10 @@
     {
       "slug": "series-04-labels",
       "file": "docs\\readme\\series-04-labels.png",
-      "bytes": 160712,
+      "bytes": 156648,
       "action": "label lanes + min gap + shifts",
-      "elapsed_s": 0.233,
-      "audit_elapsed_s": 0.258,
+      "elapsed_s": 0.224,
+      "audit_elapsed_s": 0.247,
       "canvas_mm": [
         96.0,
         62.0
@@ -368,18 +323,8 @@
       ],
       "text_bbox_overlaps": 0,
       "text_bbox_overlap_pairs": [],
-      "text_curve_overlaps": 5,
+      "text_curve_overlaps": 3,
       "text_curve_overlap_pairs": [
-        {
-          "text": "Cluster I (a/b)",
-          "text_gid": "figdemo.main.peak.alpha.2p06",
-          "curve_gid": "figdemo.main.curve.alpha"
-        },
-        {
-          "text": "Cluster II (a/b)",
-          "text_gid": "figdemo.main.peak.gamma.7p46",
-          "curve_gid": "figdemo.main.curve.gamma"
-        },
         {
           "text": "Sample A\n(synthetic)",
           "text_gid": null,
@@ -400,7 +345,7 @@
       "text_outside_canvas_gids": [],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 0,
+      "clipped_artists": 3,
       "clipped_artist_gids": [],
       "label_peak_offset_ppm": [
         {
@@ -428,7 +373,7 @@
         0.8,
         1.5
       ],
-      "spatial_risk_count": 0,
+      "spatial_risk_count": 3,
       "rendered_labels": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -459,10 +404,10 @@
     {
       "slug": "series-05-typography",
       "file": "docs\\readme\\series-05-typography.png",
-      "bytes": 130042,
+      "bytes": 156756,
       "action": "unify fonts and line width",
-      "elapsed_s": 0.227,
-      "audit_elapsed_s": 0.235,
+      "elapsed_s": 0.233,
+      "audit_elapsed_s": 0.256,
       "canvas_mm": [
         96.0,
         62.0
@@ -475,24 +420,35 @@
       "infeasible": [],
       "text_bbox_overlaps": 0,
       "text_bbox_overlap_pairs": [],
-      "text_curve_overlaps": 1,
+      "text_curve_overlaps": 4,
       "text_curve_overlap_pairs": [
+        {
+          "text": "Sample A\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        },
+        {
+          "text": "Sample B\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.beta"
+        },
         {
           "text": "Sample C\n(synthetic)",
           "text_gid": null,
           "curve_gid": "figdemo.main.curve.beta"
+        },
+        {
+          "text": "Sample C\n(synthetic)",
+          "text_gid": null,
+          "curve_gid": "figdemo.main.curve.gamma"
         }
       ],
-      "text_outside_canvas": 1,
-      "text_outside_canvas_gids": [
-        "figdemo.main.peak.gamma.7p46"
-      ],
+      "text_outside_canvas": 0,
+      "text_outside_canvas_gids": [],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 1,
-      "clipped_artist_gids": [
-        "figdemo.main.peak.gamma.7p46"
-      ],
+      "clipped_artists": 3,
+      "clipped_artist_gids": [],
       "label_peak_offset_ppm": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -550,10 +506,10 @@
     {
       "slug": "series-06-final",
       "file": "docs\\readme\\series-06-final.png",
-      "bytes": 136038,
+      "bytes": 134931,
       "action": "legend settled, no overflow",
-      "elapsed_s": 0.227,
-      "audit_elapsed_s": 0.941,
+      "elapsed_s": 0.595,
+      "audit_elapsed_s": 0.99,
       "canvas_mm": [
         96.0,
         62.0
@@ -577,7 +533,7 @@
       "label_peak_offset_ppm": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
-          "label_peak_offset_ppm": 0.0
+          "label_peak_offset_ppm": 0.195312
         },
         {
           "gid": "figdemo.main.peak.beta.5p00",
@@ -585,7 +541,7 @@
         },
         {
           "gid": "figdemo.main.peak.gamma.7p46",
-          "label_peak_offset_ppm": 0.0
+          "label_peak_offset_ppm": 0.195312
         }
       ],
       "fonts_pt": {
@@ -606,9 +562,9 @@
           "gid": "figdemo.main.peak.alpha.2p06",
           "text": "Cluster I (a/b)",
           "present": true,
-          "center_px": 229.856,
-          "center_ppm": 2.06,
-          "offset_ppm": 0.0
+          "center_px": 234.58,
+          "center_ppm": 1.8647,
+          "offset_ppm": 0.1953
         },
         {
           "gid": "figdemo.main.peak.beta.5p00",
@@ -622,9 +578,9 @@
           "gid": "figdemo.main.peak.gamma.7p46",
           "text": "Cluster II (a/b)",
           "present": true,
-          "center_px": 99.235,
-          "center_ppm": 7.46,
-          "offset_ppm": 0.0
+          "center_px": 103.96,
+          "center_ppm": 7.2647,
+          "offset_ppm": 0.1953
         }
       ]
     }

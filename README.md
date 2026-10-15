@@ -71,14 +71,14 @@ tests/test_save_loop_g7b.py   （真实 NMR 夹具）    3 passed
 
 所有数据由公式生成（固定种子），图是真实渲染；工具**只报数据**，审美决定权在人。
 
-| 阶段 | 改了什么参数 | 关键数字（起点→当前） |
-|---|---|---|
-| `series-01-ugly.png` | 初始配置 | 画布 66×40 mm；图例字号 4.5 pt（不可行）；文本重叠 1 处；空间越界 5 处 |
-| `series-02-spacing.png` | `pitch_mm` 0.32→0.78 | 越界 5→3；曲线净距拉开 |
-| `series-03-canvas.png` | 画布 66×40→96×62 mm | 越界 3→2；有效字号升至 6.0 pt |
-| `series-04-labels.png` | `label_lanes` / `label_min_gap_mm` / `peak_label_shifts_mm` | 标注分道，重叠缓解 |
-| `series-05-typography.png` | 字号档位与 `line_width` 统一 | 轴 8.5 / 刻度 7.5 / 峰 7.5 pt，无不可行项 |
-| `series-06-final.png` | 图例移出数据区、底部拼版 | 审计 `infeasible: []`；文本重叠 0、图例/数据无相交、越界 0、字号均 ≥5 pt |
+| 阶段 | 准备调什么（意图） | 怎么调（键：旧值→新值） | 预期结果 | 实际结果（实测数字 + 结论） |
+|---|---|---|---|---|
+| 01 起点 | 无（记录基线问题） | — | — | 越界 4 处、text/curve 重叠 3 处、字号 5.0 pt（图例 4.5 pt 不可行）、clipped 4 |
+| 02 | 拉开样品间距，让曲线不再互相压 | `pitch_mm` 0.32→0.78 | 曲线净距拉开、越界减少 | text_curve 4→? 实测 text_bbox 0、clipped 4、图例仍压数据 |
+| 03 | 放大画布与边距，给文字留位置 | `canvas_w_mm`/`canvas_h_mm` 66/40→96/62 | 有效字号≥5 pt、边距不挤 | text_bbox 0、clipped 3、infeasible 1 |
+| 04 | 解决近峰标签互叠 | `label_min_gap_mm` 0→1.8 + `peak_label_shifts_mm` 分道 | 标签分道、互不重叠、贴各峰 | text_bbox 0、clipped 3、infeasible 1 |
+| 05 | 统一字号档位与线宽 | `axis_font_pt`/`tick_font_pt`/`peak_font_pt`/`line_width` | 各角色一档、≥5 pt、线宽一致 | text_bbox 0、clipped 3、infeasible 0 |
+| 06 | 图例移出数据区并收尾 | `legend_anchor_x`/`legend_cols` 0.5/1→0.98/1 | 图例不压数据、无裁切、无空白撑开 | text_bbox 0、text_curve 0、clipped 0、rendered_labels 3/3、infeasible [] |
 
 ![](docs/readme/series-01-ugly.png)
 ![](docs/readme/series-02-spacing.png)
