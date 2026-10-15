@@ -180,12 +180,29 @@ CONFIG = load_config_demo(CONFIG_PATH)
 PEAK_LABEL_SHIFTS = {}
 SHIFTS_MM = {}
 CANVAS = (60.0, 45.0)
+SAMPLE_PITCH = 0.5
+GROUP_Y_MM = 0.0
 
 def _apply_config(cfg):
-    global PEAK_LABEL_SHIFTS, SHIFTS_MM, CANVAS
+    global PEAK_LABEL_SHIFTS, SHIFTS_MM, CANVAS, SAMPLE_PITCH, GROUP_Y_MM
     PEAK_LABEL_SHIFTS = _peak_shifts_by_gid(cfg["peak_label_shifts_mm"])
     SHIFTS_MM = cfg["shifts_mm"]
     CANVAS = (cfg["canvas_w_mm"], cfg["canvas_h_mm"])
+    pitch_raw = cfg.get("pitch_mm", {}) or {}
+    pitch_val = pitch_raw.get(SCOPE, None) if isinstance(pitch_raw, dict) else None
+    if isinstance(pitch_val, dict):
+        nums = [float(v) for v in pitch_val.values() if isinstance(v,(int,float)) and not isinstance(v,bool)]
+        SAMPLE_PITCH = (sum(nums)/len(nums)) if nums else 0.5
+    elif isinstance(pitch_val,(int,float)) and not isinstance(pitch_val,bool):
+        SAMPLE_PITCH = float(pitch_val)
+    else:
+        SAMPLE_PITCH = 0.5
+    gy_raw = cfg.get("group_y_mm", {}) or {}
+    gy_val = gy_raw.get(SCOPE, 0.0) if isinstance(gy_raw, dict) else gy_raw
+    if isinstance(gy_val,(int,float)) and not isinstance(gy_val,bool):
+        GROUP_Y_MM = float(gy_val)
+    else:
+        GROUP_Y_MM = 0.0
 
 rng = np.random.default_rng(42)
 
@@ -220,12 +237,13 @@ def _build_fig(science, scope_target, cfg):
     for i, (x_i, y) in enumerate(spectra):
         sid = SAMPLES_CONFIG[i][7]
         curve_gid = _gid("curve", sid, "")
-        line, = ax.plot(x_i, y + i*0.5, color=SAMPLES_CONFIG[i][2], linewidth=1.0, label=SAMPLES_CONFIG[i][1])
+        line, = ax.plot(x_i, y + i*SAMPLE_PITCH, color=SAMPLES_CONFIG[i][2], linewidth=float(cfg['line_width']), label=SAMPLES_CONFIG[i][1])
         reg_dummy = None
         line.set_gid(curve_gid)
     ax.set_xlim(10, 0)
-    ax.set_xlabel("ppm")
-    ax.set_ylabel("Intensity (a.u.)")
+    ax.set_xlabel("ppm", fontsize=float(cfg['axis_font_pt']))
+    ax.set_ylabel("Intensity (a.u.)", fontsize=float(cfg['axis_font_pt']))
+    ax.tick_params(axis='both', labelsize=float(cfg['tick_font_pt']))
     reg = GidRegistry(scope=scope_target if scope_target in SCOPES else SCOPE)
     # register curves with params
     for i in range(len(spectra)):
@@ -250,12 +268,16 @@ def _build_fig(science, scope_target, cfg):
         yi = np.interp(ppm, xi[::-1], arr[::-1]) + idx*0.5
         dx, dy = PEAK_LABEL_SHIFTS.get(peak_gid, [0.0, 0.0])
         txt = ax.annotate(f"{grp}", xy=(ppm, yi), xytext=(0, 4), textcoords="offset points",
-                          ha="center", va="bottom", fontsize=8.0, color="#333")
+                          ha="center", va="bottom", fontsize=float(cfg['peak_font_pt']), color="#333")
         txt.set_gid(peak_gid)
         apply_display_shift(txt, dx_mm=float(dx), dy_mm=float(dy))
         reg.register(txt, peak_gid, params=["peak_font_pt", "peak_label_shifts_mm"], science_policy="LAYOUT", editable=True)
+    apply_display_shift_all = None
+    for line in ax.lines:
+        apply_display_shift(line, dy_mm=float(GROUP_Y_MM))
     guide = None
-    ax.legend()
+    ax.legend(fontsize=float(cfg['legend_font_pt']), ncol=int(cfg['legend_cols']),
+              loc='center right', bbox_to_anchor=(float(cfg['legend_anchor_x']), 0.5))
     ax.invert_xaxis()
     return fig, reg
 
@@ -326,3 +348,6 @@ def layout_contract(scope: str = SCOPE) -> dict:
                     "science_policy": "LAYOUT"} for gid in gids}
     return {"parameters": params, "nodes": nodes, "groups": [{"id": prefix.rstrip("."), "parent": None, "members": gids}],
             "relations": [], "outputs": ["demo_figure.png"]}
+
+# alias expected by figpact.final_size audit
+load_config = load_config_demo

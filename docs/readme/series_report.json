@@ -1,0 +1,324 @@
+{
+  "stages": [
+    {
+      "slug": "series-01-ugly",
+      "file": "docs\\readme\\series-01-ugly.png",
+      "bytes": 167944,
+      "action": "starting config",
+      "elapsed_s": 0.088,
+      "audit_elapsed_s": 0.152,
+      "canvas_mm": [
+        66.0,
+        40.0
+      ],
+      "measured_export_mm": [
+        65.998,
+        39.963
+      ],
+      "k": 1.000035,
+      "infeasible": [
+        "legend_font_pt effective 4.5pt < 5pt"
+      ],
+      "spatial_risk_count": 5,
+      "text_overlap_entries": 1,
+      "font_roles": [
+        {
+          "role": "axis_font_pt",
+          "nominal": 6.0,
+          "effective": 6.0,
+          "infeasible": false
+        },
+        {
+          "role": "tick_font_pt",
+          "nominal": 5.0,
+          "effective": 5.0,
+          "infeasible": false
+        },
+        {
+          "role": "peak_font_pt",
+          "nominal": 5.0,
+          "effective": 5.0,
+          "infeasible": false
+        },
+        {
+          "role": "legend_font_pt",
+          "nominal": 4.5,
+          "effective": 4.5,
+          "infeasible": true
+        },
+        {
+          "role": "note_font_pt",
+          "nominal": 5.0,
+          "effective": 5.0,
+          "infeasible": false
+        }
+      ]
+    },
+    {
+      "slug": "series-02-spacing",
+      "file": "docs\\readme\\series-02-spacing.png",
+      "bytes": 159264,
+      "action": "widen sample pitch",
+      "elapsed_s": 0.058,
+      "audit_elapsed_s": 0.144,
+      "canvas_mm": [
+        66.0,
+        40.0
+      ],
+      "measured_export_mm": [
+        65.998,
+        39.963
+      ],
+      "k": 1.000035,
+      "infeasible": [
+        "legend_font_pt effective 4.5pt < 5pt"
+      ],
+      "spatial_risk_count": 3,
+      "text_overlap_entries": 1,
+      "font_roles": [
+        {
+          "role": "axis_font_pt",
+          "nominal": 6.0,
+          "effective": 6.0,
+          "infeasible": false
+        },
+        {
+          "role": "tick_font_pt",
+          "nominal": 5.0,
+          "effective": 5.0,
+          "infeasible": false
+        },
+        {
+          "role": "peak_font_pt",
+          "nominal": 5.0,
+          "effective": 5.0,
+          "infeasible": false
+        },
+        {
+          "role": "legend_font_pt",
+          "nominal": 4.5,
+          "effective": 4.5,
+          "infeasible": true
+        },
+        {
+          "role": "note_font_pt",
+          "nominal": 5.0,
+          "effective": 5.0,
+          "infeasible": false
+        }
+      ]
+    },
+    {
+      "slug": "series-03-canvas",
+      "file": "docs\\readme\\series-03-canvas.png",
+      "bytes": 159577,
+      "action": "larger canvas/margins",
+      "elapsed_s": 0.068,
+      "audit_elapsed_s": 0.182,
+      "canvas_mm": [
+        96.0,
+        62.0
+      ],
+      "measured_export_mm": [
+        95.97,
+        61.976
+      ],
+      "k": 1.000316,
+      "infeasible": [
+        "legend_font_pt effective 4.501pt < 5pt"
+      ],
+      "spatial_risk_count": 2,
+      "text_overlap_entries": 1,
+      "font_roles": [
+        {
+          "role": "axis_font_pt",
+          "nominal": 6.0,
+          "effective": 6.002,
+          "infeasible": false
+        },
+        {
+          "role": "tick_font_pt",
+          "nominal": 5.0,
+          "effective": 5.002,
+          "infeasible": false
+        },
+        {
+          "role": "peak_font_pt",
+          "nominal": 5.0,
+          "effective": 5.002,
+          "infeasible": false
+        },
+        {
+          "role": "legend_font_pt",
+          "nominal": 4.5,
+          "effective": 4.501,
+          "infeasible": true
+        },
+        {
+          "role": "note_font_pt",
+          "nominal": 5.0,
+          "effective": 5.002,
+          "infeasible": false
+        }
+      ]
+    },
+    {
+      "slug": "series-04-labels",
+      "file": "docs\\readme\\series-04-labels.png",
+      "bytes": 159894,
+      "action": "label lanes + min gap + shifts",
+      "elapsed_s": 0.069,
+      "audit_elapsed_s": 0.182,
+      "canvas_mm": [
+        96.0,
+        62.0
+      ],
+      "measured_export_mm": [
+        95.97,
+        61.976
+      ],
+      "k": 1.000316,
+      "infeasible": [
+        "legend_font_pt effective 4.501pt < 5pt"
+      ],
+      "spatial_risk_count": 2,
+      "text_overlap_entries": 1,
+      "font_roles": [
+        {
+          "role": "axis_font_pt",
+          "nominal": 6.0,
+          "effective": 6.002,
+          "infeasible": false
+        },
+        {
+          "role": "tick_font_pt",
+          "nominal": 5.0,
+          "effective": 5.002,
+          "infeasible": false
+        },
+        {
+          "role": "peak_font_pt",
+          "nominal": 5.0,
+          "effective": 5.002,
+          "infeasible": false
+        },
+        {
+          "role": "legend_font_pt",
+          "nominal": 4.5,
+          "effective": 4.501,
+          "infeasible": true
+        },
+        {
+          "role": "note_font_pt",
+          "nominal": 5.0,
+          "effective": 5.002,
+          "infeasible": false
+        }
+      ]
+    },
+    {
+      "slug": "series-05-typography",
+      "file": "docs\\readme\\series-05-typography.png",
+      "bytes": 152979,
+      "action": "unify fonts and line width",
+      "elapsed_s": 0.071,
+      "audit_elapsed_s": 0.176,
+      "canvas_mm": [
+        96.0,
+        62.0
+      ],
+      "measured_export_mm": [
+        95.97,
+        61.976
+      ],
+      "k": 1.000316,
+      "infeasible": [],
+      "spatial_risk_count": 3,
+      "text_overlap_entries": 1,
+      "font_roles": [
+        {
+          "role": "axis_font_pt",
+          "nominal": 8.5,
+          "effective": 8.503,
+          "infeasible": false
+        },
+        {
+          "role": "tick_font_pt",
+          "nominal": 7.5,
+          "effective": 7.502,
+          "infeasible": false
+        },
+        {
+          "role": "peak_font_pt",
+          "nominal": 7.5,
+          "effective": 7.502,
+          "infeasible": false
+        },
+        {
+          "role": "legend_font_pt",
+          "nominal": 7.0,
+          "effective": 7.002,
+          "infeasible": false
+        },
+        {
+          "role": "note_font_pt",
+          "nominal": 6.5,
+          "effective": 6.502,
+          "infeasible": false
+        }
+      ]
+    },
+    {
+      "slug": "series-06-perfect",
+      "file": "docs\\readme\\series-06-perfect.png",
+      "bytes": 147222,
+      "action": "legend settled, no overflow",
+      "elapsed_s": 0.067,
+      "audit_elapsed_s": 0.179,
+      "canvas_mm": [
+        96.0,
+        62.0
+      ],
+      "measured_export_mm": [
+        95.97,
+        61.976
+      ],
+      "k": 1.000316,
+      "infeasible": [],
+      "spatial_risk_count": 3,
+      "text_overlap_entries": 1,
+      "font_roles": [
+        {
+          "role": "axis_font_pt",
+          "nominal": 8.5,
+          "effective": 8.503,
+          "infeasible": false
+        },
+        {
+          "role": "tick_font_pt",
+          "nominal": 7.5,
+          "effective": 7.502,
+          "infeasible": false
+        },
+        {
+          "role": "peak_font_pt",
+          "nominal": 7.5,
+          "effective": 7.502,
+          "infeasible": false
+        },
+        {
+          "role": "legend_font_pt",
+          "nominal": 7.0,
+          "effective": 7.002,
+          "infeasible": false
+        },
+        {
+          "role": "note_font_pt",
+          "nominal": 6.5,
+          "effective": 6.502,
+          "infeasible": false
+        }
+      ]
+    }
+  ]
+}

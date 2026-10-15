@@ -1,0 +1,40 @@
+schema_version: 2
+canvas_w_mm: 96.0
+canvas_h_mm: 62.0
+label_lift_mm: 2.0
+line_width: 0.4
+peak_font_pt: 5.0
+legend_font_pt: 4.5
+note_font_pt: 5.0
+axis_font_pt: 6.0
+tick_font_pt: 5.0
+legend_cols: 1
+legend_anchor_x: 0.5
+label_min_gap_mm: 1.8
+label_max_dx_mm: 8.0
+label_lanes: 3
+shifts_mm:
+  main:
+    alpha: 0.0
+    beta: 0.0
+    gamma: 0.0
+peak_label_shifts_mm:
+  main:
+    peak.alpha.2p00:
+    - -1.2
+    - -2.0
+    peak.alpha.2p06:
+    - 1.2
+    - 2.0
+    peak.gamma.7p40:
+    - -1.2
+    - -2.0
+    peak.gamma.7p46:
+    - 1.2
+    - 2.0
+show_ppm: true
+pitch_mm:
+  main: 0.78
+group_y_mm:
+  main: 0.0
+layout_reference: {}
