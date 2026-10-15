@@ -1,324 +1,111 @@
-# figpact (figure + pact)
+# figpact
 
-面向 Agent 的科研图几何测量、排版契约与严格出版验收引擎。
+**直接改 Python 科研图的排版细节，并让不同尺寸的小图在最终投稿尺寸下规格统一——改动可复现地回到源文件，且每一步都有真实测量作证。**
 
-## 核心设计
-1. **测量与编辑分层**：Figure / Scene 的测量不要求 YAML、可编辑绑定或 `prepare_config`；可写编辑与保存使用真实 YAML 参数契约，数据与绘图逻辑仍在 Python。编辑路径上脚本可提供纯归一化钩子 `prepare_config(config) -> dict`，只补齐缺省的布局字段（不读盘、不写盘、不碰科学量、幂等）：会话用它建立基线配置，但 revision 仍按**原始 YAML 字节**计算；`build_scene()` 对传入的配置走同一个钩子，因此会话与 legacy 装载器看到同一套默认值。
-2. **纯显示位移**：不改数据坐标，不改数据本身，仅在布局完成后施加 Display Shift。
-3. **图元身份（GID）与参数绑定**：每个排版图元具备稳定 ID 并声明关联参数。
-4. **严格验收（QA）与阻断机制**：排版几何越界（裁剪、重叠、压线、顺序颠倒）作为阻断项。
-5. **验收后发布**：在独立输出目录完成验收后逐文件替换；Agent / GUI 的批量安装遇到可捕获异常会回滚。进程崩溃或断电可能留下部分新文件，当前没有事务日志与恢复流程，不承诺整批原子发布。
+figpact 面向两个具体痛点：
 
-图幅图像（`fig.figimage`）与坐标轴内图像都保护像素、方向和显示范围。图幅图像的位置是版面，
-不是科学裁剪范围；无 YAML 的测量、会话几何与正式 QA 都使用它未裁切的图幅像素包围盒，
-不使用 Matplotlib 继承的零框。无法测量即阻断，未注册也不能逃过正式画布裁切检查。
-图幅像素按当前 Figure DPI 换算毫米，必须与 renderer DPI 一致；这不是跨 DPI 的物理标定。
+1. **改图上某个标注的位置，要反复改 Python、导出、看图、再改。** figpact 让你在真图上选中标注、拖动、看到毫米读数，松手后用**真实重建**验证，确认后**写回源文件**；下次重跑脚本，改动还在。
+2. **两张尺寸不同的图放进同一张论文 Figure，最终字号与线宽不一致。** figpact 先**只读审计**在目标宽度下每个角色会落到几个 pt，再按最终尺寸**重新渲染**（不是事后缩放 PDF），放不下的地方**如实报告**而不是偷偷缩字。
 
+许可证 **MIT**。设计取舍与阶段计划见 [`docs/G7_PLAN.md`](docs/G7_PLAN.md)；历史验收记录在 `docs/`（G0–G6b）。
 
-## 只读 Figure Inspector（不需要 YAML）
+---
 
-在源码 checkout 中，直接把已有 Matplotlib `fig` 导出到一个**不存在的新目录**：
-
-```python
-from figpact.inspector import export_inspector
-
-page = export_inspector(fig, r"I:\figpact-inspections\my-figure")
-print(page)  # 用浏览器打开生成的 index.html；无需启动后端服务
-```
-
-独立前端位于 `tools/inspector/`，Python 捕获后端位于 `figpact/inspector.py`。
-支持真实折线/引线 Hover、Click 锁定、Alt+Click 重叠轮换、毫米标尺、搜索及对象列表。
-坐标原点是画布左下角；毫米来自当前 renderer / DPI 换算，不代表物理仪器校准。
-未登记对象使用单帧临时身份；已登记身份也不自动取得编辑权限。
-
-这是静态只读快照，不实时监控源文件，不修改 Artist、Python、YAML 或正式图件，
-不能据此宣称无 YAML 编辑或 strict 发布已经完成。重新出帧后需要重新选择对象。
-详细范围、验收证据和限制见 [G1 Inspector 交付报告](docs/G1_INSPECTOR.md)；
-原有测试、科学文件保护与性能基线见 [G0 基线](docs/G0_BASELINE.md)。
-
-### G2：在图上示范，再验证候选（不写源文件）
+## Quickstart
 
 ```bash
-python -m figpact.inspector_server --example nmr --scope main
-python -m figpact.inspector_server --example plain
+git clone https://github.com/LLLin000/figpact.git && cd figpact
+python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -e .
+figpact ui --script examples/demo/demo_figure.py --config examples/demo/demo.yaml
 ```
 
-打开命令打印的本机地址。前端仍在 `tools/inspector/`，会话与 HTTP 桥在
-`figpact/intents.py`、`figpact/inspector_server.py`；不是另一套 GUI 或几何引擎。
-方向键只创建临时毫米位移示范：默认 0.1 mm，Alt 0.01 mm，Shift 0.5 mm；
-也可直接输入 dx/dy。15 次 Alt+↑ 合并为一项 +0.15 mm 意图，不逐次请求 Python。
+浏览器打开终端里打印的地址。**演示图 `examples/demo/` 的全部数据由公式生成**（固定随机种子），不含任何真实测量。
 
-有明确 YAML 绑定的对象才能试算：复用已有会话重建实际 Figure，检查目标位移、
-引线科学端、科学载荷、未授权对象变化和当前 scope QA；不是修改一个参数就算成功。
-接受只保存在当前进程内，取消只丢弃当前候选；独立撤销不会重置其他已接受操作。
-关闭服务后这些操作丢失，不是 YAML 草稿、源码 History 或正式发布。
+---
 
-普通无 YAML Figure 可以测量和展示期望位置，不能在 G2 写回 Python。
-本机入口默认 600 DPI；可加 `--dpi 120` 或 `--dpi 240`。切换清晰度会重新生成完整
-图片和测量坐标，请在开始试算/接受之前选择。不会修改源码或正式图的导出设置。
+## 逐步演示
 
-窄窗口（例如 Tern 的浏览器面板）可用极简模式：在地址后加 `?panel=min`，只保留图、
-选中/ghost 轮廓、`检查排版 / 保留这次调整 / 取消` 三个动作与一行状态；对象列表、搜索、
-标尺、DPI 按钮、详情面板与脚注都不再显示。被隐藏的细节仍写入页面里不可见的
-`#agent-detail`（JSON：选择 gid、几何、delta、状态、最近一次试算结果、已接受操作），
-供 agent 读取；接口与不带参数时完全相同，后端未改。面板会随窗口尺寸自动重新适配。
-跨 scope 绑定、没有明确映射或存在多个同样合法映射时拒绝，不自动改源码或科学数据。
-既有 YAML Agent API、草稿保存和独立 strict 出图入口保持原样。
-本次真实测试、毫米数值、耗时、失败记录和未支持范围见
-[G2 Geometry Intent 交付记录](docs/G2_GEOMETRY_INTENT.md)。
-界面布局与用词见 [Inspector UI/UX](docs/INSPECTOR_UI_UX.md)；
-为什么默认高清、SVG 如何安全接入及真实成本见
-[显示清晰度与 SVG 调研](docs/INSPECTOR_DISPLAY_QUALITY.md)。
+下面每一步都是一次真实操作，截图由真实浏览器抓取（`tools/readme/capture_tour.py`，对着 `examples/demo/`）。
 
-### G3：显式启用的后端操作历史
+### 1. 启动：图加载完成
 
-Python SDK 可以使用 `IntentSession(..., history=True, state_home="I:/figpact-history")`：
-保存接受的操作与几何/科学证据，重开时核对源码和输入版本，实际构图重放；独立撤销也可恢复。
-版本不符则只能查看历史，不执行变更后的绘图脚本，不自动保存 Python/YAML。
+<img src="docs/readme/01-launch.png" width="820" alt="启动后的检查器界面">
 
-**上面的 Inspector 网页入口仍保持 G2 的会话内保留，本轮没有接入持久 History UI/HTTP。**
-普通无 YAML 测量也不因此变成可编辑。真实 NMR 两操作重启、351 项 Python 通过、
-7 项跳过及本轮 8–25 秒的单次路径耗时见
-[G3 后端操作历史验收](docs/G3_OPERATION_HISTORY.md)；不沿用旧预览耗时宣称本轮更快。
+页面加载的就是脚本渲染出来的图；顶栏显示尺寸核对结果。
 
+### 2. 选中一个标注
 
-## CLI 命令与使用
+<img src="docs/readme/02-select.png" width="820" alt="选中一个峰标注">
+
+悬停即高亮、点击即选中，显示它的 GID 与**这张图允许对它做什么**（能不能改、能不能验证）。
+
+### 3. 拖动：本地即时预览
+
+<img src="docs/readme/03-drag.png" width="820" alt="拖动中的幽灵轮廓与毫米读数">
+
+拖动时只有本地绘制：幽灵轮廓、联动引线幽灵、贴光标的**毫米读数**。**期间不重建 Matplotlib、不请求后端**——所以拖动手感是即时的。
+
+### 4. 松手：真实重建验证
+
+<img src="docs/readme/04-verified.png" width="820" alt="松手后的真实验证回执">
+
+松手后才向引擎要一次真实重建。回执里的实测位移、误差与各项检查都来自这次重建——**预览本身不是证据**，没通过就不会出现"通过"字样。
+
+### 5. 后续步骤：接受 → 保存 → 重启后一致
+
+保存链（待保存区列出目标文件、参数变更与源码差异 → 显式确认 → 原子写入 → 写后重新验证）已在后端与页面上实现，并由真实浏览器用例守着：
+
+```
+tests/browser/test_save_flow.py                    2 passed
+tests/test_save_loop_g7b.py   （真实 NMR 夹具）    3 passed
+```
+
+其中 NMR 全旅程的实测：位移 **0.1500000000000039 mm**（目标 0.15，误差 **3.9e-15**）、保存回执 **COMMITTED + PASS**、配置落盘 `[0.0, 0.15]`、**全新会话从磁盘重建后一致**；拒绝授权与取消时磁盘**逐字节不变**。
+
+> **已知限制（如实说明）**：上面 5 这一步**尚未在合成演示图上截到图**。演示图目前只具备"示范位置"能力，接受/保存仍被禁用（引擎要求会话声明 science manifest 才允许重新绘图验证，演示图的声明还没接上）。因此本教程的截图覆盖到**第 4 步（真实验证）**；保存链的证据是上表的测试与实测数字，**不是摆拍**。
+
+---
+
+## 最终尺寸统一（痛点二）
+
+同一张论文 Figure 里，**所有面板共享同一缩放比**是期刊的硬要求。figpact 的做法是**按最终尺寸重渲染**，而不是把大图缩下来。
+
 ```bash
-# 查看支持的参数清单（按可见对象分组，含单位、范围与调参效果）
-figpact list-params --script <py> [--config <yaml>]
-
-# 校验 YAML 配置格式与取值范围
-figpact validate <yaml> [--script <py>]
-
-# 试算改动，不保存配置、不覆盖正式图
-figpact try --script <py> --config <yaml> --set <parameter>=<value>
-
-# 渲染图表（支持 --strict 严格模式阻断）
-figpact render --script <py> [--config <yaml>] [--strict]
-
-# 导出图表（等价于 render --strict）
-figpact export --script <py> [--config <yaml>]
-
-# 清点可见图元清单并统计未登记/未绑定项，支持参数扰动生效检查
-figpact inventory --script <py> [--config <yaml>] [--check-effect]
-
-# 检查特定 gid 图元的几何与绑定详情
-figpact inspect <gid> --script <py> [--config <yaml>]
-
-# 导出每张图、每个 scope 的全部参数清单为 JSON
-figpact export-params --script <py> [--config <yaml>] [--json]
-
-# 遍历可见图元所有可调属性，做五类参数覆盖审计
-figpact audit-params --script <py> [--config <yaml>] [--output <md>]
-
-# 本机持久会话（JSON-RPC）：snapshot / inspect / try_layout / render_preview / commit
-figpact agent --script <py> --config <yaml> --scope <scope> [--output-dir <dir>]
+figpact final-size ...        # 只读审计：先出数，再决定改什么
 ```
 
-`agent` 在 stdin/stdout 上跑 JSON-RPC：每行一个
-`{"jsonrpc":"2.0","id":1,"method":"…","params":{…}}`，stdout 每行一个响应（`result`
-或 `error{code,message}`），**只承载协议**。`try_layout` 的操作记录用判别键
-`operation`：
+真实数字（`examples/nmr` 与 `examples/ftir`，只读审计）：
 
-```json
-{"jsonrpc":"2.0","id":1,"method":"snapshot","params":{}}
-{"jsonrpc":"2.0","id":2,"method":"try_layout","params":{"revision":"<上一条的 revision>","operations":[{"operation":"set_relation","relation_id":"annotated.clearance.hama","target_mm":2.5}]}}
-{"jsonrpc":"2.0","id":3,"method":"render_preview","params":{"revision":"<上一条的 revision>"}}
-{"jsonrpc":"2.0","id":4,"method":"commit","params":{"kind":"draft","revision":"<上一条的 revision>"}}
+| 图 | 目标宽 | 实测导出宽 | k | 轴标题 | 刻度 | 标注 | 线宽 |
+|---|---|---|---|---|---|---|---|
+| NMR | 42 mm | 41.995 mm | **1.0001** | 8.0 pt | 7.0 pt | 峰标注 6.0 → 4.8 pt ⚠ | 0.8 pt |
+| FTIR | 38 mm | 37.973 mm | **1.0007** | 8.0 pt | 7.0 pt | 官能团标注 4.7 → **3.7 pt** ⚠ | 0.8 pt |
+
+受控修改只覆盖**三个角色**（轴标题 / 刻度 / 曲线线宽），写回走既有 YAML 精确补丁 + 漂移检查 + 原子替换，写后重新审计。
+
+**放不下时说放不下**，不自动缩字：
+
+```
+infeasible: label_font_pt effective 4.703pt < 5pt; legend_font_pt effective 4.703pt < 5pt
+spatial_risk: FTIR label bottom overflow 0.697 mm; Line2D top overflow 2.632 mm (×2)
 ```
 
-`kind:"draft"` 只写 YAML 草稿（`DRAFT_SAVED`，**未过**严格校验）；`kind:"publication"`
-必须带 `confirm:true`，先逐 scope 验证完整产物契约和安全相对路径，再在独立输出目录跑全量 strict、复核科学载荷与源文件状态，最后批量安装产物并保存 YAML。捕获到的安装异常会回滚；崩溃一致性不在当前保证内。
-`--config` 指向哪份 YAML 就写哪份：试算请把真配置拷到临时目录、产物落 `--output-dir`
-沙箱，确认再用真实路径。实测几何读 `relations[].value_mm`（声明的 `target_mm` 是目标，
-不是结果）。完整键名、状态字面量与错误码见 `SKILL.md` §2.1。
+可选取舍：**加宽图 / 移动标注 / 显式指定局部字号**。figpact 不会为了凑宽度去改科学视口、缩字或裁谱线。
 
-## 本地调参预览
-在仓库根目录运行 `python -X utf8 tools/gui/server.py --port 8731`，打开
-`http://127.0.0.1:8731`。选择 FTIR 或 NMR，调整控件，点击“所见即所得 (Try)”
-查看新预览、毫米位移与 QA 差异。服务仅监听本机，同端口本机来源可访问，
-外站 Origin 请求在执行绘图前返回 403。
+---
 
-Scope 切换会重新预览所选版本，未保存值跨 scope 保留；对照图保留上下两格，
-位移只作用于参数指定的那一格。请求中的无效 scope 会被拒绝。参数目录的
-`path` 是实际 YAML 路径段，含点号的完整 GID 是一个键，不能按点号拆开。
+## 支持边界
 
-GUI 候选预览由 `figpact.preview.preview(script=..., config=..., scope=..., patch=...)`
-一次构图返回 PNG、几何和当前 scope 的 QA，不生成 PDF/SVG/TIFF。基线按配置、
-源码和数据文件状态缓存；画布不使用 tight 裁切。界面中的“当前 scope 通过”
-不是完整 strict 发布验收，正式出图仍使用原 strict 流程。
+- **预览 ≠ 验证**；**写盘 ≠ 科学验证**。只有源码已提交**且**独立重建通过，界面才会说"已保存并通过验证"；写盘成功但验证失败时，页面说的是"源码已写入，但图形验证失败"。
+- **不是任意脚本都能编辑**：可编辑需要脚本声明参数契约（`layout_contract()`）与科学基线；没有绑定或绑定歧义时，figpact **拒绝并说明原因**，而不是猜。
+- **无 YAML 的图**可以只读测量与示范，但不能保留修改。
+- 只信任**本地**脚本；figpact **不是** OS 级沙箱。
 
-预览不修改配置或正式图；即使 QA 不通过，仍可查看候选结果。
-“保存草稿”只保存合法的排版参数，保留注释和未改字段；布局有阻断或无法构图时
-也可以保存，但界面明确标记不可发布。科学字段、只读标尺和未知参数不能保存。
-“保存并发布”先在沙箱运行所有必需输出的原始 strict，再一起更新 YAML 和图件；
-strict 失败时两者均不修改，后续文件替换失败会回滚已经替换的文件。
-这里的“回滚”只处理可捕获的异常，不覆盖进程中途退出或断电；底层 `publish()` 是逐文件替换，不是整批事务。独立输出目录只隔离产物路径，不是操作系统安全沙箱，绘图 Python 仍须可信。
+## 测试
 
-保存检查浏览器所持配置 SHA-256；旧版本返回 HTTP 409，不覆盖磁盘的新修改。
-“撤销保存”恢复本会话中该图最近一次保存；若该次已发布，也恢复原图件。
-撤销前同样检查新修改，服务重启后不保留撤销记录。定点保存使用已有 PyYAML，
-不重写整份配置；含 YAML 引用（alias）的文件会被拒绝，以免改动共享的科学字段。
-
-inventory 返回测量时的 `figure_dpi` 与 `figure_size_mm`；CLI 与 GUI 的 bbox 位移
-按该 renderer 的 DPI 换算，不能使用 PNG/TIFF 导出的 DPI。
-
-相邻距离使用物理毫米：FTIR `clearance_mm.<scope>.<上方曲线id>` 是包络净距，
-NMR `pitch_mm.main.<上方样品id>` 是基线间距——两者都是**声明的目标值**，不是测得的事实。
-GUI 支持整组同值、逐对距离和 `group_y_mm.<scope>` 整组位置；它同时显示**实测**距离、
-距画布边界及坐标框的剩余空间。改一对不会改变其他相邻距离，也不会缩小信号；
-放不下时报告实测超限 mm。`shifts_mm` 是**额外声明**的逐对象显示抬升，在距离调整之后叠加、
-只作用于被点名的对象，实测值会把它算进去：因此声明的毫米数与实测毫米数一般不相等，
-报告以实测为准，不把声明值当测量结果，也不声称它「落在声明的容差内」。
-
-旧 schema 1 YAML 用原脚本 `--config <旧.yaml> --migrate-config <新.yaml>` 显式迁移；
-新文件保留旧图的实测标尺和原点，`layout_reference` 只读，不是调图旋钮。
-迁移不覆盖旧配置、不发布；不能直接把旧数据单位间距当成毫米值。
-
-QA 差异和人工豁免按 `(rule_id, scope, object_ids)` 区分，测量数字不参与已识别
-诊断的身份；未知诊断保留完整原文，不能人工豁免。旧文本签名记录不再用于放行，
-需要重新审核后记录规则、对象和理由。
-
-## 可公开复现的排版基线
-
-`tests/fixtures/native_ftir.py`、`native_nmr.py`、`native_panels.py` 和
-`native_mixed.py` 使用固定种子的合成数据，无需仪器原始文件；另有无效绑定、
-科学载荷暗改与真实碰撞的负例。各夹具支持 `--strict --probe <沙箱目录>`，
-独立检查所有声明版本并导出 PNG、PDF、SVG、TIFF。
-
-```powershell
-python -X utf8 tests/fixtures/native_panels.py --strict --probe "$env:TEMP/figpact-panels"
-python -X utf8 tests/benchmarks/bench_vnext.py --lanes cold_preview warm_preview warm_qa --repeat 7 --json "$env:TEMP/figpact-baseline.json"
+```bash
+node --test tests/inspector/test_inspector.js     # 前端纯逻辑
+python -m pytest tests/browser -q                  # 真 Chromium + 真服务
+python -m pytest -q                                # 其余
 ```
-
-计时分开记录冷启动、重建出图、已构图 PNG 编码与 QA；PNG 编码时间不代表完整
-预览或 Agent 任务耗时。科学检查保护实际绘制的数组、峰位、归属、原图像素、
-裁剪范围、长宽比和比例尺含义，正式图与配置不被试算修改。
-
-毫米位移可核对实际 renderer 的坐标；字体包围盒仍受 DPI 和栅格化影响，
-不能宣称任意精度。移动图像时保护的是原图数组及科学窗口，不承诺不同画布下
-重采样后的屏幕像素逐字节相同。
-
-### P3.1 安全收口实测
-
-指定模型 `opencode-go/step-5-preview-free` 在本机运行：focused 144 passed / 5 skipped，
-full 269 passed / 6 skipped（另有 71 个 subtests 通过），没有修改断言来放行失败。
-4 项符号链接测试因 Windows 创建权限跳过，2 项 legacy 测试因旧夹具不在场跳过；
-这些跳过不算已验证。回归覆盖逐 scope 契约、嵌套产物、异常回滚、最终输入复核、
-显式科学输入优先、图幅图像保护，以及不依赖 YAML 的实测快照。
-
-两套真实脚本未改；分别完成查询、毫米修改、实际渲染、私有草稿与独立 strict 发布：
-
-|图件|实测结果|非缓存渲染/校验|独立 strict 发布|产物|
-|---|---|---|---|---|
-|FTIR|5 条曲线各上移 0.050 mm|`render_preview` 0.405 s|8.951 s|12 个 PDF/PNG/SVG/TIFF|
-|NMR|3.91 ppm 标签与引线末端上移 0.150 mm，科学首锚点不动|`try_layout` 真实重建+校验 0.868 s|9.249 s|4 个 PDF/PNG/SVG/TIFF|
-
-这是并发验证负载下的单次值，不是 P95；NMR 随后的 PNG 请求命中缓存，不计作新绘制。
-两套科学载荷一致，22 个原脚本、配置、样式和正式产物的 SHA-256 均未变化。
-按作者要求，临时验收记录已核对 SHA-256 后归档到本机
-`I:/figpact-test-archive/P31-620fdaf/D-verification/`：
-`p31-final-suite-v2/`、`p31-real-output/logs/{protocol_r2.jsonl,summary_r2.json,*_measure_r2.json}`，
-真实试算产物为 `p31-real-output/exports/{ftir-r2,nmr-r2}/`。
-归档清单保存原路径、目标路径和校验值；C/D 盘临时副本已清理，仓库测试与科研原件仍在原位。
-新一轮完整 Agent 任务对比独立记录，不能用上面的渲染秒数替代 Agent 全耗时；P4 继续冻结。
-
-### P3.1 小批真实 Agent 对比：正确，但未证明明显提速
-
-同一指定模型通过原生 `task` 跑了 10 对 / 20 次真实任务：FTIR 整组或单曲线上移
-0.050 mm，NMR 四个标签上移 0.150 mm（引线末端跟随、科学首锚点固定）及整组上移
-0.050 mm。旧流程查询参数表、改私有 YAML、完整预览；新流程查询场景和参数绑定、
-按 revision 试算、预览并保存私有草稿。每对从相同原配置开始；每个任务独立会话，
-不是连续热会话性能测试。验收要求 0.005 mm 是任务误差上限，不是物理精度标定。
-
-|指标|旧 YAML + 完整预览|新 Agent API|
-|---|---|---|
-|FTIR 5 任务完整原生代理耗时|685 s|687 s|
-|NMR 5 任务完整原生代理耗时|867 s|801 s|
-|首次编辑成功|10/10|9/10|
-|最终独立验收与全 scope strict 通过|10/10|10/10|
-|实际完整 Figure 构建次数（含独立验收及 strict）|195|195|
-|实际 `Figure.draw` 次数（不等于完整构建）|1025|1046|
-|人工介入次数|0|0|
-
-完整耗时使用原生子任务回执的整批生命周期，包含模型和工具往返；不使用子代理自行
-相加的工具区间或文件时间戳冒充完整耗时。四批并行，期间另有归档 I/O，仅一次样本。
-两流程均保持科学载荷、峰位和非目标对象不变，共生成 160 个实际 strict 产物。
-新流程有一次将二维位移误传成标量，明确拒绝后改正；这次失败保留并计入首次成功率。
-
-两批耗时合计只从 1552 s 到 1488 s，约少 4.1%；完整构建次数未减少。
-本轮不能证明“完整任务提速 50%”，也不能由这 10 个正向微调任务外推通用成熟度。
-保留 P3.1 安全收口，P4 继续冻结。原生时钟、每次编辑、实际几何、科学一致性、
-strict 输出和两类计数的原始证据在
-`I:/figpact-test-archive/P31-620fdaf/p31-experiment/{comparison-result.json,trials/}`。
-
-
-### Agent 效率门槛：尚未通过
-
-本机三流程盲测使用 `opencode-go/step-5-preview-free`，共 90 条真实记录。
-A/B 冻结在 `e441477`，C 冻结在 `c7bb42e`；独立验收复核了 55 条，
-另 35 条未能复核。A 的 17 个候选中有 9 个没有实际 Python 排版修改，
-不能把它们当作“直接改 Python”成功。整项任务的 `attempt=1` 也不代表首次编辑成功。
-
-C 相对 B 的工具区间累计耗时减少 18.85%，但该区间不是完整 Agent 生命周期，
-且三臂未通过完整覆盖与流程有效性检查；实际 `Figure.draw` 次数不等于完整重建次数。
-因此不宣称 80% 首改成功、50% 任务提速或全部任务零科学违规，不启动 P4 自动排版。
-本机原始记录、失败及缺失证据保存在
-`I:/figpact-test-archive/previous-90/D-verification/real-agent-trials-step5/` 的
-`actual-trials.json`、`c7-independent-report.json`、`arm-audit.json` 和
-`acceptance-summary.json`；这些私人实验记录不在仓库中，不是公开性能承诺。
-
-## 查询场景与物理几何
-
-```python
-from figpact import scene
-from tests.fixtures import native_panels as plot
-
-scope = "main"
-fig, registry = plot.build_scene(plot.load_science(), plot.load_config(), scope)
-snapshot = scene.snapshot(fig, registry, scope=scope, revision="baseline",
-                          contract=plot.layout_contract(scope))
-panels = scene.inspect(snapshot, type="panel")
-```
-
-快照给出稳定 ID、实际父节点、毫米边界、锚点、关系与精确 YAML 路径段；
-`inspect` 可按 ID、名称、语义类型或 scope 查询邻居、关系和可控参数。
-同一个已登记面板只有一个身份，未登记可见对象仍列入风险诊断。
-
-六类测量为对齐、带符号包络间距、形状净距、容纳、等尺寸与均匀分布。
-原点统一为画布左下角。曲线采用实际显示线段，不把整条曲线的矩形包络当轮廓；
-文字包络、中心线与可见笔迹模型分别注明方法和局限。
-快照记录 DPI、renderer、字体环境及 revision；允差是要求，不是测量精度。
-96/300/600 DPI 实测四面板间距均为 6.000 mm、编号上内距均为 2.000 mm；
-没有进行物理标定，因此不确定度保持未知。
-
-编辑快路径同时检查移动的面板、图片和文字是否越出明确边界，不把裁剪后的可见范围
-当作原对象已容纳。边界内的基线越界量为 0，不能把剩余边距当成既有越界来放行。
-真实四面板 CLI 实测：新增 4.000 mm 越界被拒且候选状态不变；合法目标间距实测
-5.000 mm，原图内容和尺寸不变。20 次热几何试算 P95 为 36.2 ms；
-该候选未缓存预览为 0.176 秒，缓存命中单独计时，不冒充重绘或正式验收。
-
-### 只测量，不提供 YAML
-
-已有 Matplotlib Figure 可以直接测量，不必先建立排版配置或编辑契约：
-
-```python
-from figpact import GidRegistry, scene, geometry
-
-snapshot = scene.snapshot(fig, GidRegistry(), scope="measurement")
-panels = scene.inspect(snapshot, type="panel")["nodes"]
-gap = geometry.measure_relation("gap", panels[:2], axis="x")
-```
-
-这里只读取图和空间关系，不调用编辑或保存。没有登记的可见对象仍报告风险；
-临时对象身份只用于当前快照，不承诺跨版本稳定，也不虚构 `controlled_by`。
-原有登记信息可直接传入测量，但能测量不等于获准修改。
-
-无 YAML 可直接使用上述 Python 接口或只读 Inspector；有可信重建入口与明确 YAML
-绑定时，可在同一 Inspector 前端进行 G2 会话内试算。**无 YAML 编辑尚未实现**。
-既有编辑模式继续检查参数范围、revision、科学载荷，正式发布继续独立 strict；
-不为只读测量要求伪造 YAML、可编辑绑定或科学处理钩子。
-
-
-## 数据文件说明
-`examples/*/` 数据目录下的 PDF 与 PNG 文件（例如 `examples/ftir/2084_1788253487778_26083154776/26083154776/*.pdf` 为科学指南针测试机构导出的对照报告，`examples/nmr/核磁原始数据/*/pdata/1/thumb.png` 为 Bruker TopSpin 仪器采集生成的原始缩略图）均为仪器原始产物与输入数据，不是 render 导出的渲染产物。render 产生的所有构建产物均通过 `.gitignore` 排除，不进入版本跟踪。

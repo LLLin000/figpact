@@ -266,6 +266,36 @@ if __name__ == "__main__":
     plt.close(fig)
     print(f"{out} ({len(reg.gids())} gids)")
 
+def science_manifest(science: dict) -> dict:
+    """合成演示图的科学基线：锚点全部来自自造峰表（**不含任何真实测量数据**）。
+
+    没有这一步，会话拿不到 science manifest，引擎会认为"可以示范但无法重新绘图验证"
+    （`can_evaluate=false`），于是接受/保存被正确禁用。这里声明的是**编造**的峰位，
+    与 `load_science()` 的公式数据同源。
+    """
+    anchors = {}
+    for ppm, idx, group_name, *_ in PEAK_LABELS_TEMPLATE:
+        sid = SAMPLES_CONFIG[idx][7]
+        arr, xi = science["spectra"][idx][1], science["spectra"][idx][0]
+        yi = float(np.interp(ppm, xi[::-1], arr[::-1])) + idx * 0.5
+        anchors[_gid("peak", sid, _gid_tag(ppm))] = {
+            "assignment": group_name,
+            "exact_ppm": float(ppm),
+            "guide_anchor_data": [float(ppm), yi],
+        }
+    return {
+        "nodes": {},
+        "science": {
+            "figure_id": FIGURE_ID,
+            "source": {
+                "format": "synthetic (formula generated, fixed seed)",
+                "samples": [{"id": sc[7], "label": sc[1]} for sc in SAMPLES_CONFIG],
+            },
+            "peaks": anchors,
+        },
+    }
+
+
 def layout_contract(scope: str = SCOPE) -> dict:
     if scope not in SCOPES:
         raise ValueError(f"未知作用域 {scope!r}")
