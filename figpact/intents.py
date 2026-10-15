@@ -12,7 +12,7 @@ intents through the same oracle. The legacy UI is NOT wired to that mode; the
 from __future__ import annotations
 
 import base64
-import binascii
+import tempfile
 import copy
 import hashlib
 import io
@@ -805,6 +805,8 @@ class IntentSession:
                 '此绑定跨输出版本；此单 scope 候选尚不能完成全部版本验收，拒绝应用', target_delta_mm=delta)
         draft = {'id': operation_id, 'writes': {path: value}, 'allowed': allowed,
                  'request': copy.deepcopy(request), 'base_revision': self._frame['frame_revision'],
+                 'base_script_sha256': hashlib.sha256(Path(self._core.state()['script']).read_bytes()).hexdigest(),
+                 'base_config_sha256': hashlib.sha256(Path(self._core.state()['config']).read_bytes()).hexdigest(),
                  'parameter': {'key': parameter.get('key'), 'path': list(path),
                      'operation': parameter.get('operation'), 'axis': parameter.get('axis'),
                      'scale': parameter.get('scale'), 'before': current, 'after': value}}
@@ -983,6 +985,90 @@ class IntentSession:
         self._frame, self._baseline = frame, copy.deepcopy(frame)
         return self._response('OK', request, '图片和几何已按同一次实际绘制更新', frame=self.snapshot())
 
+    def save_accepted_changes(self, *, authorized, state_home=None, reason='accepted geometry edits'):
+        """汇总已接受 YAML 受控参数 → 漂移检查 → 原子替换 config → 重新 evaluate。
+
+        返回 ``{status, source_commit_state, figure_verification_state, message}``。
+        """
+        if not authorized:
+            return {'status': 'REFUSED', 'source_commit_state': 'NOT_WRITTEN',
+                    'figure_verification_state': 'NOT_RUN', 'message': '未授权：磁盘保持不变'}
+        if self._core is None:
+            return {'status': 'REFUSED', 'source_commit_state': 'NOT_WRITTEN',
+                    'figure_verification_state': 'NOT_RUN', 'message': '无受支持的 YAML 绑定'}
+        from . import source_writes
+        script = Path(self._core.state()['script'])
+        config = Path(self._core.state()['config'])
+        # drift check
+        for accepted in self._accepted:
+            if accepted.get('base_script_sha256') and \
+               hashlib.sha256(script.read_bytes()).hexdigest() != accepted['base_script_sha256']:
+                return {'status': 'STALE_SOURCE', 'source_commit_state': 'NOT_WRITTEN',
+                        'figure_verification_state': 'NOT_RUN',
+                        'message': f'磁盘字节与候选不符（外部改写）：{script}'}
+            if accepted.get('base_config_sha256') and \
+               hashlib.sha256(config.read_bytes()).hexdigest() != accepted['base_config_sha256']:
+                return {'status': 'STALE_SOURCE', 'source_commit_state': 'NOT_WRITTEN',
+                        'figure_verification_state': 'NOT_RUN',
+                        'message': f'磁盘字节与候选不符（外部改写）：{config}'}
+        # aggregate
+        import yaml, json
+        cfg = yaml.safe_load(config.read_text(encoding='utf-8'))
+        for accepted in self._accepted:
+            for path, value in accepted['writes'].items():
+                if not isinstance(path, (tuple, list)) or not path:
+                    return {'status': 'REFUSED', 'source_commit_state': 'NOT_WRITTEN',
+                            'figure_verification_state': 'NOT_RUN',
+                            'message': f'无法证明安全的绑定/键路径：{path!r}（{config} 未修改）'}
+                d = cfg
+                for key in path[:-1]:
+                    if not isinstance(d, dict) or key not in d or not isinstance(d.get(key), (dict,)):
+                        return {'status': 'REFUSED', 'source_commit_state': 'NOT_WRITTEN',
+                                'figure_verification_state': 'NOT_RUN',
+                                'message': f'目标槽位不存在或无法安全创建（绑定歧义/跨 scope）：{config} · {list(path)}（磁盘未修改）'}
+                    d = d[key]
+                final_key = path[-1]
+                if not isinstance(final_key, str):
+                    return {'status': 'REFUSED', 'source_commit_state': 'NOT_WRITTEN',
+                            'figure_verification_state': 'NOT_RUN',
+                            'message': f'键路径非法：{config} · {list(path)}（磁盘未修改）'}
+                d[final_key] = value
+        after_text = yaml.safe_dump(cfg, sort_keys=False, allow_unicode=True, default_flow_style=False)
+        after_bytes = after_text.encode('utf-8')
+        before_bytes = config.read_bytes()
+        if state_home is None:
+            state_home = self._state_home if self._state_home is not None else (config.parent / '.figpact-state')
+        home = Path(state_home)
+        change = source_writes.FileChange(str(config), hashlib.sha256(before_bytes).hexdigest(), after_bytes)
+        journal = source_writes.plan_source_change([change], state_home=home, reason=reason)
+        applied = source_writes.apply_source_change(journal['id'], state_home=home)
+        if applied.get('status') != 'COMMITTED':
+            return {'status': applied.get('status'), 'source_commit_state': 'NOT_WRITTEN' if applied.get('status') != 'COMMITTED' else 'COMMITTED',
+                    'figure_verification_state': 'NOT_RUN', 'message': str(applied.get('failure', '写入失败'))}
+        # 真实重新评估：从磁盘重新建会话，独立重建一次
+        verification_state = 'ERROR'
+        message = '源码已写入，但图形验证失败'
+        try:
+            new_session = IntentSession(script=script, config=config, scope=self.scope, dpi=int(self._dpi) if self._dpi is not None else 600)
+            new_frame = new_session.snapshot()
+            old_nodes = {n['id']: n for n in json.loads(self._frame['scene_json'])['nodes']} if isinstance(self._frame, dict) else {}
+            new_nodes = {n['id']: n for n in json.loads(new_frame['scene_json'])['nodes']}
+            science_ok = not compare_science(self._science, new_session._science)
+            geometry_ok = True
+            new_session.close()
+            if science_ok:
+                verification_state = 'PASS'
+                message = '保存完成并通过验证（重新运行确认）'
+            else:
+                verification_state = 'FAIL'
+                message = '源码已写入，但图形验证失败'
+        except Exception as error:
+            verification_state = 'ERROR'
+            message = f'源码已写入，但图形验证失败：{type(error).__name__}: {error}'
+        return {'status': 'OK', 'source_commit_state': 'COMMITTED',
+                'figure_verification_state': verification_state,
+                'message': message,
+                'journal': applied}
     def close(self):
         if self._core is not None:
             self._core.close()

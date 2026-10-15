@@ -18,6 +18,7 @@ import difflib
 import hashlib
 import json
 import os
+import stat
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -198,15 +199,38 @@ def _unified_diff(path: Any, before: bytes, after: bytes) -> str | None:
                                  fromfile=f'a/{path}', tofile=f'b/{path}')
     return ''.join(lines)
 
-
 def _write_target(target: Path, data: bytes, journal_id: str) -> None:
-    """临时文件 fsync 后受控 replace，绝不直接截断用户文件。"""
+    """临时文件 fsync 后受控 replace，绝不直接截断用户文件。
+
+    单文件原子替换不是多文件整体原子性；权限尽量保持到被替换文件的能力范围内。
+    """
     tmp = Path(f'{target}.{_TMP_SUFFIX}-{journal_id}')
+    before_mode = None
+    try:
+        before_mode = os.stat(target).st_mode
+    except FileNotFoundError:
+        before_mode = None
     try:
         with open(tmp, 'wb') as handle:
             handle.write(data)
             _fsync_file(handle)
+        if before_mode is not None:
+            try:
+                os.chmod(tmp, stat.S_IMODE(before_mode))
+            except OSError:
+                pass
+        # Windows 不允许覆盖只读目标文件：写盘前临时放行，写完立刻恢复（POSIX 无此问题）。
+        if before_mode is not None:
+            try:
+                os.chmod(target, before_mode | stat.S_IWRITE)
+            except OSError:
+                pass
         os.replace(tmp, target)
+        if before_mode is not None:
+            try:
+                os.chmod(target, stat.S_IMODE(before_mode))
+            except OSError:
+                pass
     except (OSError, ValueError):
         Path(tmp).unlink(missing_ok=True)
         raise
