@@ -302,17 +302,21 @@ def _build_fig(science, scope_target, cfg):
         leg.set_gid(_gid("legend", "", ""))
 
     # 标签必须在**坐标框内可见**：在**最终布局之后**按渲染后的真实 bbox 抬高 ylim。
-    # （若在布局之前做，会被随后的 subplots_adjust 推翻 —— 顶部那个标签就是因此被裁。）
-    if ax.texts:
+    # 迭代两次：第一次测量可能基于旧布局，set 之后再测一次才稳定。
+    for _pass in range(2):
+        if not ax.texts:
+            break
         fig.canvas.draw()
         _renderer = fig.canvas.get_renderer()
         _inv = ax.transData.inverted()
         _y0, _y1 = ax.get_ylim()
-        _top = _y1
-        for _t in ax.texts:
-            _bb = _t.get_window_extent(renderer=_renderer).transformed(_inv)
-            _top = max(_top, float(_bb.y1))
-        ax.set_ylim(_y0, max(_y1, _top) + 0.06 * (_y1 - _y0))
+        _tops = [float(t.get_window_extent(renderer=_renderer).transformed(_inv).y1)
+                 for t in ax.texts]
+        _need = max(_tops) + 0.06 * (_y1 - _y0) if _tops else _y1
+        if _pass == 0:
+            print(f"[labels] ylim_before=({_y0:.3f},{_y1:.3f}) bbox_tops={[round(v,3) for v in _tops]}")
+        ax.set_ylim(_y0, max(_y1, _need))
+    print(f"[labels] ylim_after={tuple(round(v,3) for v in ax.get_ylim())}")
 
     return fig, reg
 

@@ -3,10 +3,10 @@
     {
       "slug": "series-01-ugly",
       "file": "docs\\readme\\series-01-ugly.png",
-      "bytes": 172234,
+      "bytes": 174622,
       "action": "starting config",
-      "elapsed_s": 0.298,
-      "audit_elapsed_s": 0.194,
+      "elapsed_s": 0.28,
+      "audit_elapsed_s": 0.198,
       "canvas_mm": [
         66.0,
         40.0
@@ -63,7 +63,7 @@
       "text_outside_canvas_gids": [],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 4,
+      "clipped_artists": 1,
       "clipped_artist_gids": [],
       "label_peak_offset_ppm": [
         {
@@ -91,7 +91,7 @@
         0.8,
         1.5
       ],
-      "spatial_risk_count": 4,
+      "spatial_risk_count": 1,
       "rendered_labels": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -122,10 +122,10 @@
     {
       "slug": "series-02-spacing",
       "file": "docs\\readme\\series-02-spacing.png",
-      "bytes": 164178,
+      "bytes": 166873,
       "action": "widen sample pitch",
-      "elapsed_s": 0.214,
-      "audit_elapsed_s": 0.177,
+      "elapsed_s": 0.21,
+      "audit_elapsed_s": 0.207,
       "canvas_mm": [
         66.0,
         40.0
@@ -182,7 +182,7 @@
       "text_outside_canvas_gids": [],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 4,
+      "clipped_artists": 1,
       "clipped_artist_gids": [],
       "label_peak_offset_ppm": [
         {
@@ -210,7 +210,7 @@
         0.8,
         1.5
       ],
-      "spatial_risk_count": 4,
+      "spatial_risk_count": 1,
       "rendered_labels": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -241,10 +241,10 @@
     {
       "slug": "series-03-canvas",
       "file": "docs\\readme\\series-03-canvas.png",
-      "bytes": 156939,
+      "bytes": 160077,
       "action": "larger canvas/margins",
-      "elapsed_s": 0.209,
-      "audit_elapsed_s": 0.223,
+      "elapsed_s": 0.216,
+      "audit_elapsed_s": 0.247,
       "canvas_mm": [
         96.0,
         62.0
@@ -291,7 +291,7 @@
       "text_outside_canvas_gids": [],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 3,
+      "clipped_artists": 0,
       "clipped_artist_gids": [],
       "label_peak_offset_ppm": [
         {
@@ -319,7 +319,7 @@
         0.8,
         1.5
       ],
-      "spatial_risk_count": 3,
+      "spatial_risk_count": 0,
       "rendered_labels": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -350,10 +350,10 @@
     {
       "slug": "series-04-labels",
       "file": "docs\\readme\\series-04-labels.png",
-      "bytes": 159186,
+      "bytes": 160712,
       "action": "label lanes + min gap + shifts",
-      "elapsed_s": 0.212,
-      "audit_elapsed_s": 0.23,
+      "elapsed_s": 0.233,
+      "audit_elapsed_s": 0.258,
       "canvas_mm": [
         96.0,
         62.0
@@ -368,17 +368,12 @@
       ],
       "text_bbox_overlaps": 0,
       "text_bbox_overlap_pairs": [],
-      "text_curve_overlaps": 6,
+      "text_curve_overlaps": 5,
       "text_curve_overlap_pairs": [
         {
           "text": "Cluster I (a/b)",
           "text_gid": "figdemo.main.peak.alpha.2p06",
           "curve_gid": "figdemo.main.curve.alpha"
-        },
-        {
-          "text": "Cluster I (a/b)",
-          "text_gid": "figdemo.main.peak.alpha.2p06",
-          "curve_gid": "figdemo.main.curve.beta"
         },
         {
           "text": "Cluster II (a/b)",
@@ -405,7 +400,7 @@
       "text_outside_canvas_gids": [],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 3,
+      "clipped_artists": 0,
       "clipped_artist_gids": [],
       "label_peak_offset_ppm": [
         {
@@ -433,7 +428,7 @@
         0.8,
         1.5
       ],
-      "spatial_risk_count": 3,
+      "spatial_risk_count": 0,
       "rendered_labels": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -464,10 +459,10 @@
     {
       "slug": "series-05-typography",
       "file": "docs\\readme\\series-05-typography.png",
-      "bytes": 139577,
+      "bytes": 130042,
       "action": "unify fonts and line width",
-      "elapsed_s": 0.221,
-      "audit_elapsed_s": 0.24,
+      "elapsed_s": 0.227,
+      "audit_elapsed_s": 0.235,
       "canvas_mm": [
         96.0,
         62.0
@@ -478,46 +473,24 @@
       ],
       "k": 1.000316,
       "infeasible": [],
-      "text_bbox_overlaps": 1,
-      "text_bbox_overlap_pairs": [
-        {
-          "pair": [
-            "10",
-            "−1"
-          ],
-          "area_px2": 5.18,
-          "gid_a": null,
-          "gid_b": null
-        }
-      ],
-      "text_curve_overlaps": 3,
+      "text_bbox_overlaps": 0,
+      "text_bbox_overlap_pairs": [],
+      "text_curve_overlaps": 1,
       "text_curve_overlap_pairs": [
-        {
-          "text": "Cluster I (a/b)",
-          "text_gid": "figdemo.main.peak.alpha.2p06",
-          "curve_gid": "figdemo.main.curve.alpha"
-        },
-        {
-          "text": "Sample B\n(synthetic)",
-          "text_gid": null,
-          "curve_gid": "figdemo.main.curve.beta"
-        },
         {
           "text": "Sample C\n(synthetic)",
           "text_gid": null,
           "curve_gid": "figdemo.main.curve.beta"
         }
       ],
-      "text_outside_canvas": 2,
+      "text_outside_canvas": 1,
       "text_outside_canvas_gids": [
-        "figdemo.main.peak.beta.5p00",
         "figdemo.main.peak.gamma.7p46"
       ],
       "legend_data_intersection": true,
       "clipped_texts": 0,
-      "clipped_artists": 5,
+      "clipped_artists": 1,
       "clipped_artist_gids": [
-        "figdemo.main.peak.beta.5p00",
         "figdemo.main.peak.gamma.7p46"
       ],
       "label_peak_offset_ppm": [
@@ -546,7 +519,7 @@
         0.9,
         1.5
       ],
-      "spatial_risk_count": 5,
+      "spatial_risk_count": 1,
       "rendered_labels": [
         {
           "gid": "figdemo.main.peak.alpha.2p06",
@@ -577,10 +550,10 @@
     {
       "slug": "series-06-final",
       "file": "docs\\readme\\series-06-final.png",
-      "bytes": 138177,
+      "bytes": 136038,
       "action": "legend settled, no overflow",
-      "elapsed_s": 0.207,
-      "audit_elapsed_s": 0.669,
+      "elapsed_s": 0.227,
+      "audit_elapsed_s": 0.941,
       "canvas_mm": [
         96.0,
         62.0
