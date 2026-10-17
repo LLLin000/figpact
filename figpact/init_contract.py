@@ -40,7 +40,10 @@ import yaml
 
 DRAFT_SCHEMA = "contract-draft/1"
 
-#: v0.1 发现范围：调用名 -> (角色, 期望参数键, artist 家族)
+#: v0.1 发现范围：调用名 -> (角色, 期望参数键, artist 家族)。
+#: 角色语义唯一权威见 figpact.roles：axis.title=坐标轴标签（xlabel/ylabel），
+#: 不是 Axes.set_title；set_title 由注册表判为错配（正主是保留角色 axes.title）。
+#: 调用家族名经 roles.resolve_legacy 做兼容解析（旧契约无歧义，新错配拒绝）。
 ENTRY_CALLS = {
     "set_xlabel": ("axis.title", "axis_font_pt", "xlabel"),
     "set_ylabel": ("axis.title", "axis_font_pt", "ylabel"),
@@ -53,26 +56,13 @@ ENTRY_KWARG = {
     "set_xlabel": "fontsize", "set_ylabel": "fontsize", "set_title": "fontsize",
     "tick_params": "labelsize", "plot": "linewidth",
 }
-#: 已知可验证参数 -> 角色（复用 plate.ROLE_TO_PARAMS 的键）。
-KNOWN_PARAM_ROLE = {
-    "axis_font_pt": "axis.title",
-    "tick_font_pt": "axis.tick",
-    "line_width": "curve.linewidth",
-}
-#: 6 个角色分母（复用 plate.COMPARE_ROLES 的顺序与成员）。
-DENOMINATOR_ROLES = ("axis.title", "axis.tick", "curve.linewidth",
-                     "panel.label", "legend", "scalebar")
-#: YAML 里属于角色但 v0.1 入口覆盖不到的键 -> 角色（系统化 unresolved，不猜）。
-ROLE_PARAM_FALLBACK = {
-    "label_font_pt": "panel.label", "peak_font_pt": "panel.label",
-    "legend_font_pt": "legend",
-}
-#: 样式扰动可接受的几何家族：角色 -> drawn_shapes kind 关键字。
-ROLE_GEOMETRY_FAMILY = {
-    "axis.title": ("xlabel_envelope", "ylabel_envelope", "title_envelope"),
-    "axis.tick": ("xtick_", "ytick_"),
-    "curve.linewidth": ("polyline",),
-}
+#: 已知可验证参数 -> 角色；6 角色分母；回退映射；几何家族：唯一语义见 figpact.roles。
+from figpact import roles as _roles
+KNOWN_PARAM_ROLE = dict(_roles.VERIFIABLE_PARAM_ROLE)
+DENOMINATOR_ROLES = _roles.COMPARE_ROLES
+ROLE_PARAM_FALLBACK = dict(_roles.ROLE_PARAM_FALLBACK)
+ROLE_GEOMETRY_FAMILY = {r: tuple(v) for r, v in _roles.GEOMETRY_FAMILY.items()}
+
 
 
 # --------------------------------------------------------------------------- #
@@ -321,6 +311,8 @@ def verify(path: Any, width_mm: Optional[float] = None) -> dict:
     返回 {verified:[...], failed:[...], skipped_unconfirmed:n}。
     """
     from figpact import effects
+    from figpact import change_audit as _ca
+    from figpact import roles as _roles
     from figpact.qa import blocking_problems
     from figpact.session import FigureSession, drawn_shapes
 
@@ -386,13 +378,25 @@ def verify(path: Any, width_mm: Optional[float] = None) -> dict:
                 try:
                     with redirect_stdout(io.StringIO()):
                         after_shapes = drawn_shapes(fig, reg, include_frames=True)
-                    after_styles = session._styles(fig, reg)
+                    # 对象级审计用全量快照（注册 + 未注册可见 Artist）：窄注册表
+                    # 快照里没有未注册的轴标签/刻度，会把“没量到”当成“没变化”。
+                    after_styles = _ca.style_snapshot(session, fig, reg)
                     after_science = session._capture_science(fig, reg)
                     with redirect_stdout(io.StringIO()):
                         after_qa = list(blocking_problems(fig))
                 finally:
                     import matplotlib.pyplot as plt
                     plt.close(fig)
+                # 对象级审计的基线同样走全量快照（与扰动后同一口径才可比）。
+                with redirect_stdout(io.StringIO()):
+                    _bfig, _breg = session.build_from_yaml(config)
+                try:
+                    with redirect_stdout(io.StringIO()):
+                        _bshapes = drawn_shapes(_bfig, _breg, include_frames=True)
+                    _bstyles = _ca.style_snapshot(session, _bfig, _breg)
+                finally:
+                    import matplotlib.pyplot as plt
+                    plt.close(_bfig)
                 problems: list[str] = []
                 # 1) 目标角色实测生效（plate 同一口径前后测）。
                 try:
@@ -439,15 +443,51 @@ def verify(path: Any, width_mm: Optional[float] = None) -> dict:
                 identity_ok = (after_gids == base_gids)
                 if not identity_ok:
                     problems.append("注册对象集合变化（对象身份不一致）")
-                # 5) 注册表样式变化不得超出声明对象。
+                # 5) 对象级差异审计（G12-B）：Actual ⊆ Allowed，且目标确实变了。
+                # 允许集 = 该角色的（声明对象 x 允许属性）+ 几何家族；语义唯一来源是
+                # roles 注册表，几何增量复用 session.shape_delta 口径。
+                _entry = _roles.ROLE_REGISTRY[role]
+                _declared = {gid for gid in base_gids
+                             if param in reg.params_of(gid)}
+                _declared |= _ca._attribute_unregistered(
+                    session, {'styles': _bstyles}, role, param, float(cur))
+                _allowed = {'styles': {g: set(_entry.get('properties') or ())
+                                       for g in _declared},
+                            'shapes': {k: 'geometry-family'
+                                       for k in set(_bshapes) | set(after_shapes)
+                                       if any(f in k for f in _roles.GEOMETRY_FAMILY.get(role, ()))},
+                            'required_targets': [{'gid': g, 'property': pr}
+                                                 for g in sorted(_declared)
+                                                 for pr in (_entry.get('properties') or ())]}
+                _audit = _ca.audit_pair(
+                    {'styles': _bstyles, 'shapes': _bshapes},
+                    {'styles': after_styles, 'shapes': after_shapes}, _allowed)
+                _hard = list(_audit['unauthorized'])
+                if _hard:
+                    problems.append(
+                        '对象级审计越权：' + '; '.join(
+                            f"{u['gid']}.{u['property']} {u.get('before')}->{u.get('after')}"
+                            for u in _hard))
+                if not any(g in (_audit['actual_changes']['styles'] or {})
+                           for g in _declared):
+                    problems.append('目标未实际变化（声明对象上无语义属性变更：防假成功） ' + repr(sorted(_declared)))
+                _obj_audit = {'unauthorized': _audit['unauthorized'],
+                              'derived_geometry': _audit.get('derived_geometry', []),
+                              'within_allowed': _audit['within_allowed'],
+                              'required_targets_effectively_changed':
+                                  _audit['required_targets_effectively_changed']}
+                # 5b) 窄注册表快照只做“身份稳定性”旁证，不做语义判定：语义判定以
+                # 全量对象级审计为准。窄快照里没有未注册的轴标签/刻度，按它判
+                # “牵连”必然误报（旧 G11 逻辑的已知缺陷，这里只留痕）。
                 stch = effects._style_changes(
                     base_styles, after_styles,
                     sorted(set(base_styles) | set(after_styles)))
                 declared_gids = {gid for gid in base_gids
                                  if param in reg.params_of(gid)}
-                style_out = sorted(set(stch) - declared_gids)
-                if style_out:
-                    problems.append(f"注册表样式牵连未声明对象：{style_out}")
+                narrow_out = sorted(set(stch) - declared_gids)
+                if narrow_out:
+                    _obj_audit['narrow_registry_note'] = (
+                        'narrow-registry-only observation (not a verdict): ' + repr(narrow_out))
                 # 6) 几何联动：家族内 = 预期；家族外 = 已记录联动（量化，不否决）。
                 family = ROLE_GEOMETRY_FAMILY.get(role, ())
                 in_family = {k: v for k, v in geo.items()
@@ -477,6 +517,7 @@ def verify(path: Any, width_mm: Optional[float] = None) -> dict:
                     "qa_added": qa_added,
                     "object_identity": {"gids_stable": identity_ok,
                                         "n_gids": len(base_gids)},
+                    'object_audit': _obj_audit,
                     "geometry_family": sorted(in_family),
                     "side_effects": [
                         {"key": k, "delta": v,

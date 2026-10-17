@@ -839,10 +839,13 @@ def cmd_plate_unify(args) -> int:
     after = unified.get("after") if isinstance(unified.get("after"), dict) else None
     compare = plate_mod.compare_roles(after or result, manifest, plan)
     rec = plate_mod.receipt(result, plan, unified if after else None,
-                            manifest=manifest, compare=compare)
+                            manifest=manifest, compare=compare,
+                            change_audit=unified.get("change_audits"))
     print(json.dumps({"status": unified["status"], "plan": plan, "unify": unified,
                       "compare": compare, "receipt": rec}, ensure_ascii=False, indent=2))
     ok = unified["status"] in ("OK", "PARTIAL")
+    if unified.get("change_audits") and any(c.get("blocking") for c in unified["change_audits"] if isinstance(c, dict)):
+        ok = False
     if after:
         bad = [f for f in after.get("figures", []) if f.get("out_of_bounds") or f.get("infeasible")]
         ok = ok and not bad

@@ -32,10 +32,14 @@ from typing import Any, Optional
 RECEIPT_SCHEMA_VERSION = "plate-receipt/1"
 MEASURE_PROTOCOL = "canvas.draw + Text.get_window_extent(renderer) -> final-size pt; export probe via savefig"
 
-#: Unifiable by default (code + vector): user-supplied or profile target.
-UNIFIABLE_ROLES = ("axis.title", "axis.tick", "curve.linewidth")
-#: Compare only, never forced: density differs, forcing breaks layout.
-COMPARE_ONLY_ROLES = ("peak.label", "legend", "note")
+#: 角色语义唯一权威：figpact.roles（G12-A）。此处只复出，不另立定义。
+from figpact import roles as _roles
+COMPARE_ROLES = _roles.COMPARE_ROLES
+ROLE_TO_PARAMS = _roles.ROLE_TO_PARAMS
+CONFORMANT_ROLES = tuple(r for r, e in _roles.ROLE_REGISTRY.items() if e.get("unify"))
+UNIFIABLE_ROLES = CONFORMANT_ROLES
+#: 只比较、永不强制（密度逐图不同）；scalebar 恒为 n/a（显微图标定保护）。
+COMPARE_ONLY_ROLES = tuple(r for r in COMPARE_ROLES if r not in CONFORMANT_ROLES)
 #: Tolerance for post-unify cross-figure spread of measured roles (pt).
 UNIFY_TOLERANCE_PT = 0.25
 
@@ -76,6 +80,7 @@ def _renderer_basis(fig) -> dict:
     return {"method": MEASURE_PROTOCOL, "renderer": backend, "figure_dpi": dpi}
 
 
+#: 遗留别名（G11 以前手写映射）：唯一语义见 figpact.roles.VERIFIABLE_PARAM_ROLE。
 ROLE_PARAM_TO_ROLE = {"axis_font_pt": "axis.title", "tick_font_pt": "axis.tick"}
 
 
@@ -707,7 +712,38 @@ def unify(plan: dict, *, specs: Optional[list[dict]] = None, dry_run: bool = Fal
                  if isinstance(p.get("result"), dict) and p["result"].get("source_commit_state") == "COMMITTED"]
     status = "OK" if per_figure and len(committed) == len(per_figure) else (
         "PARTIAL" if committed else "FAILED")
-    return {"status": status, "per_figure": per_figure, "after": after}
+    # G12-B 对象级差异审计：每张已提交的图，对“写后”做一次对象级复核
+    # （Actual ⊆ Allowed 且目标确实变了）。复用 change_audit， science 结论
+    # 只搬 science 指纹比较，不自创口径；失败只记 verdict，不回滚已提交写入。
+    change_audits = []
+    try:
+        from figpact import change_audit as _ca
+        for entry, step in zip(per_figure, plan.get("steps", [])):
+            result = entry.get("result") or {}
+            if result.get("source_commit_state") != "COMMITTED":
+                continue
+            spec = by_label.get(step.get("figure")) or {}
+            audits = []
+            for key, (old_v, _new_v) in (step.get("changes") or {}).items():
+                if key in ("canvas_w_mm", "canvas_h_mm") or old_v is None:
+                    continue
+                try:
+                    audits.append(_ca.verify_param(
+                        spec.get("path"), spec.get("config"), spec.get("scope"),
+                        key))
+                except Exception as error:
+                    audits.append({"param": key, "status": "AUDIT_ERROR",
+                                   "error": f"{type(error).__name__}: {error}"})
+            change_audits.append({"figure": step.get("figure"), "audits": audits,
+                                  "blocking": [a for a in audits
+                                               if a.get("status") not in ("EFFECT_OK",)]})
+    except Exception as error:
+        change_audits = [{"error": f"{type(error).__name__}: {error}"}]
+    blocking = [c for c in change_audits if c.get("blocking")]
+    if blocking:
+        status = "AUDIT_BLOCKED"
+    return {"status": status, "per_figure": per_figure, "after": after,
+            "change_audits": change_audits}
 
 
 def _stable_hash(payload: dict) -> str:
@@ -781,6 +817,10 @@ def receipt(audit_result: dict, plan: Optional[dict] = None,
         "design_token_sources": token_sources,
         "policy": ((manifest or {}).get("policy") if isinstance(manifest, dict) else None),
         "compare": compare,
+        "role_registry": {"schema": _roles.REGISTRY_SCHEMA,
+                          "roles": _roles.registry_snapshot(),
+                          "order": list(_roles.COMPARE_ROLES)},
+        "change_audit": kwargs.get("change_audit"),
         "note": "reproducibility: identical inputs produce byte-identical JSON excluding generated_at; generated_at is informational only and excluded from content_hash",
     }
     # ponytail: figure dicts carry absolute paths, so content_hash proves this
@@ -851,23 +891,6 @@ DESIGN_TOKEN_TO_PARAM = {
     "curve_linewidth_pt": "line_width",
     "panel_label_pt": "label_font_pt",
 }
-
-#: Fixed compare-table row order.
-COMPARE_ROLES = ("axis.title", "axis.tick", "curve.linewidth",
-                 "panel.label", "legend", "scalebar")
-
-#: Role -> source parameter(s); empty = protected, no knob exists.
-ROLE_TO_PARAMS = {
-    "axis.title": ("axis_font_pt",),
-    "axis.tick": ("tick_font_pt",),
-    "curve.linewidth": ("line_width",),
-    "panel.label": ("label_font_pt", "peak_font_pt"),
-    "legend": ("legend_font_pt",),
-    "scalebar": (),
-}
-
-#: Roles a shared token may force (hence Conformant is decidable).
-CONFORMANT_ROLES = ("axis.title", "axis.tick", "curve.linewidth")
 
 #: Compare role -> design token carrying its target (panel_label: target only).
 ROLE_TO_TOKEN = {
