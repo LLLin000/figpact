@@ -199,6 +199,17 @@ def _unified_diff(path: Any, before: bytes, after: bytes) -> str | None:
                                  fromfile=f'a/{path}', tofile=f'b/{path}')
     return ''.join(lines)
 
+def _unlink_tmp(tmp: Path) -> None:
+    """删除写入临时文件；Windows 上只读位会拦 unlink，先放行再删（尽力而为）。"""
+    try:
+        os.chmod(tmp, stat.S_IWRITE | stat.S_IREAD)
+    except OSError:
+        pass
+    try:
+        Path(tmp).unlink(missing_ok=True)
+    except OSError:
+        pass
+
 def _write_target(target: Path, data: bytes, journal_id: str) -> None:
     """临时文件 fsync 后受控 replace，绝不直接截断用户文件。
 
@@ -219,12 +230,8 @@ def _write_target(target: Path, data: bytes, journal_id: str) -> None:
                 os.chmod(tmp, stat.S_IMODE(before_mode))
             except OSError:
                 pass
-        # Windows 不允许覆盖只读目标文件：写盘前临时放行，写完立刻恢复（POSIX 无此问题）。
-        if before_mode is not None:
-            try:
-                os.chmod(target, before_mode | stat.S_IWRITE)
-            except OSError:
-                pass
+        # 只读目标不临时放行：Windows replace 只读目标本就该失败，
+        # 失败即走调用方回滚；放行会把"中途失败"变成静默成功。
         os.replace(tmp, target)
         if before_mode is not None:
             try:
@@ -232,7 +239,7 @@ def _write_target(target: Path, data: bytes, journal_id: str) -> None:
             except OSError:
                 pass
     except (OSError, ValueError):
-        Path(tmp).unlink(missing_ok=True)
+        _unlink_tmp(tmp)
         raise
 
 
@@ -300,7 +307,7 @@ def _rollback(home: Path, journal: dict) -> None:
     """
     for entry in journal['files']:
         target = Path(entry['path'])
-        Path(f"{target}.{_TMP_SUFFIX}-{journal['id']}").unlink(missing_ok=True)
+        _unlink_tmp(Path(f"{target}.{_TMP_SUFFIX}-{journal['id']}"))
         actual = _sha256_file(target)
         ours = entry['status'] == 'MISMATCH'
         certified = actual == entry['before_sha256']
