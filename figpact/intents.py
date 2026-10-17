@@ -12,6 +12,7 @@ intents through the same oracle. The legacy UI is NOT wired to that mode; the
 from __future__ import annotations
 
 import base64
+import binascii
 import tempfile
 import copy
 import hashlib

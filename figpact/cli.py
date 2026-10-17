@@ -967,6 +967,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_agent.add_argument("--script", required=True, help="绘图脚本路径")
     p_agent.add_argument("--config", required=True, help="配置文件 YAML 路径")
     p_agent.add_argument("--scope", required=True, help="会话作用域（一张图一个工作进程）")
+    p_agent.add_argument("--output-dir", default=None, dest="output_dir",
+                         help="产物根目录（默认脚本所在目录）")
     # final-size (read-only)
     p_fs = subparsers.add_parser("final-size", aliases=["audit-final-size"], help="只读 final-size 审计")
     p_fs.add_argument("--script", required=True, help="绘图脚本路径")
