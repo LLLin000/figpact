@@ -74,7 +74,7 @@ REVISION_FIELDS = (('session_id', '会话'), ('scene_revision', '图帧'), ('sou
 #: 只读 Agent 上下文通道（P1-b）的 schema 名：scene / constraints / impact 三部分。
 AGENT_CONTEXT_SCHEMA = 'figpact.hub.agent_context/1'
 #: ghost（预览轮廓）资格的唯一规则在页面侧；hub 只按它读**既有** Scene 字段，不另立判据。
-GHOST_RULE_SOURCE = 'tools/inspector/inspector.js:canGhostNode（预览资格，不构成可写结论）'
+GHOST_RULE_SOURCE = 'figpact/_inspector/inspector.js:canGhostNode（预览资格，不构成可写结论）'
 #: 三部分各自的既有真值来源，随回执一起给：读的人不必猜谁说了算。
 CONTEXT_SOURCES = {
     'scene': 'session.snapshot() 的 canonical scene（scene_json：既有 Scene 构建 + Inspector 投影）',
@@ -115,7 +115,7 @@ def _canonical_scene(frame):
 def _ghost_state(node):
     """``(可 ghost, 阻止原因)``：按页面唯一规则读既有 Scene 字段，服务端不另立一套判据。
 
-    规则本体是 ``tools/inspector/inspector.js:canGhostNode``（P1-a 的拖动预览）。这里只把
+    规则本体是 ``figpact/_inspector/inspector.js:canGhostNode``（P1-a 的拖动预览）。这里只把
     同一组**既有字段**翻成可读回执：类型 / 清单附着 annotation / gid 含 guide / 未测量 /
     被完全裁掉。ghost 是**预览**资格，**不是**"引擎会受理这次改动"的结论。
     """

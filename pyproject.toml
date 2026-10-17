@@ -7,6 +7,12 @@ name = "figpact"
 version = "0.1.0"
 description = "Parameter pacts and layout engine for publication figures"
 readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "LLLin000"}]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
 requires-python = ">=3.10"
 dependencies = [
     "matplotlib>=3.8",
@@ -15,3 +21,10 @@ dependencies = [
 
 [project.scripts]
 figpact = "figpact.cli:main"
+
+[tool.setuptools]
+packages = ["figpact"]
+include-package-data = false
+
+[tool.setuptools.package-data]
+figpact = ["_inspector/*"]

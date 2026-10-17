@@ -1,6 +1,6 @@
 'use strict';
 
-// G1 frontend inspector tests: pure helper interface of tools/inspector/inspector.js.
+// G1 frontend inspector tests: pure helper interface of figpact/_inspector/inspector.js.
 // Node builtins only (node:test / node:assert / node:crypto for gold digests).
 // The frontend script must be loadable in Node without a DOM.
 
@@ -16,7 +16,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAyAAAAGQCAYAAABWJQQ0AAAE70lEQVR
 
 const HELPER_PATH = process.env.FIGPACT_INSPECTOR_JS
   ? process.env.FIGPACT_INSPECTOR_JS
-  : path.join(__dirname, '..', '..', 'tools', 'inspector', 'inspector.js');
+  : path.join(__dirname, '..', '..', 'figpact', '_inspector', 'inspector.js');
 
 function loadHelper() {
   assert.equal(fs.existsSync(HELPER_PATH), true, `missing frontend helper: ${HELPER_PATH}`);

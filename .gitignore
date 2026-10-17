@@ -16,3 +16,8 @@ examples/**/Fig_*
 # 原始仪器数据：不进仓（含未发表谱图）。本地保留以便 examples 能跑。
 examples/ftir/2084_*/
 examples/nmr/核磁原始数据/
+
+# 构建产物
+build/
+dist/
+*.egg-info/

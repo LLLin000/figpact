@@ -378,6 +378,43 @@ def _contract_catalog(module, scope):
     return {"scopes": {scope: {"groups": [{"params": params}]}}, "raw": contract}, contract
 
 
+def _catalog_with_verified(module, scope, verified_params):
+    """layout catalog + 已验证 contract 键（人工确认+扰动验证过的 YAML 顶层键）。
+
+    只允许 SCALARS 有声明区间的顶层数值键；区间取自脚本 SCALARS，不另抄数字。
+    画布键（canvas_w_mm/canvas_h_mm）是"统一最终宽度"的既有机制，随 verified
+    写入一并放行（沿用 layout contract 同键的声明；无声明则沿 SCALARS 区间）。
+    """
+    catalog, contract = _contract_catalog(module, scope)
+    have = {tuple(p["path"]) for s in catalog["scopes"].values()
+            for g in s["groups"] for p in g["params"]}
+    scalars = getattr(module, "SCALARS", {}) or {}
+    layout_by_path = {tuple(p.get("path", [])): p
+                      for p in (contract.get("parameters") or [])}
+    extra = []
+    for key in sorted({str(v) for v in (verified_params or [])}
+                      | ({"canvas_w_mm", "canvas_h_mm"} if verified_params else set())):
+        if (key,) in have:
+            continue
+        lp = layout_by_path.get((key,))
+        if isinstance(lp, dict) and lp.get("mutability") == "EDITABLE":
+            extra.append({"key": key, "path": [key], "unit": lp.get("unit", "mm"),
+                          "类型": "float",
+                          "min": lp.get("min", float("-inf")),
+                          "max": lp.get("max", float("inf"))})
+            continue
+        spec = scalars.get(key)
+        if not (isinstance(spec, tuple) and len(spec) == 3
+                and spec[0] in (float, int)):
+            continue
+        extra.append({"key": key, "path": [key], "unit": "mm",
+                      "类型": ("int" if spec[0] is int else "float"),
+                      "min": spec[1], "max": spec[2]})
+    if extra:
+        catalog["scopes"][scope]["groups"][0]["params"].extend(extra)
+    return catalog
+
+
 def safe_editable_fields(script, config=None, scope=None, target_width_mm=None):
     script = Path(script)
     module = _import_script(script)
@@ -392,12 +429,15 @@ def safe_editable_fields(script, config=None, scope=None, target_width_mm=None):
             editable.append(p.get("key"))
     return sorted(set(editable)), scope, cfg
 
-
 def apply_final_size(script, config=None, *, target_width_mm=None, target_axis_font_pt=8.0,
                     target_tick_font_pt=7.0, target_line_pt=0.8, mode="B",
                     scope=None, state_home=None,
-                    dry_run=False) -> dict:
-    """Controlled final-size style application (mode B only implements; mode A diagnostic)."""
+                    dry_run=False, verified_params=None) -> dict:
+    """Controlled final-size style application (mode B only implements; mode A diagnostic).
+
+    G11: ``verified_params`` 为清单已验证 contract 的参数键集合（人工确认+扰动验证）；
+    给出时与 layout_contract 的 EDITABLE 取并集作为安全入口。不给保持原语义。
+    """
     script = Path(script)
     module = _import_script(script)
     cfg_before = _load_config(module, script, config)
@@ -410,8 +450,10 @@ def apply_final_size(script, config=None, *, target_width_mm=None, target_axis_f
         target_width_mm = float(cfg_before.get("canvas_w_mm", 42.0))
 
     catalog, contract = _contract_catalog(module, scope)
+    if verified_params:
+        catalog = _catalog_with_verified(module, scope, verified_params)
     editable, _, _ = safe_editable_fields(script, config, scope, target_width_mm)
-    editable_set = set(editable)
+    editable_set = set(editable) | {str(v) for v in (verified_params or [])}
 
     targets = {
         "axis_font_pt": target_axis_font_pt,
@@ -425,7 +467,6 @@ def apply_final_size(script, config=None, *, target_width_mm=None, target_axis_f
     if not applied_targets:
         reasons = {k: "no safe modification entry in layout_contract (not EDITABLE)" for k in missing}
         return {
-            "status": "REFUSED",
             "source_commit_state": "NOT_WRITTEN",
             "figure_verification_state": "NOT_RUN",
             "message": "无安全修改入口: " + ", ".join(missing),

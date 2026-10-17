@@ -35,7 +35,10 @@ EDITABLE_CAPABILITY = 'READ_ONLY'
 
 _PACKAGE_DIR = pathlib.Path(__file__).resolve().parent
 _REPO_ROOT = _PACKAGE_DIR.parent
-_FRONTEND_DIR = _REPO_ROOT / 'tools' / 'inspector'
+_FRONTEND_DIR = _PACKAGE_DIR / '_inspector'
+_FALLBACK_FRONTEND = _REPO_ROOT / 'tools' / 'inspector'
+if not _FRONTEND_DIR.is_dir() and _FALLBACK_FRONTEND.is_dir():
+    _FRONTEND_DIR = _FALLBACK_FRONTEND
 # 导出目标落在这些源码/前端/测试目录内一律拒绝：绝不让导出写坏仓库文件。
 _GUARDED_DIRS = (_PACKAGE_DIR, _REPO_ROOT / 'tools', _REPO_ROOT / 'tests')
 
@@ -362,7 +365,7 @@ def _refuse_unsafe_target(target: pathlib.Path) -> None:
 def _frontend_assets() -> list[pathlib.Path]:
     directory = _FRONTEND_DIR
     if not directory.is_dir():
-        raise InspectorError(f'前端资源目录不存在：{directory}（仓库 tools/inspector 未提供）')
+        raise InspectorError(f'前端资源目录不存在：{directory}（包内 figpact/_inspector 未提供）')
     assets = [directory / name for name in ('index.html', 'inspector.js', 'inspector.css')]
     missing = [path.name for path in assets if not path.is_file()]
     if missing:

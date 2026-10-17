@@ -1,7 +1,7 @@
 """Trusted, loopback-only G2 Inspector bridge; no save/publish/source-edit routes.
 
 The browser only sends geometry intents. Script/config choices belong to the
-local caller, never to HTTP requests. UI assets stay in tools/inspector/.
+local caller, never to HTTP requests. UI assets stay in figpact/_inspector/.
 
 G5a adds read-only selection and task coordination (``/api/selection``,
 ``/api/tasks``) through an in-memory SessionHub. It still grants neither source
@@ -28,7 +28,18 @@ from typing import cast
 from .hub import CLIENT_HEADER, UI_TOKEN_HEADER, SessionHub
 from .intents import IntentSession
 
-FRONTEND = Path(__file__).resolve().parents[1] / 'tools' / 'inspector'
+try:
+    from importlib import resources as _importlib_resources
+    _PKG_FRONTEND = Path(str(_importlib_resources.files('figpact').joinpath('_inspector')))
+except Exception:
+    _PKG_FRONTEND = None
+_REPO_FRONTEND = Path(__file__).resolve().parents[1] / 'tools' / 'inspector'
+if _PKG_FRONTEND is not None and _PKG_FRONTEND.is_dir():
+    FRONTEND = _PKG_FRONTEND
+elif _REPO_FRONTEND.is_dir():
+    FRONTEND = _REPO_FRONTEND
+else:
+    FRONTEND = Path(__file__).resolve().parent / '_inspector'
 MAX_REQUEST_BYTES = 65536
 #: ``/api/plans/<plan_id>/<action>``：只有这三个动作，其它一律 404。
 PLAN_ACTIONS = ('authorize', 'apply', 'cancel')
@@ -137,7 +148,8 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         try:
             body = (self._app.frontend / name).read_bytes()
         except OSError:
-            self._send({'status': 'NOT_FOUND', 'message': 'Inspector 静态资源不存在'}, 404)
+            missing = name
+            self._send({'status': 'NOT_FOUND', 'message': f'Inspector 静态资源缺失：{missing}（期望位置：{self._app.frontend}）'}, 404)
             return
         self._send(body, media=media)
 
@@ -230,7 +242,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         self._send(result, code)
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--example', choices=('plain', 'nmr', 'ftir'), default='plain')
     parser.add_argument('--script', type=Path, help='Explicitly trusted local script, never supplied by HTTP')
@@ -241,13 +253,16 @@ def main():
                         help='Display resolution only; originals and publication files are never changed')
     parser.add_argument('--frontend', type=Path, default=FRONTEND,
                         help='Trusted local Inspector assets (development worktree only)')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if bool(args.script) != bool(args.config):
         parser.error('--script 和 --config 必须同时指定')
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
-    from tools.inspector_demo import plain_figure
+    try:
+        from tools.inspector_demo import plain_figure
+    except Exception:
+        plain_figure = None
     figure = None
     source = None
     if args.script is not None:
@@ -255,13 +270,19 @@ def main():
         # history 工作区身份：G5b 授权写入的 source_change 检查点落在同一个工作区里。
         source = {'script': str(args.script), 'config': str(args.config), 'scope': args.scope}
     elif args.example == 'plain':
+        if plain_figure is None:
+            parser.error('演示资源 tools.inspector_demo 不可用（正式入口请用 --script/--config）')
         figure = plain_figure()
         figure.set_dpi(args.dpi)
         session = IntentSession(figure=figure, scope='measurement')
     else:
         folder = Path(__file__).resolve().parents[1] / 'examples' / args.example
+        if not folder.is_dir():
+            parser.error(f'演示资源目录不存在：{folder}（--example 为可选演示，不影响正常启动）')
         script = folder / ('08 NMR.py' if args.example == 'nmr' else 'plot_ftir.py')
         config = folder / (args.example + '.yaml')
+        if not script.is_file() or not config.is_file():
+            parser.error(f'演示资源缺失：{script} / {config}')
         session = IntentSession(script=script, config=config, scope=args.scope, dpi=args.dpi)
         source = {'script': str(script), 'config': str(config), 'scope': args.scope}
     try:
