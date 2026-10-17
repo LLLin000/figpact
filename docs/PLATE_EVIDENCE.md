@@ -50,3 +50,23 @@
 - **覆盖率（分母恒为 6 个角色，含未发现）**：`verified_editable = [axis.title, axis.tick, curve.linewidth]`、`candidate = []`、`unresolved = [legend, panel.label]`、`unsupported = [scalebar]`。**没有把未发现角色从分母里剔除**。
 
 **三项收口条件对照**：demo 三角色 `E✗ → E✓` ✓；SVG/PNG 能力边界不变 ✓；FTIR `tick` 保持 `E✗` ✓。科学数据与非目标不变作为每条绑定的证据之一随扰动一并校验。
+
+---
+
+## Apply 验收（隔离副本，`plate_g11.yaml`，统一 80 mm）
+
+清单：`design.global.axis_title_pt=8`、`axis_tick_pt=8`、`plot.curve_linewidth_pt=0.8`。全部在 TEMP 副本上执行，**仓库 `examples/` 未被修改**。
+
+| 图 | 角色 | 统一前 | 统一后 |
+|---|---|---|---|
+| **demo** | axis.title | 7.11 [C✓ E✓ F✗] | **8.00 [C✓ E✓ F✓]** |
+| | axis.tick | 6.22 [C✓ E✓ F✗] | **8.00 [C✓ E✓ F✓]** |
+| | curve.linewidth | 0.80 [C✓ E✓ F✓] | **0.80 [C✓ E✓ F✓]** |
+| **ftir** | axis.title | 14.18 [C✓ E✓ F✗] | **8.00 [C✓ E✓ F✓]** |
+| | axis.tick | 13.34 [C✓ **E✗** F✗] | 8.00 [C✓ **E✗** F✓] ← **不可控但恰好达标** |
+| | curve.linewidth | 1.42 [C✓ E✓ F✗] | **0.80 [C✓ E✓ F✓]** |
+| 矢量 / 位图 | 全部角色 | C✗ E✗ F– | **不变**（边界未被动过） |
+
+- **回执**：`status OK` / `source_commit_state COMMITTED` / `figure_verification_state PASS` / `APPLIED`，与产物一一对应。
+- **一条新的、重要的观测**：FTIR 的 `tick` 现在是 `E✗ **F✓**`——**数值达标但不可控**。这与 demo 线宽（`E✓ F✓`）形成对照，正是"**碰巧达标 ≠ 受控达标**"在真实表里的呈现；也说明**达标判定不能替代控制权判定**。
+- **尚未实现（单元在模型切换中丢失）**：①**对象级差异检查**（`actual_changes ⊆ declared_allowed`，用于证明"非目标 Artist 未被误改"，比"科学指纹不变"更强）；②**角色注册表**（明确 `axis.title` = 坐标轴标签 = `xlabel`/`ylabel`，与 `Axes.title` 区分）。这两条是下一轮的唯一内容。
