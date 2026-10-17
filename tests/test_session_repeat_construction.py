@@ -36,8 +36,9 @@ DPI = 600
 #: figure is laid out with matplotlib's default font instead of the project style.
 LABEL = 'fig2_nmr.main.peak.vancho.3p68'
 GUIDE = 'fig2_nmr.main.guide.vancho.3p68'
-#: Registered objects of this figure: dropping the 3.68 ppm label + guide leaves 29.
-REGISTERED_OBJECTS = 31
+#: Registered objects of this figure: 35 with the four x-tick labels registered by G7 C2b
+#: (dropping the 3.68 ppm label + guide would leave 33).
+REGISTERED_OBJECTS = 35
 #: Declared scientific anchor of the 3.68 ppm peak (ppm), read from the public scene frame.
 DECLARED_PPM = 3.681735495251253
 OPERATION_ID = 'p0-repeat-3p68'
