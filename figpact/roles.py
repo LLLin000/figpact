@@ -86,17 +86,22 @@ ROLE_REGISTRY: dict[str, dict] = {
     },
     'panel.label': {
         'role_id': 'panel.label',
-        'definition': '面板内标注文字：峰归属/显著性等密度逐图不同的标签。',
+        'definition': '面板标签（a/b/c 这类面板字母）：只有**面板字母文本**可以绑定——'
+                      '契约显式以 role: panel.label 声明，或文本本身为字母且位于轴外/角位置。'
+                      '**峰/官能团等标注字体（peak_font_pt、label_font_pt）不属于本角色**，'
+                      '标注是 annotation，不是面板标签；无法判定则 unresolved。',
         'artist_kinds': ('text',),
         'artist_classes': (matplotlib.text.Text,),
-        'identity': '非轴标签/非刻度/非图例/非标题的面板文本',
+        'identity': '面板字母 Text（显式声明 role 或字母+轴外/角位置）；'
+                    '标注文本与无判据的任意 Text 不得归属（unresolved）',
         'properties': ('fontsize',),
         'measurement': "control-glyph 'Ag' per nominal size, same-figure draw；"
                        'effective_pt = nominal_pt x measured k',
         'capability': {'measure': True, 'edit': False, 'verify': True},
         'unify': False,
         'unify_note': '只比较不强制统一：密度逐图不同，强制统一会破坏布局。',
-        'params': ('label_font_pt', 'peak_font_pt'),
+        'params': (),
+        'declaration_required': True,
         'geometry_family': ('text_envelope',),
         'aliases': ('peak.label',),
         'reserved': False,
@@ -109,13 +114,15 @@ ROLE_REGISTRY: dict[str, dict] = {
         'identity': 'Legend 本体或 legend.get_texts() 的行文本',
         'properties': ('fontsize',),
         'measurement': "control-glyph 'Ag' per nominal size, same-figure draw；"
-                       'effective_pt = nominal_pt x measured k',
+                       'effective_pt = nominal_pt x measured k（Legend 本体无 get_fontsize，'
+                       '以其行文本 nominal 计）',
         'capability': {'measure': True, 'edit': False, 'verify': True},
         'unify': False,
         'unify_note': '只比较不强制统一：密度逐图不同，强制统一会破坏布局。',
         'params': ('legend_font_pt',),
+        'declaration_required': False,
         'geometry_family': ('legend',),
-        'aliases': (),
+        'aliases': ('legend.label', 'legend.title'),
         'reserved': False,
     },
     'scalebar': {
@@ -163,29 +170,35 @@ ROLE_TO_PARAMS: dict[str, tuple] = {
     'axis.title': ('axis_font_pt',),
     'axis.tick': ('tick_font_pt',),
     'curve.linewidth': ('line_width',),
-    'panel.label': ('label_font_pt', 'peak_font_pt'),
+    # 面板字母没有对应参数族：标注字体不属于本角色（见 roles.ROLES['panel.label']）。
+    'panel.label': (),
     'legend': ('legend_font_pt',),
     'scalebar': (),
 }
 
-#: 可扰动验证的单参数 -> 角色（v0.1 发现范围；复用 ROLE_TO_PARAMS 的键）。
+#: 可扰动验证的单参数 -> 角色（v0.3：**撤出** peak_font_pt / label_font_pt——
+#: 它们控制的是标注（annotation），不是面板标签；错误配对必须被拒绝）。
 VERIFIABLE_PARAM_ROLE = {
     'axis_font_pt': 'axis.title',
     'tick_font_pt': 'axis.tick',
     'line_width': 'curve.linewidth',
-}
-
-#: YAML 里属于角色但 v0.1 入口覆盖不到的键 -> 角色（系统化 unresolved，不猜）。
-ROLE_PARAM_FALLBACK = {
-    'label_font_pt': 'panel.label', 'peak_font_pt': 'panel.label',
     'legend_font_pt': 'legend',
+}
+#: YAML 里属于角色但发现入口覆盖不到的键 -> 角色（系统化 unresolved，不猜）。
+#: v0.2 起三键皆有合法调用族，此表恒空（保留空表：语义仍在，不得删键重建系统）。
+ROLE_PARAM_FALLBACK = {
 }
 
 #: 样式扰动可接受的几何家族：角色 -> drawn_shapes kind 关键字。
+#: legend 家族 'legend' 覆盖 legend_envelope（Legend 框）与 legend_handle
+#: 装饰线键；panel.label 家族 'text_envelope' 覆盖面板文本包络（通用机制，
+#: 不给具体 Artist 写分支：匹配只看 drawn_shapes kind 关键字）。
 GEOMETRY_FAMILY = {
     'axis.title': ('xlabel_envelope', 'ylabel_envelope'),
     'axis.tick': ('xtick_', 'ytick_'),
     'curve.linewidth': ('polyline',),
+    'panel.label': ('text_envelope',),
+    'legend': ('legend', 'legend_handle'),
 }
 
 def registry_snapshot() -> dict:
@@ -200,6 +213,8 @@ def registry_snapshot() -> dict:
         snap['geometry_family'] = list(entry.get('geometry_family') or ())
         snap['aliases'] = list(entry.get('aliases') or ())
         snap['capability'] = dict(entry.get('capability') or {})
+        if 'declaration_required' in entry:
+            snap['declaration_required'] = bool(entry['declaration_required'])
         out[rid] = snap
     return out
 
@@ -312,11 +327,72 @@ def classify_artist(artist, fig=None) -> str:
     return 'artist'
 
 
-def check_binding(role_id: str, artist, fig=None) -> dict:
+def is_panel_label_position(artist, fig) -> bool:
+    """轴外/角位置判定（panel.label 可判定规则之二）：通用几何判据。"""
+    if fig is None:
+        return False
+    try:
+        fig.canvas.draw_without_rendering()
+    except Exception:
+        try:
+            fig.canvas.draw()
+        except Exception:
+            return False
+    try:
+        renderer = fig.canvas.get_renderer()
+    except Exception:
+        return False
+    try:
+        _bb = artist.get_window_extent(renderer)
+        cx, cy = (_bb.x0 + _bb.x1) / 2.0, (_bb.y0 + _bb.y1) / 2.0
+    except Exception:
+        return False
+    try:
+        axes = list(fig.axes)
+    except Exception:
+        return False
+    for ax in axes:
+        try:
+            box = ax.get_window_extent(renderer)
+        except Exception:
+            continue
+        x0, y0 = box.x0, box.y0
+        w, h = box.width, box.height
+        if w <= 0 or h <= 0:
+            continue
+        inside = (x0 <= cx <= x0 + w and y0 <= cy <= y0 + h)
+        if not inside:
+            return True
+        fx = (cx - x0) / w
+        fy = (cy - y0) / h
+        if (fx <= 0.15 or fx >= 0.85) and (fy <= 0.15 or fy >= 0.85):
+            return True
+    return False
+
+def is_declared_panel_label(artist, fig=None, reg=None) -> bool:
+    """panel.label 可判定规则：契约显式声明 或 轴外/角位置。"""
+    entry = ROLE_REGISTRY.get('panel.label') or {}
+    want = set(entry.get('params') or ())
+    try:
+        gid = artist.get_gid() if hasattr(artist, 'get_gid') else None
+    except Exception:
+        gid = None
+    if gid and reg is not None and hasattr(reg, 'params_of'):
+        try:
+            if want & set(reg.params_of(gid)):
+                return True
+        except Exception:
+            pass
+    return bool(is_panel_label_position(artist, fig))
+
+def check_binding(role_id: str, artist, fig=None, reg=None) -> dict:
     """role -> Artist 对象配对检查；错配抛 RoleBindingError，正确返回证据。
 
     有 fig 做身份级核对（xlabel/标题/刻度按身份区分，不因字号数值相同就认）；
     无 fig 只做类级核对（错类照样拒绝）。
+    panel.label 另有可判定门：契约显式声明（reg.params_of 含本角色字体键）
+    或轴外/角位置（is_panel_label_position）；两者皆无 → 拒绝（调用方记
+    unresolved，不得强行归属）。
     """
     canonical = resolve(role_id)
     entry = ROLE_REGISTRY[canonical]
@@ -324,6 +400,14 @@ def check_binding(role_id: str, artist, fig=None) -> dict:
         raise RoleBindingError(
             f'错配拒绝：{canonical!r} 是保留角色（{entry.get("definition")}），'
             f'不得作为编辑绑定')
+    if canonical == 'panel.label' and entry.get('declaration_required'):
+        if not is_declared_panel_label(artist, fig, reg):
+            raise RoleBindingError(
+                f'错配拒绝：role {canonical!r} 只认契约显式声明或轴外/角位置的面板文本；'
+                f'无判据的任意 Text 不得归属（unresolved）')
+    # legend：Legend 本体无 get_fontsize，绑定语义是"行文本字号"；本体只认
+    # Legend 类（下述类检查），行文本只认 legend.get_texts() 成员（下述身份核
+    # 对经 classify_artist 判 legend_text）。无专用分支，无额外放行。
     classes = entry.get('artist_classes') or ()
     if classes and not isinstance(artist, classes):
         raise RoleBindingError(

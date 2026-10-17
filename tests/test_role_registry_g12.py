@@ -64,7 +64,14 @@ def test_verify_param_effective_change_demo_linewidth():
 
 
 def test_verify_param_invalid_never_passes():
-    with pytest.raises(change_audit.ChangeAuditError):
+    """无效扰动不得通过：现在由**角色注册表**在绑定层直接拒绝（比审计层更早、更严格）。
+
+    `label_font_pt` 控制的是标注（annotation），不属于任何可编辑角色——它既不能被
+    当作 panel.label，也不该被静默当作"无效值"放过。
+    """
+    from figpact.roles import RoleBindingError
+
+    with pytest.raises(RoleBindingError):
         change_audit.verify_param('examples/demo/demo_figure.py',
                                   'examples/demo/demo.yaml', 'main',
                                   'label_font_pt')
@@ -116,3 +123,85 @@ def test_ftir_tick_counterfactual_source_is_canvas_k_not_param():
     assert abs(r80['k'] - 80.0 / r80['measured_export_mm'][0]) < 1e-3
     assert abs(tick80['effective_pt_at_target'] - 8.0 * r80['k']) < 1e-3
     assert abs(tick80['effective_pt_at_target'] - 13.343) < 0.01
+
+def test_g13_panel_label_rejects_arbitrary_text_without_criteria():
+    """G13 反例①：无判据的任意 Text 当 panel.label → 拒绝（unresolved）。"""
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+    try:
+        ax.plot([0, 1], [0, 1])
+        mid = ax.text(0.5, 0.5, 'mid-figure note')
+        fig.canvas.draw()
+        with pytest.raises(roles.RoleBindingError):
+            roles.check_binding('panel.label', mid, fig)
+        assert roles.is_declared_panel_label(mid, fig, None) is False
+    finally:
+        plt.close(fig)
+
+
+def test_g13_panel_label_accepts_declared_or_corner_position():
+    """G13：契约声明或轴外/角位置的文本可归属 panel.label。"""
+    import matplotlib.pyplot as plt
+
+    from figpact.registry import GidRegistry
+
+    fig, ax = plt.subplots()
+    try:
+        ax.plot([0, 1], [0, 1])
+        corner = ax.text(0.01, 0.99, 'A', transform=ax.transAxes)
+        fig.canvas.draw()
+        assert roles.check_binding('panel.label', corner, fig)['artist_kind'] == 'text'
+        reg = GidRegistry()
+        reg.register(corner, 'fig.main.peak.x', params=['peak_font_pt'])
+        assert roles.check_binding('panel.label', corner, fig, reg)['artist_kind'] == 'text'
+    finally:
+        plt.close(fig)
+
+
+def test_g13_legend_binding_and_aliases():
+    """G13：Legend 本体/行文本可归属 legend；别名兼容历史名。"""
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+    try:
+        ax.plot([0, 1], [0, 1], label='s')
+        leg = ax.legend()
+        fig.canvas.draw()
+        assert roles.check_binding('legend', leg, fig)['artist_kind'] == 'legend'
+        assert roles.check_binding('legend', leg.get_texts()[0], fig)['artist_kind'] == 'legend_text'
+        assert roles.resolve('legend.label') == 'legend'
+        assert roles.resolve('peak.label') == 'panel.label'
+    finally:
+        plt.close(fig)
+
+
+def test_g13_invalid_legend_perturbation_never_upgrades():
+    """G13 反例②：legend 无效扰动（无归属参数）不得升 E✓（直接拒绝）。"""
+    with pytest.raises(roles.RoleBindingError):
+        change_audit.verify_param('examples/demo/demo_figure.py',
+                                  'examples/demo/demo.yaml', 'main',
+                                  'legend_font_pt_bogus')
+
+
+def test_g13_legend_verifies_and_annotation_fonts_may_not_pose_as_panel_labels():
+    """G13 修正后的语义：
+
+    - `legend`（`legend_font_pt`）仍走同一审计做非零扰动 → `EFFECT_OK`；
+    - `peak_font_pt` **不是**面板标签的控制器：把它绑到 `panel.label` 必须被拒绝，
+      而不是因为"都叫 label"就放行。
+    """
+    from figpact.roles import RoleBindingError
+
+    r = change_audit.verify_param('examples/demo/demo_figure.py',
+                                  'examples/demo/demo.yaml', 'main',
+                                  'legend_font_pt', width_mm=80.0)
+    assert r['status'] == 'EFFECT_OK', (r['status'], r.get('science_notes'))
+    assert r['target_effectively_changed'] is True
+    assert r['unauthorized'] == []
+    assert r['science_unchanged'] is True
+
+    with pytest.raises(RoleBindingError):
+        change_audit.verify_param('examples/demo/demo_figure.py',
+                                  'examples/demo/demo.yaml', 'main',
+                                  'peak_font_pt', width_mm=80.0)

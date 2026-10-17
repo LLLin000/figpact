@@ -24,10 +24,13 @@ def _draft(tmp_path, **kw):
     return out
 
 
-def test_discover_finds_three_entries_with_evidence(tmp_path):
+def test_discover_finds_four_entries_with_evidence(tmp_path):
+    # G12/G13 修正后：`peak_font_pt` / `label_font_pt` 控制的是**标注**，不是面板标签，
+    # 因此不再作为 `panel.label` 的候选（错误配对必须拒绝，而不是靠键名相似放行）。
     d = ic.discover(str(DEMO_SCRIPT), str(DEMO_YAML))
     by_param = {c["param"]: c for c in d["candidates"]}
-    assert set(by_param) == {"axis_font_pt", "tick_font_pt", "line_width"}
+    assert set(by_param) == {"axis_font_pt", "tick_font_pt", "line_width",
+                              "legend_font_pt"}
     assert all(c["confirmed"] is False and c["verified"] is False
                for c in d["candidates"])
     axis = by_param["axis_font_pt"]
@@ -36,22 +39,27 @@ def test_discover_finds_three_entries_with_evidence(tmp_path):
     line = by_param["line_width"]
     assert line["artist"]["registered"] is True
     assert "figdemo.main.curve.alpha" in line["artist"]["gids"]
+    # 标注字体不得冒充面板标签：`peak_font_pt` 不在候选里。
+    assert "peak_font_pt" not in by_param
+    leg = by_param["legend_font_pt"]
+    assert leg["role"] == "legend"
     # 歧义不猜：direction-only 的 tick_params 进 unresolved。
     assert any(u.get("kind") == "entry" and "tick_params" in (u.get("location") or {}).get("call", "")
                for u in d["unresolved"])
     cov = d["coverage"]
     assert cov["denominator_roles"] == ["axis.title", "axis.tick", "curve.linewidth",
                                         "panel.label", "legend", "scalebar"]
-    assert set(cov["candidate"]) == {"axis.title", "axis.tick", "curve.linewidth"}
-    assert "panel.label" in cov["unresolved"] and "legend" in cov["unresolved"]
+    assert set(cov["candidate"]) == {"axis.title", "axis.tick", "curve.linewidth",
+                                     "legend"}
     assert "scalebar" in cov["unsupported"]
 
 
-def test_verify_three_roles_with_nonzero_perturbation(tmp_path):
+def test_verify_five_roles_with_nonzero_perturbation(tmp_path):
+    # G12/G13 修正后：demo 四候选全部经人工确认+非零扰动验证为 verified（legend 在内；峰值标注不是面板标签）。
     p = _draft(tmp_path, confirm=True)
     res = ic.verify(str(p), width_mm=80.0)
     assert res["failed"] == [] and sorted(res["verified"]) == [
-        "axis_font_pt", "line_width", "tick_font_pt"]
+        "axis_font_pt", "legend_font_pt", "line_width", "tick_font_pt"]
     d = yaml.safe_load(p.read_text(encoding="utf-8"))
     for c in d["candidates"]:
         assert c["verified"] is True
@@ -66,7 +74,7 @@ def test_verify_three_roles_with_nonzero_perturbation(tmp_path):
         assert ev["qa_added"] == []
         assert ev["object_identity"]["gids_stable"] is True
     assert sorted(d["coverage"]["verified_editable"]) == [
-        "axis.tick", "axis.title", "curve.linewidth"]
+        "axis.tick", "axis.title", "curve.linewidth", "legend"]
 
 
 def test_unconfirmed_never_takes_effect(tmp_path):
@@ -74,7 +82,7 @@ def test_unconfirmed_never_takes_effect(tmp_path):
     p = _draft(tmp_path)  # confirmed 全 False
     res = ic.verify(str(p), width_mm=80.0)
     assert res["verified"] == [] and res["failed"] == []
-    assert res["skipped_unconfirmed"] == 3
+    assert res["skipped_unconfirmed"] == 4  # G13：demo 候选 3→5
     assert ic.load_verified(str(p))["params"] == []
 
 
@@ -103,7 +111,8 @@ def test_failed_perturbation_never_upgrades(tmp_path):
     assert bad["verified"] is False and bad["evidence"].get("failure")
     assert "axis.tick" not in d["coverage"]["verified_editable"]
     good = [c["param"] for c in d["candidates"] if c.get("verified")]
-    assert sorted(good) == ["axis_font_pt", "line_width"]
+    assert sorted(good) == ["axis_font_pt", "legend_font_pt", "line_width",
+                            ]# G13：其余三条仍 verified
 
 
 def test_plate_compare_marks_demo_editable_via_contract(tmp_path):

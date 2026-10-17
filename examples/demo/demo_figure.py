@@ -304,10 +304,9 @@ def _build_fig(science, scope_target, cfg):
         leg.set_gid(_gid("legend", "", ""))
 
     # 标签必须在**坐标框内可见**：在**最终布局之后**按渲染后的真实 bbox 抬高 ylim。
-    # 迭代两次：第一次测量可能基于旧布局，set 之后再测一次才稳定。
-    for _pass in range(2):
-        if not ax.texts:
-            break
+    # 只测量**一次**（以基线 ylim 为准）并一次性设定；不再迭代——迭代会以上一次的
+    # 结果作基准，在同一进程的多次验证之间累积，正是 SCIENCE_VIOLATION 串扰的来源。
+    if ax.texts:
         fig.canvas.draw()
         _renderer = fig.canvas.get_renderer()
         _inv = ax.transData.inverted()
@@ -315,10 +314,7 @@ def _build_fig(science, scope_target, cfg):
         _tops = [float(t.get_window_extent(renderer=_renderer).transformed(_inv).y1)
                  for t in ax.texts]
         _need = max(_tops) + max(0.02 * (_y1 - _y0), 0.05) if _tops else _y1
-        if _pass == 0:
-            print(f"[labels] ylim_before=({_y0:.3f},{_y1:.3f}) bbox_tops={[round(v,3) for v in _tops]}")
         ax.set_ylim(_y0, max(_y1, _need))
-    print(f"[labels] ylim_after={tuple(round(v,3) for v in ax.get_ylim())}")
 
     return fig, reg
 
