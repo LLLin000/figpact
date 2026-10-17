@@ -79,9 +79,9 @@ def test_verify_param_invalid_never_passes():
 
 def test_audit_pair_detects_locates_blocks_unauthorized():
     before = {'styles': {'g1': {'fontsize': 8.0}, 'g2': {'fontsize': 7.0}},
-              'shapes': {}}
+              'shapes': {}, 'view': {}}
     after = {'styles': {'g1': {'fontsize': 9.0}, 'g2': {'fontsize': 8.0}},
-             'shapes': {}}
+             'shapes': {}, 'view': {}}
     allowed = {'styles': {'g1': {'fontsize'}},
                'shapes': {},
                'required_targets': [{'gid': 'g1', 'property': 'fontsize'}]}
@@ -94,8 +94,8 @@ def test_audit_pair_detects_locates_blocks_unauthorized():
 
 
 def test_audit_pair_required_target_unchanged_flagged():
-    before = {'styles': {'g1': {'fontsize': 8.0}}, 'shapes': {}}
-    after = {'styles': {'g1': {'fontsize': 8.0}}, 'shapes': {}}
+    before = {'styles': {'g1': {'fontsize': 8.0}}, 'shapes': {}, 'view': {}}
+    after = {'styles': {'g1': {'fontsize': 8.0}}, 'shapes': {}, 'view': {}}
     allowed = {'styles': {'g1': {'fontsize'}},
                'shapes': {},
                'required_targets': [{'gid': 'g1', 'property': 'fontsize'}]}
@@ -205,3 +205,50 @@ def test_g13_legend_verifies_and_annotation_fonts_may_not_pose_as_panel_labels()
         change_audit.verify_param('examples/demo/demo_figure.py',
                                   'examples/demo/demo.yaml', 'main',
                                   'peak_font_pt', width_mm=80.0)
+
+
+def _view_pair(before_view, after_view):
+    return change_audit.audit_pair(
+        {'styles': {}, 'shapes': {}, 'view': before_view},
+        {'styles': {}, 'shapes': {}, 'view': after_view},
+        {'styles': {}, 'shapes': {}})
+
+
+def test_g14_view_change_is_protected():
+    """[0,5] → [0,7] 必须判 protected-view。"""
+    r = _view_pair({'axes0': {'ylim': [0, 5]}}, {'axes0': {'ylim': [0, 7]}})
+    assert any(u['class'] == 'protected-view' for u in r['unauthorized'])
+
+
+def test_g14_identical_view_passes():
+    """视图完全相同 → 无越权。"""
+    v = {'axes0': {'ylim': [0, 5], 'xlim': [0, 1], 'xscale': 'linear'}}
+    r = _view_pair(v, dict(v))
+    assert r['unauthorized'] == []
+
+
+def test_g14_missing_view_fails_closed():
+    """任一侧缺 view → AUDIT_INCOMPLETE，不得解释为“没有变化”。"""
+    a = change_audit.audit_pair({'styles': {}, 'shapes': {}},
+                                {'styles': {}, 'shapes': {}, 'view': {}},
+                                {'styles': {}, 'shapes': {}})
+    assert any(u['class'] == 'AUDIT_INCOMPLETE' for u in a['unauthorized'])
+    b = change_audit.audit_pair({'styles': {}, 'shapes': {}, 'view': {}},
+                                {'styles': {}, 'shapes': {}},
+                                {'styles': {}, 'shapes': {}})
+    assert any(u['class'] == 'AUDIT_INCOMPLETE' for u in b['unauthorized'])
+
+
+def test_g14_second_axes_only_is_located():
+    """只改第二个 Axes → 必须定位到 axes1。"""
+    r = _view_pair({'axes0': {'ylim': [0, 5]}, 'axes1': {'ylim': [0, 1]}},
+                   {'axes0': {'ylim': [0, 5]}, 'axes1': {'ylim': [0, 9]}})
+    flagged = [u for u in r['unauthorized'] if u['class'] == 'protected-view']
+    assert [u['gid'] for u in flagged] == ['axes1']
+
+
+def test_g14_scale_and_inversion_are_protected():
+    """scale / inversion 变化同样受保护。"""
+    r = _view_pair({'axes0': {'yscale': 'linear', 'y_inverted': False}},
+                   {'axes0': {'yscale': 'log', 'y_inverted': True}})
+    assert any(u['class'] == 'protected-view' for u in r['unauthorized'])

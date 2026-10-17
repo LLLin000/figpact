@@ -490,6 +490,7 @@ def verify(path: Any, width_mm: Optional[float] = None) -> dict:
                     # 对象级审计用全量快照（注册 + 未注册可见 Artist）：窄注册表
                     # 快照里没有未注册的轴标签/刻度，会把“没量到”当成“没变化”。
                     after_styles = _ca.style_snapshot(session, fig, reg)
+                    after_view = _ca._view_snapshot(fig)
                     after_science = session._capture_science(fig, reg)
                     with redirect_stdout(io.StringIO()):
                         after_qa = list(blocking_problems(fig))
@@ -503,6 +504,7 @@ def verify(path: Any, width_mm: Optional[float] = None) -> dict:
                     with redirect_stdout(io.StringIO()):
                         _bshapes = drawn_shapes(_bfig, _breg, include_frames=True)
                     _bstyles = _ca.style_snapshot(session, _bfig, _breg)
+                    _bview = _ca._view_snapshot(_bfig)
                 finally:
                     import matplotlib.pyplot as plt
                     plt.close(_bfig)
@@ -573,8 +575,8 @@ def verify(path: Any, width_mm: Optional[float] = None) -> dict:
                                                  for g in sorted(_declared)
                                                  for pr in (_entry.get('properties') or ())]}
                 _audit = _ca.audit_pair(
-                    {'styles': _bstyles, 'shapes': _bshapes},
-                    {'styles': after_styles, 'shapes': after_shapes}, _allowed)
+                    {'styles': _bstyles, 'shapes': _bshapes, 'view': _bview},
+                    {'styles': after_styles, 'shapes': after_shapes, 'view': after_view}, _allowed)
                 _hard = list(_audit['unauthorized'])
                 if _hard:
                     problems.append(

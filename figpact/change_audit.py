@@ -292,6 +292,12 @@ def audit_pair(before: dict, after: dict, allowed: dict) -> dict:
                              'before': 'present', 'after': 'absent',
                              'class': 'structure-removed'})
 
+    # 缺失证据必须 fail-closed：任一侧没有 view 快照时，**不得**解释为"没有变化"。
+    if 'view' not in before or 'view' not in after:
+        unauthorized.append({'gid': '', 'property': 'view',
+                             'before': before.get('view'), 'after': after.get('view'),
+                             'class': 'AUDIT_INCOMPLETE'})
+
     # 受保护的**科学视图**：坐标范围、scale、反向。未经显式授权（allowed['view']）
     # 的变化一律判越权——数据坐标窗口不属于"排版可动"的范畴。
     vb, va = before.get('view') or {}, after.get('view') or {}
