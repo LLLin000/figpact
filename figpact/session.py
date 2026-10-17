@@ -254,20 +254,22 @@ def loader_counters() -> dict:
 
 
 def pristine_rc() -> dict:
-    """matplotlib 出厂默认 rc（除 backend 外全部键）：模块导入期样式的隔离基线。
+    """调用时全局 rc 的快照（除 backend 外全部键）：构建期看到的隔离基线。
 
+    构建在与调用时相同的 rc 环境下进行（字体/dpi 不变），`rc_context`
+    退出时把全局还原——只隔离副作用，不改变输入。
     只剔 `backend`——它是哨兵对象而非可验证值，进不了 `rc_context`。
     """
     import copy
     import matplotlib as mpl
-    return {key: copy.deepcopy(value) for key, value in dict(mpl.rcParamsDefault).items()
+    return {key: copy.deepcopy(value) for key, value in dict(mpl.rcParams).items()
             if key != 'backend'}
 
 
 def load_module(script, config, *, module_name=None):
     """按路径装载绘图脚本的**定义**：一次导入，不建 Figure、不打印。
 
-    导入在出厂默认 rc 下隔离执行：脚本导入期的 `figure_style.apply()` 只污染
+    导入在调用时 rc 快照下隔离执行：脚本导入期的 `figure_style.apply()` 只污染
     隔离区，退出即还原——调用方的全局 rcParams 不会被改掉。
     旧模块会被同目录下的新模块替换掉（源码改动后重载不会串味）。
     """
@@ -291,9 +293,23 @@ def load_module(script, config, *, module_name=None):
     sys.argv = [str(script), '--config', str(Path(config).resolve()), '--inventory']
     try:
         import matplotlib as mpl
-        with mpl.rc_context(rc=pristine_rc()):
+        entry = pristine_rc()
+        with mpl.rc_context(rc=entry):
             with redirect_stdout(io.StringIO()):
                 spec.loader.exec_module(mod)
+            # 导入期改掉的 rc（字体/dpi……）是脚本声明的环境：记在模块上，
+            # 每次构建重新叠加；全局退出即还原，不外泄。
+            overlay = {}
+            for key, value in dict(mpl.rcParams).items():
+                if key == 'backend':
+                    continue
+                try:
+                    same = key in entry and bool(entry[key] == value)
+                except Exception:
+                    same = False
+                if not same:
+                    overlay[key] = copy.deepcopy(value)
+            mod.__figpact_import_rc__ = overlay
     finally:
         sys.argv = argv
     sys.modules[name] = mod
@@ -1222,15 +1238,19 @@ class FigureSession:
     def _call_builder(self, config_dict, config_path):
         """构建候选：**把配置拷贝交给脚本**，脚本的就地回写不会被当成候选输入。
 
-        构图在出厂默认 rc 下隔离执行：脚本的样式重放（`fs.apply()`）只进隔离区，
-        调用方的全局 rcParams 不会被改掉；同一份配置在任何调用方环境下都建成同一张图。
+        构图在调用时 rc 快照下隔离执行，并叠加脚本导入期的 rc 改动（字体/dpi……）——
+        两者都是脚本声明的构建环境；脚本的样式重放只进隔离区，退出即还原，不外泄。
         """
         import matplotlib as mpl
         mod = self._module
         working = copy.deepcopy(config_dict)
         builder = getattr(mod, 'build_scene', None)
         buffer = io.StringIO()
-        with mpl.rc_context(rc=pristine_rc()):
+        ambient = pristine_rc()
+        overlay = getattr(mod, '__figpact_import_rc__', None)
+        if overlay:
+            ambient.update(copy.deepcopy(overlay))
+        with mpl.rc_context(rc=ambient):
             with redirect_stdout(buffer):
                 if callable(builder):
                     fig, reg = builder(self._science, working, self.scope)
