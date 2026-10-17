@@ -253,9 +253,22 @@ def loader_counters() -> dict:
             'module_cache': len(_MODULE_CACHE), 'science_cache': len(_SCIENCE_CACHE)}
 
 
+def pristine_rc() -> dict:
+    """matplotlib 出厂默认 rc（除 backend 外全部键）：模块导入期样式的隔离基线。
+
+    只剔 `backend`——它是哨兵对象而非可验证值，进不了 `rc_context`。
+    """
+    import copy
+    import matplotlib as mpl
+    return {key: copy.deepcopy(value) for key, value in dict(mpl.rcParamsDefault).items()
+            if key != 'backend'}
+
+
 def load_module(script, config, *, module_name=None):
     """按路径装载绘图脚本的**定义**：一次导入，不建 Figure、不打印。
 
+    导入在出厂默认 rc 下隔离执行：脚本导入期的 `figure_style.apply()` 只污染
+    隔离区，退出即还原——调用方的全局 rcParams 不会被改掉。
     旧模块会被同目录下的新模块替换掉（源码改动后重载不会串味）。
     """
     script = Path(script).resolve()
@@ -277,8 +290,10 @@ def load_module(script, config, *, module_name=None):
     argv = sys.argv
     sys.argv = [str(script), '--config', str(Path(config).resolve()), '--inventory']
     try:
-        with redirect_stdout(io.StringIO()):
-            spec.loader.exec_module(mod)
+        import matplotlib as mpl
+        with mpl.rc_context(rc=pristine_rc()):
+            with redirect_stdout(io.StringIO()):
+                spec.loader.exec_module(mod)
     finally:
         sys.argv = argv
     sys.modules[name] = mod
@@ -1205,24 +1220,30 @@ class FigureSession:
     # -- 构建 -------------------------------------------------------------- #
 
     def _call_builder(self, config_dict, config_path):
-        """构建候选：**把配置拷贝交给脚本**，脚本的就地回写不会被当成候选输入。"""
+        """构建候选：**把配置拷贝交给脚本**，脚本的就地回写不会被当成候选输入。
+
+        构图在出厂默认 rc 下隔离执行：脚本的样式重放（`fs.apply()`）只进隔离区，
+        调用方的全局 rcParams 不会被改掉；同一份配置在任何调用方环境下都建成同一张图。
+        """
+        import matplotlib as mpl
         mod = self._module
         working = copy.deepcopy(config_dict)
         builder = getattr(mod, 'build_scene', None)
         buffer = io.StringIO()
-        with redirect_stdout(buffer):
-            if callable(builder):
-                fig, reg = builder(self._science, working, self.scope)
-            else:
-                legacy = getattr(mod, 'build_figure_and_registry', None)
-                if not callable(legacy):
-                    raise SessionError('脚本既没有 build_scene 也没有 build_figure_and_registry')
-                if _accepts(legacy, 'config'):
-                    fig, reg = legacy(self.scope, config=working)
+        with mpl.rc_context(rc=pristine_rc()):
+            with redirect_stdout(buffer):
+                if callable(builder):
+                    fig, reg = builder(self._science, working, self.scope)
                 else:
-                    if config_path is not None and hasattr(mod, 'CONFIG_PATH'):
-                        mod.CONFIG_PATH = Path(config_path)
-                    fig, reg = legacy(self.scope)
+                    legacy = getattr(mod, 'build_figure_and_registry', None)
+                    if not callable(legacy):
+                        raise SessionError('脚本既没有 build_scene 也没有 build_figure_and_registry')
+                    if _accepts(legacy, 'config'):
+                        fig, reg = legacy(self.scope, config=working)
+                    else:
+                        if config_path is not None and hasattr(mod, 'CONFIG_PATH'):
+                            mod.CONFIG_PATH = Path(config_path)
+                        fig, reg = legacy(self.scope)
         self.last_user_output = buffer.getvalue()[:4000]
         writeback = _config_diff(config_dict, working)
         self.last_config_writeback = writeback

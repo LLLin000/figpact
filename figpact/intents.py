@@ -37,6 +37,7 @@ from .session import (FigureSession, engine_fingerprint, get_path, module_revisi
 IMPACT_TOL_MM = 1e-3  # Same-renderer numeric comparison, not a calibrated physical error bound.
 #: History payload schema of this consumer (the store itself stays schema-agnostic).
 HISTORY_SCHEMA = 'figpact.intents.history/1'
+
 #: Render environment compared against a frozen checkpoint before any replay.
 _HISTORY_ENV_KEYS = ('font.family', 'font.sans-serif', 'axes.unicode_minus', 'text.usetex',
                      'figure.dpi', 'savefig.dpi', 'lines.linewidth', 'svg.hashsalt')
@@ -220,7 +221,6 @@ class IntentSession:
         self._frozen_outputs = None
         self._frozen_inputs = None
         self._contract_override = contract
-        self._rc_style = None
         self._history = bool(history)
         self._state_home = state_home
         self._store: HistoryStore | None = None
@@ -247,21 +247,19 @@ class IntentSession:
             if stale is not None:
                 self._enter_historical(stale['reason'], stale.get('detail') or '')
             else:
-                with matplotlib.rc_context():
-                    self._core = FigureSession(script, config, scope, contract=contract)
-                    self._rc_style = matplotlib.rcParams.copy()
-                    try:
-                        self._source = self._core.state()['source_revision']
-                        self._frozen_outputs = list(self._core.state().get('artifact_outputs', []))
-                        self._frozen_inputs = list(self._core.state().get('science_inputs', []))
-                        if self._history:
-                            self._source_files = self._live_source()
-                        self._frame, self._science = self._capture(self._core)
-                        self._baseline = copy.deepcopy(self._frame)
-                    except Exception:
-                        self._core.close()
-                        self._close_store()
-                        raise
+                self._core = FigureSession(script, config, scope, contract=contract)
+                try:
+                    self._source = self._core.state()['source_revision']
+                    self._frozen_outputs = list(self._core.state().get('artifact_outputs', []))
+                    self._frozen_inputs = list(self._core.state().get('science_inputs', []))
+                    if self._history:
+                        self._source_files = self._live_source()
+                    self._frame, self._science = self._capture(self._core)
+                    self._baseline = copy.deepcopy(self._frame)
+                except Exception:
+                    self._core.close()
+                    self._close_store()
+                    raise
                 if self._history:
                     self._verify_restore()
         self._frame = self._decorate(self._frame)
@@ -354,7 +352,7 @@ class IntentSession:
             return False
 
     def _environment(self):
-        style = self._rc_style if self._rc_style is not None else matplotlib.rcParams
+        style = matplotlib.rcParams
         state = self._core.state() if self._core is not None else {}
         return {'matplotlib': matplotlib.__version__, 'dpi': self._dpi, 'scope': self.scope,
                 'rc_style': {key: style.get(key) for key in _HISTORY_ENV_KEYS},
@@ -379,14 +377,44 @@ class IntentSession:
             self._store.close()
             self._store = None
 
-    def _verify_environment(self, saved):
-        if not isinstance(saved, dict):
+    def _replay_rc(self, environment, baseline_frame):
+        """Checkpoint-time ambient rc restored around the whole replay, or None."""
+        if not isinstance(environment, dict) or not isinstance(baseline_frame, dict):
+            return None
+        rc_style = environment.get('rc_style')
+        if not isinstance(rc_style, dict) or \
+                any(key not in rc_style for key in _HISTORY_ENV_KEYS):
+            return None
+        try:
+            measurement = json.loads(
+                baseline_frame.get('scene_json') or '').get('measurement')
+        except (ValueError, TypeError, AttributeError):
+            return None
+        font_environment = measurement.get('font_environment') \
+            if isinstance(measurement, dict) else None
+        if not isinstance(font_environment, dict) \
+                or font_environment.get('available') is not True:
+            return None
+        # Frame-time record wins on overlap: the saved geometry was rendered
+        # under exactly that ambient, not under the persist-time reading.
+        rc = {key: copy.deepcopy(rc_style[key]) for key in _HISTORY_ENV_KEYS}
+        for key, value in font_environment.items():
+            if key != 'available':
+                rc[key] = copy.deepcopy(value)
+        return rc
+
+    def _verify_environment(self, environment, baseline_frame):
+        if not isinstance(environment, dict):
             return 'EVIDENCE_INCOMPLETE'
         live = self._environment()
-        if any(saved.get(key) != live.get(key)
-               for key in ('matplotlib', 'dpi', 'rc_style', 'scope')):
+        if any(environment.get(key) != live.get(key) for key in ('matplotlib', 'dpi', 'scope')):
             return 'ENVIRONMENT_MISMATCH'
-        return None
+        # rc_style is not compared here: the replay below restores the checkpoint-time
+        # ambient around the whole restore, and every downstream evidence gate
+        # (baseline/scene/measurement/science geometry) still runs inside it.
+        return None if self._replay_rc(environment, baseline_frame) is not None \
+            else 'EVIDENCE_INCOMPLETE'
+
 
     def _verify_restore(self):
         """Replay the recorded accepted set through the live oracle, then checkpoint it.
@@ -401,46 +429,64 @@ class IntentSession:
         if not isinstance(operations, list) or any(not isinstance(op, dict) for op in operations):
             self._enter_historical('EVIDENCE_INCOMPLETE', 'accepted operation records')
             return
-        reason = self._verify_environment(payload.get('environment'))
+        reason = self._verify_environment(payload.get('environment'),
+                                          payload.get('baseline_frame'))
         if reason:
             self._enter_historical(reason, 'render environment')
             return
-        saved_baseline, current_baseline = _nodes(payload['baseline_frame']), _nodes(self._baseline)
-        if set(saved_baseline) != set(current_baseline):
-            self._enter_historical('SCENE_SET_MISMATCH', 'baseline object set')
+        replay_rc = self._replay_rc(payload.get('environment'),
+                                    payload.get('baseline_frame'))
+        if replay_rc is None:
+            self._enter_historical('EVIDENCE_INCOMPLETE', 'render environment')
             return
-        if any(_geometry_error(node, current_baseline[gid]) > IMPACT_TOL_MM
-               for gid, node in saved_baseline.items()):
-            self._enter_historical('BASELINE_GEOMETRY_MISMATCH', 'fresh baseline geometry')
-            return
-        if (json.loads(payload['baseline_frame']['scene_json']).get('measurement')
-                != json.loads(self._baseline['scene_json']).get('measurement')):
-            self._enter_historical('ENVIRONMENT_MISMATCH', 'renderer measurement conditions')
-            return
-        if compare_science(payload.get('science'), self._science):
-            self._enter_historical('SCIENCE_MISMATCH', 'frozen scientific payload')
-            return
-        if not self._source_fresh():
-            self._enter_historical('SOURCE_CHANGED', 'declared inputs changed while building')
-            return
-        verified = []
-        self._replaying = True  # only the final verified replay writes a checkpoint
+        # The checkpoint-time ambient is not a figure attribute: baseline build +
+        # all evidence gates below must see the saved ambient, and the ambient
+        # must be exactly what the caller had on entry (extra frame-time keys
+        # included, so rcParams is identical before and after the restore).
+        saved_ambient = dict(matplotlib.rcParams)
+        matplotlib.rcParams.update(replay_rc)
         try:
-            for record in operations:
-                problem, evidence = self._replay_operation(record)
-                if problem:
-                    self._enter_historical(problem, str(record.get('id')))
-                    return
-                verified.append(evidence)
+            self._frame, self._science = self._capture(self._core)
+            self._baseline = copy.deepcopy(self._frame)
+            saved_baseline, current_baseline = _nodes(payload['baseline_frame']), _nodes(self._baseline)
+            if set(saved_baseline) != set(current_baseline):
+                self._enter_historical('SCENE_SET_MISMATCH', 'baseline object set')
+                return
+            if any(_geometry_error(node, current_baseline[gid]) > IMPACT_TOL_MM
+                   for gid, node in saved_baseline.items()):
+                self._enter_historical('BASELINE_GEOMETRY_MISMATCH', 'fresh baseline geometry')
+                return
+            if (json.loads(payload['baseline_frame']['scene_json']).get('measurement')
+                    != json.loads(self._baseline['scene_json']).get('measurement')):
+                self._enter_historical('ENVIRONMENT_MISMATCH', 'renderer measurement conditions')
+                return
+            if compare_science(payload.get('science'), self._science):
+                self._enter_historical('SCIENCE_MISMATCH', 'frozen scientific payload')
+                return
+            if not self._source_fresh():
+                self._enter_historical('SOURCE_CHANGED', 'declared inputs changed while building')
+                return
+            verified = []
+            self._replaying = True  # only the final verified replay writes a checkpoint
+            try:
+                for record in operations:
+                    problem, evidence = self._replay_operation(record)
+                    if problem:
+                        self._enter_historical(problem, str(record.get('id')))
+                        return
+                    verified.append(evidence)
+            finally:
+                self._replaying = False
+            problem = self._verify_final(payload, operations)
+            if problem:
+                self._enter_historical(problem, 'restored frame')
+                return
+            checkpoint, failure = self._persist('restart', verified=verified)
+            if checkpoint is None:
+                self._enter_historical('PERSISTENCE_FAILED', failure)
         finally:
-            self._replaying = False
-        problem = self._verify_final(payload, operations)
-        if problem:
-            self._enter_historical(problem, 'restored frame')
-            return
-        checkpoint, failure = self._persist('restart', verified=verified)
-        if checkpoint is None:
-            self._enter_historical('PERSISTENCE_FAILED', failure)
+            matplotlib.rcParams.update(saved_ambient)
+
 
     def _verify_final(self, payload, operations):
         stored = payload.get('frame') or {}
@@ -719,27 +765,26 @@ class IntentSession:
         for operation in operations:
             goals.update(operation['writes'])
         state = self._core.state()
-        with matplotlib.rc_context(rc=self._rc_style):
-            with FigureSession(state['script'], state['config'], self.scope,
-                               contract=self._contract_override) as trial:
-                result: dict[str, Any] = trial.try_layout(
-                    [{'operation': 'set_parameter', 'path': list(path), 'value': value}
-                     for path, value in goals.items()]) if goals else {'status': 'OK', 'checks': []}
-                if result['status'] != 'OK':
-                    return result, None, None
-                frame, scientific = self._capture(trial)
-                baseline_keys = set(FigureSession._qa_keys(self._baseline['qa']['qa']))
-                current_keys = FigureSession._qa_keys(frame['qa']['qa'])
-                new_problems = [problem for problem, key in zip(frame['qa']['qa'], current_keys)
-                                if key not in baseline_keys]
-                result = {**result, 'checks': [*result.get('checks', []),
-                    {'check': 'rendered_scope_qa', 'status': 'FAIL' if new_problems else 'PASS',
-                     'qa_kind': frame['qa']['qa_kind'], 'baseline_problem_count': len(baseline_keys),
-                     'current_problem_count': len(current_keys), 'new_problems': new_problems}]}
-                if new_problems:
-                    result.update(status='QA_BLOCKED', message='实际显示图新增当前输出版本 QA 阻断')
-                    return result, None, None
-                return result, frame, scientific
+        with FigureSession(state['script'], state['config'], self.scope,
+                           contract=self._contract_override) as trial:
+            result: dict[str, Any] = trial.try_layout(
+                [{'operation': 'set_parameter', 'path': list(path), 'value': value}
+                 for path, value in goals.items()]) if goals else {'status': 'OK', 'checks': []}
+            if result['status'] != 'OK':
+                return result, None, None
+            frame, scientific = self._capture(trial)
+            baseline_keys = set(FigureSession._qa_keys(self._baseline['qa']['qa']))
+            current_keys = FigureSession._qa_keys(frame['qa']['qa'])
+            new_problems = [problem for problem, key in zip(frame['qa']['qa'], current_keys)
+                            if key not in baseline_keys]
+            result = {**result, 'checks': [*result.get('checks', []),
+                {'check': 'rendered_scope_qa', 'status': 'FAIL' if new_problems else 'PASS',
+                 'qa_kind': frame['qa']['qa_kind'], 'baseline_problem_count': len(baseline_keys),
+                 'current_problem_count': len(current_keys), 'new_problems': new_problems}]}
+            if new_problems:
+                result.update(status='QA_BLOCKED', message='实际显示图新增当前输出版本 QA 阻断')
+                return result, None, None
+            return result, frame, scientific
 
     def evaluate(self, request):
         if not isinstance(request, dict):
@@ -974,8 +1019,7 @@ class IntentSession:
         previous_dpi = self._dpi
         self._dpi = float(dpi)
         try:
-            with matplotlib.rc_context(rc=self._rc_style):
-                frame, scientific = self._capture(self._core)
+            frame, scientific = self._capture(self._core)
             if self._guard(request):
                 raise ValueError('重建期间源文件发生变化')
             if compare_science(self._science, scientific):
