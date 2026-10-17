@@ -586,6 +586,8 @@ def plan_unify(audit_result: dict, targets: dict,
 
     G11: 有清单 contract 时，axis/tick/line 三键只认"layout EDITABLE ∪ 已验证
     contract"；无需 contract 的老调用保持原语义。
+    G13: legend_font_pt / label_font_pt / peak_font_pt 永不进入 want（只比较、
+    不强制统一）：即使 targets 里带了也丢弃，不得自动统一。
     """
     want = {k: float(v) for k, v in targets.items()
             if k in ("axis_font_pt", "tick_font_pt", "line_width", "target_width_mm")}
@@ -712,9 +714,14 @@ def unify(plan: dict, *, specs: Optional[list[dict]] = None, dry_run: bool = Fal
                  if isinstance(p.get("result"), dict) and p["result"].get("source_commit_state") == "COMMITTED"]
     status = "OK" if per_figure and len(committed) == len(per_figure) else (
         "PARTIAL" if committed else "FAILED")
-    # G12-B 对象级差异审计：每张已提交的图，对“写后”做一次对象级复核
-    # （Actual ⊆ Allowed 且目标确实变了）。复用 change_audit， science 结论
-    # 只搬 science 指纹比较，不自创口径；失败只记 verdict，不回滚已提交写入。
+    # G12-B/G14 对象级差异审计：每张已提交的图，对“写后”做一次对象级复核
+    # （Actual ⊆ Allowed 且目标确实变了）。science 结论只搬 science 指纹比较，
+    # 不自创口径；失败只记 verdict，不回滚已提交写入。
+    # G14 联合允许集：apply 一次应用多个 token（axis/tick/line + 画布），
+    # 审计的允许集必须是**本次实际写入的全部 token 对应角色的（声明对象 x
+    # 允许属性）的并集 + 各角色几何家族的并集**，再加画布授权的派生几何
+    # （envelope 位移/增删记 derived，不判越权）。单参数 verify_param 逐个
+    # 扰动会把其他 token 的耦合判成越权，不得在这里逐个调用。
     change_audits = []
     try:
         from figpact import change_audit as _ca
@@ -723,17 +730,35 @@ def unify(plan: dict, *, specs: Optional[list[dict]] = None, dry_run: bool = Fal
             if result.get("source_commit_state") != "COMMITTED":
                 continue
             spec = by_label.get(step.get("figure")) or {}
-            audits = []
-            for key, (old_v, _new_v) in (step.get("changes") or {}).items():
-                if key in ("canvas_w_mm", "canvas_h_mm") or old_v is None:
-                    continue
-                try:
-                    audits.append(_ca.verify_param(
-                        spec.get("path"), spec.get("config"), spec.get("scope"),
-                        key))
-                except Exception as error:
-                    audits.append({"param": key, "status": "AUDIT_ERROR",
-                                   "error": f"{type(error).__name__}: {error}"})
+            journal = (result.get("journal") or {}) if isinstance(result, dict) else {}
+            applied = [k for k, (old_v, _new_v) in (step.get("changes") or {}).items()
+                       if k not in ("canvas_w_mm", "canvas_h_mm") and old_v is not None]
+            # 实际写入核对：journal diff 的 +/- 行为准；plan 里 old 为 None 的
+            # 键从未写入（如 ftir tick），上下文行不得算数。
+            try:
+                changed_lines = [
+                    ln for f in (journal.get("files") or [])
+                    for ln in str((f or {}).get("diff") or "").splitlines()
+                    if (ln.startswith("+") or ln.startswith("-"))
+                    and not ln.startswith(("+++", "---"))]
+                changed_text = "\n".join(changed_lines)
+                narrowed = [k for k in applied if f"{k}:" in changed_text]
+                if narrowed:
+                    applied = narrowed
+            except Exception:
+                pass
+            if not applied:
+                change_audits.append({"figure": step.get("figure"), "audits": [],
+                                      "blocking": [],
+                                      "note": "no token actually written; nothing to audit"})
+                continue
+            try:
+                union = _ca.verify_apply(
+                    spec.get("path"), spec.get("config"), spec.get("scope"), applied)
+            except Exception as error:
+                union = {"params": applied, "status": "AUDIT_ERROR",
+                         "error": f"{type(error).__name__}: {error}"}
+            audits = [{**union, "param": "+".join(applied)}] if isinstance(union, dict) else []
             change_audits.append({"figure": step.get("figure"), "audits": audits,
                                   "blocking": [a for a in audits
                                                if a.get("status") not in ("EFFECT_OK",)]})
@@ -1068,6 +1093,8 @@ def _compare_cell(item: dict, role: str, targets: dict[str, float],
 
     G11: E（可写回）只认两条路 —— 脚本 layout_contract 的 EDITABLE，或清单里
     人工确认+扰动验证的 contract 条目。二者都没有就是 E✗，不猜。
+    G13: legend / panel.label 同样只认这两条路；且永为 compare-only（F–），
+    不得因新增覆盖而自动统一（plan_unify 不收 compare-only 键）。
     """
     kind = item.get("kind")
     editable = set(item.get("editable_fields", []))

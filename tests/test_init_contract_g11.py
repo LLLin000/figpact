@@ -47,14 +47,14 @@ def test_discover_finds_four_entries_with_evidence(tmp_path):
     assert any(u.get("kind") == "entry" and "tick_params" in (u.get("location") or {}).get("call", "")
                for u in d["unresolved"])
     cov = d["coverage"]
-    assert cov["denominator_roles"] == ["axis.title", "axis.tick", "curve.linewidth",
-                                        "panel.label", "legend", "scalebar"]
-    assert set(cov["candidate"]) == {"axis.title", "axis.tick", "curve.linewidth",
-                                     "legend"}
-    assert "scalebar" in cov["unsupported"]
+    assert cov["verified_editable"] == []
+    assert sorted(cov["candidate"]) == ["axis.tick", "axis.title", "curve.linewidth",
+                                        "legend"]
+    assert cov["unresolved"] == ["panel.label"]
+    assert cov["unsupported"] == ["scalebar"]
 
 
-def test_verify_five_roles_with_nonzero_perturbation(tmp_path):
+def test_verify_four_roles_with_nonzero_perturbation(tmp_path):
     # G12/G13 修正后：demo 四候选全部经人工确认+非零扰动验证为 verified（legend 在内；峰值标注不是面板标签）。
     p = _draft(tmp_path, confirm=True)
     res = ic.verify(str(p), width_mm=80.0)
@@ -75,6 +75,9 @@ def test_verify_five_roles_with_nonzero_perturbation(tmp_path):
         assert ev["object_identity"]["gids_stable"] is True
     assert sorted(d["coverage"]["verified_editable"]) == [
         "axis.tick", "axis.title", "curve.linewidth", "legend"]
+    assert d["coverage"]["candidate"] == []
+    assert d["coverage"]["unresolved"] == ["panel.label"]
+    assert d["coverage"]["unsupported"] == ["scalebar"]
 
 
 def test_unconfirmed_never_takes_effect(tmp_path):
@@ -82,8 +85,7 @@ def test_unconfirmed_never_takes_effect(tmp_path):
     p = _draft(tmp_path)  # confirmed 全 False
     res = ic.verify(str(p), width_mm=80.0)
     assert res["verified"] == [] and res["failed"] == []
-    assert res["skipped_unconfirmed"] == 4  # G13：demo 候选 3→5
-    assert ic.load_verified(str(p))["params"] == []
+    assert res["skipped_unconfirmed"] == 4  # demo 候选恒为 4（legend 在内）
 
 
 def test_ambiguous_never_guessed(tmp_path):
@@ -129,7 +131,8 @@ def test_plate_compare_marks_demo_editable_via_contract(tmp_path):
     audit = plate.audit([spec], [80.0])
     compare = plate.compare_roles(audit, manifest)
     cells = compare["cells"]["demo"]
-    assert cells["axis.title"]["editable"] is True
-    assert cells["axis.tick"]["editable"] is True
-    assert cells["curve.linewidth"]["editable"] is True
-    assert cells["axis.title"].get("editable_via") == "verified-contract"
+    for role in ("axis.title", "axis.tick", "curve.linewidth", "legend"):
+        assert cells[role]["editable"] is True
+        assert cells[role].get("editable_via") == "verified-contract"
+    assert cells["panel.label"]["editable"] is False  # unresolved：无可验证绑定
+    assert cells["scalebar"]["editable"] is False  # unsupported：非显微图无 scalebar

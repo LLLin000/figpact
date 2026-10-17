@@ -255,7 +255,14 @@ def audit_pair(before: dict, after: dict, allowed: dict) -> dict:
     ``allowed``: ``{'styles': {gid: {props}}, 'shapes': {shape_key: ...},
     'exempt': [{'gid/key':..., 'by':..., 'reason':...}]}``。
     豁免只认显式条目（谁、依据、范围），且只豁免几何位移，不豁免科学内容。
+    普通 layout/unify 路径不得传入 ``allowed['view']``（传入即拒收）：
+    视图变更只能走独立科学变更路径。
     """
+    # 硬约束：allowed['view'] 在普通审计路径不可传——任何调用方传入即显式
+    # 拒绝（视图变更只能走独立科学变更路径）。
+    if 'view' in (allowed or {}):
+        raise ChangeAuditError(
+            "allowed['view'] 不得经普通审计路径传入：视图变更只能走独立科学变更路径")
     style_changes = _style_diff(before.get('styles') or {}, after.get('styles') or {})
     geom_changes, geom_added, geom_removed = _geometry_diff(
         before.get('shapes') or {}, after.get('shapes') or {})
@@ -298,12 +305,11 @@ def audit_pair(before: dict, after: dict, allowed: dict) -> dict:
                              'before': before.get('view'), 'after': after.get('view'),
                              'class': 'AUDIT_INCOMPLETE'})
 
-    # 受保护的**科学视图**：坐标范围、scale、反向。未经显式授权（allowed['view']）
-    # 的变化一律判越权——数据坐标窗口不属于"排版可动"的范畴。
+    # 受保护的**科学视图**：坐标范围、scale、反向。一律判越权——数据坐标窗口
+    # 不属于"排版可动"的范畴；入口处已拒收 allowed['view']（视图变更只能走
+    # 独立科学变更路径），此处不再设任何授权分支。
     vb, va = before.get('view') or {}, after.get('view') or {}
     for key in sorted(set(vb) | set(va)):
-        if key in set(allowed.get('view') or ()):
-            continue
         if vb.get(key) != va.get(key):
             unauthorized.append({'gid': key, 'property': 'view',
                                  'before': vb.get(key), 'after': va.get(key),
@@ -403,10 +409,12 @@ def verify_param(script: Any, config: Any, scope: str, param: str,
 
         declared_gids = {gid for gid in base['gids']
                          if param in reg.params_of(gid)} if hasattr(reg, 'params_of') else set()
-        # 未注册但字号命中同一参数的 tick/轴标签：归属按“身份 + 同值”语义补齐。
-        # 身份经 roles.classify_artist 判定（错类拒绝）；同值指该 Artist 的属性值
-        # 恰好等于被扰动参数的当前值（与 plate._measure_code_artist_effs 同口径）。
-        # 两条同时成立才归因：只同值不同身份（如 legend 撞衫）不得归因。
+        # 未注册归因：直接取 base 快照 styles 的同源子集（axis.title 取
+        # '.xlabel'/'.ylabel' 后缀，axis.tick 取 '.tick.' 前缀，legend 取
+        # '.legend' 前缀 + 空文本段 '..' 跳过 + fontsize 同值三条过滤）。同源保证
+        # 允许键与审计比较键必然同形；curve/panel/scalebar 返回空集（须注册声明，
+        # 不得按 class 猜）。只同值不同身份（如 legend 撞衫 tick 字号）因前缀/
+        # 后缀隔离不得归因；'.title.'（保留角色 axes.title）不得归入 axis.title。
         declared_gids |= _attribute_unregistered(
             session, base, role, param, float(current))
         allowed_styles = {gid: set(entry.get('properties') or ())
@@ -461,66 +469,228 @@ def verify_param(script: Any, config: Any, scope: str, param: str,
         session.close()
 
 
-def _attribute_unregistered(session, base, role, param, current: float) -> set:
-    import matplotlib.pyplot as plt
-    entry = roles.ROLE_REGISTRY[role]
-    kinds = set(entry.get('artist_kinds') or ())
-    prop = (entry.get('properties') or [None])[0]
-    out: set = set()
-    fig, reg = None, None
+def verify_apply(script: Any, config: Any, scope: str, params: list) -> dict:
+    """多 token 联合审计（plate unify --apply 用）：一次扰动，同时应用全部 token。
+
+    单参数 :func:`verify_param` 逐个扰动时会把“其他 token 引起的耦合”
+    判成越权（apply 一次写多个 token + 画布，审计却按单一 param 构造允许集）。
+    这里允许集 = 本次实际写入的全部 token 对应角色的（声明对象 x 允许属性）
+    的并集 + 各角色几何家族的并集；比较的是一次联合扰动前后的实际差异。
+    画布是 apply 的一部分：同名 envelope 位移记 ``derived``；刻度包络
+    （xtick_/ytick_）的增删在科学视图未变时同样记 ``derived``，不判越权。
+    其余 structure 增删与任何语义属性变化仍判越权；视图变化一律 fail-closed。
+    普通路径仍不得传入 ``allowed['view']``（见 :func:`audit_pair`）。
+    """
+    from figpact import effects
+
+    script_p, config_p = Path(str(script)), Path(str(config))
+    params = [str(p) for p in (params or [])]
+    if not params:
+        raise ChangeAuditError('联合审计至少需要一个参数（空允许集没有意义）')
+    param_roles: dict[str, str] = {}
+    entries: dict[str, dict] = {}
+    for param in params:
+        role = roles.role_of_param(param)  # 无归属/受保护：直接拒绝
+        param_roles[param] = role
+        entries[param] = roles.ROLE_REGISTRY[role]
+    session = FigureSession(str(script_p), str(config_p), scope)
     try:
-        with redirect_stdout(io.StringIO()):
-            fig, reg = session.build_from_yaml(str(session.config))
-        try:
-            artists = list(fig.findobj())
-        except Exception:
-            artists = []
-        artists = [a for a in artists if hasattr(a, 'get_visible')]
-        try:
-            registered_ids = {id(a) for a in reg.all().values()}
-        except Exception:
-            registered_ids = set()
-        for art in artists:
+        base_cfg = copy.deepcopy(session._base_config)
+        probes: dict[str, float] = {}
+        for param in params:
             try:
-                if not art.get_visible() or id(art) in registered_ids:
-                    continue
-            except Exception:
-                continue
-            # 身份与同值两条同时成立才归因（未注册 tick/轴标签补齐）。
+                current = base_cfg[param]
+            except KeyError:
+                raise ChangeAuditError(f'配置里没有参数 {param!r}（悬空绑定，不得猜）')
+            if isinstance(current, bool) or not isinstance(current, (int, float)):
+                raise ChangeAuditError(f'参数 {param!r} 非有限数字：{current!r}')
+            record_bounds = {'min': None, 'max': None}
             try:
-                kind = roles.classify_artist(art, fig)
-            except Exception:
-                continue
-            try:
-                if prop == 'fontsize':
-                    if kind == 'legend':
-                        # Legend 本体无 get_fontsize：语义是行文本字号，取其
-                        # 首行文本 nominal（通用口径，无专用分支）。
-                        try:
-                            texts = list(art.get_texts())
-                        except Exception:
-                            continue
-                        if not texts:
-                            continue
-                        value = float(texts[0].get_fontsize())
-                    else:
-                        value = float(art.get_fontsize())
-                elif prop == 'linewidth':
-                    value = float(art.get_linewidth())
-                else:
-                    continue
-            except Exception:
-                continue
-            if abs(value - current) > _STYLE_NUMERIC_TOL:
-                continue
-            key = _stable_key(fig, reg, art, set())
-            out.add(key)
-    finally:
-        if fig is not None:
-            try:
-                plt.close(fig)
+                from figpact.final_size import _import_script as _imp
+                scalars = getattr(_imp(script_p), 'SCALARS', {}) or {}
+                spec = scalars.get(param)
+                if isinstance(spec, tuple) and len(spec) == 3:
+                    record_bounds = {'min': spec[1], 'max': spec[2]}
             except Exception:
                 pass
+            # 扰动方向：扰动不得把图推向“更拥挤”（字号只许缩小、线宽只许改细），
+            # 否则 MaxNLocator 会吞掉次刻度/图例行柄等装饰 Artist，造成身份键
+            # 移位/消失的假越权。verify_param 的 probe_value 只保证“有界非零”，
+            # 不保证方向；联合审计按“稀疏方向”选（在界内取当前值下方的第一个）。
+            probe = None
+            lo, hi = record_bounds.get('min'), record_bounds.get('max')
+            for step in (1.0, 0.5, 2.0, 5.0, 0.1):
+                candidate = float(current) - step
+                if lo is not None and candidate < float(lo):
+                    continue
+                if hi is not None and candidate > float(hi):
+                    continue
+                if candidate != float(current):
+                    probe = float(candidate)
+                    break
+            if probe is None or probe == float(current):
+                raise ChangeAuditError(
+                    f'参数 {param!r} 给不出非零有界扰动（当前 {current}）')
+            probes[param] = float(probe)
+        pert = copy.deepcopy(base_cfg)
+        for param, probe in probes.items():
+            pert[param] = probe
+        tmp = tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False,
+                                          encoding='utf8')
+        try:
+            yaml.safe_dump(pert, tmp, sort_keys=False, allow_unicode=True)
+            tmp.close()
+            base = capture_snapshot(session)
+            with redirect_stdout(io.StringIO()):
+                fig, reg = session.build_from_yaml(tmp.name)
+            try:
+                with redirect_stdout(io.StringIO()):
+                    after_shapes = geometry_snapshot(fig, reg)
+                after_styles = style_snapshot(session, fig, reg)
+                after_science = session._capture_science(fig, reg)
+                after_view = _view_snapshot(fig)
+            finally:
+                import matplotlib.pyplot as plt
+                plt.close(fig)
+            after = {'styles': after_styles, 'shapes': after_shapes,
+                     'science': after_science,
+                     'view': after_view,
+                     'gids': sorted(reg.all())}
+        finally:
+            try:
+                Path(tmp.name).unlink()
+            except OSError:
+                pass
+
+        allowed_styles: dict[str, set] = {}
+        fam_keys: set[str] = set()
+        required: list[dict] = []
+        declared_all: set[str] = set()
+        for param in params:
+            role = param_roles[param]
+            entry = entries[param]
+            declared = {gid for gid in base['gids']
+                        if param in reg.params_of(gid)} if hasattr(reg, 'params_of') else set()
+            declared |= _attribute_unregistered(
+                session, base, role, param, float(base_cfg[param]))
+            declared_all |= declared
+            for gid in sorted(declared):
+                allowed_styles.setdefault(gid, set()).update(entry.get('properties') or ())
+            if role in ('curve.linewidth', 'legend'):
+                for key in (after.get('styles') or {}):
+                    if '.legend_handle.' in str(key):
+                        allowed_styles.setdefault(key, {'linewidth'})
+                allowed_styles.update(_legend_handle_allowlist(session, after.get('styles') or {}))
+            family = roles.GEOMETRY_FAMILY.get(role, ())
+            fam_keys |= {k for k in after['shapes']
+                         if any(f in k for f in family)} | \
+                        {k for k in base['shapes']
+                         if any(f in k for f in family)}
+            for gid in sorted(declared):
+                for prop in (entry.get('properties') or ()):
+                    required.append({'gid': gid, 'property': prop})
+        allowed = {'styles': allowed_styles,
+                   'shapes': {k: 'geometry-family' for k in fam_keys},
+                   'required_targets': required}
+        result = audit_pair(base, after, allowed)
+        # 画布是 apply 的一部分：其派生几何不判越权。audit_pair 只把“同名位移”
+        # 记成 derived；画布缩放还会带来 envelope 增删（FTIR 传奇行柄是其一；
+        # tick 标签增删见下）。窄化边界：只重分类**刻度包络**
+        # （xtick_/ytick_ 家族——G14 实测中画布 48→80/90→80mm 时唯一出现
+        # structure 增删的 envelope 家族），且仅当科学视图未变时
+        # （xlim/ylim/scale/反向逐项一致，否则 fail-closed，不重分类）。
+        # 其余 structure 增删（曲线/文本/图例包络的新增消失）仍判越权；
+        # 任何语义属性变化（fontsize/linewidth/text）永不重分类。
+        _views_equal = (base.get('view') or {}) == (after.get('view') or {})
+        if _views_equal:
+            _styled = set((result.get('actual_changes') or {}).get('styles') or {})
+            _reclass: list = []
+            _kept: list = []
+            for u in result.get('unauthorized') or []:
+                if u.get('gid') in _styled:
+                    _kept.append(u)
+                    continue
+                if u.get('class') == 'derived-geometry':
+                    _reclass.append(u)
+                    continue
+                if u.get('class') in ('structure-added', 'structure-removed'):
+                    _prop = str(u.get('property') or '')
+                    if 'xtick_' in _prop or 'ytick_' in _prop:
+                        _reclass.append(u)
+                        continue
+                _kept.append(u)
+            if _reclass:
+                result['unauthorized'] = _kept
+                result['within_allowed'] = not _kept
+                result['derived_geometry'] = list(result.get('derived_geometry') or []) + _reclass
+        target_hit = any(
+            gid in (result['actual_changes']['styles'] or {})
+            for gid in declared_all)
+        result['target_effectively_changed'] = bool(target_hit)
+        sci_ok, sci_notes = session._compare_science(base['science'], after['science'])
+        result['science_unchanged'] = sci_ok
+        result['science_notes'] = list(map(str, sci_notes or []))
+        if sci_ok is False:
+            result['status'] = 'SCIENCE_VIOLATION'
+        elif list(result['unauthorized']):
+            result['status'] = 'EFFECT_MISMATCH'
+        elif not target_hit:
+            result['status'] = 'NO_EFFECT'
+        else:
+            result['status'] = 'EFFECT_OK'
+        result.update({'roles': {p: param_roles[p] for p in params},
+                       'params': list(params), 'scope': scope,
+                       'perturbation': {p: {'from': float(base_cfg[p]), 'to': probes[p],
+                                           'nonzero': True} for p in params},
+                       'declared_objects': sorted(declared_all)})
+        return result
+    finally:
+        session.close()
+
+
+def _attribute_unregistered(session, base, role, param, current: float) -> set:
+    """未注册归因：直接从 base（before 快照）styles 键集合提取同源子集。
+
+    过滤规则：role == 'axis.title' 取后缀为 '.xlabel'/'.ylabel' 的键（demo
+    的轴标签从未注册，扰动前后同键；'.title.' 是保留角色 axes.title，不得归因）；
+    role == 'axis.tick' 取含 '.tick.' 的键；role == 'legend' 取键小写含 '.legend'
+    的键（覆盖 .legend_text./.legend_handle./.Legend.，行柄无 fontsize 自然落选）；
+    其他角色返回空集。含 '..'（空文本段占位）的键一律跳过。同源保证：返回键必是
+    base['styles'] 的子集，与审计比较键同源同形，不再经 figure/_stable_key 重新
+    生成。值校验只看 fontsize（|fontsize - current| <= _STYLE_NUMERIC_TOL）——
+    只认“当前值即该参数值”的对象，不按 class 一刀切放行。
+    """
+    styles = (base.get('styles') or {}) if isinstance(base, dict) else {}
+    if role == 'axis.title':
+        suffixes = ('.xlabel', '.ylabel')
+    elif role == 'axis.tick':
+        needle = '.tick.'
+    elif role == 'legend':
+        needle = '.legend'
+    else:
+        return set()
+    out: set = set()
+    for key, entry in (styles.items() if isinstance(styles, dict) else ()):
+        skey = str(key)
+        if role == 'axis.title':
+            # 后缀精确匹配：'.title.'（axes.title，保留角色）与 legend/tick 文本
+            # 不得混入；非 unregistered 的注册键走 params_of，不走这里。
+            if not skey.startswith('unregistered.') or not skey.endswith(suffixes):
+                continue
+        else:
+            hay = skey.lower() if role == 'legend' else skey
+            if needle not in hay:
+                continue
+            if not skey.startswith('unregistered.'):
+                continue
+        if '..' in skey:
+            continue
+        try:
+            value = float((entry or {}).get('fontsize'))
+        except (TypeError, ValueError, AttributeError):
+            continue
+        if abs(value - current) <= _STYLE_NUMERIC_TOL:
+            out.add(skey)
     return out
 
 

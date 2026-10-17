@@ -270,22 +270,129 @@ candidates:
     registered: false
   confidence: medium
   confirmed: true
-  verified: false
+  verified: true
   evidence:
-    failure: 对象级审计越权：unregistered.tick.x.0.0.fontsize 7.0->8.0; unregistered.tick.x.10.0.fontsize
-      7.0->8.0; unregistered.tick.x.2.0.fontsize 7.0->8.0; unregistered.tick.x.4.0.fontsize
-      7.0->8.0; unregistered.tick.x.6.0.fontsize 7.0->8.0; unregistered.tick.x.8.0.fontsize
-      7.0->8.0; unregistered.tick.y.0.0.fontsize 7.0->8.0; unregistered.tick.y.1.0.fontsize
-      7.0->8.0; unregistered.tick.y.2.0.fontsize 7.0->8.0; unregistered.tick.y.3.0.fontsize
-      7.0->8.0; unregistered.tick.y.4.0.fontsize 7.0->8.0; unregistered.tick.y.5.0.fontsize
-      7.0->8.0; unregistered.tick.y.−1.0.fontsize 7.0->8.0; 目标未实际变化（声明对象上无语义属性变更：防假成功）
-      ['unregistered.0.legend_text.0', 'unregistered.0.legend_text.1', 'unregistered.0.legend_text.2',
-      'unregistered.Legend.0', 'unregistered.tick.x..0', 'unregistered.tick.y..0']
     perturbation:
       path:
       - tick_font_pt
       from: 7.0
       to: 8.0
+      nonzero: true
+    width_mm: 90.0
+    target_role: axis.tick
+    target_before:
+    - 7.003
+    target_after:
+    - 8.004
+    nontarget_unchanged:
+      axis.title:
+      - 8.004
+      curve.linewidth:
+      - 0.9
+      panel.label:
+      - 7.003
+      legend:
+      - 7.003
+    science:
+      digest_before: 1cfd2d89a746b6e88dd56548c3d84a28cc2a461d733f052be8ff8a4997a67efa
+      digest_after: 1cfd2d89a746b6e88dd56548c3d84a28cc2a461d733f052be8ff8a4997a67efa
+      unchanged: true
+    qa_added: []
+    object_identity:
+      gids_stable: true
+      n_gids: 6
+    object_audit:
+      unauthorized: []
+      derived_geometry:
+      - gid: 0:ylabel_envelope:0
+        property: shape:0:ylabel_envelope:0
+        before: null
+        after: null
+        class: derived-geometry
+        delta:
+          dx_mm: -0.2222
+          dy_mm: 0.0
+          dw_mm: 0.0
+          dh_mm: 0.0
+          tol_mm: 0.001
+          tight_mm: 0.001
+          size_stable: true
+          method: envelope_center
+      within_allowed: true
+      required_targets_effectively_changed:
+        unregistered.tick.x.0.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.x.10.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.x.2.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.x.4.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.x.6.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.x.8.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.y.0.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.y.1.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.y.2.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.y.3.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.y.4.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.y.5.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.y.−1.0.fontsize:
+        - 7.0
+        - 8.0
+      narrow_registry_note: 'narrow-registry-only observation (not a verdict): [''figdemo.main.curve.alpha'',
+        ''figdemo.main.curve.beta'', ''figdemo.main.curve.gamma'', ''figdemo.main.peak.alpha.2p06'',
+        ''figdemo.main.peak.beta.5p00'', ''figdemo.main.peak.gamma.7p46'', ''unregistered.0.legend_text.0'',
+        ''unregistered.0.legend_text.1'', ''unregistered.0.legend_text.2'', ''unregistered.0.title'',
+        ''unregistered.0.xlabel'', ''unregistered.0.ylabel'', ''unregistered.Figure.0'',
+        ''unregistered.Legend.0'', ''unregistered.Line2D.0'', ''unregistered.Line2D.1'',
+        ''unregistered.Line2D.10'', ''unregistered.Line2D.11'', ''unregistered.Line2D.12'',
+        ''unregistered.Line2D.13'', ''unregistered.Line2D.14'', ''unregistered.Line2D.15'',
+        ''unregistered.Line2D.2'', ''unregistered.Line2D.3'', ''unregistered.Line2D.4'',
+        ''unregistered.Line2D.5'', ''unregistered.Line2D.6'', ''unregistered.Line2D.7'',
+        ''unregistered.Line2D.8'', ''unregistered.Line2D.9'', ''unregistered.Rectangle.0'',
+        ''unregistered.Rectangle.1'', ''unregistered.Spine.0'', ''unregistered.Spine.1'',
+        ''unregistered.Spine.2'', ''unregistered.Spine.3'', ''unregistered.Text.0'',
+        ''unregistered.Text.1'', ''unregistered.TextArea.0'', ''unregistered.TextArea.1'',
+        ''unregistered.TextArea.2'', ''unregistered.tick.x.0.0'', ''unregistered.tick.x.10.0'',
+        ''unregistered.tick.x.2.0'', ''unregistered.tick.x.4.0'', ''unregistered.tick.x.6.0'',
+        ''unregistered.tick.x.8.0'', ''unregistered.tick.y.0.0'', ''unregistered.tick.y.1.0'',
+        ''unregistered.tick.y.2.0'', ''unregistered.tick.y.3.0'', ''unregistered.tick.y.4.0'',
+        ''unregistered.tick.y.5.0'', ''unregistered.tick.y.−1.0'']'
+    geometry_family:
+    - 0:xtick_label1_envelope:5
+    - 0:ytick_label1_envelope:0
+    side_effects:
+    - key: 0:ylabel_envelope:0
+      delta:
+        dx_mm: -0.2222
+        dy_mm: 0.0
+        dw_mm: 0.0
+        dh_mm: 0.0
+        tol_mm: 0.001
+        tight_mm: 0.001
+        size_stable: true
+        method: envelope_center
+      disposition: recorded-layout-coupling
 unresolved:
 - kind: entry
   role: axis.tick
@@ -319,11 +426,11 @@ unsupported:
   reason: 非显微图无 scalebar 角色；SVG/PNG 无源码入口（compare 只报告）
 coverage:
   verified_editable:
+  - axis.tick
   - axis.title
   - curve.linewidth
   - legend
-  candidate:
-  - axis.tick
+  candidate: []
   unresolved:
   - panel.label
   unsupported:
