@@ -40,21 +40,27 @@ import yaml
 
 DRAFT_SCHEMA = "contract-draft/1"
 
-#: v0.1 发现范围：调用名 -> (角色, 期望参数键, artist 家族)。
+#: 发现范围（v0.2：G13 新增 legend / panel.label 两条合法调用族；原有三条不变）。
 #: 角色语义唯一权威见 figpact.roles：axis.title=坐标轴标签（xlabel/ylabel），
 #: 不是 Axes.set_title；set_title 由注册表判为错配（正主是保留角色 axes.title）。
 #: 调用家族名经 roles.resolve_legacy 做兼容解析（旧契约无歧义，新错配拒绝）。
+#: panel.label 的 annotate/text 家族只做"候选"，归属仍由 roles.check_binding
+#: 的可判定门裁决（无判据的任意 Text 落 unresolved，不得强行归属）。
 ENTRY_CALLS = {
     "set_xlabel": ("axis.title", "axis_font_pt", "xlabel"),
     "set_ylabel": ("axis.title", "axis_font_pt", "ylabel"),
     "set_title": ("axis.title", "axis_font_pt", "title"),
     "tick_params": ("axis.tick", "tick_font_pt", "ticklabels"),
     "plot": ("curve.linewidth", "line_width", "curve"),
+    "legend": ("legend", "legend_font_pt", "legend"),
+    "annotate": ("panel.label", "peak_font_pt", "text"),
+    "text": ("panel.label", "label_font_pt", "text"),
 }
 #: 调用关键字：调用名 -> 承载字号/线宽的关键字
 ENTRY_KWARG = {
     "set_xlabel": "fontsize", "set_ylabel": "fontsize", "set_title": "fontsize",
     "tick_params": "labelsize", "plot": "linewidth",
+    "legend": "fontsize", "annotate": "fontsize", "text": "fontsize",
 }
 #: 已知可验证参数 -> 角色；6 角色分母；回退映射；几何家族：唯一语义见 figpact.roles。
 from figpact import roles as _roles
@@ -78,7 +84,27 @@ def _call_name(node: ast.Call) -> Optional[str]:
     return None
 
 
-def _param_of_value(node: ast.AST) -> Any:
+def _const_aliases(tree: ast.AST) -> dict:
+    """模块级常量 -> cfg 键（通用机制）：只认文件内唯一绑定 NAME = cfg['key']。
+
+    FTIR 类脚本把 cfg[...] 先赋给 LABEL_FS / LEGEND_FS 等模块常量再传给
+    legend()/text()；不认别名会把合法绑定判 UNKNOWN。非唯一绑定/非 cfg
+    来源一律不认（UNKNOWN，不得猜）。
+    """
+    found: dict[str, list[str]] = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+            continue
+        tgt = node.targets[0]
+        if not isinstance(tgt, ast.Name):
+            continue
+        key = _param_of_value(node.value)
+        if isinstance(key, str) and not key.startswith('CONST:'):
+            found.setdefault(tgt.id, []).append(key)
+    return {name: keys[0] for name, keys in found.items() if len(keys) == 1}
+
+
+def _param_of_value(node: ast.AST, aliases: Optional[dict] = None) -> Any:
     """值节点 -> 参数键 / None(字面量) / 'UNKNOWN'(看不懂)。"""
     n = node
     if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
@@ -95,6 +121,8 @@ def _param_of_value(node: ast.AST) -> Any:
             and n.func.value.id == "cfg" and n.args
             and isinstance(n.args[0], ast.Constant)):
         return n.args[0].value
+    if isinstance(n, ast.Name) and aliases and n.id in aliases:
+        return aliases[n.id]
     if isinstance(n, ast.Constant) and isinstance(n.value, (int, float)) \
             and not isinstance(n.value, bool):
         return None
@@ -103,6 +131,7 @@ def _param_of_value(node: ast.AST) -> Any:
 
 def _iter_calls(tree: ast.AST, source: str) -> list[dict]:
     out = []
+    aliases = _const_aliases(tree)
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
@@ -110,6 +139,11 @@ def _iter_calls(tree: ast.AST, source: str) -> list[dict]:
         if name not in ENTRY_CALLS:
             continue
         kw = ENTRY_KWARG[name]
+        if name == "plot" and kw not in [k.arg for k in node.keywords]:
+            for k in node.keywords:
+                if k.arg == "lw":
+                    kw = "lw"
+                    break
         role, expect, family = ENTRY_CALLS[name]
         hit = None
         for k in node.keywords:
@@ -122,14 +156,14 @@ def _iter_calls(tree: ast.AST, source: str) -> list[dict]:
                         "call": (ast.get_source_segment(source, node) or name)[:160],
                         "param": "UNKNOWN", "reason": f"{name}() 未见 {kw}=（非常见写法）"})
             continue
-        param = _param_of_value(hit)
+        param = _param_of_value(hit, aliases)
         out.append({"entry": name, "role": role, "expect": expect,
                     "family": family, "line": node.lineno,
                     "call": (ast.get_source_segment(source, node) or name)[:160],
                     "param": param,
                     "reason": None if param == expect else (
                         "字面量：无 YAML 绑定" if param is None else
-                        f"参数 {param!r} 非 {expect}（超 v0.1 范围/写法不明）"
+                        f"参数 {param!r} 非 {expect}（超范围/写法不明）"
                         if isinstance(param, str) else "写法不明")})
     return out
 
@@ -148,6 +182,45 @@ def _unsupported_safety(tree: ast.AST, source: str) -> list[dict]:
     return out
 
 
+def _panel_label_attributable(fig, reg, param: str) -> tuple:
+    """panel.label 归属可判定检查（通用机制）：声明 或 轴外/角位置。
+
+    声明 = 注册表里有 params 含 label_font_pt/peak_font_pt 的 Text 对象
+    （经 roles.classify_artist 判 text 非轴标签/刻度/图例/标题）；位置 =
+    roles.is_panel_label_position。任一成立即 (True, 理由)，否则
+    (False, 判定缺口)。legend 不走这里（身份经 classify_artist 直接判定）。
+    """
+    from figpact import roles as _roles
+    want = set(_roles.ROLE_REGISTRY.get('panel.label', {}).get('params') or ())
+    if param not in want:
+        return False, f'{param} 非 panel.label 字体键'
+    if fig is None or reg is None:
+        return False, '无构建图/注册表，无法判定'
+    try:
+        artists = {gid: art for gid, art in reg.all().items()
+                   if param in (reg.params_of(gid) or [])}
+    except Exception:
+        artists = {}
+    for gid, art in artists.items():
+        try:
+            kind = _roles.classify_artist(art, fig)
+        except Exception:
+            continue
+        if kind in ('text',):
+            return True, f'契约显式声明 {gid}'
+    try:
+        import matplotlib.pyplot as _plt
+        texts = [t for t in fig.findobj(_plt.Text)]
+    except Exception:
+        texts = []
+    for art in texts:
+        try:
+            if _roles.is_panel_label_position(art, fig):
+                return True, '轴外/角位置的面板文本'
+        except Exception:
+            continue
+    return False, '无契约声明归属且无轴外/角位置文本'
+
 def discover(script: Any, config: Any, scope: Optional[str] = None) -> dict:
     """只读发现：返回 draft 字典（candidates/unresolved/unsupported/coverage）。"""
     from figpact import final_size as fs_mod
@@ -164,18 +237,16 @@ def discover(script: Any, config: Any, scope: Optional[str] = None) -> dict:
         scopes = getattr(module, "SCOPES", None)
         scope = (scopes[0] if scopes else "main")
     (_fig_reg, _scope) = (None, scope)
+    fig = reg = None
     try:
         (fig, reg), scope = fs_mod._build_figure(module, cfg, scope)
-    finally:
-        pass
-    try:
-        gid_of_param: dict[str, list[str]] = {}
+    except Exception:
+        fig = reg = None
+    gid_of_param: dict[str, list[str]] = {}
+    if reg is not None:
         for gid in reg.all():
             for key in reg.params_of(gid):
                 gid_of_param.setdefault(key, []).append(gid)
-    finally:
-        import matplotlib.pyplot as plt
-        plt.close(fig)
 
     calls = _iter_calls(tree, source)
     by_param: dict[str, list[dict]] = {}
@@ -195,7 +266,7 @@ def discover(script: Any, config: Any, scope: Optional[str] = None) -> dict:
         if key in KNOWN_PARAM_ROLE and key not in by_param:
             unresolved.append({
                 "kind": "unwired", "role": KNOWN_PARAM_ROLE[key],
-                "reason": f"YAML 有 {key}={val!r} 但未发现 v0.1 入口调用接线，不得猜",
+                "reason": f"YAML 有 {key}={val!r} 但未发现入口调用接线，不得猜",
                 "location": {"file": config_p.name, "line": None, "call": None},
             })
         if key in ROLE_PARAM_FALLBACK:
@@ -203,7 +274,7 @@ def discover(script: Any, config: Any, scope: Optional[str] = None) -> dict:
     for key in sorted(seen_yaml_keys):
         unresolved.append({
             "kind": "out_of_scope", "role": ROLE_PARAM_FALLBACK[key],
-            "reason": f"YAML 有 {key} 但其调用（annotate/legend 分支）超出 v0.1 发现范围，不得猜",
+            "reason": f"YAML 有 {key} 但其调用超出发现范围，不得猜",
             "location": {"file": config_p.name, "line": None, "call": None},
         })
 
@@ -211,8 +282,23 @@ def discover(script: Any, config: Any, scope: Optional[str] = None) -> dict:
     for param in sorted(by_param):
         locs = by_param[param]
         gids = sorted(gid_of_param.get(param, []))
+        # panel.label 可判定门（通用机制）：至少一条声明归属（注册 params 含
+        # 本角色字体键的 Text/Legend 行文本），或轴外/角位置的面板文本；
+        # 否则候选降级为 unresolved（写明判定缺口，不得强行归属）。legend
+        # 本体的判定经 roles.classify_artist（Legend/legend_text），无额外分支。
+        role = KNOWN_PARAM_ROLE[param]
+        if role == 'panel.label':
+            _ok, _why = _panel_label_attributable(fig, reg, param)
+            if not _ok:
+                unresolved.append({
+                    "kind": "unattributable", "role": role,
+                    "reason": f"YAML/调用有 {param} 但面板标签归属无法判定（{_why}），不得猜",
+                    "location": {"file": script_p.name,
+                                 "line": locs[0]["line"], "call": locs[0]["call"]},
+                })
+                continue
         candidates.append({
-            "role": KNOWN_PARAM_ROLE[param],
+            "role": role,
             "param": param,
             "source": [{"file": script_p.name, "line": c["line"],
                         "call": c["call"]} for c in sorted(locs, key=lambda d: d["line"])],
@@ -233,6 +319,12 @@ def discover(script: Any, config: Any, scope: Optional[str] = None) -> dict:
         "unsupported": unsupported,
         "coverage": _coverage(candidates, unresolved, unsupported),
     }
+    try:
+        import matplotlib.pyplot as plt
+        if fig is not None:
+            plt.close(fig)
+    except Exception:
+        pass
     return draft
 
 # --------------------------------------------------------------------------- #
@@ -275,19 +367,35 @@ def coverage_report(draft: dict) -> str:
 # --------------------------------------------------------------------------- #
 
 def load_verified(path: Any) -> dict:
-    """读 draft 文件，只返回人工确认且扰动验证通过的条目。"""
+    """读 draft 文件，只返回人工确认且扰动验证通过的条目。
+
+    关键：**旧证据不能授权新语义**。每个条目都必须按**当前角色注册表**重新验证
+    `(role, param)` 合法（`param ∈ ROLE_TO_PARAMS[role]`）；否则丢弃并记入
+    ``rejected``。`confirmed/verified` 字段本身**不构成授权**——它们只说明当时
+    验证过，不说明在今天的角色定义下仍然成立。
+    """
+    from figpact import roles as roles_mod
+
     p = Path(str(path)).expanduser().resolve()
     data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
     if data.get("schema_version") != DRAFT_SCHEMA:
         raise ValueError(f"未知 contract draft 版本：{data.get('schema_version')!r}")
-    entries = []
+    entries, rejected = [], []
     for c in data.get("candidates") or []:
-        if c.get("confirmed") and c.get("verified"):
-            entries.append(c)
+        role, param = str(c.get("role")), str(c.get("param"))
+        if not (c.get("confirmed") and c.get("verified")):
+            continue
+        allowed = tuple(roles_mod.ROLE_TO_PARAMS.get(role, ()))
+        if role not in roles_mod.ROLE_REGISTRY or param not in allowed:
+            rejected.append({"role": role, "param": param,
+                             "reason": "role_binding_invalid_under_current_registry"})
+            continue
+        entries.append(c)
     return {"path": str(p), "scope": data.get("scope"),
             "script": data.get("script"), "config": data.get("config"),
             "params": sorted({c["param"] for c in entries}),
             "entries": entries,
+            "rejected": rejected,
             "n_candidates": len(data.get("candidates") or [])}
 
 
@@ -301,7 +409,8 @@ def _role_means_of(script: str, config_path: str, scope: str,
     spec = {"label": "verify", "path": str(script), "config": str(config_path),
             "scope": scope}
     item = plate_mod._audit_code(spec, float(width_mm))
-    return plate_mod._role_means(item)
+    # 与 compare 表同一口径：三可统一角色 + panel.label/legend（只比较）。
+    return {**plate_mod._role_means(item), **plate_mod._extra_role_means(item)}
 
 
 def verify(path: Any, width_mm: Optional[float] = None) -> dict:
@@ -451,8 +560,12 @@ def verify(path: Any, width_mm: Optional[float] = None) -> dict:
                              if param in reg.params_of(gid)}
                 _declared |= _ca._attribute_unregistered(
                     session, {'styles': _bstyles}, role, param, float(cur))
-                _allowed = {'styles': {g: set(_entry.get('properties') or ())
-                                       for g in _declared},
+                _allowed_styles = {g: set(_entry.get('properties') or ())
+                                   for g in _declared}
+                # 图例行柄豁免与 change_audit.verify_param 同口径（预期耦合）。
+                if role in ('curve.linewidth', 'legend'):
+                    _allowed_styles.update(_ca._legend_handle_allowlist(session, after_styles))
+                _allowed = {'styles': _allowed_styles,
                             'shapes': {k: 'geometry-family'
                                        for k in set(_bshapes) | set(after_shapes)
                                        if any(f in k for f in _roles.GEOMETRY_FAMILY.get(role, ()))},
