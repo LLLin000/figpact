@@ -575,12 +575,18 @@ def _role_means(item: dict) -> dict[str, list[float]]:
     return out
 
 
-def plan_unify(audit_result: dict, targets: dict) -> dict:
-    """Plan source edits per figure; refuses instead of auto-shrinking text."""
+def plan_unify(audit_result: dict, targets: dict,
+               contracts: Optional[dict] = None) -> dict:
+    """Plan source edits per figure; refuses instead of auto-shrinking text.
+
+    G11: 有清单 contract 时，axis/tick/line 三键只认"layout EDITABLE ∪ 已验证
+    contract"；无需 contract 的老调用保持原语义。
+    """
     want = {k: float(v) for k, v in targets.items()
             if k in ("axis_font_pt", "tick_font_pt", "line_width", "target_width_mm")}
     steps: list[dict] = []
     infeasible: list[dict] = []
+    strict = contracts is not None
     for item in audit_result.get("figures", []):
         if item.get("kind") != "code":
             infeasible.append({
@@ -590,6 +596,9 @@ def plan_unify(audit_result: dict, targets: dict) -> dict:
             })
             continue
         editable = set(item.get("editable_fields", []))
+        if strict:
+            _vc = (contracts or {}).get(item.get("label")) or {}
+            editable = editable | set(_vc.get("params") or [])
         width = float(item.get("target_width_mm"))
         k = float(item.get("k", 1.0))
         changes: dict[str, list] = {}
@@ -604,7 +613,7 @@ def plan_unify(audit_result: dict, targets: dict) -> dict:
                 blocked.append(key)
                 continue
             # infeasible check: target written at source, then scaled by measured k
-            eff = want[key] * k if key != "line_width" else want[key] * k
+            eff = want[key] * k
             floor = 5.0 if key != "line_width" else 0.2
             if eff < floor:
                 infeasible.append({
@@ -646,12 +655,15 @@ def plan_unify(audit_result: dict, targets: dict) -> dict:
     return {"status": status, "targets": want, "steps": steps, "infeasible": infeasible}
 
 
-def unify(plan: dict, *, specs: Optional[list[dict]] = None, dry_run: bool = False) -> dict:
+def unify(plan: dict, *, specs: Optional[list[dict]] = None, dry_run: bool = False,
+          contracts: Optional[dict] = None) -> dict:
     """Apply a plan through the existing source-write chain, then re-audit.
 
     Writes go through :func:`figpact.final_size.apply_final_size` (YAML patch
     + ``source_writes`` journal + re-audit). ``dry_run`` returns the plan and
     the refusal-style pending state without touching sources.
+    G11: ``contracts`` 为清单已验证 contract（figure id -> load_verified 结果）；
+    每图只写其中已验证的参数键。
     """
     if dry_run:
         return {"status": "DRY_RUN", "source_commit_state": "NOT_WRITTEN",
@@ -678,7 +690,8 @@ def unify(plan: dict, *, specs: Optional[list[dict]] = None, dry_run: bool = Fal
                 config=_resolve(spec["config"]) if spec.get("config") else None,
                 target_width_mm=float(width) if width else float(spec.get("_width_mm") or 42.0),
                 target_axis_font_pt=float(axis), target_tick_font_pt=float(tick),
-                target_line_pt=float(line), scope=spec.get("scope"), mode="B")
+                target_line_pt=float(line), scope=spec.get("scope"), mode="B",
+                verified_params=((contracts or {}).get(step.get("figure")) or {}).get("params"))
         except Exception as e:  # keep per-figure errors structured
             res = {"status": "ERROR", "message": f"{type(e).__name__}: {e}"}
         per_figure.append({"figure": step.get("figure"), "result": res})
@@ -935,8 +948,30 @@ def load_plate(path: Any) -> dict:
                          "curve_linewidth_pt", "target_width_mm"):
                 _manifest_num(token, val, f"design.{section}")
     policy = data.get("policy") or {}
+    raw_entries = {str(e.get("id")): e for e in (data["plate"].get("figures") or [])
+                   if isinstance(e, dict) and e.get("id")}
+    contracts: dict[str, dict] = {}
+    for fig in figures:
+        raw = (raw_entries.get(fig["id"]) or {}).get("contract")
+        if raw:
+            cpath = (manifest_path.parent / str(raw)).resolve()
+            if not cpath.is_file():
+                raise ValueError(f"plate.yaml: figure {fig['id']!r} contract not found: {cpath}")
+            try:
+                from figpact import init_contract as _ic
+                verified = _ic.load_verified(cpath)
+            except ValueError as e:
+                raise ValueError(f"plate.yaml: figure {fig['id']!r} contract 无效：{e}")
+            # contract 必须指向同一脚本+作用域，否则是张冠李戴。
+            if (Path(verified["script"]).resolve() != Path(fig["path"]).resolve()
+                    or (fig.get("scope") or "main") != (verified.get("scope") or "main")):
+                raise ValueError(f"plate.yaml: figure {fig['id']!r} contract 指向不同脚本/作用域")
+            contracts[fig["id"]] = verified
+            fig["contract"] = str(cpath)
+            fig["verified_params"] = list(verified["params"])
     return {"path": str(manifest_path), "plate": data["plate"], "design": design,
             "policy": policy if isinstance(policy, dict) else {}, "figures": figures,
+            "contracts": contracts,
             "manifest_hash": _stable_hash(data)}
 
 
@@ -1004,11 +1039,20 @@ def _extra_role_means(item: dict) -> dict[str, list[float]]:
     return {k: sorted(v) for k, v in seen.items()}
 
 
-def _compare_cell(item: dict, role: str, targets: dict[str, float]) -> dict:
-    """One role cell: measured value + Comparable/Editable/Conformant marks."""
+def _compare_cell(item: dict, role: str, targets: dict[str, float],
+                  contracts: Optional[dict] = None) -> dict:
+    """One role cell: measured value + Comparable/Editable/Conformant marks.
+
+    G11: E（可写回）只认两条路 —— 脚本 layout_contract 的 EDITABLE，或清单里
+    人工确认+扰动验证的 contract 条目。二者都没有就是 E✗，不猜。
+    """
     kind = item.get("kind")
     editable = set(item.get("editable_fields", []))
     params = ROLE_TO_PARAMS[role]
+    verified_params: set[str] = set()
+    for _fig_id, _c in (contracts or {}).items():
+        if _c and _fig_id == item.get("label"):
+            verified_params |= set(_c.get("params") or [])
     if kind == "code":
         if role == "scalebar":
             return {"value": None, "value_kind": "none", "comparable": False,
@@ -1017,17 +1061,23 @@ def _compare_cell(item: dict, role: str, targets: dict[str, float]) -> dict:
         means = {**_role_means(item), **_extra_role_means(item)}
         vals = sorted({round(float(v), 3) for v in means.get(role, [])})
         if not vals:
+            edit = any(p in editable for p in params) or any(p in verified_params for p in params)
             return {"value": None, "value_kind": "none", "comparable": False,
-                    "editable": any(p in editable for p in params),
+                    "editable": edit,
                     "conformant": "n/a", "note": f"no artists for {role} in this figure"}
+        contract_edit = any(p in verified_params for p in params)
         cell: dict[str, Any] = {
             "value": vals, "value_kind": "measured",
             "comparable": True, "comparable_basis": "control-glyph extent x measured k",
-            "editable": any(p in editable for p in params),
+            "editable": any(p in editable for p in params) or contract_edit,
+            "editable_via": ("verified-contract" if contract_edit and not any(p in editable for p in params)
+                             else ("layout-contract+verified-contract" if contract_edit else "layout-contract")),
             "note": "",
         }
         if not cell["editable"]:
-            cell["note"] = f"{'/'.join(params)} not EDITABLE in layout_contract; report-only"
+            cell["note"] = f"{'/'.join(params)} 无可编辑绑定（layout_contract 非 EDITABLE 且无已验证 contract）；只报告"
+        elif contract_edit:
+            cell["note"] = f"{'/'.join(params)} 已验证 contract（人工确认+扰动验证），经由 {cell['editable_via']}"
         if role in CONFORMANT_ROLES and role in targets:
             cell["conformant"] = all(abs(v - targets[role]) <= UNIFY_TOLERANCE_PT for v in vals)
             cell["conformant_target_pt"] = targets[role]
@@ -1061,11 +1111,11 @@ def _compare_cell(item: dict, role: str, targets: dict[str, float]) -> dict:
 
 def compare_roles(audit_result: dict, manifest: Optional[dict] = None,
                   plan: Optional[dict] = None) -> dict:
-    """Cross-figure role table: per cell measured value + 3 boundary marks."""
     targets = _role_targets(manifest, plan)
+    contracts = (manifest or {}).get("contracts") if isinstance(manifest, dict) else None
     cells: dict[str, dict] = {}
     for item in audit_result.get("figures", []):
-        cells[item.get("label")] = {role: _compare_cell(item, role, targets)
+        cells[item.get("label")] = {role: _compare_cell(item, role, targets, contracts)
                                     for role in COMPARE_ROLES}
     spread: dict[str, dict] = {}
     for role in ("axis.title", "axis.tick", "curve.linewidth"):

@@ -1,0 +1,208 @@
+schema_version: contract-draft/1
+script: D:/L/AI/figpact/examples/demo/demo_figure.py
+config: D:/L/AI/figpact/examples/demo/demo.yaml
+scope: main
+candidates:
+- role: axis.title
+  param: axis_font_pt
+  source:
+  - file: demo_figure.py
+    line: 244
+    call: ax.set_xlabel(r"$\delta$ (ppm)", fontsize=float(cfg["axis_font_pt"]))
+  - file: demo_figure.py
+    line: 245
+    call: ax.set_ylabel("Intensity (a.u.)", fontsize=float(cfg["axis_font_pt"]))
+  artist:
+    gid: null
+    gids: []
+    kind: xlabel
+    registered: false
+  confidence: medium
+  confirmed: true
+  verified: true
+  evidence:
+    perturbation:
+      path:
+      - axis_font_pt
+      from: 8.0
+      to: 9.0
+      nonzero: true
+    width_mm: 80.0
+    target_role: axis.title
+    target_before:
+    - 7.114
+    target_after:
+    - 8.004
+    nontarget_unchanged:
+      axis.tick:
+      - 6.225
+      curve.linewidth:
+      - 0.8
+    science:
+      digest_before: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
+      digest_after: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
+      unchanged: true
+    qa_added: []
+    object_identity:
+      gids_stable: true
+      n_gids: 6
+    geometry_family:
+    - 0:xlabel_envelope:0
+    - 0:ylabel_envelope:0
+    side_effects: []
+- role: curve.linewidth
+  param: line_width
+  source:
+  - file: demo_figure.py
+    line: 240
+    call: "ax.plot(xi, y + i * pitch + GROUP_Y_MM, color=SAMPLES_CONFIG[i][2],\n \
+      \                       linewidth=float(cfg[\"line_width\"]), label=SAMPLES_CONFIG[i][1])"
+  artist:
+    gid: null
+    gids:
+    - figdemo.main.curve.alpha
+    - figdemo.main.curve.beta
+    - figdemo.main.curve.gamma
+    kind: curve
+    registered: true
+  confidence: high
+  confirmed: true
+  verified: true
+  evidence:
+    perturbation:
+      path:
+      - line_width
+      from: 0.9
+      to: 1.9
+      nonzero: true
+    width_mm: 80.0
+    target_role: curve.linewidth
+    target_before:
+    - 0.8
+    target_after:
+    - 1.69
+    nontarget_unchanged:
+      axis.title:
+      - 7.114
+      axis.tick:
+      - 6.225
+    science:
+      digest_before: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
+      digest_after: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
+      unchanged: true
+    qa_added: []
+    object_identity:
+      gids_stable: true
+      n_gids: 6
+    geometry_family: []
+    side_effects: []
+- role: axis.tick
+  param: tick_font_pt
+  source:
+  - file: demo_figure.py
+    line: 246
+    call: ax.tick_params(axis="both", labelsize=float(cfg["tick_font_pt"]), pad=2.5)
+  artist:
+    gid: null
+    gids: []
+    kind: ticklabels
+    registered: false
+  confidence: medium
+  confirmed: true
+  verified: true
+  evidence:
+    perturbation:
+      path:
+      - tick_font_pt
+      from: 7.0
+      to: 8.0
+      nonzero: true
+    width_mm: 80.0
+    target_role: axis.tick
+    target_before:
+    - 6.225
+    target_after:
+    - 7.114
+    nontarget_unchanged:
+      axis.title:
+      - 7.114
+      curve.linewidth:
+      - 0.8
+    science:
+      digest_before: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
+      digest_after: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
+      unchanged: true
+    qa_added: []
+    object_identity:
+      gids_stable: true
+      n_gids: 6
+    geometry_family:
+    - 0:xtick_label1_envelope:5
+    - 0:ytick_label1_envelope:0
+    side_effects:
+    - key: 0:ylabel_envelope:0
+      delta:
+        dx_mm: -0.2222
+        dy_mm: 0.0
+        dw_mm: 0.0
+        dh_mm: 0.0
+        tol_mm: 0.001
+        tight_mm: 0.001
+        size_stable: true
+        method: envelope_center
+      disposition: recorded-layout-coupling
+unresolved:
+- kind: entry
+  role: axis.tick
+  reason: tick_params() 未见 labelsize=（非常见写法）
+  location:
+    file: demo_figure.py
+    line: 250
+    call: ax.tick_params(direction="in")
+- kind: out_of_scope
+  role: legend
+  reason: YAML 有 legend_font_pt 但其调用（annotate/legend 分支）超出 v0.1 发现范围，不得猜
+  location:
+    file: demo.yaml
+    line: null
+    call: null
+- kind: out_of_scope
+  role: panel.label
+  reason: YAML 有 peak_font_pt 但其调用（annotate/legend 分支）超出 v0.1 发现范围，不得猜
+  location:
+    file: demo.yaml
+    line: null
+    call: null
+unsupported:
+- kind: safety
+  role: null
+  call: set_xlim
+  line: 243
+  reason: set_xlim() 改坐标窗口：科学内容锁定，永不自动改
+- kind: safety
+  role: null
+  call: set_ylim
+  line: 320
+  reason: set_ylim() 改坐标窗口：科学内容锁定，永不自动改
+- kind: noncode
+  role: scalebar
+  reason: 非显微图无 scalebar 角色；SVG/PNG 无源码入口（compare 只报告）
+coverage:
+  verified_editable:
+  - axis.tick
+  - axis.title
+  - curve.linewidth
+  candidate: []
+  unresolved:
+  - legend
+  - panel.label
+  unsupported:
+  - scalebar
+  denominator_roles:
+  - axis.title
+  - axis.tick
+  - curve.linewidth
+  - panel.label
+  - legend
+  - scalebar
+  denominator_note: 分母恒为 6 个角色（含未发现/未覆盖），不得把没发现从分母剔除

@@ -630,6 +630,44 @@ def cmd_audit_params(args: argparse.Namespace) -> int:
 
 
 
+
+def cmd_contract_discover(args: argparse.Namespace) -> int:
+    """G11：只读发现可编辑入口，写 Contract Draft 文件（默认未确认，不生效）。"""
+    from figpact import init_contract as ic
+
+    try:
+        draft = ic.discover(args.script, args.config, scope=args.scope)
+    except (FileNotFoundError, ValueError, SyntaxError) as e:
+        print(f"[错误] 发现失败：{type(e).__name__}: {e}", file=sys.stderr)
+        return 2
+    out = Path(args.out).expanduser().resolve() if args.out else (
+        Path(args.script).expanduser().resolve().parent / "demo.contract.yaml")
+    if out.exists() and not args.force:
+        print(f"[错误] 目标已存在（不覆盖）：{out}（用 --force 覆盖）", file=sys.stderr)
+        return 1
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(yaml.safe_dump(draft, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    print(f"[contract] draft 已写：{out}")
+    print(ic.coverage_report(draft))
+    return 0
+
+
+def cmd_contract_verify(args: argparse.Namespace) -> int:
+    """G11：对 draft 里已人工确认条目做扰动验证（只读扰动，原地写回 draft）。"""
+    from figpact import init_contract as ic
+
+    try:
+        res = ic.verify(args.contract, width_mm=args.width_mm)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"[错误] 验证失败：{type(e).__name__}: {e}", file=sys.stderr)
+        return 2
+    draft = yaml.safe_load(Path(res["contract"]).read_text(encoding="utf-8")) or {}
+    print(f"[contract] verified={res['verified']} failed={res['failed']} "
+          f"skipped_unconfirmed={res['skipped_unconfirmed']}")
+    print(ic.coverage_report(draft))
+    return 0 if not res["failed"] else 1
+
+
 def cmd_final_size(args: argparse.Namespace) -> int:
     script = Path(args.script).expanduser().resolve()
     cfg = Path(args.config).expanduser().resolve() if args.config else None
@@ -688,7 +726,8 @@ def cmd_plate_compare(args) -> int:
               file=sys.stderr)
         return 2
     plan_targets = plate_mod.manifest_shared_targets(manifest) if manifest else {}
-    plan = plate_mod.plan_unify(result, plan_targets) if manifest else None
+    plan = (plate_mod.plan_unify(result, plan_targets, manifest.get("contracts"))
+            if manifest else None)
     compare = plate_mod.compare_roles(result, manifest, plan)
     if getattr(args, "out", None):
         Path(args.out).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
@@ -782,7 +821,8 @@ def cmd_plate_unify(args) -> int:
         targets["tick_font_pt"] = float(args.tick_pt)
     if getattr(args, "line_pt", None) is not None:
         targets["line_width"] = float(args.line_pt)
-    plan = plate_mod.plan_unify(result, targets)
+    plan = plate_mod.plan_unify(result, targets,
+                                manifest.get("contracts") if manifest else None)
     if manifest is not None:
         plan["manifest_hash"] = manifest["manifest_hash"]
         plan["tokens"] = plate_mod._role_targets(manifest, plan)
@@ -794,7 +834,8 @@ def cmd_plate_unify(args) -> int:
         return 1
     for s, w in zip(specs, widths):
         s["_width_mm"] = float(targets.get("target_width_mm", w))
-    unified = plate_mod.unify(plan, specs=specs)
+    unified = plate_mod.unify(plan, specs=specs,
+                              contracts=manifest.get("contracts") if manifest else None)
     after = unified.get("after") if isinstance(unified.get("after"), dict) else None
     compare = plate_mod.compare_roles(after or result, manifest, plan)
     rec = plate_mod.receipt(result, plan, unified if after else None,
@@ -943,7 +984,18 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_fsa.add_argument("--scope", default=None)
     p_fsa.add_argument("--mode", default="B", choices=["A","B"])
 
-    # plate (cross-figure measured comparison + source-level unify + receipt)
+    # contract discover|verify (G11 init-contract 最小闭环)
+    p_contract = subparsers.add_parser("contract", help="G11：发现可编辑入口 / 扰动验证")
+    contract_sub = p_contract.add_subparsers(dest="contract_cmd", required=True)
+    p_cd = contract_sub.add_parser("discover", help="只读发现可编辑入口，写 Contract Draft（默认未确认）")
+    p_cd.add_argument("--script", required=True, help="绘图脚本路径")
+    p_cd.add_argument("--config", required=True, help="配置文件 YAML 路径")
+    p_cd.add_argument("--scope", default=None, help="作用域（默认脚本首个 scope）")
+    p_cd.add_argument("--out", default=None, help="Draft 输出路径（默认脚本同目录 demo.contract.yaml）")
+    p_cd.add_argument("--force", action="store_true", help="允许覆盖已存在的 Draft")
+    p_cv = contract_sub.add_parser("verify", help="对已确认条目做真实扰动验证（只读扰动）")
+    p_cv.add_argument("contract", help="Contract Draft 文件路径")
+    p_cv.add_argument("--width-mm", type=float, default=None, help="前后实测的目标宽度 mm（默认 YAML 画布宽）")
     p_plate = subparsers.add_parser("plate", help="跨图件实测比较 / 源码级统一 / 回执")
     plate_sub = p_plate.add_subparsers(dest="plate_cmd", required=True)
     p_pa = plate_sub.add_parser("audit", help="多张图最终尺寸下实测比较")
@@ -991,8 +1043,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         return cmd_inspect(args)
     elif args.subcommand == "list-params":
         return cmd_list_params(args)
-    elif args.subcommand == "try":
-        return cmd_try(args)
+    elif args.subcommand == "contract":
+        if args.contract_cmd == "discover":
+            return cmd_contract_discover(args)
+        elif args.contract_cmd == "verify":
+            return cmd_contract_verify(args)
 
     elif args.subcommand == "export-params":
         return cmd_export_params(args)

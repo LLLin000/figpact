@@ -1,0 +1,54 @@
+# G11 plate 清单：demo（已验证 contract）+ ftir + SVG + PNG，四图复测。
+#
+# 用法：
+#   figpact plate compare examples/plate/plate_g11.yaml
+#   figpact plate unify examples/plate/plate_g11.yaml        # 只给计划
+#   figpact plate unify examples/plate/plate_g11.yaml --apply  # 写源码 + 复测
+#
+# design token -> YAML 参数：axis_title_pt->axis_font_pt、
+# axis_tick_pt->tick_font_pt、curve_linewidth_pt->line_width。
+# panel_label_pt 只做比较目标，unify 永不强制（密度逐图不同）。
+#
+# demo 的 axis/tick/line 三键经 G11 扰动验证（examples/demo/demo.contract.yaml，
+# 人工确认 + 非零扰动 + 科学指纹不变）；FTIR 沿用既有 layout_contract
+# （其 tick 非 EDITABLE → compare 仍 E✗，unify 仍 blocked）；SVG/PNG 只报告。
+plate:
+  layout: manuscript
+  target_width_mm: 80
+  figures:
+    - id: demo
+      source: ../demo/demo_figure.py
+      kind: code
+      config: ../demo/demo.yaml
+      scope: main
+      contract: ../demo/demo.contract.yaml
+      target_width_mm: 80
+    - id: ftir
+      source: ../ftir/plot_ftir.py
+      kind: code
+      config: ../ftir/ftir.yaml
+      scope: main
+      target_width_mm: 80
+    - id: synth_vector
+      source: synth_vector.svg
+      kind: vector
+      target_width_mm: 80
+    - id: micro_bitmap
+      source: micro_bitmap.png
+      kind: bitmap
+      dpi: 300
+      target_width_mm: 80
+design:
+  global:
+    font_family: Arial
+    axis_title_pt: 8
+    axis_tick_pt: 8
+    panel_label_pt: 9
+  plot:
+    curve_linewidth_pt: 0.8
+  image:
+    panel_label_pt: 9
+policy:
+  science_content: locked
+  unsupported: report
+  unmeasurable: not_verified
