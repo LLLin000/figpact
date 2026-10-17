@@ -169,3 +169,22 @@
    SVG/PNG 边界冻结（C✗E✗）。下一个验证点是拿一张未见过的统计图做盲测
    （init-contract 发现 → 确认 → 扰动 → compare/apply 全链路），检验通用机制是否脱离夹具仍成立。
    本文件不预设其结果。
+
+---
+
+## 9. 最终回归状态与期间修掉的红
+
+全量**非浏览器**套件最终为 **554 passed / 7 skipped / 87 subtests / 0 failed**；浏览器套件 **22 passed**。G14 收口时曾有 6 failed。逐条：
+
+| 失败 | 类型 | 根因 | 处理 |
+|---|---|---|---|
+| `test_agent_api::test_live_process_serves_the_five_operations` | 真回归 | `agent` 子命令的解析器从未注册 `--output-dir`，而处理器读取它 → 子进程立即退出，客户端写管道 `EINVAL` | 恢复该参数（`aa0ad23`） |
+| `test_intent_history::test_invalid_stored_frame_is_refused_before_loading_current_source` | 既有缺陷 | `intents.py` 使用 `binascii.Error` 但未导入 → `NameError` 代替受控拒绝 | 补导入（`aa0ad23`） |
+| `test_source_writes::test_mid_apply_failure_rolls_back_already_applied_files` | 既有缺陷 | 写盘前临时清除目标只读位，把注入的第二个文件故障"消掉" → 回滚分支从未触发 | 删除放行，新增 tmp 清理 helper（`7bc1fd0`） |
+| `test_session::PanelClosureTest::…`、`test_intent_history::test_killed_process…` | 中途污染（非产品） | 一个中断子单元在 `session.py` 留下的样式上下文半成品改变了实测 gap 与重放帧 | 丢弃半成品（等价于修复），干净树上 **19 passed** |
+| `test_session_repeat_construction::…[False/True]` | 过时常量 | 断言写死 `REGISTERED_OBJECTS=31`；tick 角色注册（G7 C2b）后为 **35**。确定性本身完好：三轮构造 gid 集全等、`frame_revision` 一致 | 更新常量（`7bc122a`） |
+| `PanelClosureTest` 与 `killed_process` 在**全量顺序**下红、单跑绿 | 跨测试污染（两层） | ①`final_size._import_script` 等入口裸 `exec_module`，脚本导入期 `fs.apply()` 直写全局 rc（40 键，Arial/dpi/线宽）→ 后续测量在污染环境下进行；②`_HISTORY_ENV_KEYS` 只冻 8 键，线型（capstyle/joinstyle/dash）变化未被记录 → 重开被判 `BASELINE_GEOMETRY_MISMATCH` | 所有导入/构建入口统一走 `exec_module_isolated`（以**调用时 rc 快照**为基准、退出还原，不改变构建输入）；扩展环境身份键；几何碰撞检查跳过“基线中也不存在”的未注册静止几何（保留 `figure_image_envelope`）（`f7fcdb4`、`590df03`） |
+
+**隔离实现的关键取舍**：第一次尝试用 `rcParamsDefault` 作基准，等于**改变构建时看到的环境**，导致依赖字体度量的契约出现 dangling objects；最终改为“**当前 rc 快照 + 退出还原**”——隔离副作用而不改变输入。
+
+**测试未被削弱**：期间唯一改动的测试是 `REGISTERED_OBJECTS` 常量（随有意特性同步），其余失败全部由产品修复或丢弃中断单元的半成品解决。浏览器套件本轮复跑 **22 passed**。
