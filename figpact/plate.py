@@ -114,6 +114,7 @@ def _measure_code_artist_effs(fig, reg, cfg, k: float) -> tuple[list[dict], dict
         renderer = fig.canvas.get_renderer()
     dpi = float(fig.dpi)
     role_eff: dict[float, float] = {}
+    role_glyph: dict[float, float] = {}
     probes = []
     try:
         ax = fig.axes[0] if fig.axes else None
@@ -127,7 +128,10 @@ def _measure_code_artist_effs(fig, reg, cfg, k: float) -> tuple[list[dict], dict
                     bb = p.get_window_extent(renderer)
                     fs = float(p.get_fontsize())
                     if bb.height > 0 and fs > 0:
-                        role_eff[fs] = bb.height / dpi * 72.0 * k
+                        # 有效字号 = 声明字号 × 实测缩放（整段文字整体缩放时这是精确的）。
+                        # 控制字形高度只作为**渲染一致性证据**，不冒充 pt。
+                        role_eff[fs] = float(fs) * k
+                        role_glyph[fs] = bb.height / dpi * 72.0 * k
                 except Exception:
                     pass
     finally:
@@ -143,6 +147,8 @@ def _measure_code_artist_effs(fig, reg, cfg, k: float) -> tuple[list[dict], dict
         pass
     basis = _renderer_basis(fig)
     basis["control_glyph"] = "Ag per nominal size, same-figure draw"
+    basis["control_glyph_role"] = "render consistency evidence only; effective pt = nominal_pt x measured k"
+    basis["effective_pt_basis"] = "nominal_pt x measured k (exact for uniformly scaled text)"
     rows: list[dict] = []
     tick_n = 0
     for art in fig.findobj(plt.Text):
@@ -171,6 +177,7 @@ def _measure_code_artist_effs(fig, reg, cfg, k: float) -> tuple[list[dict], dict
             "role_params": params,
             "nominal_pt": round(nominal, 4),
             "measured_eff_pt": round(role_eff[nominal], 3),
+            "glyph_extent_pt": round(role_glyph.get(nominal, 0.0), 3),
             "extent_px": [round(bb.width, 2), round(bb.height, 2)],
         })
     return rows, role_eff, basis
