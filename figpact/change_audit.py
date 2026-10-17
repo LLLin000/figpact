@@ -381,11 +381,13 @@ def verify_param(script: Any, config: Any, scope: str, param: str,
                     after_shapes = geometry_snapshot(fig, reg)
                 after_styles = style_snapshot(session, fig, reg)
                 after_science = session._capture_science(fig, reg)
+                after_view = _view_snapshot(fig)
             finally:
                 import matplotlib.pyplot as plt
                 plt.close(fig)
             after = {'styles': after_styles, 'shapes': after_shapes,
                      'science': after_science,
+                     'view': after_view,
                      'gids': sorted(reg.all())}
         finally:
             try:
