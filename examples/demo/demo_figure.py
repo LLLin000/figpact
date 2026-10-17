@@ -303,18 +303,15 @@ def _build_fig(science, scope_target, cfg):
     if leg is not None:
         leg.set_gid(_gid("legend", "", ""))
 
-    # 标签必须在**坐标框内可见**：在**最终布局之后**按渲染后的真实 bbox 抬高 ylim。
-    # 只测量**一次**（以基线 ylim 为准）并一次性设定；不再迭代——迭代会以上一次的
-    # 结果作基准，在同一进程的多次验证之间累积，正是 SCIENCE_VIOLATION 串扰的来源。
-    if ax.texts:
-        fig.canvas.draw()
-        _renderer = fig.canvas.get_renderer()
-        _inv = ax.transData.inverted()
+    # 科学视图：上限由**数据本身**决定（曲线最高点 + 固定留白），不依赖标签 bbox。
+    # 标签只影响绘制偏移，不再反向改变数据窗口——"数据窗口不动，标注与边距可动"。
+    try:
+        _data_top = (max(float(np.nanmax(s[1])) for s in spectra)
+                     + (len(spectra) - 1) * pitch + GROUP_Y_MM)
         _y0, _y1 = ax.get_ylim()
-        _tops = [float(t.get_window_extent(renderer=_renderer).transformed(_inv).y1)
-                 for t in ax.texts]
-        _need = max(_tops) + max(0.02 * (_y1 - _y0), 0.05) if _tops else _y1
-        ax.set_ylim(_y0, max(_y1, _need))
+        ax.set_ylim(_y0, _data_top + 0.9)
+    except Exception:
+        pass
 
     return fig, reg
 

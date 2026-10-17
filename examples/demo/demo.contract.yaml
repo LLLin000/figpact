@@ -1,6 +1,6 @@
 schema_version: contract-draft/1
-script: D:/L/AI/figpact/examples/demo/demo_figure.py
-config: D:/L/AI/figpact/examples/demo/demo.yaml
+script: D:\L\AI\figpact\examples\demo\demo_figure.py
+config: D:\L\AI\figpact\examples\demo\demo.yaml
 scope: main
 candidates:
 - role: axis.title
@@ -27,28 +27,152 @@ candidates:
       from: 8.0
       to: 9.0
       nonzero: true
-    width_mm: 80.0
+    width_mm: 90.0
     target_role: axis.title
     target_before:
-    - 7.114
-    target_after:
     - 8.004
+    target_after:
+    - 9.004
     nontarget_unchanged:
       axis.tick:
-      - 6.225
+      - 7.003
       curve.linewidth:
-      - 0.8
+      - 0.9
+      panel.label:
+      - 7.003
+      legend:
+      - 7.003
     science:
-      digest_before: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
-      digest_after: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
+      digest_before: 1cfd2d89a746b6e88dd56548c3d84a28cc2a461d733f052be8ff8a4997a67efa
+      digest_after: 1cfd2d89a746b6e88dd56548c3d84a28cc2a461d733f052be8ff8a4997a67efa
       unchanged: true
     qa_added: []
     object_identity:
       gids_stable: true
       n_gids: 6
+    object_audit:
+      unauthorized: []
+      derived_geometry: []
+      within_allowed: true
+      required_targets_effectively_changed:
+        unregistered.0.xlabel.fontsize:
+        - 8.0
+        - 9.0
+        unregistered.0.ylabel.fontsize:
+        - 8.0
+        - 9.0
+      narrow_registry_note: 'narrow-registry-only observation (not a verdict): [''figdemo.main.curve.alpha'',
+        ''figdemo.main.curve.beta'', ''figdemo.main.curve.gamma'', ''figdemo.main.peak.alpha.2p06'',
+        ''figdemo.main.peak.beta.5p00'', ''figdemo.main.peak.gamma.7p46'', ''unregistered.0.legend_text.0'',
+        ''unregistered.0.legend_text.1'', ''unregistered.0.legend_text.2'', ''unregistered.0.title'',
+        ''unregistered.0.xlabel'', ''unregistered.0.ylabel'', ''unregistered.Figure.0'',
+        ''unregistered.Legend.0'', ''unregistered.Line2D.0'', ''unregistered.Line2D.1'',
+        ''unregistered.Line2D.10'', ''unregistered.Line2D.11'', ''unregistered.Line2D.12'',
+        ''unregistered.Line2D.13'', ''unregistered.Line2D.14'', ''unregistered.Line2D.15'',
+        ''unregistered.Line2D.2'', ''unregistered.Line2D.3'', ''unregistered.Line2D.4'',
+        ''unregistered.Line2D.5'', ''unregistered.Line2D.6'', ''unregistered.Line2D.7'',
+        ''unregistered.Line2D.8'', ''unregistered.Line2D.9'', ''unregistered.Rectangle.0'',
+        ''unregistered.Rectangle.1'', ''unregistered.Spine.0'', ''unregistered.Spine.1'',
+        ''unregistered.Spine.2'', ''unregistered.Spine.3'', ''unregistered.Text.0'',
+        ''unregistered.Text.1'', ''unregistered.TextArea.0'', ''unregistered.TextArea.1'',
+        ''unregistered.TextArea.2'', ''unregistered.tick.x.0.0'', ''unregistered.tick.x.10.0'',
+        ''unregistered.tick.x.2.0'', ''unregistered.tick.x.4.0'', ''unregistered.tick.x.6.0'',
+        ''unregistered.tick.x.8.0'', ''unregistered.tick.y.0.0'', ''unregistered.tick.y.1.0'',
+        ''unregistered.tick.y.2.0'', ''unregistered.tick.y.3.0'', ''unregistered.tick.y.4.0'',
+        ''unregistered.tick.y.5.0'', ''unregistered.tick.y.−1.0'']'
     geometry_family:
     - 0:xlabel_envelope:0
     - 0:ylabel_envelope:0
+    side_effects: []
+- role: legend
+  param: legend_font_pt
+  source:
+  - file: demo_figure.py
+    line: 297
+    call: "ax.legend(fontsize=float(cfg[\"legend_font_pt\"]), ncol=1,\n          \
+      \              loc=\"center left\", bbox_to_anchor=(1.01, 0.5), frameon=False)"
+  - file: demo_figure.py
+    line: 301
+    call: "ax.legend(fontsize=float(cfg[\"legend_font_pt\"]), ncol=int(cfg[\"legend_cols\"\
+      ]),\n                        loc=\"center\", bbox_to_anchor=(anchor, 0.5), frameon=True)"
+  artist:
+    gid: null
+    gids: []
+    kind: legend
+    registered: false
+  confidence: medium
+  confirmed: true
+  verified: true
+  evidence:
+    perturbation:
+      path:
+      - legend_font_pt
+      from: 7.0
+      to: 8.0
+      nonzero: true
+    width_mm: 90.0
+    target_role: legend
+    target_before:
+    - 7.003
+    target_after:
+    - 8.004
+    nontarget_unchanged:
+      axis.title:
+      - 8.004
+      axis.tick:
+      - 7.003
+      curve.linewidth:
+      - 0.9
+      panel.label:
+      - 7.003
+    science:
+      digest_before: 1cfd2d89a746b6e88dd56548c3d84a28cc2a461d733f052be8ff8a4997a67efa
+      digest_after: 1cfd2d89a746b6e88dd56548c3d84a28cc2a461d733f052be8ff8a4997a67efa
+      unchanged: true
+    qa_added: []
+    object_identity:
+      gids_stable: true
+      n_gids: 6
+    object_audit:
+      unauthorized: []
+      derived_geometry: []
+      within_allowed: true
+      required_targets_effectively_changed:
+        unregistered.0.legend_text.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.0.legend_text.1.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.0.legend_text.2.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.Legend.0.fontsize:
+        - 7.0
+        - 8.0
+        unregistered.tick.x..0.fontsize: null
+        unregistered.tick.y..0.fontsize: null
+      narrow_registry_note: 'narrow-registry-only observation (not a verdict): [''figdemo.main.curve.alpha'',
+        ''figdemo.main.curve.beta'', ''figdemo.main.curve.gamma'', ''figdemo.main.peak.alpha.2p06'',
+        ''figdemo.main.peak.beta.5p00'', ''figdemo.main.peak.gamma.7p46'', ''unregistered.0.legend_text.0'',
+        ''unregistered.0.legend_text.1'', ''unregistered.0.legend_text.2'', ''unregistered.0.title'',
+        ''unregistered.0.xlabel'', ''unregistered.0.ylabel'', ''unregistered.Figure.0'',
+        ''unregistered.Legend.0'', ''unregistered.Line2D.0'', ''unregistered.Line2D.1'',
+        ''unregistered.Line2D.10'', ''unregistered.Line2D.11'', ''unregistered.Line2D.12'',
+        ''unregistered.Line2D.13'', ''unregistered.Line2D.14'', ''unregistered.Line2D.15'',
+        ''unregistered.Line2D.2'', ''unregistered.Line2D.3'', ''unregistered.Line2D.4'',
+        ''unregistered.Line2D.5'', ''unregistered.Line2D.6'', ''unregistered.Line2D.7'',
+        ''unregistered.Line2D.8'', ''unregistered.Line2D.9'', ''unregistered.Rectangle.0'',
+        ''unregistered.Rectangle.1'', ''unregistered.Spine.0'', ''unregistered.Spine.1'',
+        ''unregistered.Spine.2'', ''unregistered.Spine.3'', ''unregistered.Text.0'',
+        ''unregistered.Text.1'', ''unregistered.TextArea.0'', ''unregistered.TextArea.1'',
+        ''unregistered.TextArea.2'', ''unregistered.tick.x.0.0'', ''unregistered.tick.x.10.0'',
+        ''unregistered.tick.x.2.0'', ''unregistered.tick.x.4.0'', ''unregistered.tick.x.6.0'',
+        ''unregistered.tick.x.8.0'', ''unregistered.tick.y.0.0'', ''unregistered.tick.y.1.0'',
+        ''unregistered.tick.y.2.0'', ''unregistered.tick.y.3.0'', ''unregistered.tick.y.4.0'',
+        ''unregistered.tick.y.5.0'', ''unregistered.tick.y.−1.0'']'
+    geometry_family:
+    - gid:figdemo.main.legend
     side_effects: []
 - role: curve.linewidth
   param: line_width
@@ -75,25 +199,62 @@ candidates:
       from: 0.9
       to: 1.9
       nonzero: true
-    width_mm: 80.0
+    width_mm: 90.0
     target_role: curve.linewidth
     target_before:
-    - 0.8
+    - 0.9
     target_after:
-    - 1.69
+    - 1.901
     nontarget_unchanged:
       axis.title:
-      - 7.114
+      - 8.004
       axis.tick:
-      - 6.225
+      - 7.003
+      panel.label:
+      - 7.003
+      legend:
+      - 7.003
     science:
-      digest_before: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
-      digest_after: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
+      digest_before: 1cfd2d89a746b6e88dd56548c3d84a28cc2a461d733f052be8ff8a4997a67efa
+      digest_after: 1cfd2d89a746b6e88dd56548c3d84a28cc2a461d733f052be8ff8a4997a67efa
       unchanged: true
     qa_added: []
     object_identity:
       gids_stable: true
       n_gids: 6
+    object_audit:
+      unauthorized: []
+      derived_geometry: []
+      within_allowed: true
+      required_targets_effectively_changed:
+        figdemo.main.curve.alpha.linewidth:
+        - 0.9
+        - 1.9
+        figdemo.main.curve.beta.linewidth:
+        - 0.9
+        - 1.9
+        figdemo.main.curve.gamma.linewidth:
+        - 0.9
+        - 1.9
+        unregistered.Line2D.0.linewidth: null
+      narrow_registry_note: 'narrow-registry-only observation (not a verdict): [''figdemo.main.peak.alpha.2p06'',
+        ''figdemo.main.peak.beta.5p00'', ''figdemo.main.peak.gamma.7p46'', ''unregistered.0.legend_text.0'',
+        ''unregistered.0.legend_text.1'', ''unregistered.0.legend_text.2'', ''unregistered.0.title'',
+        ''unregistered.0.xlabel'', ''unregistered.0.ylabel'', ''unregistered.Figure.0'',
+        ''unregistered.Legend.0'', ''unregistered.Line2D.0'', ''unregistered.Line2D.1'',
+        ''unregistered.Line2D.10'', ''unregistered.Line2D.11'', ''unregistered.Line2D.12'',
+        ''unregistered.Line2D.13'', ''unregistered.Line2D.14'', ''unregistered.Line2D.15'',
+        ''unregistered.Line2D.2'', ''unregistered.Line2D.3'', ''unregistered.Line2D.4'',
+        ''unregistered.Line2D.5'', ''unregistered.Line2D.6'', ''unregistered.Line2D.7'',
+        ''unregistered.Line2D.8'', ''unregistered.Line2D.9'', ''unregistered.Rectangle.0'',
+        ''unregistered.Rectangle.1'', ''unregistered.Spine.0'', ''unregistered.Spine.1'',
+        ''unregistered.Spine.2'', ''unregistered.Spine.3'', ''unregistered.Text.0'',
+        ''unregistered.Text.1'', ''unregistered.TextArea.0'', ''unregistered.TextArea.1'',
+        ''unregistered.TextArea.2'', ''unregistered.tick.x.0.0'', ''unregistered.tick.x.10.0'',
+        ''unregistered.tick.x.2.0'', ''unregistered.tick.x.4.0'', ''unregistered.tick.x.6.0'',
+        ''unregistered.tick.x.8.0'', ''unregistered.tick.y.0.0'', ''unregistered.tick.y.1.0'',
+        ''unregistered.tick.y.2.0'', ''unregistered.tick.y.3.0'', ''unregistered.tick.y.4.0'',
+        ''unregistered.tick.y.5.0'', ''unregistered.tick.y.−1.0'']'
     geometry_family: []
     side_effects: []
 - role: axis.tick
@@ -109,48 +270,22 @@ candidates:
     registered: false
   confidence: medium
   confirmed: true
-  verified: true
+  verified: false
   evidence:
+    failure: 对象级审计越权：unregistered.tick.x.0.0.fontsize 7.0->8.0; unregistered.tick.x.10.0.fontsize
+      7.0->8.0; unregistered.tick.x.2.0.fontsize 7.0->8.0; unregistered.tick.x.4.0.fontsize
+      7.0->8.0; unregistered.tick.x.6.0.fontsize 7.0->8.0; unregistered.tick.x.8.0.fontsize
+      7.0->8.0; unregistered.tick.y.0.0.fontsize 7.0->8.0; unregistered.tick.y.1.0.fontsize
+      7.0->8.0; unregistered.tick.y.2.0.fontsize 7.0->8.0; unregistered.tick.y.3.0.fontsize
+      7.0->8.0; unregistered.tick.y.4.0.fontsize 7.0->8.0; unregistered.tick.y.5.0.fontsize
+      7.0->8.0; unregistered.tick.y.−1.0.fontsize 7.0->8.0; 目标未实际变化（声明对象上无语义属性变更：防假成功）
+      ['unregistered.0.legend_text.0', 'unregistered.0.legend_text.1', 'unregistered.0.legend_text.2',
+      'unregistered.Legend.0', 'unregistered.tick.x..0', 'unregistered.tick.y..0']
     perturbation:
       path:
       - tick_font_pt
       from: 7.0
       to: 8.0
-      nonzero: true
-    width_mm: 80.0
-    target_role: axis.tick
-    target_before:
-    - 6.225
-    target_after:
-    - 7.114
-    nontarget_unchanged:
-      axis.title:
-      - 7.114
-      curve.linewidth:
-      - 0.8
-    science:
-      digest_before: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
-      digest_after: 364a1a4c69b72adc91ef8ac4058c916e245fd0583d8cf92309d08b58e2a74ea9
-      unchanged: true
-    qa_added: []
-    object_identity:
-      gids_stable: true
-      n_gids: 6
-    geometry_family:
-    - 0:xtick_label1_envelope:5
-    - 0:ytick_label1_envelope:0
-    side_effects:
-    - key: 0:ylabel_envelope:0
-      delta:
-        dx_mm: -0.2222
-        dy_mm: 0.0
-        dw_mm: 0.0
-        dh_mm: 0.0
-        tol_mm: 0.001
-        tight_mm: 0.001
-        size_stable: true
-        method: envelope_center
-      disposition: recorded-layout-coupling
 unresolved:
 - kind: entry
   role: axis.tick
@@ -159,20 +294,15 @@ unresolved:
     file: demo_figure.py
     line: 250
     call: ax.tick_params(direction="in")
-- kind: out_of_scope
-  role: legend
-  reason: YAML 有 legend_font_pt 但其调用（annotate/legend 分支）超出 v0.1 发现范围，不得猜
-  location:
-    file: demo.yaml
-    line: null
-    call: null
-- kind: out_of_scope
+- kind: entry
   role: panel.label
-  reason: YAML 有 peak_font_pt 但其调用（annotate/legend 分支）超出 v0.1 发现范围，不得猜
+  reason: annotate() 无法确定可编辑绑定，不得猜
   location:
-    file: demo.yaml
-    line: null
-    call: null
+    file: demo_figure.py
+    line: 279
+    call: "ax.annotate(\n            name,\n            xy=(ppm, yi),\n          \
+      \  xytext=(dx_pt, lift_pt + dy_pt),\n            textcoords=\"offset points\"\
+      ,\n            ha=\"ce"
 unsupported:
 - kind: safety
   role: null
@@ -182,19 +312,19 @@ unsupported:
 - kind: safety
   role: null
   call: set_ylim
-  line: 320
+  line: 312
   reason: set_ylim() 改坐标窗口：科学内容锁定，永不自动改
 - kind: noncode
   role: scalebar
   reason: 非显微图无 scalebar 角色；SVG/PNG 无源码入口（compare 只报告）
 coverage:
   verified_editable:
-  - axis.tick
   - axis.title
   - curve.linewidth
-  candidate: []
-  unresolved:
   - legend
+  candidate:
+  - axis.tick
+  unresolved:
   - panel.label
   unsupported:
   - scalebar
