@@ -33,12 +33,22 @@
 - 双状态：`dual_state.source_commit_state`（源码是否写入）与
   `figure_verification_state`（复测 PASS/FAIL/NOT_RUN）分开报告。
 
-## 5. 最小示例
+## 5. 最小示例（G10 清单驱动）
 
 ```bash
-figpact plate audit --figure nmr.py,nmr.yaml --figure ftir.py,ftir.yaml --width-mm 42
-figpact plate unify --figure nmr.py,nmr.yaml --figure ftir.py,ftir.yaml --width-mm 42 \
-  --axis-pt 8 --tick-pt 7 --line-pt 0.8
-figpact plate unify ... --apply   # 写入源码 + 重审计 + 回执
-figpact plate receipt --figure nmr.py,nmr.yaml --width-mm 42 --out receipt.json
+figpact plate compare examples/plate/plate_g10.yaml
+figpact plate unify examples/plate/plate_g10.yaml          # 只给计划（默认不写）
+figpact plate unify examples/plate/plate_g10.yaml --apply   # 经既有写入链写源码 + 复测
+figpact plate receipt examples/plate/plate_g10.yaml --out receipt.json
 ```
+
+清单见 `docs/schema/plate_manifest.schema.json` 与 `examples/plate/plate_g10.yaml`：
+`plate.figures[]`（id/source/target_width_mm）+ `design.global/plot/image`
+tokens + `policy`。token→参数：`axis_title_pt→axis_font_pt`、
+`axis_tick_pt→tick_font_pt`、`curve_linewidth_pt→line_width`；
+`panel_label_pt` 只做比较目标、永不强制。旧 `--figure` 旗标仍可用。
+
+`compare` 每格给实测值 + C/E/F 三标记（✓/✗/–）：代码图对照字形成对实测；
+矢量 span 字号有数但角色不可归因（C✗/E✗/F–，report-only）；
+位图字号线宽不可恢复（C✗/E✗，`spec compliance MUST NOT be reported`）；
+估计值永不记为实测。

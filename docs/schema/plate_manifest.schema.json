@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "plate-manifest/1",
+  "title": "plate-manifest/1",
+  "description": "G10 plate.yaml：figures（id+source+target_width_mm）+ design tokens（global/plot/image）+ policy。",
+  "type": "object",
+  "required": ["plate"],
+  "properties": {
+    "plate": {
+      "type": "object",
+      "required": ["figures"],
+      "properties": {
+        "layout": {"type": "string"},
+        "target_width_mm": {"type": "number", "exclusiveMinimum": 0},
+        "figures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "source"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "source": {"type": "string", "minLength": 1},
+              "kind": {"type": "string", "enum": ["code", "vector", "bitmap"]},
+              "config": {"type": "string"},
+              "scope": {"type": "string"},
+              "dpi": {"type": "number", "exclusiveMinimum": 0},
+              "target_width_mm": {"type": "number", "exclusiveMinimum": 0}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "design": {
+      "type": "object",
+      "properties": {
+        "global": {
+          "type": "object",
+          "properties": {
+            "font_family": {"type": "string"},
+            "axis_title_pt": {"type": "number", "exclusiveMinimum": 0},
+            "axis_tick_pt": {"type": "number", "exclusiveMinimum": 0},
+            "panel_label_pt": {"type": "number", "exclusiveMinimum": 0}
+          },
+          "additionalProperties": true
+        },
+        "plot": {
+          "type": "object",
+          "properties": {
+            "curve_linewidth_pt": {"type": "number", "exclusiveMinimum": 0}
+          },
+          "additionalProperties": true
+        },
+        "image": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "science_content": {"type": "string"},
+        "unsupported": {"type": "string"},
+        "unmeasurable": {"type": "string"}
+      },
+      "additionalProperties": true
+    }
+  }
+}

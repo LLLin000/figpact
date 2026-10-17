@@ -1,0 +1,50 @@
+# G10 plate 清单示例：4 张不同类输入，统一最终宽度 80mm。
+#
+# 用法：
+#   figpact plate compare examples/plate/plate_g10.yaml
+#   figpact plate unify examples/plate/plate_g10.yaml        # 只给计划
+#   figpact plate unify examples/plate/plate_g10.yaml --apply  # 写源码 + 复测
+#   figpact plate receipt examples/plate/plate_g10.yaml --out receipt.json
+#
+# design token -> YAML 参数：axis_title_pt->axis_font_pt、
+# axis_tick_pt->tick_font_pt、curve_linewidth_pt->line_width。
+# panel_label_pt 只做比较目标，unify 永不强制（密度逐图不同）。
+plate:
+  layout: manuscript
+  target_width_mm: 80
+  figures:
+    - id: nmr
+      source: ../nmr/08 NMR.py
+      kind: code
+      config: ../nmr/nmr.yaml
+      scope: main
+      target_width_mm: 80
+    - id: ftir
+      source: ../ftir/plot_ftir.py
+      kind: code
+      config: ../ftir/ftir.yaml
+      scope: main
+      target_width_mm: 80
+    - id: synth_vector
+      source: synth_vector.svg
+      kind: vector
+      target_width_mm: 80
+    - id: micro_bitmap
+      source: micro_bitmap.png
+      kind: bitmap
+      dpi: 300
+      target_width_mm: 80
+design:
+  global:
+    font_family: Arial
+    axis_title_pt: 8
+    axis_tick_pt: 7
+    panel_label_pt: 9
+  plot:
+    curve_linewidth_pt: 0.8
+  image:
+    panel_label_pt: 9
+policy:
+  science_content: locked
+  unsupported: report
+  unmeasurable: not_verified

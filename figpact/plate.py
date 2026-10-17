@@ -347,18 +347,86 @@ def _audit_code(spec: dict, width_mm: float) -> dict:
     }
 
 
+def _svg_len_to_pt(raw: Any) -> Optional[float]:
+    """CSS length -> pt (pt/px/mm/cm/in); None when unitless-context is missing."""
+    import re
+
+    if raw is None:
+        return None
+    m = re.fullmatch(r"\s*([0-9.]+)\s*(pt|px|mm|cm|in|%)?\s*", str(raw))
+    if not m:
+        return None
+    val, unit = float(m.group(1)), (m.group(2) or "px")
+    if unit == "%":
+        return None
+    return {"pt": val, "px": val * 72.0 / 96.0, "mm": val * 72.0 / 25.4,
+            "cm": val * 720.0 / 25.4, "in": val * 72.0}[unit]
+
+
+def _audit_svg(path: Path, label: str) -> dict:
+    """SVG parsed as XML: page size (when absolute units) + text font-sizes.
+
+    Sizes are measured from attributes, but roles are unattributable (no
+    source binding) and there is no fixed pt context for paths — hence
+    compare marks them not-Comparable / report-only, never Conformant.
+    """
+    import xml.etree.ElementTree as ET
+
+    try:
+        root = ET.parse(path).getroot()
+    except Exception as e:
+        return {
+            "label": label, "kind": "vector", "path": str(path),
+            "page_size_mm": None, "texts": [], "path_bboxes": [],
+            "measurement_basis": {"method": "SVG XML parse failed", "renderer": "none",
+                                  "figure_dpi": None, "error": f"{type(e).__name__}: {e}"},
+            "measurable_specs": [],
+            "unmeasurable_specs": [f"SVG unparsable ({type(e).__name__}); nothing measurable"],
+        }
+    tag = root.tag
+    ns = tag[1:].split("}")[0] if tag.startswith("{") else ""
+    q = (lambda t: f"{{{ns}}}{t}") if ns else (lambda t: t)
+    to_mm = {"pt": 25.4 / 72.0, "px": 25.4 / 96.0, "mm": 1.0, "cm": 10.0, "in": 25.4}
+    page = None
+    import re as _re
+    dims = []
+    for raw in (root.get("width"), root.get("height")):
+        m = _re.fullmatch(r"\s*([0-9.]+)\s*(pt|px|mm|cm|in|%)?\s*", str(raw or ""))
+        dims.append((float(m.group(1)), m.group(2) or "px") if m and m.group(2) != "%" else None)
+    if all(dims):
+        page = [round(dims[0][0] * to_mm[dims[0][1]], 3), round(dims[1][0] * to_mm[dims[1][1]], 3)]
+    texts = []
+    for el in root.iter():
+        if el.tag != q("text"):
+            continue
+        raw_size = el.get("font-size")
+        if raw_size is None and "font-size" in (el.get("style") or ""):
+            raw_size = (el.get("style") or "").split("font-size:")[-1].split(";")[0]
+        size = _svg_len_to_pt(raw_size)
+        texts.append({"text": "".join(el.itertext())[:80],
+                      "size_pt": round(size, 3) if size else None,
+                      "font": el.get("font-family", "")})
+        if len(texts) >= 40:
+            break
+    unmeas = ["physical page size (SVG has no fixed page)" if page is None else
+              "linewidth in pt without scale context (viewBox units only)"]
+    unmeas.append("role attribution: spans measurable, roles not (no source binding)")
+    return {
+        "label": label, "kind": "vector", "path": str(path),
+        "page_size_mm": page, "texts": texts, "path_bboxes": [],
+        "measurement_basis": {"method": "SVG parsed as XML; font-size attr -> pt; page from width/height attrs",
+                              "renderer": "none", "figure_dpi": None},
+        "measurable_specs": ["page size (absolute units only)", "text font-size attribute if present"],
+        "unmeasurable_specs": unmeas,
+    }
+
+
 def _audit_vector(spec: dict) -> dict:
     import fitz  # PyMuPDF
 
     path = _resolve(spec["path"])
     if path.suffix.lower() == ".svg":
-        return {
-            "label": spec.get("label") or path.name, "kind": "vector", "path": str(path),
-            "page_size_mm": None, "texts": [], "path_bboxes": [],
-            "measurement_basis": {"method": "SVG parsed as XML (no renderer); sizes only if text elements carry font-size", "renderer": "none", "figure_dpi": None},
-            "measurable_specs": ["path_bbox (element units)", "text font-size attribute if present"],
-            "unmeasurable_specs": ["physical page size (SVG has no fixed page)", "outlined-text size", "linewidth in pt without scale context"],
-        }
+        return _audit_svg(path, spec.get("label") or path.name)
     doc = fitz.open(path)
     try:
         pages = []
@@ -629,7 +697,13 @@ def _stable_hash(payload: dict) -> str:
 
 def receipt(audit_result: dict, plan: Optional[dict] = None,
             unify_result: Optional[dict] = None, **kwargs) -> dict:
-    """Build a byte-reproducible receipt (same input -> same bytes, timestamp excluded)."""
+    """Build a byte-reproducible receipt (same input -> same bytes, timestamp excluded).
+
+    G10: carries the plate manifest hash, design-token sources, and the full
+    compare table so every role cell's Comparable/Editable/Conformant marks
+    are auditable. Pass ``manifest=load_plate(...)`` and/or
+    ``compare=compare_roles(...)`` via kwargs; otherwise derived fields stay null.
+    """
     figures = audit_result.get("figures", [])
     inputs = [{"label": f.get("label"), "kind": f.get("kind"), "path": f.get("path")}
               for f in figures]
@@ -653,6 +727,20 @@ def receipt(audit_result: dict, plan: Optional[dict] = None,
             bad.extend(item.get("infeasible", []) or [])
             bad.extend([r for r in item.get("out_of_bounds", []) if isinstance(r, dict)])
         dual["figure_verification_state"] = "FAIL" if bad else "PASS"
+    manifest = kwargs.get("manifest")
+    design = (manifest or {}).get("design") if isinstance(manifest, dict) else None
+    token_sources: dict[str, dict] = {}
+    if isinstance(design, dict):
+        for section in ("global", "plot", "image"):
+            for token, val in ((design.get(section) or {}).items()):
+                token_sources[token] = {"section": f"design.{section}", "value": val,
+                                        "param": DESIGN_TOKEN_TO_PARAM.get(token)}
+    compare = kwargs.get("compare")
+    if compare is None and kwargs.get("manifest") is not None:
+        try:
+            compare = compare_roles(audit_result, manifest, plan)
+        except Exception:
+            compare = None
     body = {
         "schema_version": RECEIPT_SCHEMA_VERSION,
         "targets": (plan or {}).get("targets", {}),
@@ -667,8 +755,16 @@ def receipt(audit_result: dict, plan: Optional[dict] = None,
         "spec": kwargs.get("spec"),
         "measured": kwargs.get("measured"),
         "verdict": kwargs.get("verdict"),
+        "manifest_hash": (manifest or {}).get("manifest_hash") if isinstance(manifest, dict) else None,
+        "manifest_file": (Path((manifest or {}).get("path")).name if isinstance(manifest, dict)
+                          and (manifest or {}).get("path") else None),
+        "design_token_sources": token_sources,
+        "policy": ((manifest or {}).get("policy") if isinstance(manifest, dict) else None),
+        "compare": compare,
         "note": "reproducibility: identical inputs produce byte-identical JSON excluding generated_at; generated_at is informational only and excluded from content_hash",
     }
+    # ponytail: figure dicts carry absolute paths, so content_hash proves this
+    # run's integrity (recalc over the same file), not cross-machine identity.
     body["content_hash"] = _stable_hash({k: v for k, v in body.items() if k != "content_hash"})
     body["generated_at"] = datetime.now(timezone.utc).isoformat()
     return body
@@ -722,3 +818,330 @@ def render_audit_text(audit_result: dict, plan: Optional[dict] = None) -> str:
 
 def refusal_lines(why: str, need: str, command: str) -> str:
     return f"为什么不行：{why}\n需要什么才能行：{need}\n一条建议命令：{command}"
+
+# ---------------------------------------------------------------------------
+# G10: plate.yaml manifest + role-level compare (Comparable/Editable/Conformant)
+# ---------------------------------------------------------------------------
+
+#: Design token -> YAML source parameter. ``panel_label_pt`` is a compare
+#: target only: unify never forces labels (density differs per figure).
+DESIGN_TOKEN_TO_PARAM = {
+    "axis_title_pt": "axis_font_pt",
+    "axis_tick_pt": "tick_font_pt",
+    "curve_linewidth_pt": "line_width",
+    "panel_label_pt": "label_font_pt",
+}
+
+#: Fixed compare-table row order.
+COMPARE_ROLES = ("axis.title", "axis.tick", "curve.linewidth",
+                 "panel.label", "legend", "scalebar")
+
+#: Role -> source parameter(s); empty = protected, no knob exists.
+ROLE_TO_PARAMS = {
+    "axis.title": ("axis_font_pt",),
+    "axis.tick": ("tick_font_pt",),
+    "curve.linewidth": ("line_width",),
+    "panel.label": ("label_font_pt", "peak_font_pt"),
+    "legend": ("legend_font_pt",),
+    "scalebar": (),
+}
+
+#: Roles a shared token may force (hence Conformant is decidable).
+CONFORMANT_ROLES = ("axis.title", "axis.tick", "curve.linewidth")
+
+#: Compare role -> design token carrying its target (panel_label: target only).
+ROLE_TO_TOKEN = {
+    "axis.title": "axis_title_pt",
+    "axis.tick": "axis_tick_pt",
+    "curve.linewidth": "curve_linewidth_pt",
+    "panel.label": "panel_label_pt",
+}
+
+
+def _manifest_num(token: str, value: Any, fig_id: str = "design") -> float:
+    try:
+        num = float(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"plate.yaml: token {token!r} ({fig_id}) must be numeric, got {value!r}")
+    if not (num > 0):
+        raise ValueError(f"plate.yaml: token {token!r} ({fig_id}) must be > 0, got {value!r}")
+    return num
+
+
+def load_plate(path: Any) -> dict:
+    """Load and validate a G10 plate.yaml manifest (figures + design + policy)."""
+    import yaml
+
+    manifest_path = Path(str(path)).expanduser().resolve()
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"plate manifest not found: {manifest_path}")
+    try:
+        data = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    except Exception as e:
+        raise ValueError(f"plate.yaml unparsable: {type(e).__name__}: {e}")
+    if not isinstance(data, dict) or not isinstance(data.get("plate"), dict):
+        raise ValueError("plate.yaml must contain a top-level 'plate' mapping")
+    base = manifest_path.parent
+    default_w = (data["plate"] or {}).get("target_width_mm")
+    if default_w is not None:
+        default_w = _manifest_num("target_width_mm", default_w, "plate")
+    raw_figs = data["plate"].get("figures")
+    if not isinstance(raw_figs, list) or not raw_figs:
+        raise ValueError("plate.yaml: 'plate.figures' must be a non-empty list")
+    figures: list[dict] = []
+    seen: set[str] = set()
+    for entry in raw_figs:
+        if not isinstance(entry, dict) or not entry.get("id") or not entry.get("source"):
+            raise ValueError(f"plate.yaml: each figure needs 'id' + 'source', got {entry!r}")
+        fid = str(entry["id"])
+        if fid in seen:
+            raise ValueError(f"plate.yaml: duplicate figure id {fid!r}")
+        seen.add(fid)
+        src = (base / str(entry["source"])).resolve()
+        if not src.is_file():
+            raise FileNotFoundError(f"plate.yaml: figure {fid!r} source not found: {src}")
+        fig: dict[str, Any] = {"id": fid, "label": fid, "path": str(src)}
+        for key in ("kind", "config", "scope", "dpi"):
+            if entry.get(key) is not None:
+                fig[key] = entry[key]
+        if fig.get("config") is not None:
+            cfg = (base / str(fig["config"])).resolve()
+            if not cfg.is_file():
+                raise FileNotFoundError(f"plate.yaml: figure {fid!r} config not found: {cfg}")
+            fig["config"] = str(cfg)
+        if entry.get("kind") is not None and str(entry["kind"]).lower() not in ("code", "vector", "bitmap"):
+            raise ValueError(f"plate.yaml: figure {fid!r} kind must be code/vector/bitmap")
+        width = entry.get("target_width_mm", default_w)
+        if width is None:
+            raise ValueError(f"plate.yaml: figure {fid!r} needs target_width_mm (or plate.target_width_mm)")
+        fig["target_width_mm"] = _manifest_num("target_width_mm", width, fid)
+        figures.append(fig)
+    design = data.get("design") or {}
+    if not isinstance(design, dict):
+        raise ValueError("plate.yaml: 'design' must be a mapping")
+    for section in ("global", "plot", "image"):
+        block = design.get(section) or {}
+        if not isinstance(block, dict):
+            raise ValueError(f"plate.yaml: 'design.{section}' must be a mapping")
+        for token, val in block.items():
+            if token in ("axis_title_pt", "axis_tick_pt", "panel_label_pt",
+                         "curve_linewidth_pt", "target_width_mm"):
+                _manifest_num(token, val, f"design.{section}")
+    policy = data.get("policy") or {}
+    return {"path": str(manifest_path), "plate": data["plate"], "design": design,
+            "policy": policy if isinstance(policy, dict) else {}, "figures": figures,
+            "manifest_hash": _stable_hash(data)}
+
+
+def manifest_specs_widths(manifest: dict) -> tuple[list[dict], list[float]]:
+    """Manifest figures -> audit specs + per-figure final widths."""
+    specs: list[dict] = []
+    widths: list[float] = []
+    for fig in manifest["figures"]:
+        spec = {"label": fig["id"], "path": fig["path"], "_width_mm": float(fig["target_width_mm"])}
+        for key in ("kind", "config", "scope", "dpi"):
+            if fig.get(key) is not None:
+                spec[key] = fig[key]
+        specs.append(spec)
+        widths.append(float(fig["target_width_mm"]))
+    return specs, widths
+
+
+def manifest_shared_targets(manifest: dict) -> dict:
+    """Design tokens -> :func:`plan_unify` targets (labels never forced)."""
+    design = manifest.get("design") or {}
+    tokens = {**(design.get("global") or {}), **(design.get("plot") or {})}
+    targets: dict[str, float] = {}
+    for token, param in DESIGN_TOKEN_TO_PARAM.items():
+        if token == "panel_label_pt":
+            continue  # compare target only
+        if tokens.get(token) is not None:
+            targets[param] = _manifest_num(token, tokens[token], "design")
+    widths = {float(f["target_width_mm"]) for f in manifest["figures"]}
+    if len(widths) == 1:
+        targets["target_width_mm"] = next(iter(widths))
+    return targets
+
+
+def _role_targets(manifest: Optional[dict], plan: Optional[dict] = None) -> dict[str, float]:
+    """Compare role -> effective-pt target (manifest tokens first, plan params fallback)."""
+    out: dict[str, float] = {}
+    design = ((manifest or {}).get("design") or {})
+    tokens = {**(design.get("global") or {}), **(design.get("plot") or {})}
+    for role, token in ROLE_TO_TOKEN.items():
+        if tokens.get(token) is not None:
+            out[role] = float(tokens[token])
+    if plan:
+        param_to_role = {v: k for k, v in DESIGN_TOKEN_TO_PARAM.items()}
+        for param, val in (plan.get("targets") or {}).items():
+            token = param_to_role.get(param)
+            if token and param_to_role and token in ROLE_TO_TOKEN.values():
+                role = next(r for r, t in ROLE_TO_TOKEN.items() if t == token)
+                out.setdefault(role, float(val))
+    return out
+
+
+def _extra_role_means(item: dict) -> dict[str, list[float]]:
+    """Compare-only roles -> distinct measured eff_pt (code figures only)."""
+    out = {"panel.label": [], "legend": []}
+    if item.get("kind") != "code":
+        return out
+    seen: dict[str, set[float]] = {"panel.label": set(), "legend": set()}
+    for row in item.get("artist_fonts", []):
+        params = set(row.get("role_params", []))
+        val = float(row["measured_eff_pt"])
+        if params & {"label_font_pt", "peak_font_pt"}:
+            seen["panel.label"].add(val)
+        if "legend_font_pt" in params:
+            seen["legend"].add(val)
+    return {k: sorted(v) for k, v in seen.items()}
+
+
+def _compare_cell(item: dict, role: str, targets: dict[str, float]) -> dict:
+    """One role cell: measured value + Comparable/Editable/Conformant marks."""
+    kind = item.get("kind")
+    editable = set(item.get("editable_fields", []))
+    params = ROLE_TO_PARAMS[role]
+    if kind == "code":
+        if role == "scalebar":
+            return {"value": None, "value_kind": "none", "comparable": False,
+                    "editable": False, "conformant": "n/a",
+                    "note": "no scalebar role in this plot figure (microscopy only; calibration protected)"}
+        means = {**_role_means(item), **_extra_role_means(item)}
+        vals = sorted({round(float(v), 3) for v in means.get(role, [])})
+        if not vals:
+            return {"value": None, "value_kind": "none", "comparable": False,
+                    "editable": any(p in editable for p in params),
+                    "conformant": "n/a", "note": f"no artists for {role} in this figure"}
+        cell: dict[str, Any] = {
+            "value": vals, "value_kind": "measured",
+            "comparable": True, "comparable_basis": "control-glyph extent x measured k",
+            "editable": any(p in editable for p in params),
+            "note": "",
+        }
+        if not cell["editable"]:
+            cell["note"] = f"{'/'.join(params)} not EDITABLE in layout_contract; report-only"
+        if role in CONFORMANT_ROLES and role in targets:
+            cell["conformant"] = all(abs(v - targets[role]) <= UNIFY_TOLERANCE_PT for v in vals)
+            cell["conformant_target_pt"] = targets[role]
+            if not cell["conformant"]:
+                extra = f"; target {targets[role]}pt, tolerance {UNIFY_TOLERANCE_PT}pt"
+                cell["note"] = (cell["note"] + extra).lstrip("; ")
+        else:
+            cell["conformant"] = "n/a"
+            if role not in CONFORMANT_ROLES:
+                cell["note"] = ((cell["note"] + "; " if cell["note"] else "")
+                                + "compare-only role (density differs; never forced)")
+        return cell
+    if kind == "vector":
+        sizes = sorted({float(t.get("size_pt", 0.0)) for t in item.get("texts", []) if t.get("size_pt")})[:8]
+        return {"value": {"span_sizes_pt": [round(s, 3) for s in sizes],
+                          "n_texts": len(item.get("texts", []))},
+                "value_kind": "measured_unattributed",
+                "comparable": False,
+                "comparable_note": "span sizes measured but role unattributable (no source binding)",
+                "editable": False, "editable_note": "report-only: no YAML source parameters",
+                "conformant": "n/a", "conformant_note": "not_verified for vector",
+                "note": "; ".join(item.get("unmeasurable_specs", []))}
+    return {"value": None, "value_kind": "none", "comparable": False,
+            "comparable_note": "font/linewidth unrecoverable from pixels; estimation forbidden",
+            "editable": False, "editable_note": "report-only: placement only",
+            "conformant": "n/a", "conformant_note": "spec compliance MUST NOT be reported for bitmaps",
+            "note": f"physical_size_mm={item.get('physical_size_mm')} (dpi_used={item.get('dpi_used')}"
+                    + (", dpi assumed" if item.get("dpi_assumed") else "") + "); "
+                    + "; ".join(item.get("unmeasurable_specs", []))}
+
+
+def compare_roles(audit_result: dict, manifest: Optional[dict] = None,
+                  plan: Optional[dict] = None) -> dict:
+    """Cross-figure role table: per cell measured value + 3 boundary marks."""
+    targets = _role_targets(manifest, plan)
+    cells: dict[str, dict] = {}
+    for item in audit_result.get("figures", []):
+        cells[item.get("label")] = {role: _compare_cell(item, role, targets)
+                                    for role in COMPARE_ROLES}
+    spread: dict[str, dict] = {}
+    for role in ("axis.title", "axis.tick", "curve.linewidth"):
+        vals = []
+        for item in audit_result.get("figures", []):
+            vals.extend(_role_means(item).get(role, []))
+        if vals:
+            spread[role] = {"min": round(min(vals), 3), "max": round(max(vals), 3),
+                            "spread_pt": round(max(vals) - min(vals), 3),
+                            "within_tolerance": (max(vals) - min(vals)) <= UNIFY_TOLERANCE_PT,
+                            "scope": "measured code figures only; estimates excluded"}
+    infeasible: list[dict] = []
+    for item in audit_result.get("figures", []):
+        if item.get("kind") != "code":
+            infeasible.append({
+                "figure": item.get("label"), "kind": item.get("kind"),
+                "reason": f"{item.get('kind')} inputs have no YAML source parameters; nothing to unify",
+                "alternative": "recreate from code, or compare-only (no forced unify)",
+            })
+    return {"roles": list(COMPARE_ROLES), "targets_pt": targets, "cells": cells,
+            "role_spread_pt": spread, "infeasible": infeasible}
+
+
+def _mark(value: Any) -> str:
+    if value is True:
+        return "✓"
+    if value is False:
+        return "✗"
+    return "–"
+
+
+def _cell_text(cell: dict) -> str:
+    val = cell.get("value")
+    if isinstance(val, list):
+        v = ",".join(f"{x:.2f}" for x in val) + "pt"
+    elif isinstance(val, dict):
+        sizes = ",".join(f"{x:.1f}" for x in val.get("span_sizes_pt", [])) or "—"
+        v = f"spans[{sizes}]n={val.get('n_texts')}"
+    elif val is None:
+        v = "—"
+    else:
+        v = str(val)
+    marks = f"C{_mark(cell.get('comparable'))} E{_mark(cell.get('editable'))} F{_mark(cell.get('conformant'))}"
+    note = cell.get("note") or cell.get("comparable_note") or ""
+    return f"{v} [{marks}]" + (f" ({note})" if note else "")
+
+
+def render_compare_text(audit_result: dict, compare: dict, manifest: Optional[dict] = None) -> str:
+    """Human compare view: role table with measured value + C/E/F marks per cell."""
+    lines = []
+    figs = audit_result.get("figures", [])
+    widths = audit_result.get("widths_mm", [])
+    targets = compare.get("targets_pt", {})
+    tgt = ", ".join(f"{r}={v}pt" for r, v in targets.items()) or "no shared targets"
+    lines.append(f"plate compare：{len(figs)} 张图 × {len(compare.get('roles', []))} 个角色，"
+                 f"最终宽度 {widths} mm；共享目标 {tgt}。")
+    lines.append("标记：C=Comparable（可测） E=Editable（可写回源码） F=Conformant（符合目标）；"
+                 "✓/✗/–（– = 不适用）。估计值永不记为实测。")
+    lines.append("")
+    header = "| role | " + " | ".join(f"{f.get('label')} ({f.get('kind')})" for f in figs) + " |"
+    lines.append(header)
+    lines.append("|" + "---|" * (len(figs) + 1))
+    for role in compare.get("roles", []):
+        row = [role] + [_cell_text(compare["cells"][f.get("label")][role]) for f in figs]
+        lines.append("| " + " | ".join(row) + " |")
+    lines.append("")
+    lines.append("跨图实测极差（仅实测值，估计值排除）：")
+    spread = compare.get("role_spread_pt", {})
+    if spread:
+        for role, stats in spread.items():
+            flag = "达标" if stats["within_tolerance"] else "未达标"
+            lines.append(f"- {role}: min {stats['min']}pt / max {stats['max']}pt / "
+                         f"spread {stats['spread_pt']}pt（容差 {UNIFY_TOLERANCE_PT}pt）→ {flag}")
+    else:
+        lines.append("- （无可测代码图数值）")
+    if compare.get("infeasible"):
+        lines.append("")
+        lines.append("不可行项（只比较、不强制统一）：")
+        for entry in compare["infeasible"]:
+            lines.append(f"- {entry.get('figure')}（{entry.get('kind')}）：{entry.get('reason')}"
+                         f"；{entry.get('alternative')}")
+    lines.append("")
+    lines.append("下一步：`figpact plate unify <plate.yaml>` 先给计划（默认不写），"
+                 "`--apply` 才经既有写入链写源码并复测；"
+                 "`figpact plate receipt <plate.yaml>` 出三边界回执。")
+    return "\n".join(lines)

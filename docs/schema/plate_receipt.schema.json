@@ -57,6 +57,12 @@
     "spec": {"type": ["object", "string", "null"]},
     "measured": {"type": ["object", "null"]},
     "verdict": {"type": ["string", "object", "null"]},
+    "manifest_hash": {"type": ["string", "null"]},
+    "manifest_file": {"type": ["string", "null"]},
+    "design": {"type": ["object", "null"]},
+    "design_token_sources": {"type": "object"},
+    "policy": {"type": ["object", "null"]},
+    "compare": {"type": ["object", "null"]},
     "content_hash": {"type": "string", "description": "SHA-256 over canonical JSON of all fields except content_hash and generated_at."},
     "generated_at": {"type": "string", "description": "Informational only; excluded from content_hash so receipts are byte-reproducible."},
     "note": {"type": "string"}

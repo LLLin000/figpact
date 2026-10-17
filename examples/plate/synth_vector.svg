@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- G10 验证用自造矢量占位：带内嵌文字（可测 span 字号，但无源码绑定 -> report-only）。 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="80mm" height="60mm" viewBox="0 0 800 600">
+  <rect x="10" y="10" width="780" height="580" fill="white" stroke="black" stroke-width="3"/>
+  <text x="60" y="120" font-family="Arial" font-size="18">Synthetic vector panel A</text>
+  <text x="60" y="170" font-family="Arial" font-size="14">axis title placeholder</text>
+  <path d="M60,220 L740,220 L740,520 L60,520 Z" fill="none" stroke="black" stroke-width="2"/>
+  <path d="M60,470 L200,420 L340,440 L480,300 L620,340 L740,250" fill="none" stroke="red" stroke-width="4"/>
+</svg>
