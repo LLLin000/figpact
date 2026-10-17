@@ -658,6 +658,137 @@ def cmd_final_size_apply(args):
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
+
+def _plate_specs(args) -> tuple[list[dict], list[float]]:
+    figs = getattr(args, "figure", []) or []
+    if not figs:
+        print("[错误] 至少指定一张图：--figure script.py[,config.yaml][,scope][:width]（可重复）", file=sys.stderr)
+        raise SystemExit(2)
+    default_width = getattr(args, "width_mm", None)
+    specs, widths = [], []
+    for raw in figs:
+        width = default_width
+        item = raw
+        if ":" in raw:
+            item, tail = raw.rsplit(":", 1)
+            try:
+                width = float(tail)
+            except ValueError:
+                item = raw
+        parts = item.split(",")
+        spec: dict = {"path": parts[0].strip()}
+        if len(parts) > 1 and parts[1].strip():
+            spec["config"] = parts[1].strip()
+        if len(parts) > 2 and parts[2].strip():
+            spec["scope"] = parts[2].strip()
+        if len(parts) > 3 and parts[3].strip():
+            spec["label"] = parts[3].strip()
+        if width is None:
+            print(f"[错误] 缺少目标宽度：{raw}（用 --width-mm 或 --figure ...:宽度）", file=sys.stderr)
+            raise SystemExit(2)
+        spec["_width_mm"] = float(width)
+        specs.append(spec)
+        widths.append(float(width))
+    return specs, widths
+
+
+def cmd_plate_audit(args) -> int:
+    from figpact import plate as plate_mod
+    try:
+        specs, widths = _plate_specs(args)
+        result = plate_mod.audit(specs, widths)
+    except (FileNotFoundError, ValueError) as e:
+        print(plate_mod.refusal_lines(str(e), "检查 --figure 路径/宽度是否正确",
+                                      "figpact plate audit --figure <script.py,config.yaml> --width-mm 42 --json"),
+              file=sys.stderr)
+        return 2
+    if getattr(args, "out", None):
+        Path(args.out).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
+        Path(args.out).expanduser().resolve().write_text(
+            json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print(plate_mod.render_audit_text(result))
+    return 0
+
+
+def cmd_plate_unify(args) -> int:
+    from figpact import plate as plate_mod
+    try:
+        specs, widths = _plate_specs(args)
+        result = plate_mod.audit(specs, widths)
+    except (FileNotFoundError, ValueError) as e:
+        print(plate_mod.refusal_lines(str(e), "检查 --figure 路径/宽度是否正确",
+                                      "figpact plate unify --figure <script.py,config.yaml> --width-mm 42"),
+              file=sys.stderr)
+        return 2
+    targets = {}
+    if getattr(args, "target_width_mm", None) is not None:
+        targets["target_width_mm"] = float(args.target_width_mm)
+    if getattr(args, "axis_pt", None) is not None:
+        targets["axis_font_pt"] = float(args.axis_pt)
+    if getattr(args, "tick_pt", None) is not None:
+        targets["tick_font_pt"] = float(args.tick_pt)
+    if getattr(args, "line_pt", None) is not None:
+        targets["line_width"] = float(args.line_pt)
+    plan = plate_mod.plan_unify(result, targets)
+    if not args.apply:
+        print(json.dumps({"status": plan["status"], "plan": plan}, ensure_ascii=False, indent=2))
+        return 0 if plan["status"] == "feasible" else 1
+    if plan["status"] == "infeasible" and not plan.get("steps"):
+        print(json.dumps({"status": "infeasible", "plan": plan}, ensure_ascii=False, indent=2))
+        return 1
+    for s, w in zip(specs, widths):
+        s["_width_mm"] = float(targets.get("target_width_mm", w))
+    unified = plate_mod.unify(plan, specs=specs)
+    after = unified.get("after") if isinstance(unified.get("after"), dict) else None
+    rec = plate_mod.receipt(result, plan, unified if after else None)
+    print(json.dumps({"status": unified["status"], "plan": plan, "unify": unified,
+                      "receipt": rec}, ensure_ascii=False, indent=2))
+    ok = unified["status"] in ("OK", "PARTIAL")
+    if after:
+        bad = [f for f in after.get("figures", []) if f.get("out_of_bounds") or f.get("infeasible")]
+        ok = ok and not bad
+    return 0 if ok else 1
+
+
+def cmd_plate_receipt(args) -> int:
+    from figpact import plate as plate_mod
+    try:
+        specs, widths = _plate_specs(args)
+        result = plate_mod.audit(specs, widths)
+    except (FileNotFoundError, ValueError) as e:
+        print(plate_mod.refusal_lines(str(e), "检查 --figure 路径/宽度是否正确",
+                                      "figpact plate receipt --figure <script.py,config.yaml> --width-mm 42"),
+              file=sys.stderr)
+        return 2
+    rec = plate_mod.receipt(result)
+    if getattr(args, "out", None):
+        Path(args.out).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
+        Path(args.out).expanduser().resolve().write_text(
+            json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(rec, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_ui(args: argparse.Namespace) -> int:
+    """thin wrapper over inspector_server; does not implement its own service."""
+    from figpact.inspector_server import main as run_inspector
+    argv = []
+    if getattr(args, "script", None):
+        argv += ["--script", str(args.script)]
+    if getattr(args, "config", None):
+        argv += ["--config", str(args.config)]
+    if getattr(args, "scope", None):
+        argv += ["--scope", str(args.scope)]
+    if getattr(args, "port", None) is not None:
+        argv += ["--port", str(args.port)]
+    if getattr(args, "dpi", None) is not None:
+        argv += ["--dpi", str(args.dpi)]
+    return int(run_inspector(argv) or 0)
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     """命令行主入口。"""
     if argv is None:
@@ -717,6 +848,14 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_ap.add_argument("--config", default=None, help="配置文件 YAML 路径")
     p_ap.add_argument("--output", default=None, help="输出 Markdown 报告路径")
 
+    # ui --script <py> [--config <yaml>] (thin wrapper)
+    p_ui = subparsers.add_parser("ui", help="启动 Inspector（薄封装，服务仍由 inspector_server 提供）")
+    p_ui.add_argument("--script", default=None, help="可信本地绘图脚本")
+    p_ui.add_argument("--config", default=None, help="配置 YAML")
+    p_ui.add_argument("--scope", default="main", help="作用域")
+    p_ui.add_argument("--port", type=int, default=0, help="端口")
+    p_ui.add_argument("--dpi", type=int, default=600, choices=(120, 240, 600), help="显示分辨率")
+
     # agent --script <py> --config <yaml> --scope <name> [--output-dir <dir>]
     p_agent = subparsers.add_parser("agent", help="本机持久 JSON-RPC 会话：snapshot/inspect/try_layout/render_preview/commit")
     p_agent.add_argument("--script", required=True, help="绘图脚本路径")
@@ -742,6 +881,30 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_fsa.add_argument("--scope", default=None)
     p_fsa.add_argument("--mode", default="B", choices=["A","B"])
 
+    # plate (cross-figure measured comparison + source-level unify + receipt)
+    p_plate = subparsers.add_parser("plate", help="跨图件实测比较 / 源码级统一 / 回执")
+    plate_sub = p_plate.add_subparsers(dest="plate_cmd", required=True)
+    p_pa = plate_sub.add_parser("audit", help="多张图最终尺寸下实测比较")
+    p_pa.add_argument("--figure", action="append", default=[],
+                      help="script.py[,config.yaml][,scope][,label][:width]，可重复")
+    p_pa.add_argument("--width-mm", type=float, default=None, help="默认目标宽度 mm")
+    p_pa.add_argument("--out", default=None, help="审计 JSON 输出路径")
+    p_pa.add_argument("--json", action="store_true", help="JSON 输出（默认人类可读表）")
+    p_pu = plate_sub.add_parser("unify", help="规划并（--apply 才）统一源码参数")
+    p_pu.add_argument("--figure", action="append", default=[],
+                      help="script.py[,config.yaml][,scope][,label][:width]，可重复")
+    p_pu.add_argument("--width-mm", type=float, default=None, help="默认目标宽度 mm")
+    p_pu.add_argument("--target-width-mm", type=float, default=None, help="统一后的目标宽度 mm")
+    p_pu.add_argument("--axis-pt", type=float, default=None, help="轴标题目标 pt")
+    p_pu.add_argument("--tick-pt", type=float, default=None, help="刻度目标 pt")
+    p_pu.add_argument("--line-pt", type=float, default=None, help="线宽目标 pt")
+    p_pu.add_argument("--apply", action="store_true", help="写入源码并重审计")
+    p_pr = plate_sub.add_parser("receipt", help="输出可复算 JSON 回执")
+    p_pr.add_argument("--figure", action="append", default=[],
+                      help="script.py[,config.yaml][,scope][,label][:width]，可重复")
+    p_pr.add_argument("--width-mm", type=float, default=None, help="默认目标宽度 mm")
+    p_pr.add_argument("--out", default=None, help="回执 JSON 输出路径")
+
     args = parser.parse_args(argv)
 
     if args.subcommand == "validate":
@@ -766,6 +929,15 @@ def main(argv: Optional[list[str]] = None) -> int:
         return cmd_final_size(args)
     elif args.subcommand == "final-size-apply":
         return cmd_final_size_apply(args)
+    elif args.subcommand == "plate":
+        if args.plate_cmd == "audit":
+            return cmd_plate_audit(args)
+        elif args.plate_cmd == "unify":
+            return cmd_plate_unify(args)
+        elif args.plate_cmd == "receipt":
+            return cmd_plate_receipt(args)
+    elif args.subcommand == "ui":
+        return cmd_ui(args)
     elif args.subcommand == "agent":
         return cmd_agent(args)
     return 0

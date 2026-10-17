@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "plate-receipt/1",
+  "title": "plate-receipt/1",
+  "description": "G9 plate 可复算回执。reproducibility: identical inputs produce byte-identical JSON excluding generated_at; generated_at is informational only and excluded from content_hash.",
+  "type": "object",
+  "required": ["schema_version", "widths_mm", "figures", "role_spread_pt", "dual_state", "inputs", "content_hash", "generated_at", "note"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "plate-receipt/1"},
+    "targets": {"type": "object"},
+    "widths_mm": {"type": "array", "items": {"type": "number"}},
+    "figures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "kind", "path", "measurable_specs", "unmeasurable_specs", "measurement_basis"],
+        "properties": {
+          "label": {"type": "string"},
+          "kind": {"type": "string", "enum": ["code", "vector", "bitmap"]},
+          "path": {"type": "string"},
+          "k": {"type": ["number", "null"]},
+          "role_eff_pt": {"type": "object"},
+          "artist_fonts": {"type": "array"},
+          "linewidths": {"type": "object"},
+          "out_of_bounds": {"type": "array"},
+          "text_curve_crossings": {"type": "array"},
+          "measurable_specs": {"type": "array", "items": {"type": "string"}},
+          "unmeasurable_specs": {"type": "array", "items": {"type": "string"}},
+          "measurement_basis": {"type": "object"}
+        }
+      }
+    },
+    "role_spread_pt": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["min", "max", "spread_pt", "within_tolerance"],
+        "properties": {
+          "min": {"type": "number"},
+          "max": {"type": "number"},
+          "spread_pt": {"type": "number"},
+          "within_tolerance": {"type": "boolean"}
+        }
+      }
+    },
+    "plan": {"type": ["object", "null"]},
+    "unify": {"type": ["object", "null"]},
+    "dual_state": {
+      "type": "object",
+      "required": ["source_commit_state", "figure_verification_state"],
+      "properties": {
+        "source_commit_state": {"type": "string"},
+        "figure_verification_state": {"type": "string", "enum": ["PASS", "FAIL", "NOT_RUN"]}
+      }
+    },
+    "inputs": {"type": "array", "items": {"type": "object"}},
+    "spec": {"type": ["object", "string", "null"]},
+    "measured": {"type": ["object", "null"]},
+    "verdict": {"type": ["string", "object", "null"]},
+    "content_hash": {"type": "string", "description": "SHA-256 over canonical JSON of all fields except content_hash and generated_at."},
+    "generated_at": {"type": "string", "description": "Informational only; excluded from content_hash so receipts are byte-reproducible."},
+    "note": {"type": "string"}
+  }
+}
