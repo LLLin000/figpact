@@ -23,28 +23,22 @@ from figpact.registry import GidRegistry
 
 def _load_script_and_config(script_path: Path, config_path: Optional[Path] = None):
     """静默加载绘图脚本与配置，获取模块对象与当前配置字典。"""
+    from figpact.session import exec_module_isolated
     script_p = Path(script_path).resolve()
     cfg_p = Path(config_path).resolve() if config_path else None
 
     spec = importlib.util.spec_from_file_location(script_p.stem, script_p)
     if not spec or not spec.loader:
-        raise RuntimeError(f"无法为脚本创建 loader: {script_p}")
+        raise RuntimeError(f'无法为脚本创建 loader: {script_p}')
     mod = importlib.util.module_from_spec(spec)
 
-    old_argv = list(sys.argv)
-    cmd_argv = [script_p.name, "--inventory"]
+    cmd_argv = [script_p.name, '--inventory']
     if cfg_p and cfg_p.is_file():
-        cmd_argv.extend(["--config", str(cfg_p)])
-    sys.argv = cmd_argv
-
-    f = io.StringIO()
-    with redirect_stdout(f):
-        try:
-            spec.loader.exec_module(mod)
-        except SystemExit:
-            pass
-        finally:
-            sys.argv = old_argv
+        cmd_argv.extend(['--config', str(cfg_p)])
+    try:
+        exec_module_isolated(spec, mod, argv=cmd_argv)
+    except SystemExit:
+        pass
 
     # 读取当前配置
     if cfg_p and cfg_p.is_file():

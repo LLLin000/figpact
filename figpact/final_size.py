@@ -38,17 +38,11 @@ def _import_script(script: Path):
         raise RuntimeError(f"cannot create loader for {script}")
     module = importlib.util.module_from_spec(spec)
     parent = str(script.parent)
-    argv = sys.argv
-    sys.modules[name] = module
     if parent not in sys.path:
         sys.path.insert(0, parent)
-    try:
-        with io.StringIO() as _:
-            import contextlib
-            with contextlib.redirect_stdout(_):
-                spec.loader.exec_module(module)
-    finally:
-        sys.argv = argv
+    sys.modules[name] = module
+    from figpact.session import exec_module_isolated
+    exec_module_isolated(spec, module, argv=[str(script)])
     return module
 
 
@@ -70,8 +64,29 @@ def _load_config(module, script: Path, config_path: Optional[Path]):
     return {}
 
 
+def _ambient(module):
+    """构建/contract 期望的 rc 环境：调用时全局 + 脚本导入期声明的样式叠加。"""
+    import copy
+    from figpact.session import pristine_rc
+    ambient = pristine_rc()
+    overlay = getattr(module, '__figpact_import_rc__', None)
+    if overlay:
+        ambient.update(copy.deepcopy(overlay))
+    return ambient
+
+
+def _contract_isolated(module, scope):
+    """`layout_contract` 可能建基线图并重套全局样式（`fs.apply()`）：隔离执行。
+
+    构建必须在样式下跑（文字实测宽度决定避让），跑完全局原样还原。
+    """
+    import matplotlib as _mpl
+    with _mpl.rc_context(rc=_ambient(module)):
+        return module.layout_contract(scope)
+
+
 def _apply_config(module, cfg):
-    if hasattr(module, "_apply_config"):
+    if hasattr(module, '_apply_config'):
         module._apply_config(cfg)
     # refresh module-level alias if present
     if hasattr(module, "CONFIG"):
@@ -83,19 +98,21 @@ def _apply_config(module, cfg):
 
 def _build_figure(module, cfg, scope: Optional[str]):
     import copy
-    _apply_config(module, copy.deepcopy(cfg))
-    science = module.load_science() if hasattr(module, "load_science") else {}
-    if scope is None:
-        scopes = getattr(module, "SCOPES", None)
-        scope = (scopes[0] if scopes else "main")
-    if hasattr(module, "build_figure_and_registry"):
-        try:
-            return module.build_figure_and_registry(scope), scope
-        except TypeError:
-            return module.build_figure_and_registry(), scope
-    if hasattr(module, "_build"):
-        return module._build(science, scope), scope
-    raise RuntimeError("script exposes no build entry")
+    import matplotlib as _mpl
+    with _mpl.rc_context(rc=_ambient(module)):
+        _apply_config(module, copy.deepcopy(cfg))
+        science = module.load_science() if hasattr(module, "load_science") else {}
+        if scope is None:
+            scopes = getattr(module, 'SCOPES', None)
+            scope = (scopes[0] if scopes else 'main')
+        if hasattr(module, 'build_figure_and_registry'):
+            try:
+                return module.build_figure_and_registry(scope), scope
+            except TypeError:
+                return module.build_figure_and_registry(), scope
+        if hasattr(module, '_build'):
+            return module._build(science, scope), scope
+        raise RuntimeError('script exposes no build entry')
 
 
 def _gid_of_artists(reg) -> dict[int, str]:
@@ -257,23 +274,24 @@ def audit_figure(script, config=None, target_width_mm=None, target_axis_font_pt=
     # overlap check using figure_style if available
     overlap_notes = []
     try:
-        import sys as _sys
+        import matplotlib as _mpl
         # attempt import figure_style from script dir
-        fs_path = script.parent / "figure_style.py"
+        fs_path = script.parent / 'figure_style.py'
         if fs_path.is_file():
-            spec2 = importlib.util.spec_from_file_location("figure_style_audit", fs_path)
+            spec2 = importlib.util.spec_from_file_location('figure_style_audit', fs_path)
             m2 = importlib.util.module_from_spec(spec2)
-            with io.StringIO() as _:
-                import contextlib
-                with contextlib.redirect_stdout(_):
-                    spec2.loader.exec_module(m2)
-            if hasattr(m2, "find_text_overlaps"):
+            with _mpl.rc_context():
+                with io.StringIO() as _:
+                    import contextlib
+                    with contextlib.redirect_stdout(_):
+                        spec2.loader.exec_module(m2)
+            if hasattr(m2, 'find_text_overlaps'):
                 try:
                     r = m2.find_text_overlaps(fig)
                     if r:
                         overlap_notes.append(str(r))
                 except Exception as e:
-                    overlap_notes.append(f"overlap check error: {e}")
+                    overlap_notes.append(f'overlap check error: {e}')
     except Exception:
         pass
 
@@ -284,7 +302,7 @@ def audit_figure(script, config=None, target_width_mm=None, target_axis_font_pt=
     editable_fields = []
     if hasattr(module, "layout_contract"):
         try:
-            contract = module.layout_contract(scope)
+            contract = _contract_isolated(module, scope)
             for p in contract.get("parameters", []):
                 if p.get("mutability") == "EDITABLE":
                     editable_fields.append(p.get("key"))
@@ -360,7 +378,7 @@ ROLE_TARGETS = {
 
 
 def _contract_catalog(module, scope):
-    contract = module.layout_contract(scope)
+    contract = _contract_isolated(module, scope)
     params = []
     for p in contract.get("parameters", []):
         typ = "int" if p.get("unit") in ("col", "lane") else "float"
@@ -422,7 +440,7 @@ def safe_editable_fields(script, config=None, scope=None, target_width_mm=None):
     if scope is None:
         scopes = getattr(module, "SCOPES", None)
         scope = (scopes[0] if scopes else "main")
-    contract = module.layout_contract(scope)
+    contract = _contract_isolated(module, scope)
     editable = []
     for p in contract.get("parameters", []):
         if p.get("mutability") == "EDITABLE":

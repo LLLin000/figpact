@@ -39,9 +39,14 @@ IMPACT_TOL_MM = 1e-3  # Same-renderer numeric comparison, not a calibrated physi
 HISTORY_SCHEMA = 'figpact.intents.history/1'
 
 #: Render environment compared against a frozen checkpoint before any replay.
+#: Font/dpi keys decide text measurement; line/patch/axes keys decide stroke ink
+#: facts (capstyle/joinstyle/linewidth feed `_geometry_error`'s stroke compare).
 _HISTORY_ENV_KEYS = ('font.family', 'font.sans-serif', 'axes.unicode_minus', 'text.usetex',
-                     'figure.dpi', 'savefig.dpi', 'lines.linewidth', 'svg.hashsalt')
-
+                     'figure.dpi', 'savefig.dpi', 'lines.linewidth', 'svg.hashsalt',
+                     'lines.solid_capstyle', 'lines.solid_joinstyle',
+                     'lines.dashed_pattern', 'lines.dash_joinstyle', 'lines.dash_capstyle',
+                     'lines.antialiased', 'patch.linewidth', 'patch.force_edgecolor',
+                     'axes.linewidth')
 
 def _finite(value):
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):

@@ -727,16 +727,13 @@ def _load_script(script, config):
     spec = importlib.util.spec_from_file_location('figpact_agent_plot', script)
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
-    argv = sys.argv
-    sys.argv = [str(script), '--config', str(config), '--inventory']
+    from figpact.session import exec_module_isolated
     try:
-        with redirect_stdout(io.StringIO()):
-            spec.loader.exec_module(module)
+        exec_module_isolated(spec, module, argv=[str(script), '--config', str(config),
+                                                 '--inventory'])
     except BaseException:
         sys.modules.pop(spec.name, None)
         raise
-    finally:
-        sys.argv = argv
     return module
 
 

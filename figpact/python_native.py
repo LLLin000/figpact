@@ -98,15 +98,12 @@ def read_layout_binding(script: Path) -> dict:
         raise LayoutBindingError(f'无法为脚本创建 loader：{script}')
     module = importlib.util.module_from_spec(spec)
     parent = str(script.parent)
-    argv = sys.argv
     sys.modules[name] = module
     sys.path.insert(0, parent)
-    sys.argv = [str(script)]
+    from figpact.session import exec_module_isolated
     try:
-        with redirect_stdout(io.StringIO()):
-            spec.loader.exec_module(module)
+        exec_module_isolated(spec, module, argv=[str(script)])
     finally:
-        sys.argv = argv
         sys.path.remove(parent)
         sys.modules.pop(name, None)
     declared = getattr(module, LAYOUT_NAME, None)

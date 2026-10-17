@@ -266,6 +266,38 @@ def pristine_rc() -> dict:
             if key != 'backend'}
 
 
+def exec_module_isolated(spec, module, *, argv):
+    """装载绘图脚本：导入期的 `figure_style.apply()` 只污染隔离区。
+
+    调用方的全局 rcParams 原样保留；导入期改掉的 rc 记在模块的
+    `__figpact_import_rc__` 上（构建期由 `FigureSession._call_builder` 叠加）。
+    """
+    old_argv = sys.argv
+    sys.argv = list(argv)
+    try:
+        import matplotlib as mpl
+        entry = pristine_rc()
+        with mpl.rc_context(rc=entry):
+            with redirect_stdout(io.StringIO()):
+                spec.loader.exec_module(module)
+            # 导入期改掉的 rc（字体/dpi……）是脚本声明的环境：记在模块上，
+            # 每次构建重新叠加；全局退出即还原，不外泄。
+            overlay = {}
+            for key, value in dict(mpl.rcParams).items():
+                if key == 'backend':
+                    continue
+                try:
+                    same = key in entry and bool(entry[key] == value)
+                except Exception:
+                    same = False
+                if not same:
+                    overlay[key] = copy.deepcopy(value)
+            module.__figpact_import_rc__ = overlay
+    finally:
+        sys.argv = old_argv
+    return module
+
+
 def load_module(script, config, *, module_name=None):
     """按路径装载绘图脚本的**定义**：一次导入，不建 Figure、不打印。
 
@@ -289,29 +321,9 @@ def load_module(script, config, *, module_name=None):
     if spec is None or spec.loader is None:
         raise SessionError(f'无法为脚本创建 loader：{script}')
     mod = importlib.util.module_from_spec(spec)
-    argv = sys.argv
-    sys.argv = [str(script), '--config', str(Path(config).resolve()), '--inventory']
-    try:
-        import matplotlib as mpl
-        entry = pristine_rc()
-        with mpl.rc_context(rc=entry):
-            with redirect_stdout(io.StringIO()):
-                spec.loader.exec_module(mod)
-            # 导入期改掉的 rc（字体/dpi……）是脚本声明的环境：记在模块上，
-            # 每次构建重新叠加；全局退出即还原，不外泄。
-            overlay = {}
-            for key, value in dict(mpl.rcParams).items():
-                if key == 'backend':
-                    continue
-                try:
-                    same = key in entry and bool(entry[key] == value)
-                except Exception:
-                    same = False
-                if not same:
-                    overlay[key] = copy.deepcopy(value)
-            mod.__figpact_import_rc__ = overlay
-    finally:
-        sys.argv = argv
+    exec_module_isolated(spec, mod,
+                         argv=[str(script), '--config', str(Path(config).resolve()),
+                               '--inventory'])
     sys.modules[name] = mod
     return mod
 
@@ -2004,7 +2016,10 @@ class FigureSession:
                                  f'（画布外边界 + contain 关系 + 实际裁切边界，形状包围盒，mm）'
                                  + (f'；基线里已存在的越界 {len(pre_existing_overflow)} 处未加深'
                                     if pre_existing_overflow else '')})
-        # 碰撞：动过的对象 vs 其它所有可见几何 + 其余动过的对象。
+        # 碰撞：动过的对象 vs 同一次构建的候选几何。
+        # 基线里的**未注册**可见几何（刻度标签包络等，没有 gid，只能按轴归属）
+        # 不进基线碰撞对：构建的 dpi/字体变了它们的包络就整体偏移——那是两次构建的
+        # 环境差异，不是本次位移造成的碰撞（候选内部动/静比较不受影响）。
         moved_set = set(moved_keys)
         collisions, pre_existing, uncertainties, min_clear = [], [], [], None
 
@@ -2025,6 +2040,14 @@ class FigureSession:
                 other = base_shapes[other_key]
                 if other_key == key or other.get('container') or other_key in moved_set:
                     continue
+                if not other_key.startswith('gid:'):
+                    # 基线里的未注册可见几何（刻度标签包络等）不进碰撞对：
+                    # 它们按轴归属、随构建 dpi/字体整体偏移——那是两次构建的
+                    # 环境差异，不是本次位移造成的碰撞。但图幅图像
+                    # （`figure_image_envelope`）不挂任何坐标轴、不随轴环境
+                    # 偏移，是真实存在的静止几何，必须参与碰撞测量。
+                    if other.get('kind') != 'figure_image_envelope':
+                        continue
                 pairs.append((key, other_key, other))
             for other_key in sorted(moved_keys):
                 if other_key <= key:
