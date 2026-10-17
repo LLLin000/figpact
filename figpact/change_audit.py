@@ -56,6 +56,16 @@ def _style_entry(fig, art):
     for prop, getter in _SEMANTIC_PROPS:
         fn = getattr(art, getter, None)
         if not callable(fn):
+            if prop == 'fontsize':
+                # Legend 本体无 get_fontsize：行文本字号即其语义字号（通用口径）。
+                try:
+                    import matplotlib.legend as _leg
+                    if isinstance(art, _leg.Legend):
+                        texts = list(art.get_texts())
+                        if texts:
+                            entry[prop] = _json_native(float(texts[0].get_fontsize()))
+                except Exception:
+                    pass
             continue
         try:
             value = fn()
@@ -120,7 +130,21 @@ def _stable_key(fig, reg, art, taken: set) -> str:
                     return f'unregistered.tick.{axis_name}.{content}.{n}'
             except Exception:
                 pass
-        if isinstance(art, _lines.Line2D):
+            # 图例行文本：同图例同行文本即同一身份（通用身份，不给具体 Artist
+            # 写分支：身份经 roles.classify_artist 判 legend_text，键按图例行序）。
+            try:
+                from figpact import roles as _r
+                if _r.classify_artist(art, fig) == 'legend_text':
+                    for ax_idx, ax in enumerate(axes):
+                        try:
+                            leg = ax.get_legend()
+                            texts = list(leg.get_texts()) if leg is not None else []
+                        except Exception:
+                            texts = []
+                        if art in texts:
+                            return f'unregistered.{ax_idx}.legend_text.{texts.index(art)}'
+            except Exception:
+                pass
             # 图例行柄：图例的装饰线，不是数据曲线（扰动跟着图例字号联动，不算越权）。
             for ax_idx, ax in enumerate(axes):
                 try:
@@ -186,7 +210,7 @@ def geometry_snapshot(fig, reg) -> dict:
 
 
 def capture_snapshot(session: FigureSession) -> dict:
-    """基线快照：全量 styles + shapes + science（与扰动后同一口径）。
+    """基线快照：全量 styles + shapes + science + **受保护视图**（与扰动后同一口径）。
 
     不得直接复用 ``session._baseline`` 的注册表窄快照：窄快照里没有未注册
     的轴标签/刻度，与扰动后的全量快照一比，全是“新增”，全是误报。
@@ -199,11 +223,30 @@ def capture_snapshot(session: FigureSession) -> dict:
             shapes = geometry_snapshot(fig, reg)
         styles = style_snapshot(session, fig, reg)
         science = session._capture_science(fig, reg)
+        view = _view_snapshot(fig)
     finally:
         import matplotlib.pyplot as plt
         plt.close(fig)
     return {'styles': styles, 'shapes': shapes, 'science': science,
-            'gids': sorted(reg.all())}
+            'view': view, 'gids': sorted(reg.all())}
+
+
+def _view_snapshot(fig) -> dict:
+    """受保护的科学视图状态：坐标范围、scale、是否反向（逐 Axes）。"""
+    out = {}
+    for i, ax in enumerate(getattr(fig, 'axes', []) or []):
+        try:
+            out[f'axes{i}'] = {
+                'xlim': [float(v) for v in ax.get_xlim()],
+                'ylim': [float(v) for v in ax.get_ylim()],
+                'xscale': str(ax.get_xscale()),
+                'yscale': str(ax.get_yscale()),
+                'x_inverted': bool(ax.xaxis_inverted()),
+                'y_inverted': bool(ax.yaxis_inverted()),
+            }
+        except Exception:
+            continue
+    return out
 
 
 def audit_pair(before: dict, after: dict, allowed: dict) -> dict:
@@ -248,6 +291,17 @@ def audit_pair(before: dict, after: dict, allowed: dict) -> dict:
         unauthorized.append({'gid': key.split(':', 1)[-1], 'property': f'shape:{key}',
                              'before': 'present', 'after': 'absent',
                              'class': 'structure-removed'})
+
+    # 受保护的**科学视图**：坐标范围、scale、反向。未经显式授权（allowed['view']）
+    # 的变化一律判越权——数据坐标窗口不属于"排版可动"的范畴。
+    vb, va = before.get('view') or {}, after.get('view') or {}
+    for key in sorted(set(vb) | set(va)):
+        if key in set(allowed.get('view') or ()):
+            continue
+        if vb.get(key) != va.get(key):
+            unauthorized.append({'gid': key, 'property': 'view',
+                                 'before': vb.get(key), 'after': va.get(key),
+                                 'class': 'protected-view'})
 
     required = allowed.get('required_targets') or []
     required_changed = {}
@@ -350,11 +404,13 @@ def verify_param(script: Any, config: Any, scope: str, param: str,
         allowed_styles = {gid: set(entry.get('properties') or ())
                           for gid in declared_gids}
         # 图例行柄是图例的装饰线（Line2D 却非数据曲线）：随图例/曲线参数联动
-        # 是预期耦合，不算越权。允许集按身份补齐，不按字号猜。
+        # 是预期耦合，不算越权。允许集按身份补齐，不按字号猜。见
+        # _legend_handle_allowlist（verify_param 与 init_contract.verify 共用）。
         if role in ('curve.linewidth', 'legend'):
             for key in (after.get('styles') or {}):
                 if '.legend_handle.' in str(key):
                     allowed_styles.setdefault(key, {'linewidth'})
+            allowed_styles.update(_legend_handle_allowlist(session, after.get('styles') or {}))
         family = roles.GEOMETRY_FAMILY.get(role, ())
         fam_keys = {k for k in after['shapes']
                     if any(f in k for f in family)} | \
@@ -422,15 +478,25 @@ def _attribute_unregistered(session, base, role, param, current: float) -> set:
                     continue
             except Exception:
                 continue
+            # 身份与同值两条同时成立才归因（未注册 tick/轴标签补齐）。
             try:
                 kind = roles.classify_artist(art, fig)
             except Exception:
                 continue
-            if kind not in kinds:
-                continue
             try:
                 if prop == 'fontsize':
-                    value = float(art.get_fontsize())
+                    if kind == 'legend':
+                        # Legend 本体无 get_fontsize：语义是行文本字号，取其
+                        # 首行文本 nominal（通用口径，无专用分支）。
+                        try:
+                            texts = list(art.get_texts())
+                        except Exception:
+                            continue
+                        if not texts:
+                            continue
+                        value = float(texts[0].get_fontsize())
+                    else:
+                        value = float(art.get_fontsize())
                 elif prop == 'linewidth':
                     value = float(art.get_linewidth())
                 else:
@@ -447,6 +513,56 @@ def _attribute_unregistered(session, base, role, param, current: float) -> set:
                 plt.close(fig)
             except Exception:
                 pass
+    return out
+
+
+def _legend_handle_allowlist(session, after_styles: Optional[dict] = None) -> dict:
+    """图例行柄允许集（通用身份）：快照里行柄身份的键 -> linewidth。
+
+    行柄是图例的装饰线（Line2D 却非数据曲线），随图例/曲线参数联动是预期
+    耦合。稳定键按 findobj 遍历序编号，另起一套 taken 会错位：直接复用扰动
+    后快照里"与基线同值行柄同键"的键——行柄 lw 恒等于曲线 lw（装饰线跟随），
+    故扰动前后行柄键集合一致；在 after 快照里按"Line2D 且 lw==曲线值"认行柄
+    会误伤数据曲线，这里按"非 ax.lines 且在 legend_handles 里"的身份认。
+    """
+    out: dict = {}
+    if not after_styles:
+        return out
+    try:
+        import matplotlib.pyplot as _plt
+        import matplotlib.lines as _lines
+        _fig2, _reg2 = None, None
+        with redirect_stdout(io.StringIO()):
+            _fig2, _reg2 = session.build_from_yaml(str(session.config))
+        try:
+            _handles = set()
+            for _ax in (_fig2.axes or []):
+                try:
+                    _leg = _ax.get_legend()
+                    _hh = list(_leg.legend_handles) if _leg is not None and hasattr(_leg, 'legend_handles') else []
+                except Exception:
+                    _hh = []
+                _handles |= {id(h) for h in _hh}
+            _taken: set = set()
+            for _art in _fig2.findobj():
+                if not hasattr(_art, 'get_visible'):
+                    continue
+                try:
+                    if not _art.get_visible():
+                        continue
+                except Exception:
+                    continue
+                _key = _stable_key(_fig2, _reg2, _art, _taken)
+                _taken.add(_key)
+                if isinstance(_art, _lines.Line2D) and id(_art) in _handles and _key in after_styles:
+                    out.setdefault(_key, {'linewidth'})
+        finally:
+            try:
+                _plt.close(_fig2)
+            except Exception:
+                pass
+    except Exception:
+        pass
     return out
 
 
