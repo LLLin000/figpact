@@ -844,6 +844,9 @@ def cmd_plate_unify(args) -> int:
     print(json.dumps({"status": unified["status"], "plan": plan, "unify": unified,
                       "compare": compare, "receipt": rec}, ensure_ascii=False, indent=2))
     ok = unified["status"] in ("OK", "PARTIAL")
+    if any(item.get("result", {}).get("figure_verification_state") == "FAIL"
+           for item in unified.get("per_figure", [])):
+        ok = False
     if unified.get("change_audits") and any(c.get("blocking") for c in unified["change_audits"] if isinstance(c, dict)):
         ok = False
     if after:

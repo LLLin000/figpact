@@ -124,6 +124,31 @@ spatial_risk: FTIR label bottom overflow 0.697 mm; Line2D top overflow 2.632 mm 
 - **无 YAML 的图**可以只读测量与示范，但不能保留修改。
 - 只信任**本地**脚本；figpact **不是** OS 级沙箱。
 
+### 新图型接入检查：统计曲线与误差棒
+
+`examples/statistics/statistical.py` 使用固定合成均值/标准误数组，只声明现有接入协议，
+没有为统计图新增适配器。这是协议内新图型检查，不是独立人员盲测，也不是任意零接入脚本支持。
+隔离副本实跑：100×75 mm → 80×60 mm，目标轴标题/刻度 8 pt、线宽 0.8 pt。
+
+| 角色 | 发现与扰动验证 | apply 后实测 |
+|---|---|---|
+| 轴标题 | verified | 8.003 pt |
+| 刻度 | verified | 8.003 pt |
+| 图例 | verified，compare-only | 7.003 pt，未强制统一 |
+| 曲线线宽 | rejected：共享参数还改变未声明的误差棒 LineCollection | 1.2 pt，源码参数未改，不冒充达标 |
+
+视图、6 个 Line2D 的数据坐标和 2 个误差棒集合的线段均前后相等；重复 apply 配置字节不变。
+空间校验仍报告 FAIL，不能将该图称为整图通过。本次修复了一个 CLI 误报：
+即使顶层写入状态是 OK，只要任一子图回执为 `figure_verification_state=FAIL`，
+`plate unify --apply` 就返回退出码 1；成功写盘不等于成功验证。
+
+可复跑的真实发现→确认→扰动→写盘→CLI 退出码检查（在临时副本中运行，不修改示例）：
+
+```bash
+python -m pytest tests/test_statistical_unify.py -q
+```
+
+
 ## 测试
 
 ```bash
