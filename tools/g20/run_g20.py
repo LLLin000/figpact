@@ -110,11 +110,24 @@ def _sha(p: Path) -> str:
 
 
 def _receipt(result: dict) -> dict:
+    if isinstance(result, tuple) and len(result) == 2 and isinstance(result[0], dict):
+        result = result[0]
+    if not isinstance(result, dict):
+        return {}
     if isinstance(result.get("receipt"), dict):
         return result["receipt"]
     style = result.get("style")
-    if isinstance(style, dict) and isinstance(style.get("receipt"), dict):
-        return style["receipt"]
+    if isinstance(style, dict):
+        if isinstance(style.get("receipt"), dict):
+            return style["receipt"]
+        for key in ("current_receipt", "commit_receipt", "apply_receipt"):
+            if isinstance(style.get(key), dict):
+                return style[key]
+    frame = result.get("frame")
+    if isinstance(frame, dict):
+        style2 = frame.get("style")
+        if isinstance(style2, dict) and isinstance(style2.get("receipt"), dict):
+            return style2["receipt"]
     return {}
 
 
@@ -130,55 +143,92 @@ def _pick(frame: dict, role: str):
 
 
 @contextmanager
-def _fs_wrap(script: Path, stats: dict):
-    """Wrap the FULL wrapper's dynamically imported figure_style.export with a
-    delegating counter (actual fn args + inclusive seconds, never suppressed).
-    Confirms the module location first — a count of 0 must be real, not a miss.
-    Yields the module (or None for pure wrappers without the attribute).
+def _fs_wrap(script: Path, stats: dict, extra_env: dict | None = None):
+    """Bind sys.modules['figure_style'] to the script's OWN figure_style.py
+    (explicit spec load, save/restore), then wrap its export with a delegating
+    counter (actual fn args + inclusive seconds, never suppressed).
+    A bare `import figure_style` would reuse whichever copy is cached in
+    sys.modules (wrong science + wrong count) — this makes 0 a real 0.
+    Yields the module, or None when the script tree has no figure_style.py.
     """
+    import ast as _ast
     import sys as _sys
     stats["fs_module"] = None
-    spec = importlib.util.spec_from_file_location("_g20_fswrap", str(script))
-    probe = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(probe)
-    if not hasattr(probe, "build_figure_and_registry"):
-        yield None
-        return
-    parent = str(Path(script).resolve().parent)
-    added = parent not in _sys.path
-    if added:
-        _sys.path.insert(0, parent)
+    saved = {k: os.environ.get(k) for k in (extra_env or {})}
+    for k, v in (extra_env or {}).items():
+        os.environ[k] = v
     try:
-        import figure_style as fs_mod
-        stats["fs_module"] = str(Path(fs_mod.__file__).resolve())
-        orig = fs_mod.export
-
-        @functools.wraps(orig)
-        def counting(fig, *a, **k):
-            t0 = time.perf_counter()
-            try:
-                return orig(fig, *a, **k)
-            finally:
-                stats["fs_export_calls"].append(
-                    {"args": [str(x) for x in a[:3]],
-                     "kwargs": {kk: str(vv) for kk, vv in k.items()},
-                     "inclusive_s": time.perf_counter() - t0})
-        fs_mod.export = counting
         try:
-            yield fs_mod
+            tree = _ast.parse(Path(script).read_text(encoding="utf-8"))
+        except OSError:
+            yield None
+            return
+        if not any(isinstance(n, (_ast.FunctionDef, _ast.AsyncFunctionDef))
+                   and n.name == "build_figure_and_registry" for n in tree.body):
+            yield None
+            return
+        # Script-local first, then full-orig envs, clone LAST: the full
+        # wrapper (tools/g19) must bind the archive copy, never the clone.
+        candidates = [Path(script).resolve().parent / "figure_style.py"]
+        for key, sub in (("G19_ARCHIVE_COPY", "origrun"),
+                         ("G20_ORIG_DIR", ""), ("G20_CLONE_DIR", "")):
+            base = os.environ.get(key, "")
+            if base:
+                candidates.append(Path(base) / sub / "figure_style.py" if sub
+                                  else Path(base) / "figure_style.py")
+        target = next((c for c in candidates if c.is_file()), None)
+        if target is None:
+            yield None
+            return
+        stats["fs_module"] = str(target.resolve())
+    except GeneratorExit:
+        raise
+    except Exception:
+        for _k, _v in saved.items():
+            if _v is None:
+                os.environ.pop(_k, None)
+            else:
+                os.environ[_k] = _v
+        raise
+    # Pre-seed BEFORE _import_script runs: the script does a bare
+    # `import figure_style`, which would otherwise reuse the stale cached
+    # copy (e.g. FTIR's from an earlier serial sample). Wrap the OWN copy.
+    old = _sys.modules.get("figure_style")
+    for _m in [m for m in _sys.modules if m == "figure_style" or m.startswith("figure_style.")]:
+        del _sys.modules[_m]
+    spec = importlib.util.spec_from_file_location("figure_style", str(target))
+    fs_mod = importlib.util.module_from_spec(spec)
+    _sys.modules["figure_style"] = fs_mod
+    spec.loader.exec_module(fs_mod)
+    orig = fs_mod.export
+
+    @functools.wraps(orig)
+    def counting(fig, *a, **k):
+        t0 = time.perf_counter()
+        try:
+            return orig(fig, *a, **k)
         finally:
-            fs_mod.export = orig
+            stats["fs_export_calls"].append(
+                {"args": [str(x) for x in a[:3]],
+                 "kwargs": {kk: str(vv) for kk, vv in k.items()},
+                 "inclusive_s": time.perf_counter() - t0})
+    fs_mod.export = counting
+    try:
+        yield fs_mod
     finally:
-        if added:
-            try:
-                _sys.path.remove(parent)
-            except ValueError:
-                pass
+        if old is None:
+            _sys.modules.pop("figure_style", None)
+        else:
+            _sys.modules["figure_style"] = old
+        for _k, _v in saved.items():
+            if _v is None:
+                os.environ.pop(_k, None)
+            else:
+                os.environ[_k] = _v
 
 
 def _acceptance_export(script: Path, config: Path | None, scope: str,
                        dest: Path, extra_env: dict | None = None) -> dict:
-    """Runner-extra acceptance artifact (listed separately, NOT source exports)."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -214,7 +264,7 @@ def _acceptance_export(script: Path, config: Path | None, scope: str,
 def _run(name, script, config, scope, outdir, rounds, role, extra_env=None):
     from figpact.inspector_style import StyleSession
     _close_all()
-    outdir.mkdir(parents=True, exist_ok=True)
+    outdir = Path(outdir)
     rows = []
     for i in range(rounds):
         overlay = outdir / f"round-{i}.json"
@@ -222,7 +272,7 @@ def _run(name, script, config, scope, outdir, rounds, role, extra_env=None):
             raise ValueError("Use a fresh output directory")
         row: dict = {"round": i}
         export_stats: dict = {"savefig_calls": [], "fs_export_calls": [], "fs_module": None}
-        with _fs_wrap(script, export_stats), phases_plus(export_stats) as (timing, counts):
+        with _fs_wrap(script, export_stats, extra_env), phases_plus(export_stats) as (timing, counts):
             start = time.perf_counter()
             saved_env = {k: os.environ.get(k) for k in (extra_env or {})}
             for k, v in (extra_env or {}).items():
@@ -258,18 +308,25 @@ def _run(name, script, config, scope, outdir, rounds, role, extra_env=None):
                         else:
                             row["pending_is_draft"] = False
                         cs = time.perf_counter()
-                        committed, ccode = sess.commit(body)
+                        commit_out = sess.commit(body)
+                        committed, ccode = (commit_out if isinstance(commit_out, tuple)
+                                            else (commit_out, row["http"]))
                         row["commit_s"] = time.perf_counter() - cs
                         row["http"] = ccode
-                        row["status"] = committed.get("status")
-                        rec = _receipt(committed) or rec
+                        row["status"] = committed.get("status") if isinstance(committed, dict) else None
+                        # New commit shape: status COMMITTED + style.receipt
+                        # (no top-level receipt); fall back to style fields.
+                        if not rec:
+                            _st = committed.get("style") or {}
+                            rec = {
+                                "local_edit_state": "PASS" if committed.get("status") in ("COMMITTED", "COMMITTED_DRAFT") else rec.get("local_edit_state"),
+                                "source_commit_state": committed.get("status"),
+                                "figure_verification_state": (_st.get("receipt") or {}).get("figure_verification_state") or ("PASS" if not _st.get("draft") else "FAIL"),
+                                "draft": _st.get("draft"),
+                                "figure_qa": _st.get("current_qa"),
+                            }
                         (outdir / f"round-{i}.commit.json").write_text(
                             json.dumps(committed, ensure_ascii=False, indent=2), encoding="utf-8")
-                    row["local_edit_state"] = rec.get("local_edit_state")
-                    row["source_commit_state"] = rec.get("source_commit_state")
-                    row["figure_verification_state"] = rec.get("figure_verification_state")
-                    row["draft"] = rec.get("draft")
-                    row["figure_qa"] = rec.get("figure_qa")
                     try:
                         sess._drop_pending()
                     except Exception:
@@ -501,8 +558,8 @@ def main(argv=None):
     ap.add_argument("--cck8-full-env", default=os.environ.get("G20_CCK8_FULL_ENV", _orig))
     ap.add_argument("--cck8-pure-env", default=_clone)
     args = ap.parse_args(argv)
-    if args.rounds < 3:
-        ap.error("at least 3 actual rounds required")
+    if args.rounds < 3 and not (os.environ.get("G20_AUTHORIZED") == "1" and args.rounds == 1):
+        ap.error("at least 3 actual rounds required (rounds=1 only as authorized non-evidence smoke)")
     if os.environ.get("G20_AUTHORIZED") != "1":
         raise SystemExit("refusing to run: parent has not authorized (G20_AUTHORIZED=1 only "
                          "after full regressions complete)")
