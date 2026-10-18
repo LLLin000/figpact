@@ -1,0 +1,68 @@
+{
+  "product_code_equivalent_to": "63273f4",
+  "product_changes": false,
+  "nmr": {
+    "baseline_glyph_floor_records": 7,
+    "baseline_effective_pt": 4.2,
+    "glyph_threshold_pt": 5.0,
+    "native_changes": {
+      "peak_font_pt": [6.0, 7.2],
+      "legend_font_pt": [6.0, 7.2],
+      "canvas_w_mm": [48.0, 68.0],
+      "canvas_h_mm": [48.0, 48.0]
+    },
+    "continued_committed_change": {"note_font_pt": [5.5, 6.0]},
+    "science_digest": "e5d4f227912792b6ee506a1d992d90a0f7ad097135d75a30d7d9f70650c7a170",
+    "science_digest_identical": true,
+    "science_source_files_byte_identical": 12,
+    "curve_arrays_identical": 4,
+    "peak_labels_preserved": 7,
+    "peak_and_legend_texts_identical": 11,
+    "xlim_identical": [10.5, 0.0],
+    "ylim_identical": [-6.0, 304.99999999999994],
+    "scales_identical": ["linear", "linear"],
+    "candidate_qa_records": [],
+    "edge_clearance_warning_count": {"baseline": 3, "final": 2},
+    "surviving_edge_clearance_mm": 0.8,
+    "text_canvas_overflow_px": -0.3878,
+    "native_publications": ["STRICT_VERIFIED", "STRICT_VERIFIED"],
+    "reopened_in_fresh_worker": true,
+    "strict_overlay": {"commit": "COMMITTED", "load": "PASS", "render": "PASS"},
+    "pdf_min_glyph_pt": 5.04,
+    "artifacts": {
+      "native_pdf": {"bytes": 55142, "sha256": "44fece5267cb1e21f20258a15bdb02f74fc3fb2b32b1d95c304b652a6023ca9b"},
+      "native_png": {"bytes": 137044, "sha256": "ccecdc02ca66839260b786f8e545acdace1086a588e5c5e7828d535b18203c13"},
+      "strict_overlay_pdf": {"bytes": 55150, "sha256": "bb32ccc25ef844027f3c07455378540086d4a328f5d487aef0ca126b83f3035c"}
+    }
+  },
+  "ftir": {
+    "scope": "annotated",
+    "baseline_glyph_floor_records": 10,
+    "baseline_effective_pt": [3.29, 4.7],
+    "native_try": "OK",
+    "native_science_unchanged": true,
+    "tested_candidate_changed_ylim": true,
+    "strict_publication_returncode": 1,
+    "strict_blockers": {"TEXT_ON_DATA": 4},
+    "published": false,
+    "pdf_produced": false,
+    "conclusion": "Measured failed candidate and scope-coupled legend controls; not an exhaustive impossibility proof"
+  },
+  "ftir_lifecycle": {
+    "edit_cycles": 3,
+    "build_calls": {"startup": 2, "per_preview": 12, "per_commit": 12},
+    "figures_created": 194,
+    "managed_after_releasing_session_and_gc": 120,
+    "rss_after_gc_bytes": {"before": 69947392, "released_session": 1299111936},
+    "purpose": "Observation only; no timing comparison, caching or verifier changes",
+    "figure_creation_origin": "20 retained manifest baseline-scene Figures per preview/commit"
+  },
+  "verification": {"related_pytest_passed": 101, "skipped": 2, "subtests_passed": 4},
+  "limits": [
+    "Native publication and strict overlay API proof, not a new GUI interaction proof",
+    "Existing edge-clearance warnings remain; Strict PASS is not zero warnings",
+    "Plain-text canvas clipping is not covered by current qa.measure; runner checks actual renderer geometry",
+    "RSS includes allocator retention; retained Figure count separately proves pyplot ownership",
+    "Private raw data, scripts and scientific figure artifacts remain outside the repository"
+  ]
+}

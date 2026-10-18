@@ -204,6 +204,9 @@ G20 工作草稿：原图已有 QA 问题时，只有局部／科学／视图审
 程序接口使用 `style_overlay.load_workspace(path)` 明确读取工作区；严格 `load`／`render` 仍只接受整图 PASS。
 已改善的问题不能回退到原图程度；“恢复原始”也遵守当前已保存工作状态的实测门禁。规则见 [G20 协议](docs/G20_PROTOCOL.md)，真实草稿闭环、纯构图等价与五轮结果见 [G20 报告](docs/G20_REPORT.md)。
 
+G21 已用现有 Native/YAML 控制完成真实 NMR 的字号修复、保存、新 worker 重开、继续编辑及严格出版；未新增 Overlay 角色或降低 5 pt 字形下限。
+Strict PASS 仍可能保留非阻断 warning；FTIR 本轮严格出版未通过，连续编辑的 Figure 持有问题也尚未修复。完整证据与边界见 [G21 报告](docs/G21_REPORT.md)。
+
 
 ## 测试
 
