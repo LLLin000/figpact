@@ -202,7 +202,7 @@ python -m figpact ui --script tools/g15/B/g15b_barchart_decl.py --scope main --o
 G20 工作草稿：原图已有 QA 问题时，只有局部／科学／视图审计通过，且按真实对象与实测量比较没有新增或加重问题，才显示 **保存工作草稿**。
 保存后仍显示整图未通过及问题数量；同一命令重开可继续编辑，不能据此合规导出。缺少测量、对象歧义、源码漂移或外部 Overlay 冲突均拒绝。
 程序接口使用 `style_overlay.load_workspace(path)` 明确读取工作区；严格 `load`／`render` 仍只接受整图 PASS。
-已改善的问题不能回退到原图程度；“恢复原始”也遵守当前已保存工作状态的实测门禁。验收规则见 [G20 协议](docs/G20_PROTOCOL.md)。
+已改善的问题不能回退到原图程度；“恢复原始”也遵守当前已保存工作状态的实测门禁。规则见 [G20 协议](docs/G20_PROTOCOL.md)，真实草稿闭环、纯构图等价与五轮结果见 [G20 报告](docs/G20_REPORT.md)。
 
 
 ## 测试
