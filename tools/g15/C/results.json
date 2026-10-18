@@ -1,0 +1,726 @@
+{
+ "group": "C",
+ "freeze_sha": "793aaa89b39af49d2421e2a2840751cf757ba959",
+ "upstream_sha": "4aeb773422464799998d900198b35cb80e94b3e1",
+ "upstream_urls": {
+  "eventcollection": "https://raw.githubusercontent.com/matplotlib/matplotlib/4aeb773422464799998d900198b35cb80e94b3e1/galleries/examples/lines_bars_and_markers/eventcollection_demo.py",
+  "annotation": "https://raw.githubusercontent.com/matplotlib/matplotlib/4aeb773422464799998d900198b35cb80e94b3e1/galleries/examples/text_labels_and_annotations/annotation_demo.py"
+ },
+ "license": "tools/g15/LICENSE.matplotlib.txt + NOTICE.txt (parent-saved, shared)",
+ "truth_source": "tools/g15/inputs.json (parent-unified): per-file roles d=2; legal intents d=2 (ticks 8pt, curve 0.8pt); axis.title absent is not a legal attempt; scopes do not multiply the denominator.",
+ "method_validity": {
+  "r1_form": "per-scope build_scene (SCOPES fig0..fig5 + main), each rerunning the FULL raw text in order then selecting its figure; registry and contract nodes derive from the RETURNED figure's real artists only. Protocol-allowed declarations, not harness distortion.",
+  "r1_ast_limit": "wrapper AST hides original plotting statements from Discover; recorded as declaration-form/discovery limitation (main-table 0/2 with limitation note), not as all-wrapper-forms-fail.",
+  "old_experiment": "previous single-scope cross-registry ANN run retained as harness-invalid, excluded from the main table.",
+  "scoring": "recall per-raw-file role kinds (d=2); hint FP per unresolved location; binding FP separate (0 candidates); unauthorized N/A on 0 acceptances."
+ },
+ "samples": [
+  {
+   "id": "eventcollection",
+   "source": {
+    "path": "D:\\L\\AI\\figpact\\tools\\g15\\C\\raw\\eventcollection_demo.py",
+    "sha256": "12f9facb541a25ca8702d44dcbd1f17ad7cf51bd9155c180200ed4d14b88d88a",
+    "url": "https://raw.githubusercontent.com/matplotlib/matplotlib/4aeb773422464799998d900198b35cb80e94b3e1/galleries/examples/lines_bars_and_markers/eventcollection_demo.py"
+   },
+   "truth": {
+    "file": "eventcollection_demo.py",
+    "present_roles": [
+     "axis.tick",
+     "curve.linewidth"
+    ],
+    "role_evidence": {
+     "axis.tick": [
+      "default Axes ticks present (get_xticklabels 0.0..1.0, fs 10.0); no tick_fontsize call in source"
+     ],
+     "curve.linewidth": [
+      "L36 ax.plot(xdata1, ydata1, color='tab:blue')",
+      "L37 ax.plot(xdata2, ydata2, color='tab:orange')"
+     ]
+    },
+    "non_role": [
+     "4x EventCollection collection marks",
+     "Axes title L59 (not axis.title role)",
+     "no xlabel/ylabel/legend/panel letters"
+    ]
+   },
+   "present_roles": [
+    "axis.tick",
+    "curve.linewidth"
+   ],
+   "role_denom": 2,
+   "legal_intents": [
+    {
+     "role": "axis.tick",
+     "param": "tick_font_pt",
+     "target": "8pt"
+    },
+    {
+     "role": "curve.linewidth",
+     "param": "line_width",
+     "target": "0.8pt"
+    }
+   ],
+   "conditions": {
+    "R0": {
+     "config": "external empty YAML (no binding)",
+     "source_sha_before": "12f9facb541a25ca8702d44dcbd1f17ad7cf51bd9155c180200ed4d14b88d88a",
+     "source_sha_after": "12f9facb541a25ca8702d44dcbd1f17ad7cf51bd9155c180200ed4d14b88d88a",
+     "source_unchanged": true,
+     "log_paths": {
+      "discover": "D:/L/AI/figpact-archive/g15-frozen/C/logs/discover_r0_eventcollection.log",
+      "verify": "D:/L/AI/figpact-archive/g15-frozen/C/logs/verify_r0_eventcollection.log",
+      "audit": "D:/L/AI/figpact-archive/g15-frozen/C/logs/audit_r0_eventcollection.log",
+      "compare": "D:/L/AI/figpact-archive/g15-frozen/C/logs/compare_r0_eventcollection.log",
+      "plan": "D:/L/AI/figpact-archive/g15-frozen/C/logs/plan_r0_eventcollection.log",
+      "apply1": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply1_r0_eventcollection.log",
+      "apply2": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply2_r0_eventcollection.log",
+      "receipt": "D:/L/AI/figpact-archive/g15-frozen/C/logs/receipt_r0_eventcollection.log"
+     },
+     "stages": {
+      "discover_exit": 0,
+      "verify_exit": 0,
+      "audit_exit": 1,
+      "compare_exit": 1,
+      "plan_exit": 1,
+      "apply_exit": 1,
+      "receipt_exit": 1,
+      "verified": [],
+      "failed": []
+     },
+     "plate_note": "blocked: raw exposes no build entry. The corrected audit, compare, plan, apply and receipt CLI attempts exit 1 with RuntimeError; the earlier audit argument-shape error is excluded from final scores.",
+     "role_recall": {
+      "n": 1,
+      "d": 2,
+      "note": "curve.linewidth hinted with exact AST lines; axis.tick present in truth but unhinted (no tick call in source)."
+     },
+     "role_hint_fp": {
+      "n": 1,
+      "d": 3,
+      "detail": "axis.title hint@L59 is FP (Axes title, not xlabel/ylabel role); 2x curve.linewidth hints correct."
+     },
+     "binding_precision": {
+      "n": 0,
+      "d": "N/A",
+      "note": "0 candidates; precision N/A, not 100%."
+     },
+     "binding_fp": {
+      "n": 0,
+      "checked": "0 candidates: nothing to misbind."
+     },
+     "valid_requests": {
+      "n": 0,
+      "d": 2,
+      "note": "ticks 8pt + curve 0.8pt preregistered; no bindings, 0 successes. axis.title absent: not an attempt."
+     },
+     "capability_rejections": {
+      "n": 2,
+      "d": 2,
+      "note": "both intents lack bindings; capability gap, not engine false rejection."
+     },
+     "false_rejections": {
+      "n": 0,
+      "d": "N/A",
+      "note": "nothing safely expressible was refused."
+     },
+     "unauthorized_accepted": {
+      "n": "N/A",
+      "d": 0,
+      "note": "0 accepted edits; unobserved, not proven 0."
+     },
+     "reproducibility": {
+      "n": 2,
+      "d": 2,
+      "blocked": "plate stages N/A (no build entry)",
+      "note": "Discover+Verify repeat-consistent; source bytes unchanged."
+     }
+    },
+    "R1": {
+     "declaration": "D:\\L\\AI\\figpact\\tools\\g15\\C\\decl_ev\\g15c_ev.py",
+     "decl_sha256": "faa9bbffa45fe7edaf6ab4e6de00f2557a325cf5b30123583d88cbbcb6879208",
+     "scopes": [
+      "main"
+     ],
+     "scope_outcomes": {
+      "main": {
+       "discover_exit": 0,
+       "verify_exit": 0,
+       "n_gids": 7,
+       "gids": [
+        "g15c_ev.main.curve.0",
+        "g15c_ev.main.curve.1",
+        "g15c_ev.main.eventcollection.0",
+        "g15c_ev.main.eventcollection.1",
+        "g15c_ev.main.eventcollection.2",
+        "g15c_ev.main.eventcollection.3",
+        "g15c_ev.main.text.2"
+       ],
+       "repeat": {
+        "scope": "main",
+        "gids": [
+         "g15c_ev.main.curve.0",
+         "g15c_ev.main.curve.1",
+         "g15c_ev.main.eventcollection.0",
+         "g15c_ev.main.eventcollection.1",
+         "g15c_ev.main.eventcollection.2",
+         "g15c_ev.main.eventcollection.3",
+         "g15c_ev.main.text.2"
+        ],
+        "view_equal": true,
+        "lines_equal": true,
+        "coll_equal": true
+       },
+       "log_paths": {
+        "discover": "D:/L/AI/figpact-archive/g15-frozen/C/logs/discover_r1_eventcollection_main.log",
+        "verify": "D:/L/AI/figpact-archive/g15-frozen/C/logs/verify_r1_eventcollection_main.log",
+        "audit": "D:/L/AI/figpact-archive/g15-frozen/C/logs/audit_r1_eventcollection_main.log",
+        "compare": "D:/L/AI/figpact-archive/g15-frozen/C/logs/compare_r1_eventcollection_main.log",
+        "plan": "D:/L/AI/figpact-archive/g15-frozen/C/logs/plan_r1_eventcollection_main.log",
+        "apply1": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply1_r1_eventcollection_main.log",
+        "apply2": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply2_r1_eventcollection_main.log",
+        "receipt": "D:/L/AI/figpact-archive/g15-frozen/C/logs/receipt_r1_eventcollection_main.log"
+       }
+      }
+     },
+     "plate_outcomes": {
+      "main": {
+       "audit_exit": 0,
+       "compare_exit": 0,
+       "plan_exit": 0,
+       "apply_exit": 1,
+       "receipt_exit": 0,
+       "apply1_unchanged": true,
+       "apply2_unchanged": true,
+       "apply_status": "FAILED"
+      }
+     },
+     "source_sha_before": "12f9facb541a25ca8702d44dcbd1f17ad7cf51bd9155c180200ed4d14b88d88a",
+     "source_sha_after": "12f9facb541a25ca8702d44dcbd1f17ad7cf51bd9155c180200ed4d14b88d88a",
+     "source_unchanged": true,
+     "all_figures_enumerated": true,
+     "role_recall": {
+      "n": 0,
+      "d": 2,
+      "note": "wrapper AST hides original plotting statements from Discover (0 hints by construction); declaration-form/discovery limitation, not scientific distortion; denominator unchanged."
+     },
+     "role_hint_fp": {
+      "n": 0,
+      "d": 0,
+      "checked": "0 hints proposed; nothing to misattribute."
+     },
+     "binding_precision": {
+      "n": 0,
+      "d": "N/A",
+      "note": "identity-only registry, 0 EDITABLE params; N/A."
+     },
+     "binding_fp": {
+      "n": 0,
+      "checked": "0 candidates; nothing to misbind."
+     },
+     "valid_requests": {
+      "n": 0,
+      "d": 2,
+      "note": "same 2 intents, 0 successes (no bindings)."
+     },
+     "capability_rejections": {
+      "n": 2,
+      "d": 2,
+      "note": "declaration form frozen; no tuning to manufacture params."
+     },
+     "false_rejections": {
+      "n": 0,
+      "d": "N/A",
+      "note": "nothing safely expressible refused."
+     },
+     "unauthorized_accepted": {
+      "n": "N/A",
+      "d": 0,
+      "note": "0 accepted edits across repeat applies (NOT_WRITTEN, before/after hashes equal); unobserved."
+     },
+     "reproducibility": {
+      "n": 1,
+      "d": 1,
+      "repeat_apply": true,
+      "note": "per-scope rebuild geometry/view equal; repeat --apply identical refusal with unchanged file hashes."
+     }
+    }
+   }
+  },
+  {
+   "id": "annotation",
+   "source": {
+    "path": "D:\\L\\AI\\figpact\\tools\\g15\\C\\raw\\annotation_demo.py",
+    "sha256": "1073f84b8efa3147271c5171017530f4f190b2ae5f73ece7af1e186d1e0d1d90",
+    "url": "https://raw.githubusercontent.com/matplotlib/matplotlib/4aeb773422464799998d900198b35cb80e94b3e1/galleries/examples/text_labels_and_annotations/annotation_demo.py"
+   },
+   "truth": {
+    "file": "annotation_demo.py",
+    "present_roles": [
+     "axis.tick",
+     "curve.linewidth"
+    ],
+    "role_evidence": {
+     "axis.tick": [
+      "default Axes ticks on all 7 axes; no tick_fontsize call"
+     ],
+     "curve.linewidth": [
+      "L62 ax.plot(t, s)",
+      "L116 polar ax.plot(theta, r)",
+      "L120 marker-only plot",
+      "L164 ax.plot(t, s, lw=3)"
+     ]
+    },
+    "non_role": [
+     "34x ordinary Annotation (NOT panel.label truth, incl. polar/transform demos)",
+     "Ellipse patches",
+     "no xlabel/ylabel/title/legend anywhere"
+    ]
+   },
+   "present_roles": [
+    "axis.tick",
+    "curve.linewidth"
+   ],
+   "role_denom": 2,
+   "legal_intents": [
+    {
+     "role": "axis.tick",
+     "param": "tick_font_pt",
+     "target": "8pt"
+    },
+    {
+     "role": "curve.linewidth",
+     "param": "line_width",
+     "target": "0.8pt"
+    }
+   ],
+   "conditions": {
+    "R0": {
+     "config": "external empty YAML (no binding)",
+     "source_sha_before": "1073f84b8efa3147271c5171017530f4f190b2ae5f73ece7af1e186d1e0d1d90",
+     "source_sha_after": "1073f84b8efa3147271c5171017530f4f190b2ae5f73ece7af1e186d1e0d1d90",
+     "source_unchanged": true,
+     "log_paths": {
+      "discover": "D:/L/AI/figpact-archive/g15-frozen/C/logs/discover_r0_annotation.log",
+      "verify": "D:/L/AI/figpact-archive/g15-frozen/C/logs/verify_r0_annotation.log",
+      "audit": "D:/L/AI/figpact-archive/g15-frozen/C/logs/audit_r0_annotation.log",
+      "compare": "D:/L/AI/figpact-archive/g15-frozen/C/logs/compare_r0_annotation.log",
+      "plan": "D:/L/AI/figpact-archive/g15-frozen/C/logs/plan_r0_annotation.log",
+      "apply1": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply1_r0_annotation.log",
+      "apply2": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply2_r0_annotation.log",
+      "receipt": "D:/L/AI/figpact-archive/g15-frozen/C/logs/receipt_r0_annotation.log"
+     },
+     "stages": {
+      "discover_exit": 0,
+      "verify_exit": 0,
+      "audit_exit": 1,
+      "compare_exit": 1,
+      "plan_exit": 1,
+      "apply_exit": 1,
+      "receipt_exit": 1,
+      "verified": [],
+      "failed": []
+     },
+     "plate_note": "blocked: raw exposes no build entry. The corrected audit, compare, plan, apply and receipt CLI attempts exit 1 with RuntimeError; the earlier audit argument-shape error is excluded from final scores.",
+     "role_recall": {
+      "n": 1,
+      "d": 2,
+      "note": "curve.linewidth hinted with exact AST lines; axis.tick present in truth but unhinted (no tick call in source)."
+     },
+     "role_hint_fp": {
+      "n": 34,
+      "d": 38,
+      "detail": "34x panel.label hints on ordinary annotations are FP (no panel letters in source); 4x curve.linewidth hints correct."
+     },
+     "binding_precision": {
+      "n": 0,
+      "d": "N/A",
+      "note": "0 candidates; precision N/A, not 100%."
+     },
+     "binding_fp": {
+      "n": 0,
+      "checked": "0 candidates: nothing to misbind."
+     },
+     "valid_requests": {
+      "n": 0,
+      "d": 2,
+      "note": "ticks 8pt + curve 0.8pt preregistered; no bindings, 0 successes. axis.title absent: not an attempt."
+     },
+     "capability_rejections": {
+      "n": 2,
+      "d": 2,
+      "note": "both intents lack bindings; capability gap, not engine false rejection."
+     },
+     "false_rejections": {
+      "n": 0,
+      "d": "N/A",
+      "note": "nothing safely expressible was refused."
+     },
+     "unauthorized_accepted": {
+      "n": "N/A",
+      "d": 0,
+      "note": "0 accepted edits; unobserved, not proven 0."
+     },
+     "reproducibility": {
+      "n": 2,
+      "d": 2,
+      "blocked": "plate stages N/A (no build entry)",
+      "note": "Discover+Verify repeat-consistent; source bytes unchanged."
+     }
+    },
+    "R1": {
+     "declaration": "D:\\L\\AI\\figpact\\tools\\g15\\C\\decl_ann\\g15c_ann.py",
+     "decl_sha256": "b5ee3f160258af0aab85ab901c6f305baed7be8b3fe681d2892aba2a9315366b",
+     "scopes": [
+      "fig0",
+      "fig1",
+      "fig2",
+      "fig3",
+      "fig4",
+      "fig5"
+     ],
+     "scope_outcomes": {
+      "fig0": {
+       "discover_exit": 0,
+       "verify_exit": 0,
+       "n_gids": 7,
+       "gids": [
+        "g15c_ann.fig0.ax0.curve.0",
+        "g15c_ann.fig0.ax0.text.3",
+        "g15c_ann.fig0.ax0.text.4",
+        "g15c_ann.fig0.ax0.text.5",
+        "g15c_ann.fig0.ax0.text.6",
+        "g15c_ann.fig0.ax0.text.7",
+        "g15c_ann.fig0.ax0.text.8"
+       ],
+       "repeat": {
+        "scope": "fig0",
+        "gids": [
+         "g15c_ann.fig0.ax0.curve.0",
+         "g15c_ann.fig0.ax0.text.3",
+         "g15c_ann.fig0.ax0.text.4",
+         "g15c_ann.fig0.ax0.text.5",
+         "g15c_ann.fig0.ax0.text.6",
+         "g15c_ann.fig0.ax0.text.7",
+         "g15c_ann.fig0.ax0.text.8"
+        ],
+        "view_equal": true,
+        "lines_equal": true,
+        "coll_equal": true
+       },
+       "log_paths": {
+        "discover": "D:/L/AI/figpact-archive/g15-frozen/C/logs/discover_r1_annotation_fig0.log",
+        "verify": "D:/L/AI/figpact-archive/g15-frozen/C/logs/verify_r1_annotation_fig0.log",
+        "audit": "D:/L/AI/figpact-archive/g15-frozen/C/logs/audit_r1_annotation_fig0.log",
+        "compare": "D:/L/AI/figpact-archive/g15-frozen/C/logs/compare_r1_annotation_fig0.log",
+        "plan": "D:/L/AI/figpact-archive/g15-frozen/C/logs/plan_r1_annotation_fig0.log",
+        "apply1": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply1_r1_annotation_fig0.log",
+        "apply2": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply2_r1_annotation_fig0.log",
+        "receipt": "D:/L/AI/figpact-archive/g15-frozen/C/logs/receipt_r1_annotation_fig0.log"
+       }
+      },
+      "fig1": {
+       "discover_exit": 0,
+       "verify_exit": 0,
+       "n_gids": 3,
+       "gids": [
+        "g15c_ann.fig1.ax0.curve.0",
+        "g15c_ann.fig1.ax0.curve.1",
+        "g15c_ann.fig1.ax0.text.3"
+       ],
+       "repeat": {
+        "scope": "fig1",
+        "gids": [
+         "g15c_ann.fig1.ax0.curve.0",
+         "g15c_ann.fig1.ax0.curve.1",
+         "g15c_ann.fig1.ax0.text.3"
+        ],
+        "view_equal": true,
+        "lines_equal": true,
+        "coll_equal": true
+       },
+       "log_paths": {
+        "discover": "D:/L/AI/figpact-archive/g15-frozen/C/logs/discover_r1_annotation_fig1.log",
+        "verify": "D:/L/AI/figpact-archive/g15-frozen/C/logs/verify_r1_annotation_fig1.log",
+        "audit": "D:/L/AI/figpact-archive/g15-frozen/C/logs/audit_r1_annotation_fig1.log",
+        "compare": "D:/L/AI/figpact-archive/g15-frozen/C/logs/compare_r1_annotation_fig1.log",
+        "plan": "D:/L/AI/figpact-archive/g15-frozen/C/logs/plan_r1_annotation_fig1.log",
+        "apply1": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply1_r1_annotation_fig1.log",
+        "apply2": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply2_r1_annotation_fig1.log",
+        "receipt": "D:/L/AI/figpact-archive/g15-frozen/C/logs/receipt_r1_annotation_fig1.log"
+       }
+      },
+      "fig2": {
+       "discover_exit": 0,
+       "verify_exit": 0,
+       "n_gids": 2,
+       "gids": [
+        "g15c_ann.fig2.ax0.patch.0",
+        "g15c_ann.fig2.ax0.text.3"
+       ],
+       "repeat": {
+        "scope": "fig2",
+        "gids": [
+         "g15c_ann.fig2.ax0.patch.0",
+         "g15c_ann.fig2.ax0.text.3"
+        ],
+        "view_equal": true,
+        "lines_equal": true,
+        "coll_equal": true
+       },
+       "log_paths": {
+        "discover": "D:/L/AI/figpact-archive/g15-frozen/C/logs/discover_r1_annotation_fig2.log",
+        "verify": "D:/L/AI/figpact-archive/g15-frozen/C/logs/verify_r1_annotation_fig2.log",
+        "audit": "D:/L/AI/figpact-archive/g15-frozen/C/logs/audit_r1_annotation_fig2.log",
+        "compare": "D:/L/AI/figpact-archive/g15-frozen/C/logs/compare_r1_annotation_fig2.log",
+        "plan": "D:/L/AI/figpact-archive/g15-frozen/C/logs/plan_r1_annotation_fig2.log",
+        "apply1": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply1_r1_annotation_fig2.log",
+        "apply2": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply2_r1_annotation_fig2.log",
+        "receipt": "D:/L/AI/figpact-archive/g15-frozen/C/logs/receipt_r1_annotation_fig2.log"
+       }
+      },
+      "fig3": {
+       "discover_exit": 0,
+       "verify_exit": 0,
+       "n_gids": 10,
+       "gids": [
+        "g15c_ann.fig3.ax0.curve.0",
+        "g15c_ann.fig3.ax0.text.10",
+        "g15c_ann.fig3.ax0.text.11",
+        "g15c_ann.fig3.ax0.text.3",
+        "g15c_ann.fig3.ax0.text.4",
+        "g15c_ann.fig3.ax0.text.5",
+        "g15c_ann.fig3.ax0.text.6",
+        "g15c_ann.fig3.ax0.text.7",
+        "g15c_ann.fig3.ax0.text.8",
+        "g15c_ann.fig3.ax0.text.9"
+       ],
+       "repeat": {
+        "scope": "fig3",
+        "gids": [
+         "g15c_ann.fig3.ax0.curve.0",
+         "g15c_ann.fig3.ax0.text.10",
+         "g15c_ann.fig3.ax0.text.11",
+         "g15c_ann.fig3.ax0.text.3",
+         "g15c_ann.fig3.ax0.text.4",
+         "g15c_ann.fig3.ax0.text.5",
+         "g15c_ann.fig3.ax0.text.6",
+         "g15c_ann.fig3.ax0.text.7",
+         "g15c_ann.fig3.ax0.text.8",
+         "g15c_ann.fig3.ax0.text.9"
+        ],
+        "view_equal": true,
+        "lines_equal": true,
+        "coll_equal": true
+       },
+       "log_paths": {
+        "discover": "D:/L/AI/figpact-archive/g15-frozen/C/logs/discover_r1_annotation_fig3.log",
+        "verify": "D:/L/AI/figpact-archive/g15-frozen/C/logs/verify_r1_annotation_fig3.log",
+        "audit": "D:/L/AI/figpact-archive/g15-frozen/C/logs/audit_r1_annotation_fig3.log",
+        "compare": "D:/L/AI/figpact-archive/g15-frozen/C/logs/compare_r1_annotation_fig3.log",
+        "plan": "D:/L/AI/figpact-archive/g15-frozen/C/logs/plan_r1_annotation_fig3.log",
+        "apply1": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply1_r1_annotation_fig3.log",
+        "apply2": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply2_r1_annotation_fig3.log",
+        "receipt": "D:/L/AI/figpact-archive/g15-frozen/C/logs/receipt_r1_annotation_fig3.log"
+       }
+      },
+      "fig4": {
+       "discover_exit": 0,
+       "verify_exit": 0,
+       "n_gids": 7,
+       "gids": [
+        "g15c_ann.fig4.ax0.patch.0",
+        "g15c_ann.fig4.ax0.text.3",
+        "g15c_ann.fig4.ax0.text.4",
+        "g15c_ann.fig4.ax0.text.5",
+        "g15c_ann.fig4.ax0.text.6",
+        "g15c_ann.fig4.ax0.text.7",
+        "g15c_ann.fig4.ax0.text.8"
+       ],
+       "repeat": {
+        "scope": "fig4",
+        "gids": [
+         "g15c_ann.fig4.ax0.patch.0",
+         "g15c_ann.fig4.ax0.text.3",
+         "g15c_ann.fig4.ax0.text.4",
+         "g15c_ann.fig4.ax0.text.5",
+         "g15c_ann.fig4.ax0.text.6",
+         "g15c_ann.fig4.ax0.text.7",
+         "g15c_ann.fig4.ax0.text.8"
+        ],
+        "view_equal": true,
+        "lines_equal": true,
+        "coll_equal": true
+       },
+       "log_paths": {
+        "discover": "D:/L/AI/figpact-archive/g15-frozen/C/logs/discover_r1_annotation_fig4.log",
+        "verify": "D:/L/AI/figpact-archive/g15-frozen/C/logs/verify_r1_annotation_fig4.log",
+        "audit": "D:/L/AI/figpact-archive/g15-frozen/C/logs/audit_r1_annotation_fig4.log",
+        "compare": "D:/L/AI/figpact-archive/g15-frozen/C/logs/compare_r1_annotation_fig4.log",
+        "plan": "D:/L/AI/figpact-archive/g15-frozen/C/logs/plan_r1_annotation_fig4.log",
+        "apply1": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply1_r1_annotation_fig4.log",
+        "apply2": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply2_r1_annotation_fig4.log",
+        "receipt": "D:/L/AI/figpact-archive/g15-frozen/C/logs/receipt_r1_annotation_fig4.log"
+       }
+      },
+      "fig5": {
+       "discover_exit": 0,
+       "verify_exit": 0,
+       "n_gids": 9,
+       "gids": [
+        "g15c_ann.fig5.ax0.text.3",
+        "g15c_ann.fig5.ax0.text.4",
+        "g15c_ann.fig5.ax0.text.5",
+        "g15c_ann.fig5.ax0.text.6",
+        "g15c_ann.fig5.ax0.text.7",
+        "g15c_ann.fig5.ax0.text.8",
+        "g15c_ann.fig5.ax1.text.3",
+        "g15c_ann.fig5.ax1.text.4",
+        "g15c_ann.fig5.ax1.text.5"
+       ],
+       "repeat": {
+        "scope": "fig5",
+        "gids": [
+         "g15c_ann.fig5.ax0.text.3",
+         "g15c_ann.fig5.ax0.text.4",
+         "g15c_ann.fig5.ax0.text.5",
+         "g15c_ann.fig5.ax0.text.6",
+         "g15c_ann.fig5.ax0.text.7",
+         "g15c_ann.fig5.ax0.text.8",
+         "g15c_ann.fig5.ax1.text.3",
+         "g15c_ann.fig5.ax1.text.4",
+         "g15c_ann.fig5.ax1.text.5"
+        ],
+        "view_equal": true,
+        "lines_equal": true,
+        "coll_equal": true
+       },
+       "log_paths": {
+        "discover": "D:/L/AI/figpact-archive/g15-frozen/C/logs/discover_r1_annotation_fig5.log",
+        "verify": "D:/L/AI/figpact-archive/g15-frozen/C/logs/verify_r1_annotation_fig5.log",
+        "audit": "D:/L/AI/figpact-archive/g15-frozen/C/logs/audit_r1_annotation_fig5.log",
+        "compare": "D:/L/AI/figpact-archive/g15-frozen/C/logs/compare_r1_annotation_fig5.log",
+        "plan": "D:/L/AI/figpact-archive/g15-frozen/C/logs/plan_r1_annotation_fig5.log",
+        "apply1": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply1_r1_annotation_fig5.log",
+        "apply2": "D:/L/AI/figpact-archive/g15-frozen/C/logs/apply2_r1_annotation_fig5.log",
+        "receipt": "D:/L/AI/figpact-archive/g15-frozen/C/logs/receipt_r1_annotation_fig5.log"
+       }
+      }
+     },
+     "plate_outcomes": {
+      "fig0": {
+       "audit_exit": 0,
+       "compare_exit": 0,
+       "plan_exit": 0,
+       "apply_exit": 1,
+       "receipt_exit": 0,
+       "apply1_unchanged": true,
+       "apply2_unchanged": true,
+       "apply_status": "FAILED"
+      },
+      "fig1": {
+       "audit_exit": 0,
+       "compare_exit": 0,
+       "plan_exit": 0,
+       "apply_exit": 1,
+       "receipt_exit": 0,
+       "apply1_unchanged": true,
+       "apply2_unchanged": true,
+       "apply_status": "FAILED"
+      },
+      "fig2": {
+       "audit_exit": 0,
+       "compare_exit": 0,
+       "plan_exit": 0,
+       "apply_exit": 1,
+       "receipt_exit": 0,
+       "apply1_unchanged": true,
+       "apply2_unchanged": true,
+       "apply_status": "FAILED"
+      },
+      "fig3": {
+       "audit_exit": 0,
+       "compare_exit": 0,
+       "plan_exit": 0,
+       "apply_exit": 1,
+       "receipt_exit": 0,
+       "apply1_unchanged": true,
+       "apply2_unchanged": true,
+       "apply_status": "FAILED"
+      },
+      "fig4": {
+       "audit_exit": 0,
+       "compare_exit": 0,
+       "plan_exit": 0,
+       "apply_exit": 1,
+       "receipt_exit": 0,
+       "apply1_unchanged": true,
+       "apply2_unchanged": true,
+       "apply_status": "FAILED"
+      },
+      "fig5": {
+       "audit_exit": 0,
+       "compare_exit": 0,
+       "plan_exit": 0,
+       "apply_exit": 1,
+       "receipt_exit": 0,
+       "apply1_unchanged": true,
+       "apply2_unchanged": true,
+       "apply_status": "FAILED"
+      }
+     },
+     "source_sha_before": "1073f84b8efa3147271c5171017530f4f190b2ae5f73ece7af1e186d1e0d1d90",
+     "source_sha_after": "1073f84b8efa3147271c5171017530f4f190b2ae5f73ece7af1e186d1e0d1d90",
+     "source_unchanged": true,
+     "all_figures_enumerated": true,
+     "role_recall": {
+      "n": 0,
+      "d": 2,
+      "note": "wrapper AST hides original plotting statements from Discover (0 hints by construction); declaration-form/discovery limitation, not scientific distortion; denominator unchanged."
+     },
+     "role_hint_fp": {
+      "n": 0,
+      "d": 0,
+      "checked": "0 hints proposed; nothing to misattribute."
+     },
+     "binding_precision": {
+      "n": 0,
+      "d": "N/A",
+      "note": "identity-only registry, 0 EDITABLE params; N/A."
+     },
+     "binding_fp": {
+      "n": 0,
+      "checked": "0 candidates; nothing to misbind."
+     },
+     "valid_requests": {
+      "n": 0,
+      "d": 2,
+      "note": "same 2 intents, 0 successes (no bindings)."
+     },
+     "capability_rejections": {
+      "n": 2,
+      "d": 2,
+      "note": "declaration form frozen; no tuning to manufacture params."
+     },
+     "false_rejections": {
+      "n": 0,
+      "d": "N/A",
+      "note": "nothing safely expressible refused."
+     },
+     "unauthorized_accepted": {
+      "n": "N/A",
+      "d": 0,
+      "note": "0 accepted edits across repeat applies (NOT_WRITTEN, before/after hashes equal); unobserved."
+     },
+     "reproducibility": {
+      "n": 6,
+      "d": 6,
+      "repeat_apply": true,
+      "note": "per-scope rebuild geometry/view equal; repeat --apply identical refusal with unchanged file hashes."
+     }
+    }
+   }
+  }
+ ],
+ "observed_bugs": [
+  "No engine fix attempted; no source/engine edits made. R1 uses per-scope declarations (fig0..fig5 + main), each rerunning the full raw text in order (no per-cell split, no new seed); only the protocol-allowed single-declaration form changed, for validity. Notes: (1) plate audit CLI takes --figure flags; R0 audit/compare/plan/apply/receipt are blocked at entry (no build hooks in raw) — expected. (2) axis.tick is present in truth but undiscoverable by construction (no tick call) — recall gap, not a miss. (3) annotation science-capture gap: text/arrow repositioning has no binding and arrow geometry is display_derived — documented gap, nothing passed off as proof."
+ ]
+}

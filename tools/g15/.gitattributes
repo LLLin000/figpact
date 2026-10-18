@@ -1,0 +1,2 @@
+# Preserve frozen upstream bytes and evidence hashes under core.autocrlf.
+* -text

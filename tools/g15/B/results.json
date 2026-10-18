@@ -1,0 +1,196 @@
+{
+ "freeze_sha": "793aaa89b39af49d2421e2a2840751cf757ba959",
+ "upstream_sha": "4aeb773422464799998d900198b35cb80e94b3e1",
+ "upstream_sha256": {
+  "barchart": "f742b277c57b54e68df8adf4a7ce66250b438247b1b06235b481f36bc0ef79ed",
+  "errorbar_features": "9741f89bfc1e55ccfdaf5e06e6eb4d8b8200d1daa9dfc63583267ba1a8d05aeb",
+  "scatter_with_legend": "e128daaa4b90d0a3723c31445ade9b94da93717a532b48e7af9aa498fa3efea6"
+ },
+ "R1_denomination": {
+  "R1_scope_runs": {
+   "n": 7,
+   "members": [
+    "R1/barchart main",
+    "R1/errorbar ax0",
+    "R1/errorbar ax1",
+    "R1/scatter fig1_loop",
+    "R1/scatter fig2_classes",
+    "R1/scatter fig3_rankprice",
+    "R0/raw-triple (baseline ref)"
+   ]
+  },
+  "file_request_denominator": {
+   "n": 5,
+   "note": "per-source-file role kinds deduped; parent aggregates via fixed inputs.json 19/15"
+  }
+ },
+ "validity_erratum_2026-10-18_scatter_rev1_invalid": {
+  "cause": "rev1 split RAW on # %% and execd blocks standalone, dropping seed(19680801)+prior-block RNG consumption for fig2/fig3 -> changed science inputs",
+  "status": "rev1 scatter R1 evidence retained in archive logs/drafts but EXCLUDED from main tables; rev2 (full-RAW exec + figure-index select, no seed injection/style edits) is the valid series; reran all 3 scatter scopes: discover/verify/repeat-apply/rediscovery/numeric invariants",
+  "not_engine": "never attributed to engine nondeterminism"
+ },
+ "role_recall_integer": {
+  "R0/barchart": {
+   "present_kinds": [
+    "axis.title",
+    "axis.tick",
+    "legend"
+   ],
+   "denominator": 3,
+   "correct_hints_n": 2,
+   "hints": [
+    "set_ylabel L35 -> axis.title CORRECT",
+    "legend() L38 -> legend CORRECT"
+   ],
+   "false_positives": [
+    "set_title L36 hint labeled axis.title (Axes title, must not count)"
+   ],
+   "missing": [
+    "axis.tick: rendered but no source call -> no hint (recall miss, not FP)"
+   ]
+  },
+  "R0/errorbar": {
+   "present_kinds": [
+    "axis.tick(x2 axes)",
+    "curve.linewidth(ax0 only)"
+   ],
+   "denominator": 2,
+   "correct_hints_n": 0,
+   "hints": [],
+   "false_positives": [
+    "set_title L36+L45 hints labeled axis.title (Axes title, must not count)"
+   ],
+   "missing": [
+    "axis.tick: no source call",
+    "curve.linewidth ax0: errorbar(fmt=-o) call not in ENTRY_CALLS -> no hint (miss)"
+   ]
+  },
+  "R0/scatter": {
+   "present_kinds": [
+    "legend",
+    "axis.tick"
+   ],
+   "denominator": 2,
+   "correct_hints_n": 1,
+   "hints": [
+    "legend() L28/L56/L62/L86/L97 -> legend CORRECT (5 hints, 1 kind)"
+   ],
+   "false_positives": [],
+   "missing": [
+    "axis.tick: no source call (miss)"
+   ]
+  },
+  "R1/barchart+errorbar+scatter-rev2": {
+   "denominator": "same as R0 (wrappers add no source calls)",
+   "correct_hints_n": 0,
+   "note": "R1 wrappers expose registries, not new entry calls; 0 candidates by design; recall scored on source hints, not editable precision"
+  }
+ },
+ "binding_precision": "N/A in all 9 scope-runs (0 candidates; unresolved kept separate, never promoted)",
+ "edit_requests": {
+  "preregistered_legal": [
+   "axis.title 8pt barchart ylabel",
+   "axis.tick 8pt every axes",
+   "curve.linewidth 0.8pt err-ax0 connected dataLine",
+   "legends compare-only"
+  ],
+  "accepted_n": 0,
+  "capability_rejections": "all executable probes lack YAML wiring/layout EDITABLE -> refused (denominator kept)",
+  "false_rejections": "0/0",
+  "unauthorized": "0 accepted -> rate unobservable, not 0% proof"
+ },
+ "R0_plate": {
+  "compare/receipt/audit/unify": "exit 1 each: RuntimeError script exposes no build entry - recorded evidence",
+  "logs": [
+   "log_plate_R0_compare.txt",
+   "log_plate_R0_unify_apply.txt",
+   "log_plate_R0_receipt.txt",
+   "log_plate_R0_audit.txt"
+  ]
+ },
+ "R1_plate": {
+  "compare_exit": 0,
+  "receipt_exit": 0,
+  "audit_exit": 0,
+  "unify_apply_exit": 1,
+  "unify_reason": "all keys not EDITABLE in layout_contract"
+ },
+ "repeated_apply": {
+  "R0/barchart": {
+   "default": {
+    "r1_exit": 1,
+    "r2_exit": 1,
+    "src_unchanged_both": true
+   }
+  },
+  "R0/errorbar_features": {
+   "default": {
+    "r1_exit": 1,
+    "r2_exit": 1,
+    "src_unchanged_both": true
+   }
+  },
+  "R0/scatter_with_legend": {
+   "default": {
+    "r1_exit": 1,
+    "r2_exit": 1,
+    "src_unchanged_both": true
+   }
+  },
+  "R1/barchart": {
+   "main": {
+    "r1_exit": 1,
+    "r2_exit": 1,
+    "src_unchanged_both": true
+   }
+  },
+  "R1/errorbar": {
+   "ax0": {
+    "r1_exit": 1,
+    "r2_exit": 1,
+    "src_unchanged_both": true
+   },
+   "ax1": {
+    "r1_exit": 1,
+    "r2_exit": 1,
+    "src_unchanged_both": true
+   }
+  },
+  "R1/scatter": {
+   "fig1_loop": {
+    "r1_exit": 1,
+    "r2_exit": 1,
+    "src_unchanged_both": true
+   },
+   "fig2_classes": {
+    "r1_exit": 1,
+    "r2_exit": 1,
+    "src_unchanged_both": true
+   },
+   "fig3_rankprice": {
+    "r1_exit": 1,
+    "r2_exit": 1,
+    "src_unchanged_both": true
+   }
+  }
+ },
+ "reproducibility": {
+  "rediscover_struct_9_9": true,
+  "method": "isolated copy incl raw/ for all R1; structured YAML compare excl identity keys",
+  "science_rev2": {
+   "bar": "heights+x stable, match truth",
+   "errorbar": "data xy + error segments incl bounds stable both axes, match truth; ax0 lw=1.5 ls=-; ax1 marker-only; sharex; ax1 log",
+   "scatter_rev2_VALID": "fig1/fig2/fig3 offsets+sizes value+full-hash EQUAL to sequential full-file truth in both replays (science_replay_scatter_rev2.json all_equal=True)",
+   "scatter_rev1": "HARNESS-INVALID, excluded"
+  }
+ },
+ "bugs_observed_not_fixed": [
+  "ENTRY_CALLS set_title->axis.title mislabels Axes title (3 FPs above)",
+  "R1 wrapper AST blind spot documented"
+ ],
+ "artifacts": {
+  "drafts": 9,
+  "iso": 9,
+  "truth": "tools/g15/B/truth.json + science_replay.json + science_replay_scatter_rev2.json"
+ }
+}

@@ -1,0 +1,776 @@
+{
+  "freeze_sha": "793aaa89b39af49d2421e2a2840751cf757ba959",
+  "samples": {
+    "subplots_demo": {
+      "R0": {
+        "commands": [
+          {
+            "step": "discover",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\raw\\subplots_demo.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R0.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R0.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R0.discover.stderr.txt"
+          },
+          {
+            "step": "verify",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R0.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R0.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R0.verify.stderr.txt"
+          },
+          {
+            "step": "compare",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate compare D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R0.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R0.compare.json --json",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R0.compare.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R0.compare.stderr.txt"
+          },
+          {
+            "step": "unify-plan",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R0.plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R0.unify-plan.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R0.unify-plan.stderr.txt"
+          },
+          {
+            "step": "receipt",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate receipt D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R0.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R0.receipt.json",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R0.receipt.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R0.receipt.stderr.txt"
+          },
+          {
+            "step": "apply-isolated",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-R0apply-hqkvh066\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R0.apply.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R0.apply.stderr.txt"
+          }
+        ],
+        "discover_exit": 0,
+        "discover_timeout": false,
+        "verify_exit": 0,
+        "compare_exit": 1,
+        "compare_timeout": false,
+        "unify-plan_exit": 1,
+        "unify-plan_timeout": false,
+        "receipt_exit": 1,
+        "receipt_timeout": false,
+        "apply_exit": 1,
+        "src_before": "802f31d63cc05c584b415472585d7c76ccd266aab673c23d20cd985744da1ba9",
+        "src_after": "802f31d63cc05c584b415472585d7c76ccd266aab673c23d20cd985744da1ba9",
+        "src_unchanged": true,
+        "cfg_unchanged": true
+      },
+      "R1": {
+        "commands": [
+          {
+            "step": "discover-fig00",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig00 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig00.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig00.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig00.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig00",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig00.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig00.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig00.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig01",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig01 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig01.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig01.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig01.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig01",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig01.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig01.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig01.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig02",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig02 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig02.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig02.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig02.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig02",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig02.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig02.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig02.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig03",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig03 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig03.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig03.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig03.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig03",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig03.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig03.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig03.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig04",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig04 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig04.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig04.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig04.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig04",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig04.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig04.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig04.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig05",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig05 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig05.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig05.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig05.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig05",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig05.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig05.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig05.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig06",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig06 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig06.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig06.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig06.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig06",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig06.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig06.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig06.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig07",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig07 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig07.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig07.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig07.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig07",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig07.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig07.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig07.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig08",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig08 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig08.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig08.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig08.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig08",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig08.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig08.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig08.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig09",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig09 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig09.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig09.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig09.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig09",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig09.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig09.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig09.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig10",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig10 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig10.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig10.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig10.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig10",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig10.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig10.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig10.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig11",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig11 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig11.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig11.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig11.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig11",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig11.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig11.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig11.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig12",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_subplots_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig12 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig12.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig12.discover.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig12.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig12",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1_fig12.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1_fig12.verify.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1_fig12.verify.stderr.txt"
+          },
+          {
+            "step": "compare",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate compare D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1.compare.json --json",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1.compare.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1.compare.stderr.txt"
+          },
+          {
+            "step": "unify-plan",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1.plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1.unify-plan.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1.unify-plan.stderr.txt"
+          },
+          {
+            "step": "receipt",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate receipt D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\subplots_demo_R1.receipt.json",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1.receipt.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1.receipt.stderr.txt"
+          },
+          {
+            "step": "apply-rep1",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-6itjiduf\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1.apply1.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1.apply1.stderr.txt"
+          },
+          {
+            "step": "apply-rep2",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-uji04jpv\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1.apply2.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1.apply2.stderr.txt"
+          }
+        ],
+        "discover_exits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "verify_exits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "compare_exit": 0,
+        "unify-plan_exit": 1,
+        "receipt_exit": 0,
+        "apply_runs": [
+          {
+            "rep": 1,
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-6itjiduf\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1.apply1.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1.apply1.stderr.txt",
+            "src_before": "6265ca0767d51ba169da936780594666f6e89572c5298ec021fb741d0de6a873",
+            "src_after": "6265ca0767d51ba169da936780594666f6e89572c5298ec021fb741d0de6a873",
+            "src_unchanged": true,
+            "cfg_before": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_after": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_unchanged": true,
+            "status": "FAILED"
+          },
+          {
+            "rep": 2,
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-uji04jpv\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/subplots_demo_R1.apply2.stdout.txt",
+            "stderr_log": "logs/subplots_demo_R1.apply2.stderr.txt",
+            "src_before": "6265ca0767d51ba169da936780594666f6e89572c5298ec021fb741d0de6a873",
+            "src_after": "6265ca0767d51ba169da936780594666f6e89572c5298ec021fb741d0de6a873",
+            "src_unchanged": true,
+            "cfg_before": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_after": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_unchanged": true,
+            "status": "FAILED"
+          }
+        ],
+        "apply_repeat_identical": true
+      },
+      "source_sha256": "802f31d63cc05c584b415472585d7c76ccd266aab673c23d20cd985744da1ba9",
+      "wrapper_sha256": "6265ca0767d51ba169da936780594666f6e89572c5298ec021fb741d0de6a873",
+      "config_sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    "label_subplots": {
+      "R0": {
+        "commands": [
+          {
+            "step": "discover",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\raw\\label_subplots.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R0.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R0.discover.stdout.txt",
+            "stderr_log": "logs/label_subplots_R0.discover.stderr.txt"
+          },
+          {
+            "step": "verify",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R0.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R0.verify.stdout.txt",
+            "stderr_log": "logs/label_subplots_R0.verify.stderr.txt"
+          },
+          {
+            "step": "compare",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate compare D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R0.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R0.compare.json --json",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R0.compare.stdout.txt",
+            "stderr_log": "logs/label_subplots_R0.compare.stderr.txt"
+          },
+          {
+            "step": "unify-plan",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R0.plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R0.unify-plan.stdout.txt",
+            "stderr_log": "logs/label_subplots_R0.unify-plan.stderr.txt"
+          },
+          {
+            "step": "receipt",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate receipt D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R0.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R0.receipt.json",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R0.receipt.stdout.txt",
+            "stderr_log": "logs/label_subplots_R0.receipt.stderr.txt"
+          },
+          {
+            "step": "apply-isolated",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-R0apply-iuensm4h\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R0.apply.stdout.txt",
+            "stderr_log": "logs/label_subplots_R0.apply.stderr.txt"
+          }
+        ],
+        "discover_exit": 0,
+        "discover_timeout": false,
+        "verify_exit": 0,
+        "compare_exit": 1,
+        "compare_timeout": false,
+        "unify-plan_exit": 1,
+        "unify-plan_timeout": false,
+        "receipt_exit": 1,
+        "receipt_timeout": false,
+        "apply_exit": 1,
+        "src_before": "a99b7dd3f4452f6d82782f2dd567d91db4b079132802b01d8baf904ec58faaaf",
+        "src_after": "a99b7dd3f4452f6d82782f2dd567d91db4b079132802b01d8baf904ec58faaaf",
+        "src_unchanged": true,
+        "cfg_unchanged": true
+      },
+      "R1": {
+        "commands": [
+          {
+            "step": "discover-fig00",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_label_subplots_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig00 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1_fig00.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1_fig00.discover.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1_fig00.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig00",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1_fig00.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1_fig00.verify.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1_fig00.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig01",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_label_subplots_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig01 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1_fig01.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1_fig01.discover.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1_fig01.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig01",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1_fig01.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1_fig01.verify.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1_fig01.verify.stderr.txt"
+          },
+          {
+            "step": "discover-fig02",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_label_subplots_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig02 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1_fig02.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1_fig02.discover.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1_fig02.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig02",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1_fig02.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1_fig02.verify.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1_fig02.verify.stderr.txt"
+          },
+          {
+            "step": "compare",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate compare D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1.compare.json --json",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1.compare.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1.compare.stderr.txt"
+          },
+          {
+            "step": "unify-plan",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1.plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1.unify-plan.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1.unify-plan.stderr.txt"
+          },
+          {
+            "step": "receipt",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate receipt D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\label_subplots_R1.receipt.json",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1.receipt.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1.receipt.stderr.txt"
+          },
+          {
+            "step": "apply-rep1",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-3ldoxr_c\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1.apply1.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1.apply1.stderr.txt"
+          },
+          {
+            "step": "apply-rep2",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-8tnssftl\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1.apply2.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1.apply2.stderr.txt"
+          }
+        ],
+        "discover_exits": [
+          0,
+          0,
+          0
+        ],
+        "verify_exits": [
+          0,
+          0,
+          0
+        ],
+        "compare_exit": 0,
+        "unify-plan_exit": 1,
+        "receipt_exit": 0,
+        "apply_runs": [
+          {
+            "rep": 1,
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-3ldoxr_c\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1.apply1.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1.apply1.stderr.txt",
+            "src_before": "95436bd87f0203784e708398da3c113e0e992d75a18c7d458d9548417c54c731",
+            "src_after": "95436bd87f0203784e708398da3c113e0e992d75a18c7d458d9548417c54c731",
+            "src_unchanged": true,
+            "cfg_before": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_after": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_unchanged": true,
+            "status": "FAILED"
+          },
+          {
+            "rep": 2,
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-8tnssftl\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/label_subplots_R1.apply2.stdout.txt",
+            "stderr_log": "logs/label_subplots_R1.apply2.stderr.txt",
+            "src_before": "95436bd87f0203784e708398da3c113e0e992d75a18c7d458d9548417c54c731",
+            "src_after": "95436bd87f0203784e708398da3c113e0e992d75a18c7d458d9548417c54c731",
+            "src_unchanged": true,
+            "cfg_before": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_after": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_unchanged": true,
+            "status": "FAILED"
+          }
+        ],
+        "apply_repeat_identical": true
+      },
+      "source_sha256": "a99b7dd3f4452f6d82782f2dd567d91db4b079132802b01d8baf904ec58faaaf",
+      "wrapper_sha256": "95436bd87f0203784e708398da3c113e0e992d75a18c7d458d9548417c54c731",
+      "config_sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    "figlegend_demo": {
+      "R0": {
+        "commands": [
+          {
+            "step": "discover",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\raw\\figlegend_demo.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R0.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R0.discover.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R0.discover.stderr.txt"
+          },
+          {
+            "step": "verify",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R0.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R0.verify.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R0.verify.stderr.txt"
+          },
+          {
+            "step": "compare",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate compare D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R0.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R0.compare.json --json",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R0.compare.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R0.compare.stderr.txt"
+          },
+          {
+            "step": "unify-plan",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R0.plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R0.unify-plan.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R0.unify-plan.stderr.txt"
+          },
+          {
+            "step": "receipt",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate receipt D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R0.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R0.receipt.json",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R0.receipt.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R0.receipt.stderr.txt"
+          },
+          {
+            "step": "apply-isolated",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-R0apply-tdpuntxu\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R0.apply.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R0.apply.stderr.txt"
+          }
+        ],
+        "discover_exit": 0,
+        "discover_timeout": false,
+        "verify_exit": 0,
+        "compare_exit": 1,
+        "compare_timeout": false,
+        "unify-plan_exit": 1,
+        "unify-plan_timeout": false,
+        "receipt_exit": 1,
+        "receipt_timeout": false,
+        "apply_exit": 1,
+        "src_before": "589a20e8aed1cd3e4493f67cd6953825527e87f9b2ecd39aeebdb7bfed910ce0",
+        "src_after": "589a20e8aed1cd3e4493f67cd6953825527e87f9b2ecd39aeebdb7bfed910ce0",
+        "src_unchanged": true,
+        "cfg_unchanged": true
+      },
+      "R1": {
+        "commands": [
+          {
+            "step": "discover-fig00",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract discover --script D:\\L\\AI\\figpact\\tools\\g15\\A\\wrap_figlegend_demo_r1.py --config D:\\L\\AI\\figpact\\tools\\g15\\A\\r0_empty.yaml --scope fig00 --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R1_fig00.discover.yaml --force",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R1_fig00.discover.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R1_fig00.discover.stderr.txt"
+          },
+          {
+            "step": "verify-fig00",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact contract verify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R1_fig00.discover.yaml",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R1_fig00.verify.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R1_fig00.verify.stderr.txt"
+          },
+          {
+            "step": "compare",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate compare D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R1.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R1.compare.json --json",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R1.compare.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R1.compare.stderr.txt"
+          },
+          {
+            "step": "unify-plan",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R1.plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R1.unify-plan.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R1.unify-plan.stderr.txt"
+          },
+          {
+            "step": "receipt",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate receipt D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R1.plate.yaml --out D:\\L\\AI\\figpact-archive\\g15-frozen\\A\\logs2\\figlegend_demo_R1.receipt.json",
+            "exit": 0,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R1.receipt.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R1.receipt.stderr.txt"
+          },
+          {
+            "step": "apply-rep1",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-6wlr2wlq\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R1.apply1.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R1.apply1.stderr.txt"
+          },
+          {
+            "step": "apply-rep2",
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-r66i9e3y\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R1.apply2.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R1.apply2.stderr.txt"
+          }
+        ],
+        "discover_exits": [
+          0
+        ],
+        "verify_exits": [
+          0
+        ],
+        "compare_exit": 0,
+        "unify-plan_exit": 1,
+        "receipt_exit": 0,
+        "apply_runs": [
+          {
+            "rep": 1,
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-6wlr2wlq\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R1.apply1.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R1.apply1.stderr.txt",
+            "src_before": "29e64fed1d5bc3ae258846a3ad9eb390d1b20f2c8f2b60983f69de584eb1ee74",
+            "src_after": "29e64fed1d5bc3ae258846a3ad9eb390d1b20f2c8f2b60983f69de584eb1ee74",
+            "src_unchanged": true,
+            "cfg_before": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_after": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_unchanged": true,
+            "status": "FAILED"
+          },
+          {
+            "rep": 2,
+            "cmd": "D:/programs/Python/python.exe -B -X utf8 -m figpact plate unify C:\\Users\\Lin\\AppData\\Local\\Temp\\g15A-apply-r66i9e3y\\plate.yaml --target-width-mm 90 --axis-pt 8 --tick-pt 8 --line-pt 0.8 --apply",
+            "exit": 1,
+            "timeout": false,
+            "stdout_log": "logs/figlegend_demo_R1.apply2.stdout.txt",
+            "stderr_log": "logs/figlegend_demo_R1.apply2.stderr.txt",
+            "src_before": "29e64fed1d5bc3ae258846a3ad9eb390d1b20f2c8f2b60983f69de584eb1ee74",
+            "src_after": "29e64fed1d5bc3ae258846a3ad9eb390d1b20f2c8f2b60983f69de584eb1ee74",
+            "src_unchanged": true,
+            "cfg_before": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_after": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+            "cfg_unchanged": true,
+            "status": "FAILED"
+          }
+        ],
+        "apply_repeat_identical": true
+      },
+      "source_sha256": "589a20e8aed1cd3e4493f67cd6953825527e87f9b2ecd39aeebdb7bfed910ce0",
+      "wrapper_sha256": "29e64fed1d5bc3ae258846a3ad9eb390d1b20f2c8f2b60983f69de584eb1ee74",
+      "config_sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    }
+  }
+}

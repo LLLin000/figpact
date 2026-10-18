@@ -1,0 +1,1615 @@
+{
+  "condition": "R0",
+  "backend": "Agg",
+  "samples": [
+    {
+      "source": "subplots_demo.py",
+      "n_figs": 13,
+      "scopes": [
+        {
+          "scope": "subplots_demo#fig00",
+          "png": "R0_raw_subplots_demo_fig00.png",
+          "png_sha256": "7dc5a4972c04633070c02367f71cbf3045a1af103770c521406080ab1d057670",
+          "n_axes": 1,
+          "suptitle": null,
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "A single plot",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 9,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig01",
+          "png": "R0_raw_subplots_demo_fig01.png",
+          "png_sha256": "2482f1619fe333e2e9f92d60efdfadf4d8c7a75481e2f480fe3c604b9ca191b4",
+          "n_axes": 2,
+          "suptitle": "Vertically stacked subplots",
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 9,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 9,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9783405512597778,
+                  "sha256_xy": "114bcc28c17b07b5a95974c872b4a3026174f372a6d39d66448cf00ff25c92a1",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig02",
+          "png": "R0_raw_subplots_demo_fig02.png",
+          "png_sha256": "2482f1619fe333e2e9f92d60efdfadf4d8c7a75481e2f480fe3c604b9ca191b4",
+          "n_axes": 2,
+          "suptitle": "Vertically stacked subplots",
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 9,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 9,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9783405512597778,
+                  "sha256_xy": "114bcc28c17b07b5a95974c872b4a3026174f372a6d39d66448cf00ff25c92a1",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig03",
+          "png": "R0_raw_subplots_demo_fig03.png",
+          "png_sha256": "15be9274dbe6c96030339c866cfa57bf02464fea029bfba9b06018be781d70e8",
+          "n_axes": 2,
+          "suptitle": "Horizontally stacked subplots",
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9783405512597778,
+                  "sha256_xy": "114bcc28c17b07b5a95974c872b4a3026174f372a6d39d66448cf00ff25c92a1",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig04",
+          "png": "R0_raw_subplots_demo_fig04.png",
+          "png_sha256": "c7ee114726661884e58f443394e82f1fd8962d537903231de7c34e09be0a6226",
+          "n_axes": 4,
+          "suptitle": null,
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "Axis [0, 0]",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "y-label",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "Axis [0, 1]",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 2,
+              "title": "Axis [1, 0]",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "x-label",
+              "ylabel": "y-label",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9783405512597778,
+                  "sha256_xy": "114bcc28c17b07b5a95974c872b4a3026174f372a6d39d66448cf00ff25c92a1",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 3,
+              "title": "Axis [1, 1]",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "x-label",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9783405512597778,
+                  "sha256_xy": "114bcc28c17b07b5a95974c872b4a3026174f372a6d39d66448cf00ff25c92a1",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig05",
+          "png": "R0_raw_subplots_demo_fig05.png",
+          "png_sha256": "f3f279dc45a2ab2c91421c0937b9fb80c2eae94c0d28b9775ac2729d1b196d4f",
+          "n_axes": 4,
+          "suptitle": "Sharing x per column, y per row",
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9571502342392859,
+                  "sha256_xy": "32e448430143ad63c57987e0f52fc5a93f4db221f53e35a14e4c249d4e49611a",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 2,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9783405512597778,
+                  "sha256_xy": "114bcc28c17b07b5a95974c872b4a3026174f372a6d39d66448cf00ff25c92a1",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 3,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9571502342392859,
+                  "sha256_xy": "f99fcbc777a1a0ba5cf019fad3213179c435a7947d7d6074b74caa82e4ca884c",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig06",
+          "png": "R0_raw_subplots_demo_fig06.png",
+          "png_sha256": "8f7cf590f232cce3ce99b9270cacc3d32b57c90efb494bc77598b000e6904182",
+          "n_axes": 2,
+          "suptitle": "Axes values are scaled individually by default",
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 9,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 9,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 1.0,
+                  "x_last": 7.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9783405512597778,
+                  "sha256_xy": "cf74e32aa76060d52615dbef7d566000e6429e98e5753a1ea56c623eb4685129",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig07",
+          "png": "R0_raw_subplots_demo_fig07.png",
+          "png_sha256": "c02d713666d2e7dc7617623dc0cf5bf440d0fb33d81520695fd38ca1c5e40c4c",
+          "n_axes": 2,
+          "suptitle": "Aligning x-axis using sharex",
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": true,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 10,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 1.0,
+                  "x_last": 7.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9783405512597778,
+                  "sha256_xy": "cf74e32aa76060d52615dbef7d566000e6429e98e5753a1ea56c623eb4685129",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig08",
+          "png": "R0_raw_subplots_demo_fig08.png",
+          "png_sha256": "d93b90ed03108444703194c42de2102942e77e1b72d70d949093013d14c33e74",
+          "n_axes": 3,
+          "suptitle": "Sharing both axes",
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9571502342392859,
+                  "sha256_xy": "32e448430143ad63c57987e0f52fc5a93f4db221f53e35a14e4c249d4e49611a",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": true,
+              "shared_y": true,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.29350216537793333,
+                  "sha256_xy": "f31badc1287f6c36b9aac1ddfb47872d83570a82b2278e084e112f89d55a742c",
+                  "linewidth": 1.5,
+                  "marker": "o",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 2,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": true,
+              "shared_y": true,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 9,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "+",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig09",
+          "png": "R0_raw_subplots_demo_fig09.png",
+          "png_sha256": "4df8e1581bb84e1bbfa5037163e40f39f7be92b34c99f03df748effd23909fe4",
+          "n_axes": 3,
+          "suptitle": "Sharing both axes",
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9571502342392859,
+                  "sha256_xy": "32e448430143ad63c57987e0f52fc5a93f4db221f53e35a14e4c249d4e49611a",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": true,
+              "shared_y": true,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.29350216537793333,
+                  "sha256_xy": "f31badc1287f6c36b9aac1ddfb47872d83570a82b2278e084e112f89d55a742c",
+                  "linewidth": 1.5,
+                  "marker": "o",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 2,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": true,
+              "shared_y": true,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 9,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "+",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig10",
+          "png": "R0_raw_subplots_demo_fig10.png",
+          "png_sha256": "a418a71e843518822952bc5bf7452bd2a93520dc2497df076c1d6e9b307c69b8",
+          "n_axes": 4,
+          "suptitle": "Sharing x per column, y per row",
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": true,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 0,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9571502342392859,
+                  "sha256_xy": "32e448430143ad63c57987e0f52fc5a93f4db221f53e35a14e4c249d4e49611a",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 2,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": true,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 1.0,
+                  "x_last": 7.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9783405512597778,
+                  "sha256_xy": "cf74e32aa76060d52615dbef7d566000e6429e98e5753a1ea56c623eb4685129",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 3,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": true,
+              "shared_y": true,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 7,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 2.0,
+                  "x_last": 8.283185307179586,
+                  "y_first": -0.0,
+                  "y_last": -0.9571502342392859,
+                  "sha256_xy": "d53b50314d2906d2abebf788d620ec720dcef0c42c174512bda2703c0beb0ffc",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig11",
+          "png": "R0_raw_subplots_demo_fig11.png",
+          "png_sha256": "f17b862543e34e0749b6a92d83f4e9485b62a1881a4c3cd0422621bb9d992e16",
+          "n_axes": 4,
+          "suptitle": null,
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "main",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "unrelated",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 5,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 1.0,
+                  "x_last": 7.283185307179586,
+                  "y_first": 1.0,
+                  "y_last": 1.9783405512597778,
+                  "sha256_xy": "a2116627cc57606d81a0bcdc42e4e8bc8e4dd6a960e01c761513fa62b7c32012",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 2,
+              "title": "shares x with main",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": true,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9571502342392859,
+                  "sha256_xy": "32e448430143ad63c57987e0f52fc5a93f4db221f53e35a14e4c249d4e49611a",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 3,
+              "title": "also unrelated",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 2.0,
+                  "x_last": 8.283185307179586,
+                  "y_first": 2.0,
+                  "y_last": 2.9783405512597776,
+                  "sha256_xy": "ad29cb69fec24d6919a604428daebd36f1f9fcb53a52ecdd90987bde9eb9088f",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "subplots_demo#fig12",
+          "png": "R0_raw_subplots_demo_fig12.png",
+          "png_sha256": "636f51e92ba386b1e38121f152f29836a7d63f443afa0c1a4acf6e7ffc459894",
+          "n_axes": 2,
+          "suptitle": null,
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "polar",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 8,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9783405512597778,
+                  "sha256_xy": "c99af289f440ac5edd819a7193a68ded408a89b92d40c51d83d2c4a9b86d0020",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "polar",
+              "n_lines": 1,
+              "n_texts": 0,
+              "n_xticklabels": 8,
+              "lines": [
+                {
+                  "n": 400,
+                  "x_first": 0.0,
+                  "x_last": 6.283185307179586,
+                  "y_first": 0.0,
+                  "y_last": 0.9571502342392859,
+                  "sha256_xy": "32e448430143ad63c57987e0f52fc5a93f4db221f53e35a14e4c249d4e49611a",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "_child0"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        }
+      ],
+      "source_sha256": "802f31d63cc05c584b415472585d7c76ccd266aab673c23d20cd985744da1ba9",
+      "source_bytes": 6395
+    },
+    {
+      "source": "label_subplots.py",
+      "n_figs": 3,
+      "scopes": [
+        {
+          "scope": "label_subplots#fig00",
+          "png": "R0_raw_label_subplots_fig00.png",
+          "png_sha256": "2a5b70eef6c03ae9b43e341cf93ceadeaa7b631bf8006bbec9157c49f8e000c5",
+          "n_axes": 4,
+          "suptitle": null,
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 1,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [
+                {
+                  "text": "a)",
+                  "fontsize": 10.0,
+                  "position": [
+                    0.5,
+                    -0.5
+                  ]
+                }
+              ],
+              "annotations": [
+                {
+                  "text": "a)",
+                  "fontsize": 10.0
+                }
+              ]
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 1,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [
+                {
+                  "text": "c)",
+                  "fontsize": 10.0,
+                  "position": [
+                    0.5,
+                    -0.5
+                  ]
+                }
+              ],
+              "annotations": [
+                {
+                  "text": "c)",
+                  "fontsize": 10.0
+                }
+              ]
+            },
+            {
+              "index": 2,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 1,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [
+                {
+                  "text": "b)",
+                  "fontsize": 10.0,
+                  "position": [
+                    0.5,
+                    -0.5
+                  ]
+                }
+              ],
+              "annotations": [
+                {
+                  "text": "b)",
+                  "fontsize": 10.0
+                }
+              ]
+            },
+            {
+              "index": 3,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 1,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [
+                {
+                  "text": "d)",
+                  "fontsize": 10.0,
+                  "position": [
+                    0.5,
+                    -0.5
+                  ]
+                }
+              ],
+              "annotations": [
+                {
+                  "text": "d)",
+                  "fontsize": 10.0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scope": "label_subplots#fig01",
+          "png": "R0_raw_label_subplots_fig01.png",
+          "png_sha256": "38ced45323d65147b0d768924db107118267690697b9d1abc8dd2f721fb546fe",
+          "n_axes": 4,
+          "suptitle": null,
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 1,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [
+                {
+                  "text": "a)",
+                  "fontsize": 10.0,
+                  "position": [
+                    0.0,
+                    1.0
+                  ]
+                }
+              ],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 1,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [
+                {
+                  "text": "c)",
+                  "fontsize": 10.0,
+                  "position": [
+                    0.0,
+                    1.0
+                  ]
+                }
+              ],
+              "annotations": []
+            },
+            {
+              "index": 2,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 1,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [
+                {
+                  "text": "b)",
+                  "fontsize": 10.0,
+                  "position": [
+                    0.0,
+                    1.0
+                  ]
+                }
+              ],
+              "annotations": []
+            },
+            {
+              "index": 3,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 1,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [
+                {
+                  "text": "d)",
+                  "fontsize": 10.0,
+                  "position": [
+                    0.0,
+                    1.0
+                  ]
+                }
+              ],
+              "annotations": []
+            }
+          ]
+        },
+        {
+          "scope": "label_subplots#fig02",
+          "png": "R0_raw_label_subplots_fig02.png",
+          "png_sha256": "b822dbb5afe3ec6644a17d3da91ed3c4189cca0aa1f1c618cf1216ee742005a1",
+          "n_axes": 4,
+          "suptitle": null,
+          "n_fig_legends": 0,
+          "fig_legend_texts": [],
+          "axes": [
+            {
+              "index": 0,
+              "title": "Normal Title",
+              "left_title": "a)",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "Normal Title",
+              "left_title": "c)",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 2,
+              "title": "Normal Title",
+              "left_title": "b)",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 3,
+              "title": "Normal Title",
+              "left_title": "d)",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 0,
+              "n_texts": 0,
+              "n_xticklabels": 6,
+              "lines": [],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        }
+      ],
+      "source_sha256": "a99b7dd3f4452f6d82782f2dd567d91db4b079132802b01d8baf904ec58faaaf",
+      "source_bytes": 2663
+    },
+    {
+      "source": "figlegend_demo.py",
+      "n_figs": 1,
+      "scopes": [
+        {
+          "scope": "figlegend_demo#fig00",
+          "png": "R0_raw_figlegend_demo_fig00.png",
+          "png_sha256": "753a0774ed0637ff3f6d3ccf0dce2359f6df09395c9e60e00569ff7bb5d86012",
+          "n_axes": 2,
+          "suptitle": null,
+          "n_fig_legends": 1,
+          "fig_legend_texts": [
+            [
+              "Line 1",
+              "Line 2",
+              "Line 3",
+              "Line 4"
+            ]
+          ],
+          "axes": [
+            {
+              "index": 0,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 2,
+              "n_texts": 0,
+              "n_xticklabels": 5,
+              "lines": [
+                {
+                  "n": 63,
+                  "x_first": 0.0,
+                  "x_last": 12.4,
+                  "y_first": 0.0,
+                  "y_last": -0.1656041754483094,
+                  "sha256_xy": "4f00b6d50abf506a8f9dc2eb92c0c936735394360e17b2279cd12f851852aaf5",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "Line 1"
+                },
+                {
+                  "n": 63,
+                  "x_first": 0.0,
+                  "x_last": 12.4,
+                  "y_first": 1.0,
+                  "y_last": 0.002029430636295734,
+                  "sha256_xy": "949ca9d4ffc1f22e9c8224907633766cccbc8c2aab1d0b03b4468b9769e98d68",
+                  "linewidth": 1.5,
+                  "marker": "o",
+                  "label": "Line 2"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            },
+            {
+              "index": 1,
+              "title": "",
+              "left_title": "",
+              "right_title": "",
+              "xlabel": "",
+              "ylabel": "",
+              "shared_x": false,
+              "shared_y": false,
+              "projection": "rectilinear",
+              "n_lines": 2,
+              "n_texts": 0,
+              "n_xticklabels": 5,
+              "lines": [
+                {
+                  "n": 63,
+                  "x_first": 0.0,
+                  "x_last": 12.4,
+                  "y_first": 0.0,
+                  "y_last": -0.1656041754483094,
+                  "sha256_xy": "4f00b6d50abf506a8f9dc2eb92c0c936735394360e17b2279cd12f851852aaf5",
+                  "linewidth": 1.5,
+                  "marker": "None",
+                  "label": "Line 3"
+                },
+                {
+                  "n": 63,
+                  "x_first": 0.0,
+                  "x_last": 12.4,
+                  "y_first": 1.0,
+                  "y_last": 0.0450492023935578,
+                  "sha256_xy": "cadca49955dacbc2c52f38d765dc9d9baa4eed9eebd0c08d8c91dd99abbaf9f5",
+                  "linewidth": 1.5,
+                  "marker": "^",
+                  "label": "Line 4"
+                }
+              ],
+              "texts": [],
+              "annotations": []
+            }
+          ]
+        }
+      ],
+      "source_sha256": "589a20e8aed1cd3e4493f67cd6953825527e87f9b2ecd39aeebdb7bfed910ce0",
+      "source_bytes": 764
+    }
+  ]
+}

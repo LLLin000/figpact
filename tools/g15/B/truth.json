@@ -1,0 +1,286 @@
+{
+ "barchart": {
+  "fig1": {
+   "png_sha16": "02ab6845a69df064",
+   "artists": {
+    "ax0": {
+     "title": "Penguin attributes by species",
+     "xlabel": "",
+     "ylabel": "Length (mm)",
+     "xscale": "linear",
+     "yscale": "linear",
+     "ylim": [
+      0.0,
+      250.0
+     ],
+     "xlim": [
+      -0.2625,
+      2.7625
+     ],
+     "lines": [],
+     "bars": [
+      [
+       18.35,
+       18.43,
+       14.98
+      ],
+      [
+       38.79,
+       48.83,
+       47.5
+      ],
+      [
+       189.95,
+       195.82,
+       217.19
+      ]
+     ],
+     "offsets_n": [],
+     "n_coll": 0,
+     "legend": true
+    }
+   },
+   "bar_heights": [
+    [
+     18.35,
+     18.43,
+     14.98
+    ],
+    [
+     38.79,
+     48.83,
+     47.5
+    ],
+    [
+     189.95,
+     195.82,
+     217.19
+    ]
+   ],
+   "barlabel_texts": [
+    "18.35",
+    "18.43",
+    "14.98",
+    "38.79",
+    "48.83",
+    "47.5",
+    "189.95",
+    "195.82",
+    "217.19"
+   ]
+  }
+ },
+ "errorbar_features": {
+  "fig1": {
+   "png_sha16": "7892326f9f8c82bc",
+   "artists": {
+    "ax0": {
+     "title": "variable, symmetric error",
+     "xlabel": "",
+     "ylabel": "",
+     "xscale": "linear",
+     "yscale": "linear",
+     "ylim": [
+      -0.8835519623321408,
+      1.115713102815393
+     ],
+     "xlim": [
+      -0.16640000000000005,
+      4.6384
+     ],
+     "lines": [
+      {
+       "x": [
+        0.1,
+        0.6,
+        1.1,
+        1.6,
+        2.1,
+        2.6,
+        3.1,
+        3.6
+       ],
+       "y": [
+        0.9048374180359595,
+        0.5488116360940265,
+        0.33287108369807955,
+        0.20189651799465538,
+        0.1224564282529819,
+        0.07427357821433388,
+        0.0450492023935578,
+        0.02732372244729256
+       ],
+       "lw": 1.5,
+       "ls": "-",
+       "m": "o"
+      }
+     ],
+     "bars": [],
+     "offsets_n": [
+      1
+     ],
+     "n_coll": 1,
+     "legend": false
+    },
+    "ax1": {
+     "title": "variable, asymmetric error",
+     "xlabel": "",
+     "ylabel": "",
+     "xscale": "linear",
+     "yscale": "log",
+     "ylim": [
+      0.022937090641928927,
+      1.0778841508846315
+     ],
+     "xlim": [
+      -0.16640000000000005,
+      4.6384
+     ],
+     "lines": [
+      {
+       "x": [
+        0.1,
+        0.6,
+        1.1,
+        1.6,
+        2.1,
+        2.6,
+        3.1,
+        3.6
+       ],
+       "y": [
+        0.9048374180359595,
+        0.5488116360940265,
+        0.33287108369807955,
+        0.20189651799465538,
+        0.1224564282529819,
+        0.07427357821433388,
+        0.0450492023935578,
+        0.02732372244729256
+       ],
+       "lw": 1.5,
+       "ls": "None",
+       "m": "o"
+      }
+     ],
+     "bars": [],
+     "offsets_n": [
+      1
+     ],
+     "n_coll": 1,
+     "legend": false
+    }
+   },
+   "ax0_data_xy_sha": "1a4afc5cca044a6f",
+   "ax0_errseg_sha": "7f084e6dfb1ca6b8",
+   "ax0_dlw": 1.5,
+   "ax0_dls": "-",
+   "ax1_data_xy_sha": "1a4afc5cca044a6f",
+   "ax1_errseg_sha": "ddd65655dbc511e2",
+   "ax1_dlw": 1.5,
+   "ax1_dls": "None"
+  }
+ },
+ "scatter_with_legend": {
+  "fig1": {
+   "png_sha16": "402d3c7bfc2c0ae4",
+   "artists": {
+    "ax0": {
+     "title": "",
+     "xlabel": "",
+     "ylabel": "",
+     "xscale": "linear",
+     "yscale": "linear",
+     "ylim": [
+      -0.04966673402335453,
+      1.0499255917644463
+     ],
+     "xlim": [
+      -0.04966432998299337,
+      1.0486676585169388
+     ],
+     "lines": [],
+     "bars": [],
+     "offsets_n": [
+      750,
+      750,
+      750
+     ],
+     "n_coll": 3,
+     "legend": true
+    }
+   },
+   "offsets_sha": [
+    "cd80da4fb0114f10",
+    "a34ec6440ae4485b",
+    "96b9919a2f352e95"
+   ],
+   "sizes_sha": "b951cf0fc7d5a75f",
+   "n_legends": 1
+  },
+  "fig2": {
+   "png_sha16": "e899e932dfae4b70",
+   "artists": {
+    "ax0": {
+     "title": "",
+     "xlabel": "",
+     "ylabel": "",
+     "xscale": "linear",
+     "yscale": "linear",
+     "ylim": [
+      -0.026674424568009975,
+      1.026156117243027
+     ],
+     "xlim": [
+      -0.03467765543263483,
+      1.0061551877392285
+     ],
+     "lines": [],
+     "bars": [],
+     "offsets_n": [
+      45
+     ],
+     "n_coll": 1,
+     "legend": true
+    }
+   },
+   "offsets_sha": [
+    "659103040298abe0"
+   ],
+   "sizes_sha": "bc3cc6d258230817",
+   "n_legends": 1
+  },
+  "fig3": {
+   "png_sha16": "1ce1087d38bea23c",
+   "artists": {
+    "ax0": {
+     "title": "",
+     "xlabel": "",
+     "ylabel": "",
+     "xscale": "linear",
+     "yscale": "linear",
+     "ylim": [
+      3.35,
+      17.65
+     ],
+     "xlim": [
+      5.113520094202512,
+      79.51734565101968
+     ],
+     "lines": [],
+     "bars": [],
+     "offsets_n": [
+      40
+     ],
+     "n_coll": 1,
+     "legend": true
+    }
+   },
+   "offsets_sha": [
+    "c550ab21116a7045"
+   ],
+   "sizes_sha": "4da5567f1d32754b",
+   "n_legends": 1
+  }
+ }
+}

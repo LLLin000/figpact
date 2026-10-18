@@ -1,0 +1,22 @@
+G15-A R1 wrapper form (corrected): complete metadata-only protocol declaration.
+
+Each wrap_*_r1.py executes the byte-identical frozen raw source in full via
+runpy, then selects the figure index for its scope (no cell split, no seed,
+no execution-sequence change). It appends ONLY:
+- stable SCOPES (one per Figure the raw source creates),
+- generic config load (empty YAML),
+- figure build + extant-artist GidRegistry enumeration (params=[], no
+  fabricated bindings),
+- metadata-only layout_contract(): parameters=[] (nothing EDITABLE —
+  literal raw calls have no YAML source binding); nodes enumerates the REAL
+  gids/types from a true build_figure_and_registry(scope) run (closed
+  immediately); groups=[], relations=[], outputs=[]. No new cfg keys, no
+  Artist setters, no per-sample role mappings, no engine changes.
+
+Known limitation (unchanged): discover parses the wrapper AST, not the
+runpy-executed raw source, so literal raw calls stay invisible by
+construction (0 candidates / 0 unresolved per scope). This is a wrapper-form
+property, not an engine regression claim. Old no-contract wrapper runs are
+superseded (archive logs_superseded_no_contract/), excluded from the main
+table; main-table R1 evidence uses this complete declaration only.
+Raw truth (scopes, geometry, view PNGs) fully executed under both R0 and R1.

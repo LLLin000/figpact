@@ -1,0 +1,61 @@
+{
+  "engine_sha": "793aaa89b39af49d2421e2a2840751cf757ba959",
+  "upstream_sha": "4aeb773422464799998d900198b35cb80e94b3e1",
+  "product_bytes_sha256_before_and_after": "61e9c0da6a478eb288d00adeab2c0d1a79080454d6d2ed8002b22df1c9208f6c",
+  "product_unchanged": true,
+  "population": {"source_files":8,"raw_figures":29,"R1_scopes":30,"role_kinds_per_condition":19,"legal_visual_intents_per_condition":15},
+  "sample_scores": [
+    {"sample":"A/subplots_demo","roles":3,"R0_correct_role_hints":1,"R1_correct_role_hints":0,"legal_intents":3,"success_R0":0,"success_R1":0},
+    {"sample":"A/label_subplots","roles":2,"R0_correct_role_hints":1,"R1_correct_role_hints":0,"legal_intents":1,"success_R0":0,"success_R1":0},
+    {"sample":"A/figlegend_demo","roles":3,"R0_correct_role_hints":2,"R1_correct_role_hints":0,"legal_intents":2,"success_R0":0,"success_R1":0},
+    {"sample":"B/barchart","roles":3,"R0_correct_role_hints":2,"R1_correct_role_hints":0,"legal_intents":2,"success_R0":0,"success_R1":0},
+    {"sample":"B/errorbar_features","roles":2,"R0_correct_role_hints":0,"R1_correct_role_hints":0,"legal_intents":2,"success_R0":0,"success_R1":0},
+    {"sample":"B/scatter_with_legend","roles":2,"R0_correct_role_hints":1,"R1_correct_role_hints":0,"legal_intents":1,"success_R0":0,"success_R1":0},
+    {"sample":"C/eventcollection_demo","roles":2,"R0_correct_role_hints":1,"R1_correct_role_hints":0,"legal_intents":2,"success_R0":0,"success_R1":0},
+    {"sample":"C/annotation_demo","roles":2,"R0_correct_role_hints":1,"R1_correct_role_hints":0,"legal_intents":2,"success_R0":0,"success_R1":0}
+  ],
+  "R0": {
+    "role_hint_recall":{"n":9,"d":19},
+    "role_hint_misses":{"n":10,"detail":"8 default-tick roles; subplots xlabel/ylabel through Axes.set; connected errorbar data curve through Axes.errorbar"},
+    "binding_precision":{"n":0,"d":0,"rate":null,"reason":"No editable candidates"},
+    "edit_success":{"n":0,"d":15},
+    "capability_rejections":15,
+    "false_rejection":{"n":0,"d":0,"rate":null,"reason":"No safely expressible source binding under this condition; not proof of zero false rejection"},
+    "unauthorized_acceptance":{"observed":0,"accepted_edits":0,"rate":null,"reason":"No accepted edits; no G15 proof of zero unauthorized-acceptance rate"},
+    "pipeline_boundary":"Discover gives source hints, Verify records 0 verified; plate audit/compare/apply/receipt blocked by missing build entry with RuntimeError"
+  },
+  "R1": {
+    "form":"Identity-only protocol wrappers executing each full frozen source then selecting its original Figure; no new parameter bindings or post-build setters",
+    "role_hint_recall":{"n":0,"d":19,"caveat":"Discover parses wrapper AST only; this is a declaration-form/source-visibility limitation, not proof that every protocol declaration form loses discovery"},
+    "binding_precision":{"n":0,"d":0,"rate":null,"reason":"No editable candidates"},
+    "edit_success":{"n":0,"d":15},
+    "capability_rejections":15,
+    "false_rejection":{"n":0,"d":0,"rate":null,"reason":"No safely expressible source binding; cannot estimate false rejection"},
+    "unauthorized_acceptance":{"observed":0,"accepted_edits":0,"rate":null,"reason":"No accepted edits; rate unobservable"},
+    "pipeline_boundary":"Measurement/report stages become reachable; Apply refuses because no source parameter has authorized editable bindings"
+  },
+  "reproducibility": {
+    "R0_repeated_discovery":{"n":8,"d":8},
+    "R1_repeated_discovery":{"n":30,"d":30},
+    "R1_rebuild_checks":{"n":30,"d":30,"scope":"A:17 PNG-identical scopes; B:6 numeric replay checks; C:7 view/line/collection checks. B errorbar scopes share one original Figure, so scope count is not unique-figure count."},
+    "R1_repeat_apply":"All 30 scopes remain refused; source/config bytes unchanged; successful-Apply idempotency is untested because 0 edits were accepted",
+    "limits":"Blocked stages are not successes; stable rejection is not successful editing"
+  },
+  "parent_independent_checks": [
+    "Actual raw barchart Discover: correct ylabel and legend hints plus wrong set_title axis.title hint; 0 candidates",
+    "Actual protocol barchart Apply: exit 1, FAILED, NOT_WRITTEN",
+    "Shared-axis subplots fig07: shared x, views, data, Artist ownership, actual contract-node IDs match",
+    "Scatter: all three complete-file Figure selections have exact original offsets and sizes",
+    "Annotation: all six Figures retain views, data lines, text/xy positions, arrow paths and patch vertices; registry artists belong to returned Figure and contract-node IDs exist",
+    "All eight original raw SHA256 values match inputs.json; all 38 frozen product-file bytes remain unchanged"
+  ],
+  "harness_errata_excluded": [
+    "B rev1 split-cell scatter replay lost original RNG execution sequence; corrected full-source replay, invalid trial excluded",
+    "C rev1 cross-Figure registry and invented contract nodes; corrected per-Figure scopes and actual nodes, invalid trial excluded",
+    "A rev1 missing layout_contract; metadata-only contract added without bindings, incomplete-protocol trial excluded",
+    "Missing Agg, incorrect CLI argument forms and missing raw siblings in isolated copies; corrected environment/commands, not scored as engine defects",
+    "Grading corrections: default ticks count as present; legitimate unresolved literal hints count toward role-hint recall; absent axis labels are not valid edit requests"
+  ],
+  "verification_scope":{"pre_freeze_regression":"23 passed, 1 warning","actual_failed_draft_CLI_smoke":"FAILED + COMMITTED/FAIL + exit 1","full_suite_rerun":false,"browser_suite_rerun":false},
+  "conclusion":"This sample does not establish general unfamiliar-script editing. It demonstrates partial static role hints, measurement via protocol declarations, and fail-closed rejection where source bindings are absent. Multi-Artist control expressiveness and accepted-edit safety cannot be estimated from zero accepted edits."
+}

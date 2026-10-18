@@ -150,6 +150,11 @@ receipt 保留真实的 `COMMITTED / FAIL`，不将验证失败误写为未提�
 python -m pytest tests/test_statistical_unify.py -q
 ```
 
+G15 已在冻结引擎上运行第三方 Matplotlib gallery 的多 Axes、统计与混合对象样本，
+分开检查原始脚本和仅协议声明两种条件。结果**不支持宣称任意陌生脚本已经可编辑**；
+缺入口、缺绑定、源文提示错配与正确拒绝分别记账。
+协议、逐项指标、有效性勘误和复跑入口见 [G15 报告](docs/G15_REPORT.md)。
+
 
 ## 测试
 

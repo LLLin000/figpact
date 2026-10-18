@@ -1,0 +1,2 @@
+# R0: external empty YAML (CLI-required only); asserts no source parameter binding.
+{}

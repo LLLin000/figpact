@@ -1,0 +1,639 @@
+{
+  "freeze_sha": "793aaa89b39af49d2421e2a2840751cf757ba959",
+  "upstream_sha": "4aeb773422464799998d900198b35cb80e94b3e1",
+  "group": "A",
+  "license": "Matplotlib license retained at tools/g15/LICENSE.matplotlib.txt; attribution in tools/g15/NOTICE.txt",
+  "protocol_note": "Role recall per raw FILE over dedup role kinds (not per scope). Binding precision N/A with 0 candidates. Edit denominator = full legal-intent pool per present roles (R0 and R1 alike); all failures are capability rejections (no binding), kept in denominator. Old no-contract R1 runs excluded from main table, kept at logs_superseded_no_contract/. Prior non-Agg timeouts were harness environment errors, not engine defects; all evidence below ran under Agg.",
+  "samples": [
+    {
+      "sample": "subplots_demo",
+      "source_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/4aeb773422464799998d900198b35cb80e94b3e1/galleries/examples/subplots_axes_and_figures/subplots_demo.py",
+      "source_sha256": "802f31d63cc05c584b415472585d7c76ccd266aab673c23d20cd985744da1ba9",
+      "source_bytes": 6395,
+      "wrapper": {
+        "file": "wrap_subplots_demo_r1.py",
+        "sha256": "6265ca0767d51ba169da936780594666f6e89572c5298ec021fb741d0de6a873",
+        "scopes": [
+          "fig00",
+          "fig01",
+          "fig02",
+          "fig03",
+          "fig04",
+          "fig05",
+          "fig06",
+          "fig07",
+          "fig08",
+          "fig09",
+          "fig10",
+          "fig11",
+          "fig12"
+        ],
+        "layout_contract": "metadata-only: parameters=[], nodes from real reg.all() gid/type, editable=False, no bindings/setters",
+        "ast_blind_spot": "discover parses the wrapper AST, not the runpy-executed raw; raw calls invisible by construction"
+      },
+      "raw_truth": {
+        "roles": [
+          "axis.title",
+          "axis.tick",
+          "curve.linewidth"
+        ],
+        "evidence": {
+          "axis.title": "raw L90: ax.set(xlabel='x-label', ylabel='y-label') on the 2x2 grid (fig04); visible x-label/y-label on bottom/left panels",
+          "axis.tick": "default tick labels on every Axes (5-10/axis; label_outer hides inner rows); shared-axis relations fig07 sharex, fig08/09 3-stack sharex+sharey, fig10 col/row, fig11 posteriori sharex (L192)",
+          "curve.linewidth": "35 ax.plot() calls, literal linewidth (no linewidth kw); all Line2D lw=1.5; markers o/+ on fig08/09 (Line2D)"
+        },
+        "domain_objects_outside_6_roles": [
+          "Axes titles (set_title) = axes.title",
+          "fig.suptitle x8",
+          "polar fig12",
+          "label_outer/tight_layout/GridSpec ops"
+        ],
+        "kinds": "multi-Axes grid, shared axes, curves + polar",
+        "n_figs": 13,
+        "view_pngs": [
+          "R0_raw_subplots_demo_fig00.png",
+          "R0_raw_subplots_demo_fig01.png",
+          "R0_raw_subplots_demo_fig02.png",
+          "R0_raw_subplots_demo_fig03.png",
+          "R0_raw_subplots_demo_fig04.png",
+          "R0_raw_subplots_demo_fig05.png",
+          "R0_raw_subplots_demo_fig06.png",
+          "R0_raw_subplots_demo_fig07.png",
+          "R0_raw_subplots_demo_fig08.png",
+          "R0_raw_subplots_demo_fig09.png",
+          "R0_raw_subplots_demo_fig10.png",
+          "R0_raw_subplots_demo_fig11.png",
+          "R0_raw_subplots_demo_fig12.png"
+        ],
+        "geometry_manifest": "tools/g15/A/r0_manifest.json"
+      },
+      "R0": {
+        "inputs": "unmodified source + external empty YAML",
+        "commands": [
+          {
+            "step": "discover",
+            "exit": 0,
+            "log": "logs/subplots_demo_R0.discover.stdout.txt"
+          },
+          {
+            "step": "verify",
+            "exit": 0,
+            "note": "verified=[] failed=[] skipped_unconfirmed=0",
+            "log": "logs/subplots_demo_R0.verify.stdout.txt"
+          },
+          {
+            "step": "compare",
+            "exit": 1,
+            "note": "RuntimeError: script exposes no build entry (traceback saved)",
+            "log": "logs/subplots_demo_R0.compare.stderr.txt"
+          },
+          {
+            "step": "unify-plan",
+            "exit": 1,
+            "note": "same entry-point inability (traceback saved)",
+            "log": "logs/subplots_demo_R0.unify-plan.stderr.txt"
+          },
+          {
+            "step": "apply-isolated",
+            "exit": 1,
+            "src_unchanged": true,
+            "cfg_unchanged": true,
+            "note": "same entry-point inability; raw bytes preserved",
+            "log": "logs/subplots_demo_R0.apply.stderr.txt"
+          },
+          {
+            "step": "receipt",
+            "exit": 1,
+            "note": "same entry-point inability (traceback saved)",
+            "log": "logs/subplots_demo_R0.receipt.stderr.txt"
+          }
+        ],
+        "role_recall": {
+          "n": 1,
+          "d": 3,
+          "correct": [
+            "curve.linewidth"
+          ],
+          "false_positives": [
+            "9x set_title->axis.title (reserved axes.title)"
+          ]
+        },
+        "binding_precision": "N/A (0 candidates proposed)",
+        "edit_success": {
+          "n": 0,
+          "d": 3,
+          "note": "full legal-intent pool attempted; 0 written+verified+audited; all are capability rejections (no binding)"
+        },
+        "capability_rejections": {
+          "n": 3,
+          "d": 3
+        },
+        "false_rejections": "N/A (no safe expressible request refused)",
+        "unauthorized_acceptance": "unobserved (0 accepted with full audit; not a 0% proof)",
+        "reproducibility": {
+          "completed": 2,
+          "d": 2,
+          "detail": "discover+verify repeat-stable; compare/unify/apply/receipt deterministically unreachable (same RuntimeError); geometry+view rebuild IDENTICAL (R0 vs R1 PNG bytes)"
+        }
+      },
+      "R1": {
+        "inputs": "wrapper wrap_subplots_demo_r1.py (full raw text via runpy, scope=figure index over 13 scopes) + empty YAML",
+        "execution_sequence_note": "full-file runpy per scope; no cell split, no seed; R0 vs R1 PNG bytes IDENTICAL on all 13",
+        "commands": [
+          {
+            "step": "discover x13",
+            "exits": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "note": "0 candidates / 0 unresolved / unsupported=[scalebar] per scope (wrapper-AST blind spot, documented)",
+            "log": "logs/subplots_demo_R1_<scope>.discover.stdout.txt"
+          },
+          {
+            "step": "verify x13",
+            "exits": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "note": "verified=[] failed=[] skipped_unconfirmed=0",
+            "log": "logs/subplots_demo_R1_<scope>.verify.stdout.txt"
+          },
+          {
+            "step": "compare",
+            "exit": 0,
+            "note": "all cells editable=False; curve [0.83] conformant where curves exist",
+            "log": "logs/subplots_demo_R1.compare.json"
+          },
+          {
+            "step": "unify-plan",
+            "exit": 1,
+            "note": "partially_feasible; every axis/tick/line key blocked not-EDITABLE, no verified contract",
+            "log": "logs/subplots_demo_R1.unify-plan.stdout.txt"
+          },
+          {
+            "step": "apply-rep1",
+            "exit": 1,
+            "status": "FAILED",
+            "src_unchanged": true,
+            "cfg_unchanged": true,
+            "src_sha": "6265ca0767d51ba169da936780594666f6e89572c5298ec021fb741d0de6a873",
+            "log": "logs/subplots_demo_R1.apply1.stdout.txt"
+          },
+          {
+            "step": "apply-rep2",
+            "exit": 1,
+            "status": "FAILED",
+            "src_unchanged": true,
+            "cfg_unchanged": true,
+            "src_sha": "6265ca0767d51ba169da936780594666f6e89572c5298ec021fb741d0de6a873",
+            "log": "logs/subplots_demo_R1.apply2.stdout.txt"
+          },
+          {
+            "step": "receipt",
+            "exit": 0,
+            "note": "report only",
+            "log": "logs/subplots_demo_R1.receipt.json"
+          }
+        ],
+        "role_recall": {
+          "n": 0,
+          "d": 3,
+          "note": "0 editable candidates by construction (parameters=[]); not an engine regression"
+        },
+        "binding_precision": "N/A (0 candidates proposed)",
+        "edit_success": {
+          "n": 0,
+          "d": 3,
+          "note": "full legal-intent pool via unify --apply: 0 written+verified+audited; unify FAILED with clean refusal (NOT_WRITTEN/NOT_RUN, no safe modification entry); kept in denominator as capability rejections"
+        },
+        "capability_rejections": {
+          "n": 3,
+          "d": 3
+        },
+        "false_rejections": "N/A (no safe expressible request refused)",
+        "unauthorized_acceptance": "unobserved (0 accepted with full audit; not a 0% proof)",
+        "reproducibility": {
+          "completed": 3,
+          "d": 3,
+          "detail": "discover repeat 13/13 consistent; rebuild PNG-identical; apply rep1==rep2 (exit 1/FAILED, src+cfg hashes unchanged both reps); semantic diff excludes timestamp/temp-path only"
+        }
+      },
+      "observed_bugs": [
+        "R0 plate path raises RuntimeError: script exposes no build entry (full traceback saved per step) — entry-point inability, recorded as result.",
+        "R1 unify --apply with complete metadata-only contract now refuses cleanly (FAILED/NOT_WRITTEN/NOT_RUN, no safe modification entry) instead of the old AttributeError (superseded logs kept out of main table).",
+        "curve.linewidth compare value [0.83] with editable=False is honest compare-only measurement, not an edit path."
+      ],
+      "visual_check": "13/13 R0 PNGs rendered (Agg) and inspected at representative panels; R1 after-PNGs byte-identical; polar/legend/mosaic panels visually confirmed; thumbnails not metric."
+    },
+    {
+      "sample": "label_subplots",
+      "source_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/4aeb773422464799998d900198b35cb80e94b3e1/galleries/examples/text_labels_and_annotations/label_subplots.py",
+      "source_sha256": "a99b7dd3f4452f6d82782f2dd567d91db4b079132802b01d8baf904ec58faaaf",
+      "source_bytes": 2663,
+      "wrapper": {
+        "file": "wrap_label_subplots_r1.py",
+        "sha256": "95436bd87f0203784e708398da3c113e0e992d75a18c7d458d9548417c54c731",
+        "scopes": [
+          "fig00",
+          "fig01",
+          "fig02"
+        ],
+        "layout_contract": "metadata-only: parameters=[], nodes from real reg.all() gid/type, editable=False, no bindings/setters",
+        "ast_blind_spot": "discover parses the wrapper AST, not the runpy-executed raw; raw calls invisible by construction"
+      },
+      "raw_truth": {
+        "roles": [
+          "axis.tick",
+          "panel.label"
+        ],
+        "evidence": {
+          "axis.tick": "default tick labels 6/axis on all 4 mosaic Axes",
+          "panel.label": "fig00 annotate inside offset fontsize (L32-37); fig01 text outside ScaledTranslation (L47-50); both fontsize medium=10.0; fig02 loc letters are axes.title, not panel evidence"
+        },
+        "domain_objects_outside_6_roles": [
+          "fig02 Normal Title + loc letters = axes.title",
+          "no curves/legends/scalebar"
+        ],
+        "kinds": "subplot_mosaic panel letters",
+        "n_figs": 3,
+        "view_pngs": [
+          "R0_raw_label_subplots_fig00.png",
+          "R0_raw_label_subplots_fig01.png",
+          "R0_raw_label_subplots_fig02.png"
+        ],
+        "geometry_manifest": "tools/g15/A/r0_manifest.json"
+      },
+      "R0": {
+        "inputs": "unmodified source + external empty YAML",
+        "commands": [
+          {
+            "step": "discover",
+            "exit": 0,
+            "log": "logs/label_subplots_R0.discover.stdout.txt"
+          },
+          {
+            "step": "verify",
+            "exit": 0,
+            "note": "verified=[] failed=[] skipped_unconfirmed=0",
+            "log": "logs/label_subplots_R0.verify.stdout.txt"
+          },
+          {
+            "step": "compare",
+            "exit": 1,
+            "note": "RuntimeError: script exposes no build entry (traceback saved)",
+            "log": "logs/label_subplots_R0.compare.stderr.txt"
+          },
+          {
+            "step": "unify-plan",
+            "exit": 1,
+            "note": "same entry-point inability (traceback saved)",
+            "log": "logs/label_subplots_R0.unify-plan.stderr.txt"
+          },
+          {
+            "step": "apply-isolated",
+            "exit": 1,
+            "src_unchanged": true,
+            "cfg_unchanged": true,
+            "note": "same entry-point inability; raw bytes preserved",
+            "log": "logs/label_subplots_R0.apply.stderr.txt"
+          },
+          {
+            "step": "receipt",
+            "exit": 1,
+            "note": "same entry-point inability (traceback saved)",
+            "log": "logs/label_subplots_R0.receipt.stderr.txt"
+          }
+        ],
+        "role_recall": {
+          "n": 1,
+          "d": 2,
+          "correct": [
+            "panel.label"
+          ],
+          "false_positives": [
+            "2x set_title->axis.title L59/L60 (axes.title)"
+          ]
+        },
+        "binding_precision": "N/A (0 candidates proposed)",
+        "edit_success": {
+          "n": 0,
+          "d": 1,
+          "note": "full legal-intent pool attempted; 0 written+verified+audited; all are capability rejections (no binding)"
+        },
+        "capability_rejections": {
+          "n": 1,
+          "d": 1
+        },
+        "false_rejections": "N/A (no safe expressible request refused)",
+        "unauthorized_acceptance": "unobserved (0 accepted with full audit; not a 0% proof)",
+        "reproducibility": {
+          "completed": 2,
+          "d": 2,
+          "detail": "discover+verify repeat-stable; compare/unify/apply/receipt deterministically unreachable (same RuntimeError); geometry+view rebuild IDENTICAL (R0 vs R1 PNG bytes)"
+        }
+      },
+      "R1": {
+        "inputs": "wrapper wrap_label_subplots_r1.py (full raw text via runpy, scope=figure index over 3 scopes) + empty YAML",
+        "execution_sequence_note": "full-file runpy per scope; no cell split, no seed; R0 vs R1 PNG bytes IDENTICAL on all 3",
+        "commands": [
+          {
+            "step": "discover x3",
+            "exits": [
+              0,
+              0,
+              0
+            ],
+            "note": "0 candidates / 0 unresolved / unsupported=[scalebar] per scope (wrapper-AST blind spot, documented)",
+            "log": "logs/label_subplots_R1_<scope>.discover.stdout.txt"
+          },
+          {
+            "step": "verify x3",
+            "exits": [
+              0,
+              0,
+              0
+            ],
+            "note": "verified=[] failed=[] skipped_unconfirmed=0",
+            "log": "logs/label_subplots_R1_<scope>.verify.stdout.txt"
+          },
+          {
+            "step": "compare",
+            "exit": 0,
+            "note": "all cells editable=False; curve [0.83] conformant where curves exist",
+            "log": "logs/label_subplots_R1.compare.json"
+          },
+          {
+            "step": "unify-plan",
+            "exit": 1,
+            "note": "partially_feasible; every axis/tick/line key blocked not-EDITABLE, no verified contract",
+            "log": "logs/label_subplots_R1.unify-plan.stdout.txt"
+          },
+          {
+            "step": "apply-rep1",
+            "exit": 1,
+            "status": "FAILED",
+            "src_unchanged": true,
+            "cfg_unchanged": true,
+            "src_sha": "95436bd87f0203784e708398da3c113e0e992d75a18c7d458d9548417c54c731",
+            "log": "logs/label_subplots_R1.apply1.stdout.txt"
+          },
+          {
+            "step": "apply-rep2",
+            "exit": 1,
+            "status": "FAILED",
+            "src_unchanged": true,
+            "cfg_unchanged": true,
+            "src_sha": "95436bd87f0203784e708398da3c113e0e992d75a18c7d458d9548417c54c731",
+            "log": "logs/label_subplots_R1.apply2.stdout.txt"
+          },
+          {
+            "step": "receipt",
+            "exit": 0,
+            "note": "report only",
+            "log": "logs/label_subplots_R1.receipt.json"
+          }
+        ],
+        "role_recall": {
+          "n": 0,
+          "d": 2,
+          "note": "0 editable candidates by construction (parameters=[]); not an engine regression"
+        },
+        "binding_precision": "N/A (0 candidates proposed)",
+        "edit_success": {
+          "n": 0,
+          "d": 1,
+          "note": "full legal-intent pool via unify --apply: 0 written+verified+audited; unify FAILED with clean refusal (NOT_WRITTEN/NOT_RUN, no safe modification entry); kept in denominator as capability rejections"
+        },
+        "capability_rejections": {
+          "n": 1,
+          "d": 1
+        },
+        "false_rejections": "N/A (no safe expressible request refused)",
+        "unauthorized_acceptance": "unobserved (0 accepted with full audit; not a 0% proof)",
+        "reproducibility": {
+          "completed": 3,
+          "d": 3,
+          "detail": "discover repeat 3/3 consistent; rebuild PNG-identical; apply rep1==rep2 (exit 1/FAILED, src+cfg hashes unchanged both reps); semantic diff excludes timestamp/temp-path only"
+        }
+      },
+      "observed_bugs": [
+        "R0 plate path raises RuntimeError: script exposes no build entry (full traceback saved per step) — entry-point inability, recorded as result.",
+        "R1 unify --apply with complete metadata-only contract now refuses cleanly (FAILED/NOT_WRITTEN/NOT_RUN, no safe modification entry) instead of the old AttributeError (superseded logs kept out of main table).",
+        "curve.linewidth compare value [0.83] with editable=False is honest compare-only measurement, not an edit path."
+      ],
+      "visual_check": "3/3 R0 PNGs rendered (Agg) and inspected at representative panels; R1 after-PNGs byte-identical; polar/legend/mosaic panels visually confirmed; thumbnails not metric."
+    },
+    {
+      "sample": "figlegend_demo",
+      "source_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/4aeb773422464799998d900198b35cb80e94b3e1/galleries/examples/text_labels_and_annotations/figlegend_demo.py",
+      "source_sha256": "589a20e8aed1cd3e4493f67cd6953825527e87f9b2ecd39aeebdb7bfed910ce0",
+      "source_bytes": 764,
+      "wrapper": {
+        "file": "wrap_figlegend_demo_r1.py",
+        "sha256": "29e64fed1d5bc3ae258846a3ad9eb390d1b20f2c8f2b60983f69de584eb1ee74",
+        "scopes": [
+          "fig00"
+        ],
+        "layout_contract": "metadata-only: parameters=[], nodes from real reg.all() gid/type, editable=False, no bindings/setters",
+        "ast_blind_spot": "discover parses the wrapper AST, not the runpy-executed raw; raw calls invisible by construction"
+      },
+      "raw_truth": {
+        "roles": [
+          "axis.tick",
+          "curve.linewidth",
+          "legend"
+        ],
+        "evidence": {
+          "axis.tick": "default tick labels 5/axis on both Axes",
+          "curve.linewidth": "4 ax.plot() label=, no linewidth kw; Line2D lw=1.5; markers o/^; n=63",
+          "legend": "fig.legend(loc='outside right upper') L21; 1 Fig legend Line 1..4 @10pt; no ax.legend"
+        },
+        "domain_objects_outside_6_roles": [
+          "no xlabels/titles/panel letters/scalebar"
+        ],
+        "kinds": "2 subplots + Figure-level legend",
+        "n_figs": 1,
+        "view_pngs": [
+          "R0_raw_figlegend_demo_fig00.png"
+        ],
+        "geometry_manifest": "tools/g15/A/r0_manifest.json"
+      },
+      "R0": {
+        "inputs": "unmodified source + external empty YAML",
+        "commands": [
+          {
+            "step": "discover",
+            "exit": 0,
+            "log": "logs/figlegend_demo_R0.discover.stdout.txt"
+          },
+          {
+            "step": "verify",
+            "exit": 0,
+            "note": "verified=[] failed=[] skipped_unconfirmed=0",
+            "log": "logs/figlegend_demo_R0.verify.stdout.txt"
+          },
+          {
+            "step": "compare",
+            "exit": 1,
+            "note": "RuntimeError: script exposes no build entry (traceback saved)",
+            "log": "logs/figlegend_demo_R0.compare.stderr.txt"
+          },
+          {
+            "step": "unify-plan",
+            "exit": 1,
+            "note": "same entry-point inability (traceback saved)",
+            "log": "logs/figlegend_demo_R0.unify-plan.stderr.txt"
+          },
+          {
+            "step": "apply-isolated",
+            "exit": 1,
+            "src_unchanged": true,
+            "cfg_unchanged": true,
+            "note": "same entry-point inability; raw bytes preserved",
+            "log": "logs/figlegend_demo_R0.apply.stderr.txt"
+          },
+          {
+            "step": "receipt",
+            "exit": 1,
+            "note": "same entry-point inability (traceback saved)",
+            "log": "logs/figlegend_demo_R0.receipt.stderr.txt"
+          }
+        ],
+        "role_recall": {
+          "n": 2,
+          "d": 3,
+          "correct": [
+            "curve.linewidth",
+            "legend"
+          ],
+          "false_positives": []
+        },
+        "binding_precision": "N/A (0 candidates proposed)",
+        "edit_success": {
+          "n": 0,
+          "d": 2,
+          "note": "full legal-intent pool attempted; 0 written+verified+audited; all are capability rejections (no binding)"
+        },
+        "capability_rejections": {
+          "n": 2,
+          "d": 2
+        },
+        "false_rejections": "N/A (no safe expressible request refused)",
+        "unauthorized_acceptance": "unobserved (0 accepted with full audit; not a 0% proof)",
+        "reproducibility": {
+          "completed": 2,
+          "d": 2,
+          "detail": "discover+verify repeat-stable; compare/unify/apply/receipt deterministically unreachable (same RuntimeError); geometry+view rebuild IDENTICAL (R0 vs R1 PNG bytes)"
+        }
+      },
+      "R1": {
+        "inputs": "wrapper wrap_figlegend_demo_r1.py (full raw text via runpy, scope=figure index over 1 scopes) + empty YAML",
+        "execution_sequence_note": "full-file runpy per scope; no cell split, no seed; R0 vs R1 PNG bytes IDENTICAL on all 1",
+        "commands": [
+          {
+            "step": "discover x1",
+            "exits": [
+              0
+            ],
+            "note": "0 candidates / 0 unresolved / unsupported=[scalebar] per scope (wrapper-AST blind spot, documented)",
+            "log": "logs/figlegend_demo_R1_<scope>.discover.stdout.txt"
+          },
+          {
+            "step": "verify x1",
+            "exits": [
+              0
+            ],
+            "note": "verified=[] failed=[] skipped_unconfirmed=0",
+            "log": "logs/figlegend_demo_R1_<scope>.verify.stdout.txt"
+          },
+          {
+            "step": "compare",
+            "exit": 0,
+            "note": "all cells editable=False; curve [0.83] conformant where curves exist",
+            "log": "logs/figlegend_demo_R1.compare.json"
+          },
+          {
+            "step": "unify-plan",
+            "exit": 1,
+            "note": "partially_feasible; every axis/tick/line key blocked not-EDITABLE, no verified contract",
+            "log": "logs/figlegend_demo_R1.unify-plan.stdout.txt"
+          },
+          {
+            "step": "apply-rep1",
+            "exit": 1,
+            "status": "FAILED",
+            "src_unchanged": true,
+            "cfg_unchanged": true,
+            "src_sha": "29e64fed1d5bc3ae258846a3ad9eb390d1b20f2c8f2b60983f69de584eb1ee74",
+            "log": "logs/figlegend_demo_R1.apply1.stdout.txt"
+          },
+          {
+            "step": "apply-rep2",
+            "exit": 1,
+            "status": "FAILED",
+            "src_unchanged": true,
+            "cfg_unchanged": true,
+            "src_sha": "29e64fed1d5bc3ae258846a3ad9eb390d1b20f2c8f2b60983f69de584eb1ee74",
+            "log": "logs/figlegend_demo_R1.apply2.stdout.txt"
+          },
+          {
+            "step": "receipt",
+            "exit": 0,
+            "note": "report only",
+            "log": "logs/figlegend_demo_R1.receipt.json"
+          }
+        ],
+        "role_recall": {
+          "n": 0,
+          "d": 3,
+          "note": "0 editable candidates by construction (parameters=[]); not an engine regression"
+        },
+        "binding_precision": "N/A (0 candidates proposed)",
+        "edit_success": {
+          "n": 0,
+          "d": 2,
+          "note": "full legal-intent pool via unify --apply: 0 written+verified+audited; unify FAILED with clean refusal (NOT_WRITTEN/NOT_RUN, no safe modification entry); kept in denominator as capability rejections"
+        },
+        "capability_rejections": {
+          "n": 2,
+          "d": 2
+        },
+        "false_rejections": "N/A (no safe expressible request refused)",
+        "unauthorized_acceptance": "unobserved (0 accepted with full audit; not a 0% proof)",
+        "reproducibility": {
+          "completed": 3,
+          "d": 3,
+          "detail": "discover repeat 1/1 consistent; rebuild PNG-identical; apply rep1==rep2 (exit 1/FAILED, src+cfg hashes unchanged both reps); semantic diff excludes timestamp/temp-path only"
+        }
+      },
+      "observed_bugs": [
+        "R0 plate path raises RuntimeError: script exposes no build entry (full traceback saved per step) — entry-point inability, recorded as result.",
+        "R1 unify --apply with complete metadata-only contract now refuses cleanly (FAILED/NOT_WRITTEN/NOT_RUN, no safe modification entry) instead of the old AttributeError (superseded logs kept out of main table).",
+        "curve.linewidth compare value [0.83] with editable=False is honest compare-only measurement, not an edit path."
+      ],
+      "visual_check": "1/1 R0 PNGs rendered (Agg) and inspected at representative panels; R1 after-PNGs byte-identical; polar/legend/mosaic panels visually confirmed; thumbnails not metric."
+    }
+  ]
+}

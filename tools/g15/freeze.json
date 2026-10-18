@@ -1,0 +1,25 @@
+{
+  "engine_sha": "793aaa89b39af49d2421e2a2840751cf757ba959",
+  "product_file_count": 38,
+  "product_bytes_sha256": "61e9c0da6a478eb288d00adeab2c0d1a79080454d6d2ed8002b22df1c9208f6c",
+  "product_digest_algorithm": "SHA256 over sorted figpact/**/* files with suffix .py/.js/.css/.html; each relative POSIX path, NUL byte, then raw file bytes",
+  "upstream_sha": "4aeb773422464799998d900198b35cb80e94b3e1",
+  "upstream_tag": "v3.10.7",
+  "python": "3.14.0",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "pyyaml": "6.0.3",
+  "backend": "Agg",
+  "pre_freeze_executed_regression": "23 passed, 1 warning",
+  "pre_freeze_actual_cli_smoke": {
+    "top_status": "FAILED",
+    "unify_status": "FAILED",
+    "child_status": "FAILED",
+    "source_commit_state": "COMMITTED",
+    "figure_verification_state": "FAIL",
+    "receipt_dual_state": {"source_commit_state": "COMMITTED", "figure_verification_state": "FAIL"},
+    "exit_code": 1
+  },
+  "full_suite_rerun_at_freeze": false,
+  "browser_suite_rerun_at_freeze": false
+}

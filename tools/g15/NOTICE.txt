@@ -1,0 +1,15 @@
+G15 third-party input fixtures
+
+Original gallery sources: Matplotlib developers, Matplotlib v3.10.7.
+Copyright (c) 2012- Matplotlib Development Team; All Rights Reserved.
+Copyright (c) 2002-2011 John D. Hunter; All Rights Reserved.
+Upstream: https://github.com/matplotlib/matplotlib
+Immutable source commit: 4aeb773422464799998d900198b35cb80e94b3e1
+License: LICENSE.matplotlib.txt (retained upstream license agreement).
+
+Original input files retain their upstream bytes. Generated R1 declarations,
+runners and evaluation results are figpact evaluation artifacts, not upstream
+Matplotlib code. R1 adds protocol declarations only; it must not rewrite plotting
+logic, insert new parameter bindings or set Artist properties after plotting.
+Per-case source paths, hashes and declaration changes are recorded with results.
+These fixtures are not evidence of arbitrary-script editing support.

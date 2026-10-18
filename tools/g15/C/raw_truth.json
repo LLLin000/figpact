@@ -1,0 +1,308 @@
+{
+ "eventcollection": {
+  "nfigs": 1,
+  "lines": [
+   {
+    "digest": "921c1fb7bddfb163",
+    "lw": 1.5
+   },
+   {
+    "digest": "20dde213ae117483",
+    "lw": 1.5
+   }
+  ],
+  "collections": [
+   {
+    "kind": "EventCollection",
+    "nseg": 10,
+    "seg_digest": "5139ff7c09814a56"
+   },
+   {
+    "kind": "EventCollection",
+    "nseg": 10,
+    "seg_digest": "4b6905e8a56ed317"
+   },
+   {
+    "kind": "EventCollection",
+    "nseg": 10,
+    "seg_digest": "ec7453fc508f00ab"
+   },
+   {
+    "kind": "EventCollection",
+    "nseg": 10,
+    "seg_digest": "46be386bac76f7a6"
+   }
+  ],
+  "title": "line plot with data points",
+  "xlabel": "",
+  "ylabel": "",
+  "xlim": [
+   0.0,
+   1.0
+  ],
+  "ylim": [
+   0.0,
+   1.0
+  ],
+  "tick_fs": 10.0
+ },
+ "annotation": {
+  "nfigs": 6,
+  "figs": [
+   {
+    "num": 1,
+    "size": [
+     4.0,
+     4.0
+    ],
+    "axes": [
+     {
+      "proj": "rectilinear",
+      "title": "",
+      "xlabel": "",
+      "ylabel": "",
+      "nlines": 1,
+      "ntexts": 6,
+      "npatches": 0,
+      "xlim": [
+       -1.0,
+       5.0
+      ],
+      "ylim": [
+       -3.0,
+       5.0
+      ],
+      "tick_fs": 10.0,
+      "texts": [
+       "figure pixels",
+       "figure points",
+       "figure fraction",
+       "point offset from data",
+       "axes fraction",
+       "pixel offset from axes fraction"
+      ],
+      "lines": [
+       {
+        "digest": "2ac23503466dbe0b",
+        "lw": 1.5
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "num": 2,
+    "size": [
+     3.0,
+     3.0
+    ],
+    "axes": [
+     {
+      "proj": "polar",
+      "title": "",
+      "xlabel": "",
+      "ylabel": "",
+      "nlines": 2,
+      "ntexts": 1,
+      "npatches": 0,
+      "xlim": [
+       0.0,
+       6.283185307179586
+      ],
+      "ylim": [
+       0.0,
+       1.04895
+      ],
+      "tick_fs": 10.0,
+      "texts": [
+       "a polar annotation"
+      ],
+      "lines": [
+       {
+        "digest": "bab7e1ac7d88d6f0",
+        "lw": 1.5
+       },
+       {
+        "digest": "bb0b1c48f1a40a10",
+        "lw": 1.5
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "num": 3,
+    "size": [
+     6.4,
+     4.8
+    ],
+    "axes": [
+     {
+      "proj": "rectilinear",
+      "title": "",
+      "xlabel": "",
+      "ylabel": "",
+      "nlines": 0,
+      "ntexts": 1,
+      "npatches": 1,
+      "xlim": [
+       -20.0,
+       20.0
+      ],
+      "ylim": [
+       -20.0,
+       20.0
+      ],
+      "tick_fs": 10.0,
+      "texts": [
+       "the top"
+      ],
+      "lines": []
+     }
+    ]
+   },
+   {
+    "num": 4,
+    "size": [
+     8.0,
+     5.0
+    ],
+    "axes": [
+     {
+      "proj": "rectilinear",
+      "title": "",
+      "xlabel": "",
+      "ylabel": "",
+      "nlines": 1,
+      "ntexts": 10,
+      "npatches": 0,
+      "xlim": [
+       -1.0,
+       5.0
+      ],
+      "ylim": [
+       -4.0,
+       3.0
+      ],
+      "tick_fs": 10.0,
+      "texts": [
+       "straight",
+       "arc3,\nrad 0.2",
+       "arc,\nangle 50",
+       "arc,\narms",
+       "angle,\nangle 90",
+       "angle3,\nangle -90",
+       "angle,\nround",
+       "angle,\nround4",
+       "angle,\nshrink",
+       ""
+      ],
+      "lines": [
+       {
+        "digest": "2ac23503466dbe0b",
+        "lw": 3.0
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "num": 5,
+    "size": [
+     6.4,
+     4.8
+    ],
+    "axes": [
+     {
+      "proj": "rectilinear",
+      "title": "",
+      "xlabel": "",
+      "ylabel": "",
+      "nlines": 0,
+      "ntexts": 6,
+      "npatches": 1,
+      "xlim": [
+       -1.0,
+       5.0
+      ],
+      "ylim": [
+       -5.0,
+       3.0
+      ],
+      "tick_fs": 10.0,
+      "texts": [
+       "$->$",
+       "arrow\nfancy",
+       "arrow\nsimple",
+       "wedge",
+       "bubble,\ncontours",
+       "bubble"
+      ],
+      "lines": []
+     }
+    ]
+   },
+   {
+    "num": 6,
+    "size": [
+     6.4,
+     4.8
+    ],
+    "axes": [
+     {
+      "proj": "rectilinear",
+      "title": "",
+      "xlabel": "",
+      "ylabel": "",
+      "nlines": 0,
+      "ntexts": 7,
+      "npatches": 0,
+      "xlim": [
+       0.0,
+       1.0
+      ],
+      "ylim": [
+       0.0,
+       1.0
+      ],
+      "tick_fs": 10.0,
+      "texts": [
+       "figure fraction : 0, 0",
+       "figure fraction : 1, 1",
+       "axes fraction : 0, 0",
+       "axes fraction : 1, 1",
+       "Drag me 1",
+       "Drag me 2",
+       ""
+      ],
+      "lines": []
+     },
+     {
+      "proj": "rectilinear",
+      "title": "",
+      "xlabel": "",
+      "ylabel": "",
+      "nlines": 0,
+      "ntexts": 3,
+      "npatches": 0,
+      "xlim": [
+       -2.0,
+       2.0
+      ],
+      "ylim": [
+       -2.0,
+       2.0
+      ],
+      "tick_fs": 10.0,
+      "texts": [
+       "xy=(0, 1)\nxycoords=(\"data\", \"axes fraction\")",
+       "xy=(0.5, 0)\nxycoords=artist",
+       "xy=(0.8, 0.5)\nxycoords=ax1.transData"
+      ],
+      "lines": []
+     }
+    ]
+   }
+  ]
+ }
+}

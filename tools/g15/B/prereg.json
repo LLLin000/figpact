@@ -1,0 +1,84 @@
+{
+ "freeze_sha": "PENDING_PARENT",
+ "upstream_sha": "4aeb773422464799998d900198b35cb80e94b3e1",
+ "raw_files": {
+  "barchart": {
+   "path": "raw/barchart.py",
+   "sha256": "f742b277c57b54e68df8adf4a7ce66250b438247b1b06235b481f36bc0ef79ed"
+  },
+  "errorbar_features": {
+   "path": "raw/errorbar_features.py",
+   "sha256": "9741f89bfc1e55ccfdaf5e06e6eb4d8b8200d1daa9dfc63583267ba1a8d05aeb"
+  },
+  "scatter_with_legend": {
+   "path": "raw/scatter_with_legend.py",
+   "sha256": "e128daaa4b90d0a3723c31445ade9b94da93717a532b48e7af9aa498fa3efea6"
+  }
+ },
+ "truth_pngs": "D:/L/AI/figpact-archive/g15-frozen/B/*_fig*.png + tools/g15/B/truth.json (geometry hashes)",
+ "preregistration_v1_draft": {
+  "barchart": {
+   "raw_roles": {
+    "axis.title(xlabel/ylabel)": [
+     "raw:35 set_ylabel",
+     "NOT set_title L36 (Axes title, must not count)"
+    ],
+    "axis.tick": [],
+    "curve.linewidth": [],
+    "panel.label": [],
+    "legend": [
+     "raw:38 legend() compare-only"
+    ],
+    "scalebar": []
+   },
+   "domain_objects": "3x BarContainer (9 rects) + bar_label Texts; bar heights + label values frozen in truth.json",
+   "legal_requests_v1_WRONG": [
+    "axis.tick 8pt (if wrapper exposes)",
+    "legend compare-only"
+   ],
+   "note": "set_title L36 is Axes title, NOT axis.title: any discovery claiming axis.title from L36 = false positive"
+  },
+  "errorbar_features": {
+   "raw_roles": {
+    "axis.title": [],
+    "axis.tick": [],
+    "curve.linewidth": [
+     "ax0 fmt=-o connected data Line2D L35, lw present"
+    ],
+    "panel.label": [],
+    "legend": [],
+    "scalebar": []
+   },
+   "ax1_marker_only": "fmt=o marker-only data Line2D (no connected curve): curve.linewidth NOT present there; claiming it = false positive",
+   "shared_axis": "sharex=True relationship preserved; ax1 log yscale protected (never edited)",
+   "legal_requests_v1_WRONG": [
+    "curve.linewidth 0.8pt on ax0 connected curve only"
+   ],
+   "domain_objects": "2x ErrorbarContainer (data Line2D + LineCollection barcols); data xy + err segments hashed in truth.json"
+  },
+  "scatter_with_legend": {
+   "raw_roles": {
+    "axis.title": [],
+    "axis.tick": [],
+    "curve.linewidth": [],
+    "panel.label": [],
+    "legend": [
+     "fig1 L28, fig2 L56-62 x2, fig3 L86-97 x2 compare-only"
+    ],
+    "scalebar": []
+   },
+   "domain_objects": "fig1 3x PathCollection(750ea, loop labels); fig2/fig3 PathCollection + legend_elements auto handles; ALL figures in scope",
+   "legal_requests_v1_WRONG": [
+    "legend compare-only (no forced writes)"
+   ],
+   "note": "PathCollections are domain objects outside 6 roles: register as object-coverage gap, never silent"
+  }
+ },
+ "errata_2026-10-18T04:55Z_parent_review_BEFORE_SCORING": {
+  "correction_1_roles": "axis.tick PRESENT in every axes of all 3 samples (default tick labels rendered; truth.json artist census confirms texts/lines). v1 [] meant 'no fontsize hook', NOT absence: this would corrupt recall denominator. Corrected: axis.tick present-as-rendered in barchart ax, errorbar ax0+ax1, scatter fig1/fig2/fig3 axes.",
+  "correction_1_requests": "legal pre-registered requests now: EVERY tick-bearing axes -> axis.tick 8pt probe; barchart -> axis.title 8pt probe on set_ylabel L35 (was missing); errorbar ax0 -> curve.linewidth 0.8pt probe on connected data Line2D; errorbar ax1 marker-only excluded from curve.linewidth; legend requests remain compare-only in all samples. No 'if wrapper exposes' exclusion.",
+  "correction_2_errorbar_types": "layout_contract nodes hardcoded type Line2D for all gids incl. LineCollection barcols. Fixed 2026-10-18 pre-rerun: type=type(reg.all()[gid]).__name__. Affects R1 errorbar rerun only; no result derived from false type.",
+  "correction_3_side_effects": "wrapper plt.close(all)/plt.show=lambda are host-side isolation, restored via try/finally in _build_frozen/_build_block (all 3 decls). Never scored as engine issue.",
+  "correction_4_runner": "v1 run_B.py covered discover/verify only. Extended pre-final: plate compare + unify --apply (with registered legal probes) + receipt + audit, repeated discovery/rebuild/apply in isolated copies, science/view invariants. History drafts from v1 run retained with exit codes; affected R1 errorbar + all plate steps rerun after fix, not silently edited."
+ }
+}

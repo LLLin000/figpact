@@ -1,0 +1,18 @@
+{
+  "upstream_sha": "4aeb773422464799998d900198b35cb80e94b3e1",
+  "base_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/4aeb773422464799998d900198b35cb80e94b3e1/galleries/examples/",
+  "selection": "Fixed before G15 engine execution; all figures from each full script retained, not a passing-panel subset",
+  "samples": [
+    {"group":"A", "path":"A/raw/subplots_demo.py", "upstream_path":"subplots_axes_and_figures/subplots_demo.py", "sha256":"802f31d63cc05c584b415472585d7c76ccd266aab673c23d20cd985744da1ba9", "present_roles":["axis.title","axis.tick","curve.linewidth"], "domain_objects":["shared axes", "polar projection", "Axes titles", "suptitles"]},
+    {"group":"A", "path":"A/raw/label_subplots.py", "upstream_path":"text_labels_and_annotations/label_subplots.py", "sha256":"a99b7dd3f4452f6d82782f2dd567d91db4b079132802b01d8baf904ec58faaaf", "present_roles":["axis.tick","panel.label"], "domain_objects":["subplot mosaic", "Axes titles"]},
+    {"group":"A", "path":"A/raw/figlegend_demo.py", "upstream_path":"text_labels_and_annotations/figlegend_demo.py", "sha256":"589a20e8aed1cd3e4493f67cd6953825527e87f9b2ecd39aeebdb7bfed910ce0", "present_roles":["axis.tick","curve.linewidth","legend"], "domain_objects":["Figure legend"]},
+    {"group":"B", "path":"B/raw/barchart.py", "upstream_path":"lines_bars_and_markers/barchart.py", "sha256":"f742b277c57b54e68df8adf4a7ce66250b438247b1b06235b481f36bc0ef79ed", "present_roles":["axis.title","axis.tick","legend"], "domain_objects":["BarContainer", "bar labels", "Axes title"]},
+    {"group":"B", "path":"B/raw/errorbar_features.py", "upstream_path":"statistics/errorbar_features.py", "sha256":"9741f89bfc1e55ccfdaf5e06e6eb4d8b8200d1daa9dfc63583267ba1a8d05aeb", "present_roles":["axis.tick","curve.linewidth"], "domain_objects":["ErrorbarContainer", "LineCollection", "marker-only Line2D", "log y-axis", "shared x-axis", "Axes titles"], "truth_note":"ax0 fmt=-o contains a connected data curve; ax1 fmt=o is marker-only"},
+    {"group":"B", "path":"B/raw/scatter_with_legend.py", "upstream_path":"lines_bars_and_markers/scatter_with_legend.py", "sha256":"e128daaa4b90d0a3723c31445ade9b94da93717a532b48e7af9aa498fa3efea6", "present_roles":["axis.tick","legend"], "domain_objects":["PathCollection", "multiple legends", "scatter sizes/colors"]},
+    {"group":"C", "path":"C/raw/eventcollection_demo.py", "upstream_path":"lines_bars_and_markers/eventcollection_demo.py", "sha256":"12f9facb541a25ca8702d44dcbd1f17ad7cf51bd9155c180200ed4d14b88d88a", "present_roles":["axis.tick","curve.linewidth"], "domain_objects":["EventCollection", "Axes title"]},
+    {"group":"C", "path":"C/raw/annotation_demo.py", "upstream_path":"text_labels_and_annotations/annotation_demo.py", "sha256":"1073f84b8efa3147271c5171017530f4f190b2ae5f73ece7af1e186d1e0d1d90", "present_roles":["axis.tick","curve.linewidth"], "domain_objects":["Annotation", "arrows", "Ellipse", "polar projection", "mixed coordinate transforms"], "truth_note":"Ordinary explanatory annotations are not panel labels"}
+  ],
+  "role_unit": "one semantic role kind per original source file, union across all figures; R0 and R1 use the same truth denominator",
+  "valid_visual_edit_intents": "axis.title 8pt, axis.tick 8pt, curve.linewidth 0.8pt where present; legend and panel.label compare-only",
+  "source_truth_caveat": "No truth was inferred from engine acceptance. Detailed source positions and independent numerical inventories are retained in each stratum. This aggregate provenance manifest is recorded after source acquisition; it does not replace the earlier preregistration."
+}
