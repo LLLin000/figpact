@@ -138,9 +138,11 @@ spatial_risk: FTIR label bottom overflow 0.697 mm; Line2D top overflow 2.632 mm 
 | 曲线线宽 | rejected：共享参数还改变未声明的误差棒 LineCollection | 1.2 pt，源码参数未改，不冒充达标 |
 
 视图、6 个 Line2D 的数据坐标和 2 个误差棒集合的线段均前后相等；重复 apply 配置字节不变。
-空间校验仍报告 FAIL，不能将该图称为整图通过。本次修复了一个 CLI 误报：
-即使顶层写入状态是 OK，只要任一子图回执为 `figure_verification_state=FAIL`，
-`plate unify --apply` 就返回退出码 1；成功写盘不等于成功验证。
+空间校验仍报告 FAIL，不能将该图称为整图通过。草稿允许 `source_commit_state=COMMITTED`
+且 `figure_verification_state=FAIL`，但子结果、plate 聚合结果和 CLI 顶层 `status` 均为 `FAILED`
+（对象审计阻断时为 `AUDIT_BLOCKED`），`plate unify --apply` 返回退出码 1。
+receipt 保留真实的 `COMMITTED / FAIL`，不将验证失败误写为未提交，也不让干净的后续审计抹掉 FAIL。
+现有 Apply 是工作草稿保存，不是 Strict 发布；失败图不能作为已验证的正式产物。
 
 可复跑的真实发现→确认→扰动→写盘→CLI 退出码检查（在临时副本中运行，不修改示例）：
 

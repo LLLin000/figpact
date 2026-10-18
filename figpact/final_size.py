@@ -585,7 +585,7 @@ def apply_final_size(script, config=None, *, target_width_mm=None, target_axis_f
 
     result = {
         "refused_roles": missing if 'missing' in locals() else [],
-        "status": ("OK" if committed else applied.get("status", "FAILED")),
+        "status": ("OK" if (committed and ver_state == "PASS") else (applied.get("status", "FAILED") if not committed else "FAILED")),
         "source_commit_state": src_state,
         "figure_verification_state": ver_state,
         "message": message,

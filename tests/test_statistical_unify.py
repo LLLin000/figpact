@@ -36,9 +36,15 @@ def test_unify_returns_failure_when_committed_figure_verification_fails(tmp_path
     code = main(['plate', 'unify', str(manifest), '--apply'])
     result = json.loads(capsys.readouterr().out)
     applied = result['unify']['per_figure'][0]['result']
+    assert result['status'] not in ('OK', 'PARTIAL'), result['status']
+    assert result['unify']['status'] not in ('OK', 'PARTIAL'), result['unify']
+    assert applied['status'] != 'OK', applied
     assert applied['source_commit_state'] == 'COMMITTED'
     assert applied['figure_verification_state'] == 'FAIL'
     assert applied['refused_roles'] == ['line_width']
     assert yaml.safe_load(config.read_text(encoding='utf-8'))['line_width'] == 1.2
     assert script.read_bytes() == script_before
     assert code == 1, 'a failed rendered figure must fail the CLI even after a successful write'
+    dual = result['receipt']['dual_state']
+    assert dual['source_commit_state'] == 'COMMITTED', dual
+    assert dual['figure_verification_state'] == 'FAIL', dual

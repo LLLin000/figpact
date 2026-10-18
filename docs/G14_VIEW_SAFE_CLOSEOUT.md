@@ -133,12 +133,13 @@
    unauthorized（`unregistered.Line2D.*`、`unregistered.tick.y.*`、2 个 ytick envelope
    structure-removed）已作为历史对照保留在 G14_EVIDENCE §5——口径差异已解释，非放水。
 
-## 7. 测试数字：61 passed
+## 7. 历史测试收集数：61 collected（不是 passed）
 
-以下 8 个套件合计 **61**（本任务不跑测试，此数为 `pytest --collect-only` 实测收集数，
-17+12+7+7+6+5+4+3=61；按任务口径列为 61 passed 的套件构成）：
+以下 8 个套件合计 **61 个已收集测试**，数字来自当时的 `pytest --collect-only`：
+17+12+7+7+6+5+4+3=61。该命令未执行测试，不能证明通过；原文“61 passed”已更正。
+这份历史收集清单与 §9 的全量实际执行结果是两组不同证据，不得互相替代。
 
-| 套件 | tests |
+| 套件 | collected tests |
 |---|---|
 | `tests/test_role_registry_g12.py` | 17 |
 | `tests/test_g14_view_and_idempotency.py` | 12 |
@@ -154,9 +155,8 @@
 1. **ftir label/legend 在 80 mm 下不可行**：effective 4.702 pt < 5 pt 下限
    （`infeasible_report` 见 §5）。名义值 4.7 从未被统一目标覆盖（`panel_label_pt=9` 仅比较、
    legend compare-only），k 归一后暴露。影响：ftir `figure_verification_state=FAIL`，
-   apply 退出码 1（顶层 status=OK 不受影响）。修法（三选一，需下一阶段决定）：
-   给 ftir label/legend 显式声明可编辑绑定并纳入统一目标；或接受 compare-only 并在
-   verification 口径中豁免；或改 ftir 版式。本阶段均未做，如实保留 FAIL。
+   apply 退出码 1（当时顶层 status=OK；后续状态语义修正单独记录，历史回执不重写）。
+   该样本作为真实失败保留；G15 不修改 FTIR 版式、不补专用绑定，也不豁免字号下限。
 2. **embedded receipt 的 spread 口径差**：内嵌 receipt 的 `role_spread_pt` 仍为统一前极差
    （7.063/7.118/0.618，`within_tolerance:false`），与其同文件的 compare cells
    （8.003，F✓）不在同一口径（G14_EVIDENCE §7-②）。影响：读内嵌 receipt 会误判为未达标；
@@ -169,12 +169,16 @@
    SVG/PNG 边界冻结（C✗E✗）。下一个验证点是拿一张未见过的统计图做盲测
    （init-contract 发现 → 确认 → 扰动 → compare/apply 全链路），检验通用机制是否脱离夹具仍成立。
    本文件不预设其结果。
+5. **Demo 标签空间仅被隔离，未彻底解决**：`set_ylim(_y0, _data_top + 0.9)` 的上限现在只依赖数据和固定留白，
+   不再依赖标签 bbox，因此消除了标签字号反向改变科学窗口的问题。标签仍使用 `offset points`，
+   没有独立的轴外标签布局区域；长标签仍可能空间不足。G14 不再为使示例通过而改动此布局。
+
 
 ---
 
 ## 9. 最终回归状态与期间修掉的红
 
-全量**非浏览器**套件最终为 **554 passed / 7 skipped / 87 subtests / 0 failed**；浏览器套件 **22 passed**。G14 收口时曾有 6 failed。逐条：
+G14 收口时的全量实际执行（对应 `590df03` 产品代码状态）：**非浏览器 554 passed / 7 skipped / 87 subtests / 0 failed**；浏览器 **22 passed**。这不是最新提交自动继承的验证结果。G14 收口时曾有 6 failed。逐条：
 
 | 失败 | 类型 | 根因 | 处理 |
 |---|---|---|---|
@@ -188,3 +192,14 @@
 **隔离实现的关键取舍**：第一次尝试用 `rcParamsDefault` 作基准，等于**改变构建时看到的环境**，导致依赖字体度量的契约出现 dangling objects；最终改为“**当前 rc 快照 + 退出还原**”——隔离副作用而不改变输入。
 
 **测试未被削弱**：期间唯一改动的测试是 `REGISTERED_OBJECTS` 常量（随有意特性同步），其余失败全部由产品修复或丢弃中断单元的半成品解决。浏览器套件本轮复跑 **22 passed**。
+
+### 后续提交的验证范围
+
+`d465a6e` 新增协议内统计图样本与 CLI 退出码修复，实际执行了两组命令：
+
+- plate 相关组合：**12 passed**（包含统计图回归）。
+- 契约与安全组合：**34 passed / 3 warnings**（也包含统计图回归，不能与上一组相加成独立测试总数）。
+
+该提交**未重新执行全量或浏览器套件**。统计图样本是开发者添加现有接入协议后的新图型检查，
+不是零接入识别，也不是独立人员盲测。G15 将冻结引擎并明确区分这两种接入条件。
+

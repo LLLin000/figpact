@@ -714,6 +714,21 @@ def unify(plan: dict, *, specs: Optional[list[dict]] = None, dry_run: bool = Fal
                  if isinstance(p.get("result"), dict) and p["result"].get("source_commit_state") == "COMMITTED"]
     status = "OK" if per_figure and len(committed) == len(per_figure) else (
         "PARTIAL" if committed else "FAILED")
+    #: 写盘是事实、验证是结论：任一已提交子回执 FAIL/ERROR 就不能再报 OK/PARTIAL。
+    #: AUDIT_BLOCKED 仍优先（见下），此处只降级、不伪造 PASS。
+    _ver_failed = any(
+        isinstance(p.get("result"), dict)
+        and p["result"].get("source_commit_state") == "COMMITTED"
+        and p["result"].get("figure_verification_state") in ("FAIL", "ERROR")
+        for p in per_figure)
+    _after_bad = isinstance(after, dict) and bool(after.get("error"))
+    if isinstance(after, dict):
+        for _item in after.get("figures", []):
+            if _item.get("infeasible") or _item.get("out_of_bounds"):
+                _after_bad = True
+                break
+    if (_ver_failed or _after_bad) and status in ("OK", "PARTIAL"):
+        status = "FAILED"
     # G12-B/G14 对象级差异审计：每张已提交的图，对“写后”做一次对象级复核
     # （Actual ⊆ Allowed 且目标确实变了）。science 结论只搬 science 指纹比较，
     # 不自创口径；失败只记 verdict，不回滚已提交写入。
@@ -797,17 +812,34 @@ def receipt(audit_result: dict, plan: Optional[dict] = None,
             отклон[role] = {"min": round(min(vals), 3), "max": round(max(vals), 3),
                             "spread_pt": round(max(vals) - min(vals), 3),
                             "within_tolerance": (max(vals) - min(vals)) <= UNIFY_TOLERANCE_PT}
+    #: 写入口径只看子回执（互不推导）：有已提交即 COMMITTED，否则 NOT_WRITTEN；
+    #: 验证 FAIL/ERROR 不得把已提交说成未写，顶层 status 更不许直接搬进 source。
+    _n_committed = sum(
+        1 for _p in ((unify_result or {}).get("per_figure") or [])
+        if isinstance((_p or {}).get("result"), dict)
+        and (_p["result"] or {}).get("source_commit_state") == "COMMITTED") if unify_result else 0
     dual = {
-        "source_commit_state": ((unify_result or {}).get("status")
-                                if unify_result else "NOT_WRITTEN"),
+        "source_commit_state": "NOT_WRITTEN" if not unify_result else ("COMMITTED" if _n_committed else "NOT_WRITTEN"),
         "figure_verification_state": "NOT_RUN",
     }
-    if unify_result and isinstance(unify_result.get("after"), dict):
-        bad = []
-        for item in unify_result["after"].get("figures", []):
-            bad.extend(item.get("infeasible", []) or [])
-            bad.extend([r for r in item.get("out_of_bounds", []) if isinstance(r, dict)])
-        dual["figure_verification_state"] = "FAIL" if bad else "PASS"
+    _after = unify_result.get("after") if isinstance(unify_result, dict) else None
+    if isinstance(_after, dict):
+        if isinstance(_after.get("figures"), list):
+            bad = []
+            for item in _after.get("figures", []):
+                bad.extend(item.get("infeasible", []) or [])
+                bad.extend([r for r in item.get("out_of_bounds", []) if isinstance(r, dict)])
+            dual["figure_verification_state"] = "FAIL" if bad else "PASS"
+        elif _after.get("error"):
+            #: 重审计没跑完：不许编 PASS；按 schema 口径记 FAIL（未通过），不伪造通过。
+            dual["figure_verification_state"] = "FAIL"
+    #: 子回执已提交 FAIL/ERROR 永远优先：after 缺失/干净都不得把它洗成 PASS/NOT_RUN。
+    if unify_result and any(
+            isinstance((_p or {}).get("result"), dict)
+            and (_p["result"] or {}).get("source_commit_state") == "COMMITTED"
+            and (_p["result"] or {}).get("figure_verification_state") in ("FAIL", "ERROR")
+            for _p in (unify_result.get("per_figure") or [])):
+        dual["figure_verification_state"] = "FAIL"
     manifest = kwargs.get("manifest")
     design = (manifest or {}).get("design") if isinstance(manifest, dict) else None
     token_sources: dict[str, dict] = {}
