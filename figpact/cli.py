@@ -898,6 +898,44 @@ def cmd_ui(args: argparse.Namespace) -> int:
     return int(run_inspector(argv) or 0)
 
 
+def cmd_overlay(args) -> int:
+    """Verified declarative styles; never rewrite the plotting script."""
+    from figpact import style_overlay
+
+    try:
+        if args.overlay_cmd == "inventory":
+            result = {"targets": style_overlay.inventory(
+                args.script, args.config, args.scope)}
+            code = 0
+        elif args.overlay_cmd == "apply":
+            edits = json.loads(Path(args.edits).read_text(encoding="utf-8"))
+            result = style_overlay.apply(
+                args.script, args.config, args.scope, edits=edits,
+                overlay=args.overlay, expected_before_sha256=args.expected_sha256,
+                allow_draft=args.allow_draft)
+            code = 0 if (result.get("local_edit_state") == "PASS"
+                         and result.get("figure_verification_state") == "PASS") else 1
+        else:
+            if args.output:
+                output = Path(args.output).expanduser().resolve()
+                if output.suffix.lower() not in (".png", ".svg", ".pdf"):
+                    raise ValueError("output must be PNG, SVG or PDF")
+                result = style_overlay.render(args.overlay, output)
+            else:
+                fig, _reg, result = style_overlay.load(args.overlay)
+                if fig is not None:
+                    import matplotlib.pyplot as plt
+                    plt.close(fig)
+            code = 0 if (result.get("local_edit_state") == "PASS"
+                         and result.get("figure_verification_state") == "PASS") else 1
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return code
+    except (ValueError, OSError, RuntimeError) as error:
+        print(json.dumps({"status": "REFUSED", "local_edit_state": "ERROR",
+                          "message": str(error)}, ensure_ascii=False, indent=2))
+        return 1
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     """命令行主入口。"""
     if argv is None:
@@ -1036,10 +1074,28 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_pr.add_argument("--width-mm", type=float, default=None, help="默认目标宽度 mm（无清单时用）")
     p_pr.add_argument("--out", default=None, help="回执 JSON 输出路径")
 
+    p_overlay = subparsers.add_parser("overlay", help="Verified Style Overlay（不改原始 Python）")
+    overlay_sub = p_overlay.add_subparsers(dest="overlay_cmd", required=True)
+    for name in ("inventory", "apply"):
+        p = overlay_sub.add_parser(name)
+        p.add_argument("--script", required=True)
+        p.add_argument("--config", default=None)
+        p.add_argument("--scope", default=None)
+        if name == "apply":
+            p.add_argument("--edits", required=True, help="JSON list: target_id + absolute value")
+            p.add_argument("--overlay", required=True, help="声明式样式 JSON，不是 Python 改写")
+            p.add_argument("--expected-sha256", default=None, help="更新既有 Overlay 的内容哈希")
+            p.add_argument("--allow-draft", action="store_true", help="显式允许局部通过但整图 QA 失败的草稿")
+    p_or = overlay_sub.add_parser("render", help="从原图与持久化 Overlay 重建、验证、渲染")
+    p_or.add_argument("overlay")
+    p_or.add_argument("--output", default=None)
+
     args = parser.parse_args(argv)
 
     if args.subcommand == "validate":
         return cmd_validate(args)
+    elif args.subcommand == "overlay":
+        return cmd_overlay(args)
     elif args.subcommand == "render":
         return cmd_render(args)
     elif args.subcommand == "export":

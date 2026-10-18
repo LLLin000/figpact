@@ -155,6 +155,30 @@ G15 已在冻结引擎上运行第三方 Matplotlib gallery 的多 Axes、统计
 缺入口、缺绑定、源文提示错配与正确拒绝分别记账。
 协议、逐项指标、有效性勘误和复跑入口见 [G15 报告](docs/G15_REPORT.md)。
 
+### Verified Style Overlay：不改原 Python 的受控样式（G16 / R2）
+
+没有原生 YAML 参数的可信 Figure，可通过独立 JSON Overlay 持久化三种已验证操作：
+xlabel/ylabel 字号、某一轴的可见主刻度字号、唯一连接数据 Line2D 的线宽。
+不支持任意方法、误差棒 Collection、柱形、散点、图例或 AST 自动改写。
+Overlay 不是原始 Python 源码改写；原始科学程序和配置保持不变。
+
+```bash
+python -m figpact overlay inventory --script tools/g15/B/g15b_errorbar_decl.py --scope ax0
+# 将 inventory 中选定对象的 id 写入 edits.json：
+# [{"target_id": "<inventory 中的精确 id>", "value": 0.8}]
+python -m figpact overlay apply --script tools/g15/B/g15b_errorbar_decl.py --scope ax0 --edits edits.json --overlay style.json
+python -m figpact overlay render style.json --output edited.png
+```
+
+重建时由引擎按结构指纹和源依赖哈希重新定位，不以遍历序号猜对象；缺失、歧义、漂移均拒绝。
+更新既有 Overlay 需 `--expected-sha256`；相同目标重复应用不会累积或重写文件。
+局部审计与整图 QA 分开：只有显式 `--allow-draft` 才保存局部通过、整图失败的草稿，
+回执为 `COMMITTED_DRAFT / FAIL`，退出码仍为 1，失败草稿不渲染为已验证产物。
+首次创建为完整临时文件的原子排他安装；更新复用现有原子替换，沿用单写者约束（非多进程 CAS）。
+跨盘声明会保存绝对路径并标记不可移植；普通路径引用与依赖内容均受校验。
+
+三个异构陌生图的真实 R2 验收与限制见 [G16 报告](docs/G16_REPORT.md)。
+
 
 ## 测试
 

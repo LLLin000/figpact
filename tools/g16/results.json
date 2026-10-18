@@ -1,0 +1,101 @@
+{
+  "condition": "R2 Verified Style Overlay",
+  "source_version": "Matplotlib v3.10.7 / 4aeb773422464799998d900198b35cb80e94b3e1",
+  "g15_frozen_files": 44,
+  "g15_changed_files": 0,
+  "samples": [
+    {
+      "sample": "bar_ylabel",
+      "target_value_pt": 8,
+      "first_exit": 0,
+      "restart_exit": 0,
+      "repeat_exit": 0,
+      "local_edit_state": "PASS",
+      "source_commit_state": "COMMITTED",
+      "figure_verification_state": "PASS",
+      "science_unchanged": true,
+      "audit_summary": {
+        "agreement": true,
+        "derived_allowed": 28,
+        "derived_total": 28,
+        "hard": 0,
+        "pair_runs": 2,
+        "required_changed": {
+          "main.ax[sa547ab9390fe].ylabel.fontsize.fontsize": [
+            10.0,
+            8.0
+          ]
+        }
+      },
+      "overlay_repeat_bytes_identical": true,
+      "source_unchanged": true
+    },
+    {
+      "sample": "shared_ticks",
+      "target_value_pt": 8,
+      "first_exit": 0,
+      "restart_exit": 0,
+      "repeat_exit": 0,
+      "local_edit_state": "PASS",
+      "source_commit_state": "COMMITTED",
+      "figure_verification_state": "PASS",
+      "science_unchanged": true,
+      "audit_summary": {
+        "agreement": true,
+        "derived_allowed": 7,
+        "derived_total": 7,
+        "hard": 0,
+        "pair_runs": 2,
+        "required_changed": {
+          "fig07.ax[sa9ae0a072fbe].tick.y.fontsize.fontsize": [
+            10.0,
+            8.0
+          ]
+        }
+      },
+      "overlay_repeat_bytes_identical": true,
+      "source_unchanged": true
+    },
+    {
+      "sample": "errorbar_curve",
+      "target_value_pt": 0.8,
+      "first_exit": 0,
+      "restart_exit": 0,
+      "repeat_exit": 0,
+      "local_edit_state": "PASS",
+      "source_commit_state": "COMMITTED",
+      "figure_verification_state": "PASS",
+      "science_unchanged": true,
+      "audit_summary": {
+        "agreement": true,
+        "derived_allowed": 0,
+        "derived_total": 0,
+        "hard": 0,
+        "pair_runs": 2,
+        "required_changed": {
+          "ax0.ax[scf04968b1d1d].curve.db53fdbe31807.l1baef315.gg15b_errorbar.ax0.data.linewidth.linewidth": [
+            1.5,
+            0.8
+          ]
+        }
+      },
+      "overlay_repeat_bytes_identical": true,
+      "source_unchanged": true
+    }
+  ],
+  "independent_non_target_checks": {
+    "shared_ticks": {
+      "top_y_pt": 8,
+      "bottom_y_pt": 10,
+      "shared_x": true
+    },
+    "errorbar_curve": {
+      "top_line_pt": 0.8,
+      "bottom_line_pt": 1.5,
+      "error_segments_unchanged": true,
+      "collection_widths_unchanged": true,
+      "markers_unchanged": true,
+      "views_unchanged": true
+    }
+  }
+}
