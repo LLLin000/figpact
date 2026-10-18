@@ -1,0 +1,36 @@
+{
+  "scope": "main",
+  "verdict": "PASS",
+  "dimensions": {
+    "all_runs_returncode_zero": true,
+    "freezes_present": true,
+    "science_numeric": true,
+    "stats_stdout_report_block": true,
+    "figure_geometry": true,
+    "artists": true,
+    "styles": true,
+    "view": true,
+    "ownership_registry": true,
+    "export_counts_expected": true,
+    "full_cli_exports_created_during_run": true,
+    "pure_zero_new_files": true
+  },
+  "orig_script_sha256": "59a2f9586ed62edcd2d10afa5f35b325728d2ef80ffc015129db0164163fbad2",
+  "orig_byte_exact": true,
+  "export_counts": {
+    "full": {
+      "fs_export": 1,
+      "savefig": 3
+    },
+    "pure": {
+      "fs_export": 0,
+      "savefig": 0
+    }
+  },
+  "run_returncodes": {
+    "full_cli": 0,
+    "full_probe": 0,
+    "pure_probe": 0
+  },
+  "note": "sanitized: sha + PASS/FAIL + counts + returncodes only"
+}

@@ -38,7 +38,7 @@ RECEIPT_SCHEMA = "figpact.style-overlay-receipt/1"
 FONTSIZE_RANGE = (0.5, 100.0)
 LINEWIDTH_RANGE = (0.05, 20.0)
 
-__all__ = ["inventory", "apply", "load", "render",
+__all__ = ["inventory", "apply", "load", "load_workspace", "inspect_candidate", "render",
            "OVERLAY_SCHEMA", "RECEIPT_SCHEMA"]
 
 
@@ -617,10 +617,16 @@ def _snapshots(fig: Any, reg: Any, manifest: Any,
     except Exception as error:
         captured = {"digest": None, "objects": {},
                     "error": f"{type(error).__name__}: {error}"}
+    try:
+        measured = qa_mod.measure(fig)
+        records: list = list(measured.get("records") or [])
+    except Exception:
+        records = []
     return {"styles": styles, "shapes": shapes, "view": view,
             "science": captured,
             "qa_blocking": list(qa_mod.blocking_problems(fig)),
-            "qa_glyph": _min_plain_fontsize(fig)}
+            "qa_glyph": _min_plain_fontsize(fig),
+            "qa_records": records}
 
 
 def _qa_of(snap: dict) -> dict:
@@ -646,6 +652,112 @@ def _figure_state(local_state: str, qa_pass: bool) -> str:
     if local_state in ("PASS", "FAIL"):
         return "FAIL"
     return "ERROR"
+
+
+def _closed_delta(reason: str) -> dict:
+    """Fail-closed qa_delta: unknown/unmeasured never counts as eligible."""
+    return {"eligible": False, "inherited": [], "new": [],
+            "worsened": [], "unmeasured": [str(reason)],
+            "reason": str(reason)}
+
+
+def _delta_of(before: Any, after: Any) -> dict:
+    """Renderer-records QA delta (QA-owned); string input never shippable.
+
+    ``before`` is the saved-workspace baseline records, ``after`` the
+    candidate after records. Missing collector, any error, or any
+    unmeasured/ambiguous record fails closed.
+    """
+    try:
+        from figpact import qa as qa_mod
+        delta = qa_mod.delta_records(before or [], after or [])
+        if not isinstance(delta, dict):
+            raise ValueError("delta_records must return a dict")
+        return {"eligible": bool(delta.get("eligible")),
+                "inherited": list(delta.get("inherited") or []),
+                "new": list(delta.get("new") or []),
+                "worsened": list(delta.get("worsened") or []),
+                "unmeasured": list(delta.get("unmeasured") or []),
+                "ambiguous": list(delta.get("ambiguous") or []),
+                "reason": str(delta.get("reason") or "")}
+    except Exception as error:
+        closed = _closed_delta(f"delta_records unavailable: {error}")
+        closed["ambiguous"] = []
+        return closed
+
+
+def _saved_state_records(script_p: Path, config_p: Path | None,
+                          scope: str | None, targets: list) -> list | None:
+    """Renderer QA records of the currently saved overlay state (baseline).
+
+    ``None`` on any problem: the draft gate then fails closed.
+    """
+    import matplotlib.pyplot as plt
+    from figpact import style_identity as ident
+    try:
+        module, _, fig, reg, resolved = _fresh_build(script_p, config_p, scope)
+        try:
+            for item in targets or []:
+                artists = ident.resolve(fig, item["descriptor"], scope=resolved)
+                _set_absolute(artists, item["descriptor"]["role"],
+                              item["descriptor"]["property"], float(item["value"]))
+            from figpact import qa as qa_mod
+            return list(qa_mod.measure(fig)["records"])
+        finally:
+            try:
+                plt.close(fig)
+            except Exception:
+                pass
+    except Exception:
+        return None
+
+
+def _original_records(script_p: Path, config_p: Path | None, scope: str | None) -> list | None:
+    """Renderer QA records of the pristine original figure (truth baseline).
+
+    ``None`` on any problem: the draft gate fails closed.
+    """
+    import matplotlib.pyplot as plt
+    try:
+        _module, _, fig, _reg, _resolved = _fresh_build(script_p, config_p, scope)
+        try:
+            from figpact import qa as qa_mod
+            return list(qa_mod.measure(fig).get("records") or [])
+        finally:
+            try:
+                plt.close(fig)
+            except Exception:
+                pass
+    except Exception:
+        return None
+
+
+def _draft_gate(script_p: Path, config_p: Path | None, scope: str | None,
+                prior: dict | None, after_recs: list) -> dict:
+    """Safe-draft eligibility: candidate vs truth baselines, measured fresh.
+
+    Baseline truth is the actual current workspace figure: ORIGINAL records
+    when no prior overlay exists, else the PRIOR overlay's current-figure
+    records (a real ``measure`` of the saved state, never a union of
+    original + prior lists which would resurrect eliminated defects).
+    Candidate ``after_recs`` come from the independently verified pair.
+    Unmeasurable baseline, or any error, fails closed.
+    """
+    if prior is not None:
+        base = _saved_state_records(script_p, config_p,
+                                    prior.get("scope") or scope,
+                                    prior.get("targets") or [])
+        if base is None:
+            return _closed_delta("saved-state QA unmeasurable")
+    else:
+        base = _original_records(script_p, config_p, scope)
+        if base is None:
+            return _closed_delta("original QA unmeasurable")
+    try:
+        return _delta_of({"records": _native(base or [])},
+                         {"records": _native(after_recs or [])})
+    except Exception as error:
+        return _closed_delta(f"draft baseline failed: {error}")
 
 
 # ------------------------------------------------------------- verify core
@@ -721,9 +833,11 @@ def _snapshot_fingerprint(before: dict, after: dict) -> dict:
         "before_science": str((before.get("science") or {}).get("digest")),
         "after_science": str((after.get("science") or {}).get("digest")),
         "before_qa": _digest({"blocking": before.get("qa_blocking"),
-                              "glyph": before.get("qa_glyph")}),
+                              "glyph": before.get("qa_glyph"),
+                              "records": before.get("qa_records")}),
         "after_qa": _digest({"blocking": after.get("qa_blocking"),
-                             "glyph": after.get("qa_glyph")}),
+                             "glyph": after.get("qa_glyph"),
+                             "records": after.get("qa_records")}),
     }
 
 
@@ -999,11 +1113,28 @@ def _verify_clear(script_p: Path, config_p: Path | None, scope: str | None,
             "protected_sources": list(protected0),
             "local_problems": list(audit["problems"]), "target_effects": []}
     if not audit["ok"]:
+        failed = dict(base)
+        failed["qa_delta"] = _closed_delta("local audit failed")
         return _build_receipt(local_edit_state="FAIL",
                               source_commit_state="NOT_WRITTEN",
                               figure_verification_state=_figure_state("FAIL", qa),
-                              draft=False, **base)
-    if not qa and not allow_draft:
+                              draft=False, **failed)
+    if not isinstance(allow_draft, bool):
+        failed = dict(base)
+        failed["qa_delta"] = _closed_delta("INVALID allow_draft: must be bool")
+        return _build_receipt(local_edit_state="ERROR",
+                              local_problems=["INVALID allow_draft: must be bool"],
+                              source_commit_state="NOT_WRITTEN",
+                              figure_verification_state="ERROR", draft=False,
+                              **{k: v for k, v in failed.items() if k != "local_problems"})
+    delta = _draft_gate(script_p, config_p, want_scope, prior,
+                        snap2.get("qa_records") or [])
+    base["qa_delta"] = delta
+    if not qa and not (allow_draft and delta.get("eligible")):
+        problem = ("DRAFT_REFUSED: " + str(delta.get("reason") or "not eligible")
+                   if allow_draft else
+                   "whole-figure QA FAIL: pass allow_draft=True for eligible draft only")
+        base["local_problems"] = list(base["local_problems"]) + [problem]
         return _build_receipt(local_edit_state="PASS",
                               source_commit_state="NOT_WRITTEN",
                               figure_verification_state="FAIL", draft=False, **base)
@@ -1056,7 +1187,14 @@ def _verify_clear(script_p: Path, config_p: Path | None, scope: str | None,
         core, sort_keys=True, ensure_ascii=False,
         separators=(",", ":"), allow_nan=False))
     if same:
-        draft = not qa
+        eligible = bool((base.get("qa_delta") or {}).get("eligible"))
+        if (not qa) and not eligible:
+            problem = ("DRAFT_REFUSED: " + str((base.get("qa_delta") or {}).get("reason") or "not eligible"))
+            base["local_problems"] = list(base["local_problems"]) + [problem]
+            return _build_receipt(local_edit_state="PASS",
+                                  source_commit_state="NOT_WRITTEN",
+                                  figure_verification_state="FAIL", draft=False, **base)
+        draft = (not qa) and eligible
         ok = dict(base)
         ok.update(local_edit_state="PASS", local_problems=[],
                   source_commit_state="COMMITTED_DRAFT" if draft else "COMMITTED",
@@ -1100,6 +1238,10 @@ def _build_receipt(**fields: Any) -> dict:
     overriding the base dict first (``dict.update`` then one splat) -- no
     call site may pass the same keyword twice.
     """
+    if "qa_delta" not in fields:
+        fields["qa_delta"] = _closed_delta("unmeasured: no verified QA pair")
+    if "qa_delta" not in fields:
+        fields["qa_delta"] = _closed_delta("unmeasured: no verified QA pair")
     doc = {"schema": RECEIPT_SCHEMA}
     doc.update(fields)
     return json.loads(json.dumps(doc, sort_keys=True, ensure_ascii=False,
@@ -1209,6 +1351,8 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
     script_p = Path(script).resolve()
     config_p = Path(config).resolve() if config is not None else None
     overlay_p = Path(overlay).resolve()
+    if not isinstance(allow_draft, bool):
+        return _build_receipt(local_edit_state="ERROR", local_problems=["INVALID allow_draft: must be bool"], source_commit_state="NOT_WRITTEN", figure_verification_state="ERROR", figure_qa={"blocking": [], "glyph_floor": [], "pass": False}, qa_before={"blocking": [], "glyph_floor": [], "pass": False}, target_effects=[], science_unchanged=False, science_notes=["INVALID allow_draft: must be bool"], audit_summary={}, overlay_path=str(overlay_p), draft=False, drift="INVALID allow_draft: must be bool", protected_sources=[])
     try:
         clean = _validate_edits(edits)
         doomed = _validate_remove(remove)
@@ -1492,7 +1636,14 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
     if not verdict["ok"]:
         return _receipt(base_receipt, source_commit_state="NOT_WRITTEN",
                         figure_verification_state=fig_state, draft=False)
-    if not qa_pass and not allow_draft:
+    delta = _draft_gate(script_p, config_p, run1["scope"], prior,
+                        run1["after"].get("qa_records") or [])
+    base_receipt["qa_delta"] = delta
+    if not qa_pass and not (allow_draft and delta.get("eligible")):
+        problem = ("DRAFT_REFUSED: " + str(delta.get("reason") or "not eligible")
+                   if allow_draft else
+                   "whole-figure QA FAIL: pass allow_draft=True for eligible draft only")
+        base_receipt["local_problems"] = list(base_receipt["local_problems"]) + [problem]
         return _receipt(base_receipt, source_commit_state="NOT_WRITTEN",
                         figure_verification_state="FAIL", draft=False)
     # Drift between verification and persist refuses to write (exact set).
@@ -1544,7 +1695,13 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
                           separators=(",", ":"), allow_nan=False) == json.dumps(
                     doc_core, sort_keys=True, ensure_ascii=False,
                     separators=(",", ":"), allow_nan=False):
-                draft = not qa_pass
+                eligible = bool((base_receipt.get("qa_delta") or {}).get("eligible"))
+                draft = (not qa_pass) and eligible
+                if (not qa_pass) and not eligible:
+                    problem = ("DRAFT_REFUSED: " + str((base_receipt.get("qa_delta") or {}).get("reason") or "not eligible"))
+                    base_receipt["local_problems"] = list(base_receipt["local_problems"]) + [problem]
+                    return _receipt(base_receipt, source_commit_state="NOT_WRITTEN",
+                                    figure_verification_state="FAIL", draft=False)
                 state = "COMMITTED_DRAFT" if draft else "COMMITTED"
                 return _receipt(base_receipt, source_commit_state=state,
                                 figure_verification_state=_figure_state("PASS", qa_pass),
@@ -1639,18 +1796,19 @@ def _open_styled(script_p: Path, config_p: Path | None, scope: str,
         raise
 
 
-def load(overlay_path: Any) -> tuple:
-    """Clean rebuild + stored overlay, returning ``(fig, reg, receipt)``.
+def _load_internal(overlay_p: Path, *, workspace: bool) -> tuple:
+    """Shared verified loader; ``workspace`` selects the open-fig policy.
 
-    Dependency bytes are hashed and compared BEFORE any figure is built.
-    Verification uses two independent rebuild pairs; the returned figure is
-    a third fresh build whose target values must equal the verified ones.
-    The figure stays open only when the local edit verifies; otherwise
-    ``(None, None, receipt)`` so the CLI cannot render an unverified figure
-    and never reimplements state judgement.
+    Same-source/identity/independent-rebuild verification in one place (no
+    semantic fork). ``workspace=False`` (strict ``load``/``render``): the
+    figure opens only on localPASS + whole-figure PASS. ``workspace=True``
+    (``load_workspace``): the figure additionally opens when localPASS
+    holds and the records ``qa_delta`` is eligible (a safe draft reopened
+    for continued editing); the receipt keeps the truthful whole-FAIL
+    verdict, never washed to PASS.
     """
     import matplotlib.pyplot as plt
-    overlay_p = Path(overlay_path).resolve()
+    overlay_p = Path(overlay_p).resolve()
     try:
         raw = overlay_p.read_bytes()
     except OSError as error:
@@ -1761,6 +1919,7 @@ def load(overlay_path: Any) -> tuple:
             target_effects=[], science_unchanged=False, science_notes=[drift],
             audit_summary={}, overlay_path=str(overlay_p), draft=False,
             drift=drift, protected_sources=protected)
+        return None, None, receipt
     if not doc["targets"]:
         import matplotlib.pyplot as _plt
         try:
@@ -1829,6 +1988,8 @@ def load(overlay_path: Any) -> tuple:
                                figure_verification_state=_figure_state("PASS", _qp),
                                draft=bool(not _qp))
         if not _qp:
+            if workspace:
+                return _fig, _reg, _done
             try:
                 _plt.close(_fig)
             except Exception:
@@ -1875,6 +2036,9 @@ def load(overlay_path: Any) -> tuple:
     base_receipt = _bundle_receipt_base(run1, overlay_p)
     base_receipt["local_edit_state"] = "PASS" if verdict["ok"] else "FAIL"
     base_receipt["local_problems"] = list(verdict["problems"])
+    base_receipt["qa_delta"] = _delta_of(
+        {"records": _native(run1["before"].get("qa_records") or [])},
+        {"records": _native(run1["after"].get("qa_records") or [])})
     effects, effect_problems = _effects_of(run1, verdict)
     base_receipt["target_effects"] = effects
     if effect_problems:
@@ -1900,16 +2064,87 @@ def load(overlay_path: Any) -> tuple:
                                  local_edit_state="ERROR",
                                  local_problems=failure.problems)
         return None, None, receipt
+    eligible = bool((base_receipt.get("qa_delta") or {}).get("eligible"))
+    local_ok = (base_receipt.get("local_edit_state") == "PASS"
+                and bool(verdict.get("ok")))
     receipt = _build_receipt(**base_receipt, source_commit_state="NOT_WRITTEN",
                              figure_verification_state=_figure_state("PASS", qa_pass),
                              draft=bool(not qa_pass))
     if not qa_pass:
+        if workspace and local_ok and eligible:
+            return fig, reg, receipt
         try:
             plt.close(fig)
         except Exception:
             pass
         return None, None, receipt
     return fig, reg, receipt
+
+
+def inspect_candidate(script: Any, config: Any = None, scope: str | None = None, *,
+                        edits: list[dict], overlay: Any,
+                        expected_before_sha256: str | None = None,
+                        remove: list[str] | None = None) -> dict:
+    """Non-persist candidate inspection: verify + records qa_delta, no bytes.
+
+    Runs the apply verification path against a same-directory private clone
+    of ``overlay`` so prior deps/descriptors are inherited, then deletes the
+    clone. Never writes the official overlay; receipt reports draft
+    eligibility via ``qa_delta`` without persisting.
+    """
+    import shutil
+    import uuid
+    from pathlib import Path as _P
+    script_p = _P(script).resolve()
+    overlay_p = _P(overlay).resolve()
+    tmp = overlay_p.parent / (".inspect-" + uuid.uuid4().hex + ".json")
+    try:
+        if overlay_p.exists():
+            shutil.copyfile(overlay_p, tmp)
+            exp = None
+            try:
+                import hashlib as _h
+                exp = _h.sha256(tmp.read_bytes()).hexdigest()
+            except OSError:
+                exp = None
+            if expected_before_sha256 is not None:
+                exp = expected_before_sha256
+            receipt = apply(script, config, scope, edits=edits, overlay=str(tmp),
+                            expected_before_sha256=exp, allow_draft=True,
+                            remove=remove)
+        else:
+            receipt = apply(script, config, scope, edits=edits, overlay=str(tmp),
+                            expected_before_sha256=None, allow_draft=True,
+                            remove=remove)
+        return receipt
+    finally:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def load(overlay_path: Any) -> tuple:
+    """Clean rebuild + stored overlay, returning ``(fig, reg, receipt)``.
+
+    Strict policy: the figure opens only on localPASS + whole-figure PASS,
+    else ``(None, None, receipt)`` so the CLI cannot render an unverified
+    figure and never reimplements state judgement.
+    """
+    return _load_internal(Path(overlay_path), workspace=False)
+
+
+def load_workspace(overlay_path: Any) -> tuple:
+    """Open the locally verified workspace saved state for continued editing.
+
+    Same-source/identity/independent-rebuild verification as strict
+    ``load`` (shared ``_load_internal``). Opens the figure when localPASS
+    holds and the records ``qa_delta`` is eligible (safe draft), even
+    though the receipt keeps the truthful whole-FAIL verdict; strict
+    ``load``/``render`` still refuse the figure on any whole-QA FAIL.
+    Never exports or publishes.
+    """
+    return _load_internal(Path(overlay_path), workspace=True)
 
 
 def render(overlay_path: Any, output: Any) -> dict:

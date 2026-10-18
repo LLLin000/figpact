@@ -1887,8 +1887,11 @@
       }
     }
     if (st && st.refresh_required) {
+      // Draft/normal commit truth identical: bytes saved, frame refresh
+      // failed. Keep targets editable iff a later /api/frame recovers
+      // (refreshStyleFromFrame re-runs); until then freeze new edits.
       state.styleRefreshFailed = true;
-      state.styleTargets = [];
+      state.styleTargets = st && Array.isArray(st.targets) && st.targets.length ? st.targets : [];
       state.stylePending = null;
       if (typeof st.overlay_sha256 === 'string') state.styleOverlaySha = st.overlay_sha256;
       renderStyle();
@@ -1896,7 +1899,6 @@
       styleNote('文件已保存，但界面刷新失败。请重载页面核对（正式文件已保存，无需重做）。', true);
       return;
     }
-    state.styleRefreshFailed = false;
     const sec2 = byId('style-section'); if (sec2) sec2.hidden = !st;
     state.styleTargets = st && Array.isArray(st.targets) ? st.targets : [];
     state.styleOverlaySha = st ? (st.overlay_sha256 || '') : '';
@@ -1944,12 +1946,26 @@
     if (p) {
       const pt = byId('style-pending-text');
       const pl = styleLabel(state.styleTargets.find(x => x.target_id === p.target_id)) || p.target_id;
-      if (pt) pt.textContent = p.new_pt == null
-        ? `待确认：${pl} ${p.old_pt} pt → 原始样式（移除覆盖）（影响 ${Array.isArray(p.affected) ? p.affected.length : 0} 个对象）`
-        : `待确认：${pl} ${p.old_pt} → ${p.new_pt} pt（影响 ${Array.isArray(p.affected) ? p.affected.length : 0} 个对象）`;
-      styleBadge('已验证 · 待确认', 'validated');
-    } else if (t && !state.styleBusy && !['verifying', 'saving', 'saved', 'failed', 'cancelled'].includes(byId('style-status')?.dataset.styleState)) {
-      styleBadge(t.saved_pt == null ? `当前 ${t.current_pt} pt · 原始样式` : `当前 ${t.current_pt} pt · 已保存`, 'idle');
+      const issues = Number.isFinite(Number(p.issue_count)) ? Number(p.issue_count) : null;
+      if (pt) {
+        const base = p.new_pt == null
+          ? `待确认：${pl} ${p.old_pt} pt → 原始样式（移除覆盖）（影响 ${Array.isArray(p.affected) ? p.affected.length : 0} 个对象）`
+          : `待确认：${pl} ${p.old_pt} → ${p.new_pt} pt（影响 ${Array.isArray(p.affected) ? p.affected.length : 0} 个对象）`;
+        pt.textContent = (p.is_draft && issues != null)
+          ? `本次修改通过局部审计，但原图仍有${issues}项整图问题未通过；保存工作草稿后仍不能合规导出。${base}`
+          : base;
+      }
+      styleBadge(p.is_draft ? '已验证 · 待确认（草稿）' : '已验证 · 待确认', 'validated');
+      const cf = byId('style-confirm');
+      if (cf) cf.textContent = p.is_draft ? '保存工作草稿' : '确认保存';
+    } else if (t && (!state.styleBusy || (state.styleBusy && state.styleTargets.length)) && !['verifying', 'saving', 'failed', 'cancelled'].includes(byId('style-status')?.dataset.styleState)) {
+      const st = (state.acceptedFrame && state.acceptedFrame.style) || (state.frame && state.frame.style) || {};
+      const dIssues = Number.isFinite(Number(st.issue_count)) ? Number(st.issue_count) : null;
+      const isDraft = !!st.workspace_draft || !!st.draft;
+      const cf = byId('style-confirm');
+      if (cf) cf.textContent = '确认保存';
+      if (isDraft && dIssues != null) styleBadge(`工作草稿 · 整图未通过（${dIssues}项）`, 'saved');
+      else styleBadge(t.saved_pt == null ? `当前 ${t.current_pt} pt · 原始样式` : `当前 ${t.current_pt} pt · 已保存`, 'idle');
     }
     const tm = byId('style-timings');
     const tw = byId('style-timing-wrap');
@@ -2023,27 +2039,26 @@
   }
   async function styleCommit() {
     const p = state.stylePending; if (!p || state.styleBusy) return;
-    // pending 自带 server-bound 修订（base_frame_revision + expected_sha256），原样回送；
-    // 缺失才用 style 包络/accepted 帧回退，绝不用 candidate 修订。
     const rev = p.base_frame_revision || state.styleBaseRev
       || (state.acceptedFrame || state.frame || {}).frame_revision;
     const sha = (p.expected_sha256 != null) ? p.expected_sha256
       : (((state.acceptedFrame || state.frame || {}).style || {}).overlay_sha256 ?? state.styleOverlaySha ?? '');
     if (!rev || sha == null) { styleNote('版本信息缺失，请刷新后重试', true); return; }
-    // '' 合法（尚未保存），只拒绝缺失。
+    const draftBody = p.is_draft
+      ? { candidate_id: p.candidate_id, frame_revision: rev, expected_sha256: sha, save_draft: true }
+      : { candidate_id: p.candidate_id, frame_revision: rev, expected_sha256: sha };
     styleSetBusy(true); styleBadge('保存中…', 'saving');
     try {
-      const { res, data } = await styleJson('/api/style/commit',
-        { candidate_id: p.candidate_id, frame_revision: rev, expected_sha256: sha }, true);
+      const { res, data } = await styleJson('/api/style/commit', draftBody, true);
       if (data && data.style && data.style.timings_ms) {
         const tm = data.style.timings_ms;
         state.styleServerMs = tm.commit_ms ?? tm.preview_ms ?? tm.rebuild_ms ?? null;
       }
       if (!res.ok || !data) throw new Error(styleFail(data, res));
-      // Commit truth: ov.apply 已写盘且 COMMITTED/PASS，但服务端刷新新帧失败
-      // （frame 为 null + style.refresh_required）。绝不报"保存失败"：正式文件
-      // 已保存；作废无新帧的编辑/选区，提示重载恢复。
-      if (data.status === 'COMMITTED' && !data.frame) {
+      // Commit truth: ov.apply 已写盘（COMMITTED/COMMITTED_DRAFT），frame 为
+      // null + refresh_required 只说明服务端刷新新帧失败：文件已保存，作废
+      // 无新帧的编辑/选区，提示重载恢复。草稿与正常两路都走同一保护。
+      if ((data.status === 'COMMITTED' || data.status === 'COMMITTED_DRAFT') && !data.frame) {
         state.stylePending = null;
         state.styleRefreshFailed = true;
         state.styleTargets = [];
@@ -2056,7 +2071,7 @@
             await loadFrame(fr, undefined, true);
           }
         } catch (ee) {}
-        styleBadge('文件已保存，但界面刷新失败', 'saved');
+        styleBadge(data.status === 'COMMITTED_DRAFT' ? '工作草稿已保存，但界面刷新失败' : '文件已保存，但界面刷新失败', 'saved');
         styleNote('文件已保存，但界面刷新失败。请重载页面核对（正式文件已保存，无需重做）。', true);
         return;
       }
@@ -2068,7 +2083,12 @@
           const sid = mapStyleToScene(styleTarget());
           if (sid) select(sid);
         }
-        styleBadge('已保存并验证', 'saved'); styleNote('', false);
+        if (data.status === 'COMMITTED_DRAFT') {
+          const st = (data.style || {});
+          const n = Number.isFinite(Number(st.issue_count)) ? Number(st.issue_count) : null;
+          styleBadge(n != null ? `工作草稿已保存 · 整图未通过（${n}项）` : '工作草稿已保存 · 整图未通过', 'saved');
+        } else styleBadge('已保存并验证', 'saved');
+        styleNote('', false);
       } catch (uiE) { uiError = uiE; }
       if (uiError) {
         // receipt 已 COMMITTED/PASS：正式文件已保存，只报 UI 呈现问题，绝不说未改动。
@@ -2077,7 +2097,7 @@
       }
     } catch (e) {
       const msg = String((e && e.message) || '');
-      if (/OVERLAY_CONFLICT|CANDIDATE_UNKNOWN|STALE_REVISION|FORBIDDEN/.test(msg)) {
+      if (/OVERLAY_CONFLICT|CANDIDATE_UNKNOWN|STALE_REVISION|FORBIDDEN|DRAFT_REQUIRES_EXPLICIT_SAVE/.test(msg)) {
         state.stylePending = null;
         try {
           const fr = await (await fetch('/api/frame', { headers: { Accept: 'application/json' } })).json();
@@ -2085,7 +2105,7 @@
         } catch (ee) {}
       }
       styleBadge('保存失败', 'failed');
-      styleNote(/NOT_WRITTEN/.test(msg) ? `样式保存失败：${msg}（正式文件未改动）` : `样式保存结果未知：${msg}。请刷新页面核对正式文件。`, true);
+      styleNote(/NOT_WRITTEN|DRAFT_REQUIRES/.test(msg) ? `样式保存失败：${msg}（正式文件未改动）` : `样式保存结果未知：${msg}。请刷新页面核对正式文件。`, true);
     }
     finally { styleSetBusy(false); renderStyle(); }
   }
