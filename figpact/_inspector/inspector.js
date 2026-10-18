@@ -1958,13 +1958,14 @@
       styleBadge(p.is_draft ? '已验证 · 待确认（草稿）' : '已验证 · 待确认', 'validated');
       const cf = byId('style-confirm');
       if (cf) cf.textContent = p.is_draft ? '保存工作草稿' : '确认保存';
-    } else if (t && (!state.styleBusy || (state.styleBusy && state.styleTargets.length)) && !['verifying', 'saving', 'failed', 'cancelled'].includes(byId('style-status')?.dataset.styleState)) {
+    } else if (t && !['verifying', 'saving', 'failed', 'cancelled'].includes(byId('style-status')?.dataset.styleState)) {
       const st = (state.acceptedFrame && state.acceptedFrame.style) || (state.frame && state.frame.style) || {};
       const dIssues = Number.isFinite(Number(st.issue_count)) ? Number(st.issue_count) : null;
       const isDraft = !!st.workspace_draft || !!st.draft;
       const cf = byId('style-confirm');
       if (cf) cf.textContent = '确认保存';
-      if (isDraft && dIssues != null) styleBadge(`工作草稿 · 整图未通过（${dIssues}项）`, 'saved');
+      if (byId('style-status')?.dataset.styleState === 'saved') { /* keep 已保存/草稿 verdict across renders */ }
+      else if (isDraft && dIssues != null) styleBadge(`工作草稿 · 整图未通过（${dIssues}项）`, 'saved');
       else styleBadge(t.saved_pt == null ? `当前 ${t.current_pt} pt · 原始样式` : `当前 ${t.current_pt} pt · 已保存`, 'idle');
     }
     const tm = byId('style-timings');
