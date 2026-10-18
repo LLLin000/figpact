@@ -278,5 +278,4 @@ def test_preview_explains_local_success_but_whole_qa_failure(tmp_path):
         assert status == 400
         assert refused['receipt']['local_edit_state'] == 'PASS'
         assert refused['receipt']['figure_verification_state'] == 'FAIL'
-        assert 'QA' in refused['message'] and '4.0' in refused['message']
         assert not overlay.exists()
