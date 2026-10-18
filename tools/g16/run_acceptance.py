@@ -45,19 +45,24 @@ def main():
         overlay = directory/'overlay.json'
         assert not overlay.exists(), 'Use a fresh output directory for first-apply evidence'
         source_hash = hashlib.sha256((ROOT/script).read_bytes()).hexdigest()
-        code, first = run(['apply', *common, '--edits', str(edits), '--overlay', str(overlay),
-                           '--allow-draft'], directory/'apply')
+        code, first = run(['apply', *common, '--edits', str(edits), '--overlay', str(overlay)], directory/'apply')
+        assert code == 0, first
         assert first['local_edit_state'] == 'PASS', first
-        assert first['source_commit_state'] in ('COMMITTED', 'COMMITTED_DRAFT'), first
+        assert first['source_commit_state'] == 'COMMITTED', first
+        assert first['figure_verification_state'] == 'PASS', first
         saved = overlay.read_bytes()
         replay_code, replay = run(['render', str(overlay), '--output', str(directory/'after.png')],
                                   directory/'restart')
         assert replay['local_edit_state'] == 'PASS', replay
+        assert replay_code == 0, replay
+        assert replay['figure_verification_state'] == 'PASS', replay
         assert replay['science_unchanged'], replay
         repeat_code, repeat = run(['apply', *common, '--edits', str(edits), '--overlay', str(overlay),
-                                   '--expected-sha256', hashlib.sha256(saved).hexdigest(),
-                                   '--allow-draft'], directory/'repeat')
+                                   '--expected-sha256', hashlib.sha256(saved).hexdigest()], directory/'repeat')
+        assert repeat_code == 0, repeat
         assert repeat['local_edit_state'] == 'PASS', repeat
+        assert repeat['source_commit_state'] == 'COMMITTED', repeat
+        assert repeat['figure_verification_state'] == 'PASS', repeat
         assert overlay.read_bytes() == saved
         assert hashlib.sha256((ROOT/script).read_bytes()).hexdigest() == source_hash
         results.append({'sample':name, 'value':value, 'first_exit':code,

@@ -908,11 +908,11 @@ def cmd_overlay(args) -> int:
                 args.script, args.config, args.scope)}
             code = 0
         elif args.overlay_cmd == "apply":
-            edits = json.loads(Path(args.edits).read_text(encoding="utf-8"))
+            edits = json.loads(Path(args.edits).read_text(encoding="utf-8")) if args.edits else []
             result = style_overlay.apply(
                 args.script, args.config, args.scope, edits=edits,
                 overlay=args.overlay, expected_before_sha256=args.expected_sha256,
-                allow_draft=args.allow_draft)
+                allow_draft=args.allow_draft, remove=args.remove)
             code = 0 if (result.get("local_edit_state") == "PASS"
                          and result.get("figure_verification_state") == "PASS") else 1
         else:
@@ -1082,9 +1082,10 @@ def main(argv: Optional[list[str]] = None) -> int:
         p.add_argument("--config", default=None)
         p.add_argument("--scope", default=None)
         if name == "apply":
-            p.add_argument("--edits", required=True, help="JSON list: target_id + absolute value")
+            p.add_argument("--edits", default=None, help="增量 upsert JSON list: target_id + absolute value")
             p.add_argument("--overlay", required=True, help="声明式样式 JSON，不是 Python 改写")
             p.add_argument("--expected-sha256", default=None, help="更新既有 Overlay 的内容哈希")
+            p.add_argument("--remove", action="append", default=[], help="显式移除一个已保存 target_id，可重复")
             p.add_argument("--allow-draft", action="store_true", help="显式允许局部通过但整图 QA 失败的草稿")
     p_or = overlay_sub.add_parser("render", help="从原图与持久化 Overlay 重建、验证、渲染")
     p_or.add_argument("overlay")

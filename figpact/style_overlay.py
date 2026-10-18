@@ -161,8 +161,8 @@ def inventory(script: Any, config: Any = None, scope: str | None = None) -> list
 # ------------------------------------------------------------- validation
 
 def _validate_edits(edits: Any) -> list[dict]:
-    if not isinstance(edits, list) or not edits:
-        raise ValueError("INVALID_EDITS: edits must be a nonempty list")
+    if not isinstance(edits, list):
+        raise ValueError("INVALID_EDITS: edits must be a list")
     seen_ids: set[str] = set()
     out: list[dict] = []
     for entry in edits:
@@ -185,6 +185,24 @@ def _validate_edits(edits: Any) -> list[dict]:
             raise ValueError(f"INVALID_VALUE: {tid!r} value {value!r} "
                              "must be a finite number (bool/NaN/Inf rejected)")
         out.append({"target_id": tid, "value": float(value)})
+    return out
+
+
+def _validate_remove(remove: Any) -> list[str]:
+    if remove is None:
+        return []
+    if not isinstance(remove, list):
+        raise ValueError("INVALID_REMOVE: remove must be a list of target ids")
+    seen: set[str] = set()
+    out: list[str] = []
+    for tid in remove:
+        if not isinstance(tid, str) or not tid:
+            raise ValueError(f"INVALID_REMOVE: target id {tid!r} "
+                             "must be a nonempty string")
+        if tid in seen:
+            raise ValueError(f"DUPLICATE_TARGET: {tid!r} requested twice")
+        seen.add(tid)
+        out.append(tid)
     return out
 
 
@@ -234,8 +252,8 @@ def _validate_overlay_shape(doc: Any) -> dict:
     if not isinstance(doc.get("scope"), str) or not doc["scope"]:
         raise ValueError("INVALID_OVERLAY: scope must be a nonempty string")
     targets = doc.get("targets")
-    if not isinstance(targets, list) or not targets:
-        raise ValueError("INVALID_OVERLAY: targets must be a nonempty list")
+    if not isinstance(targets, list):
+        raise ValueError("INVALID_OVERLAY: targets must be a list")
     seen: set[str] = set()
     for item in targets:
         if not isinstance(item, dict) or set(item) != {"id", "descriptor", "value"}:
@@ -292,46 +310,76 @@ def _raw_path_of(module: Any) -> Path | None:
         return None
     try:
         candidate = Path(str(raw))
-    except Exception:
-        return None
+    except Exception as error:
+        raise ValueError(f"REFUSED: RAW declaration malformed ({raw!r}): {error}") from error
     if not candidate.is_absolute():
         try:
             base = Path(str(getattr(module, "__file__", "."))).parent
             candidate = (base / candidate).resolve()
-        except Exception:
-            return None
-    return candidate if candidate.is_file() else None
+        except Exception as error:
+            raise ValueError(f"REFUSED: RAW declaration unresolvable ({raw!r}): {error}") from error
+    else:
+        try:
+            candidate = candidate.resolve()
+        except Exception as error:
+            raise ValueError(f"REFUSED: RAW declaration unresolvable ({raw!r}): {error}") from error
+    if not candidate.is_file():
+        raise FileNotFoundError(f"REFUSED: RAW declared but not a regular file: {candidate}")
+    try:
+        with open(candidate, "rb") as handle:
+            handle.read(1)
+    except OSError as error:
+        raise PermissionError(f"REFUSED: RAW declared but unreadable: {candidate} ({error})") from error
+    return candidate
 
 
 def _science_input_paths(module: Any) -> list[Path]:
-    try:
-        from figpact.session import declared_science_inputs
-        return [Path(p) for p in declared_science_inputs(module)]
-    except Exception:
+    from figpact.session import SessionError, declared_science_inputs
+    declared = getattr(module, "SCIENCE_INPUTS", None)
+    hook = getattr(module, "science_inputs", None)
+    has_decl = declared is not None and declared != "" and not (isinstance(declared, (list, tuple, set)) and len(declared) == 0)
+    has_hook = callable(hook)
+    if not has_decl and not has_hook:
         return []
+    try:
+        return [Path(p) for p in declared_science_inputs(module)]
+    except SessionError:
+        raise
+    except Exception as error:
+        raise RuntimeError(f"REFUSED: science_inputs hook failed ({type(error).__name__}: {error})") from error
 
 
 def _live_dependencies(module: Any, script: Path, config: Path | None) -> dict:
-    """Exact live dependency inventory in stored naming: no guessing.
+    """Live dependency inventory for the NAMED inputs only (no import closure).
 
-    ``script``/``config`` from the build inputs, ``raw`` from the module's
-    real ``RAW`` attribute, ``sci:<absolute-posix-path>`` per declared
-    science input with that path as the name. Post-import only: callers
-    compare the name SET against the stored one to catch forged extras.
+    Covers ``script``/``config`` build inputs, the module's real ``RAW``
+    attribute, and ``sci:<absolute-posix-path>`` per declared science
+    input. Transitive imports are NOT tracked: no full closure is claimed.
+    Raises (REFUSED/diagnostic) on declared-but-bad paths -- never a
+    ``missing`` sentinel or skip.
     """
-    out: dict[str, tuple[Path, str]] = {
-        "script": (Path(script), _sha256_file(script) or "missing")}
+    out: dict[str, tuple[Path, str]] = {}
+    script_hash = _sha256_file(Path(script))
+    if script_hash is None:
+        raise FileNotFoundError(f"REFUSED: dependency unreadable: script {Path(script)}")
+    out["script"] = (Path(script), script_hash)
     if config is not None:
-        out["config"] = (Path(config), _sha256_file(config) or "missing")
+        config_hash = _sha256_file(Path(config))
+        if config_hash is None:
+            raise FileNotFoundError(f"REFUSED: dependency unreadable: config {Path(config)}")
+        out["config"] = (Path(config), config_hash)
     raw = _raw_path_of(module)
     if raw is not None:
-        out["raw"] = (raw.resolve(), _sha256_file(raw) or "missing")
+        raw_hash = _sha256_file(raw.resolve())
+        if raw_hash is None:
+            raise FileNotFoundError(f"REFUSED: dependency unreadable: raw {raw}")
+        out["raw"] = (raw.resolve(), raw_hash)
     for path in _science_input_paths(module):
-        try:
-            resolved = Path(path).resolve()
-        except Exception:
-            continue
-        out[f"sci:{resolved.as_posix()}"] = (resolved, _sha256_file(resolved) or "missing")
+        resolved = Path(path).resolve()
+        digest = _sha256_file(resolved)
+        if digest is None:
+            raise FileNotFoundError(f"REFUSED: dependency unreadable: sci {resolved}")
+        out[f"sci:{resolved.as_posix()}"] = (resolved, digest)
     return out
 
 
@@ -378,10 +426,7 @@ def _protected_list(script: Path, config: Path | None, module: Any) -> list[str]
     if raw is not None:
         out.append(str(raw.resolve()))
     for path in _science_input_paths(module):
-        try:
-            out.append(str(path.resolve()))
-        except Exception:
-            continue
+        out.append(str(Path(path).resolve()))
     return out
 
 
@@ -849,11 +894,15 @@ def _pair_run(script_p: Path, config_p: Path | None, scope: str | None,
                             if use["role"] != "curve.linewidth"
                             else float(arts[0].get_linewidth()))
                       for tid, _, use, arts in sty_pairs}
-        deps = _live_dependencies(module2, script_p, config_p)
+        try:
+            deps = _live_dependencies(module2, script_p, config_p)
+            fenced = _protected_list(script_p, config_p, module2)
+        except (ValueError, RuntimeError, OSError,
+                FileNotFoundError, PermissionError) as error:
+            raise _VerifyFail([str(error)]) from error
         bundle.update({"before": before, "after": after,
                        "before_vals": before_vals, "after_vals": after_vals,
-                       "deps": deps, "protected": _protected_list(
-                           script_p, config_p, module2),
+                       "deps": deps, "protected": fenced,
                        "pairs": [(tid, value, use) for tid, value, use, _ in sty_pairs]})
         bundle["fingerprint"] = _snapshot_fingerprint(before, after)
         return bundle
@@ -863,6 +912,186 @@ def _pair_run(script_p: Path, config_p: Path | None, scope: str | None,
         except Exception:
             pass
 
+
+def _refuse(problem: str, overlay_p: Path, protected: list) -> dict:
+    """One-line structured refusal: prior bytes stay, nothing executed."""
+    return _build_receipt(local_edit_state="ERROR", local_problems=[problem],
+                          source_commit_state="NOT_WRITTEN",
+                          figure_verification_state="ERROR",
+                          figure_qa={"blocking": [], "glyph_floor": [], "pass": False},
+                          qa_before={"blocking": [], "glyph_floor": [], "pass": False},
+                          target_effects=[], science_unchanged=False,
+                          science_notes=[problem], audit_summary={},
+                          overlay_path=str(overlay_p), draft=False,
+                          drift=problem, protected_sources=list(protected))
+
+
+def _check_prior_source(prior: dict, script_p: Path, config_p: Path | None,
+                        overlay_p: Path, request_scope: str | None) -> str | None:
+    """Pre-import prior gate: source/config/scope + stored-bytes drift.
+
+    Pure path arithmetic + disk hashing from the overlay's own stored refs;
+    no import, no figure construction, so a drifted source is never executed
+    (the drift marker test proves the changed script body never runs).
+    Returns an error string or None.
+    """
+    if request_scope is not None and prior["scope"] != request_scope:
+        return (f"SCOPE_MISMATCH: request scope {request_scope!r} != "
+                f"prior overlay scope {prior['scope']!r}")
+    try:
+        prior_script = _restore_path(prior["script"], overlay_p.parent)
+        prior_config_ref = prior.get("config")
+        prior_config = (_restore_path(prior_config_ref, overlay_p.parent)
+                        if prior_config_ref is not None else None)
+    except Exception as error:
+        return f"INVALID_OVERLAY: {error}"
+    if prior_script != script_p or prior_config != config_p:
+        return ("SOURCE_MISMATCH: request script/config differs from "
+                "prior overlay source/config")
+    stored_files = (prior.get("dependencies") or {}).get("files") or {}
+    try:
+        pre_paths = _dep_refs(prior, overlay_p.parent)
+    except Exception as error:
+        return f"INVALID_OVERLAY: {error}"
+    return _drift_check(stored_files, pre_paths)
+
+
+def _verify_clear(script_p: Path, config_p: Path | None, scope: str | None,
+                  prior: dict, overlay_p: Path, protected0: list,
+                  *, no_change_request: bool, actual_expected: str | None,
+                  allow_draft: bool, module0: Any) -> dict | None:
+    """Verify clear-to-original: empty targets rebuild, no fake effect."""
+    import matplotlib.pyplot as plt
+    want_scope = prior["scope"] if scope is None else scope
+    try:
+        m1, _, b1, r1, s1 = _fresh_build(script_p, config_p, want_scope)
+        man1 = _manifest_of(m1)
+        snap1 = _snapshots(b1, r1, man1, {})
+    finally:
+        try:
+            plt.close(b1)
+        except Exception:
+            pass
+    try:
+        m2, _, b2, r2, s2 = _fresh_build(script_p, config_p, want_scope)
+        man2 = _manifest_of(m2)
+        snap2 = _snapshots(b2, r2, man2, {})
+    finally:
+        try:
+            plt.close(b2)
+        except Exception:
+            pass
+    if s1 != want_scope or s2 != want_scope:
+        raise _VerifyFail([f"SCOPE_MISMATCH: {s1!r}/{s2!r} != {want_scope!r}"])
+    audit = _verify_pair(snap1, snap2, allowed_styles={}, required=[],
+                         proven=True)
+    qa = bool(_qa_of(snap2)["pass"])
+    base = {"qa_before": _qa_of(snap1), "figure_qa": _qa_of(snap2),
+            "science_unchanged": audit["science_ok"],
+            "science_notes": [str(n)[:300] for n in (audit["sci_notes"] or [])],
+            "audit_summary": {"hard": len(audit["hard"]),
+                              "derived_total": len(audit["derived"]),
+                              "derived_allowed": len(audit["derived"])
+                              if audit["derived_ok"] else 0,
+                              "required_changed": audit["required_changed"],
+                              "agreement": True, "pair_runs": 2, "cleared": True},
+            "overlay_path": str(overlay_p), "drift": None,
+            "protected_sources": list(protected0),
+            "local_problems": list(audit["problems"]), "target_effects": []}
+    if not audit["ok"]:
+        return _build_receipt(local_edit_state="FAIL",
+                              source_commit_state="NOT_WRITTEN",
+                              figure_verification_state=_figure_state("FAIL", qa),
+                              draft=False, **base)
+    if not qa and not allow_draft:
+        return _build_receipt(local_edit_state="PASS",
+                              source_commit_state="NOT_WRITTEN",
+                              figure_verification_state="FAIL", draft=False, **base)
+    try:
+        deps = _live_dependencies(module0, script_p, config_p)
+    except (ValueError, RuntimeError, OSError,
+            FileNotFoundError, PermissionError) as error:
+        failed = dict(base)
+        failed.update(local_edit_state="ERROR", local_problems=[str(error)],
+                      source_commit_state="NOT_WRITTEN",
+                      figure_verification_state="ERROR", draft=False,
+                      drift=str(error))
+        return _build_receipt(**failed)
+    mismatch = _live_drift_check((prior.get("dependencies") or {}).get("files")
+                                 or {}, deps)
+    if mismatch is not None:
+        failed = dict(base)
+        failed.update(local_edit_state="ERROR", local_problems=[mismatch],
+                      source_commit_state="NOT_WRITTEN",
+                      figure_verification_state="ERROR", draft=False,
+                      drift=mismatch)
+        return _build_receipt(**failed)
+    try:
+        odir = overlay_p.parent
+        sref = _store_path(script_p, odir)
+        cref = (_store_path(config_p, odir) if config_p is not None else None)
+        files: dict[str, dict] = {}
+        for oname, (opath, ohash) in deps.items():
+            files[oname] = {"ref": _store_path(Path(opath).resolve(), odir),
+                            "sha256": ohash}
+    except Exception as error:
+        failed = dict(base)
+        failed.update(local_edit_state="ERROR",
+                      local_problems=[f"REL_PATH: {error}"],
+                      source_commit_state="NOT_WRITTEN",
+                      figure_verification_state="ERROR", draft=False,
+                      drift=f"REL_PATH: {error}")
+        return _build_receipt(**failed)
+    core = {"schema": OVERLAY_SCHEMA, "script": sref, "config": cref,
+            "scope": prior["scope"], "targets": [],
+            "dependencies": {"files": files},
+            "generator": "figpact.style_overlay/1"}
+    _validate_overlay_shape({**core, "created_at": "1970-01-01T00:00:00+00:00"})
+    prior_doc = json.loads(overlay_p.read_bytes().decode("utf-8"))
+    prior_core = {k: prior_doc.get(k) for k in
+                  ("schema", "script", "config", "scope",
+                   "targets", "dependencies", "generator")}
+    same = (json.dumps(prior_core, sort_keys=True, ensure_ascii=False,
+                        separators=(",", ":"), allow_nan=False) == json.dumps(
+        core, sort_keys=True, ensure_ascii=False,
+        separators=(",", ":"), allow_nan=False))
+    if same:
+        draft = not qa
+        ok = dict(base)
+        ok.update(local_edit_state="PASS", local_problems=[],
+                  source_commit_state="COMMITTED_DRAFT" if draft else "COMMITTED",
+                  figure_verification_state=_figure_state("PASS", qa), draft=draft)
+        return _build_receipt(**ok)
+    doc = dict(core)
+    doc["created_at"] = datetime.now(timezone.utc).isoformat()
+    _validate_overlay_shape(doc)
+    from figpact import source_writes as _sw
+    try:
+        _sw._write_json(overlay_p, doc)
+    except Exception as error:
+        failed = dict(base)
+        failed.update(local_edit_state="ERROR",
+                      local_problems=[f"WRITE_FAILED: {error}"],
+                      source_commit_state="NOT_WRITTEN",
+                      figure_verification_state="ERROR", draft=False,
+                      drift=f"WRITE_FAILED: {error}")
+        return _build_receipt(**failed)
+    payload = json.dumps(doc, sort_keys=True, ensure_ascii=False,
+                         separators=(",", ":"), allow_nan=False).encode("utf-8")
+    if _sha256_file(overlay_p) != _sha256_bytes(payload):
+        failed = dict(base)
+        failed.update(local_edit_state="ERROR",
+                      local_problems=["WRITE_VERIFY: overlay bytes mismatch"],
+                      source_commit_state="NOT_WRITTEN",
+                      figure_verification_state="ERROR", draft=False,
+                      drift="WRITE_VERIFY: overlay bytes mismatch")
+        return _build_receipt(**failed)
+    draft = not qa
+    ok = dict(base)
+    ok.update(local_edit_state="PASS", local_problems=[],
+              source_commit_state="COMMITTED_DRAFT" if draft else "COMMITTED",
+              figure_verification_state=_figure_state("PASS", qa), draft=draft)
+    return _build_receipt(**ok)
 
 def _build_receipt(**fields: Any) -> dict:
     """Single receipt constructor: later kwargs win, never duplicate keys.
@@ -966,14 +1195,23 @@ def _write_new_exclusive(path: Path, payload: bytes) -> None:
 def apply(script: Any, config: Any = None, scope: str | None = None, *,
           edits: list[dict], overlay: Any,
           expected_before_sha256: str | None = None,
-          allow_draft: bool = False) -> dict:
-    """Verify requested absolute style values and atomically persist overlay."""
+          allow_draft: bool = False, remove: list[str] | None = None) -> dict:
+    """Verify requested absolute style values and atomically persist overlay.
+
+    G17 composable: ``edits`` is an incremental upsert (unmentioned targets
+    are retained), ``remove`` explicitly deletes saved targets. Empty
+    ``edits`` with nonempty ``remove`` is valid; ``edits=[]`` + ``remove=[]``
+    on an existing overlay is a no-op retaining all targets (still hash
+    gated); on a missing overlay it is refused. Only an explicit ``remove``
+    of every saved id yields ``targets=[]`` (clear-to-original).
+    """
     import matplotlib.pyplot as plt
     script_p = Path(script).resolve()
     config_p = Path(config).resolve() if config is not None else None
     overlay_p = Path(overlay).resolve()
     try:
         clean = _validate_edits(edits)
+        doomed = _validate_remove(remove)
     except ValueError as error:
         return _build_receipt(local_edit_state="ERROR", local_problems=[str(error)],
                               source_commit_state="NOT_WRITTEN",
@@ -984,9 +1222,45 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
                               science_notes=[str(error)], audit_summary={},
                               overlay_path=str(overlay_p), draft=False,
                               drift=None, protected_sources=[])
+    overlap = {item["target_id"] for item in clean} & set(doomed)
+    if overlap:
+        problem = (f"CONFLICT: target(s) {sorted(overlap)} requested "
+                   "as both upsert and remove")
+        return _build_receipt(local_edit_state="ERROR", local_problems=[problem],
+                              source_commit_state="NOT_WRITTEN",
+                              figure_verification_state="ERROR",
+                              figure_qa={"blocking": [], "glyph_floor": [], "pass": False},
+                              qa_before={"blocking": [], "glyph_floor": [], "pass": False},
+                              target_effects=[], science_unchanged=False,
+                              science_notes=[problem], audit_summary={},
+                              overlay_path=str(overlay_p), draft=False,
+                              drift=None, protected_sources=[])
+    # Mandatory prior gate FIRST (hash, source/config/scope, stored drift):
+    # before reading/importing the script any further, so a drifted source
+    # is never executed by a mere update/remove request.
+    prior_raw: bytes | None = None
+    prior: dict | None = None
+    if overlay_p.exists():
+        try:
+            prior_raw = overlay_p.read_bytes()
+            prior = json.loads(prior_raw.decode("utf-8"))
+            _validate_overlay_shape(prior)
+        except Exception as error:
+            return _refuse(f"INVALID_OVERLAY: prior overlay unreadable ({error})",
+                           overlay_p, [])
+        if expected_before_sha256 is None:
+            return _refuse("CREATE_CONFLICT: overlay already exists; pass "
+                           "expected_before_sha256 to update", overlay_p, [])
+        actual = _sha256_bytes(prior_raw if prior_raw is not None else b"")
+        if actual != expected_before_sha256:
+            return _refuse(
+                f"STALE_SOURCE: overlay before {expected_before_sha256} "
+                f"!= disk {actual}", overlay_p, [])
+        gated = _check_prior_source(prior, script_p, config_p, overlay_p, scope)
+        if gated is not None:
+            return _refuse(gated, overlay_p, [])
     # Pre-execution gates: import only (no figure construction), hash the
     # named dependency bytes first, and refuse an overlay output that would
-    # clobber a protected source file.
     try:
         module0 = _import_only(script_p)
     except Exception as error:
@@ -999,7 +1273,18 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
                               science_notes=[str(error)], audit_summary={},
                               overlay_path=str(overlay_p), draft=False,
                               drift=str(error), protected_sources=[str(script_p)])
-    protected0 = _protected_list(script_p, config_p, module0)
+    try:
+        protected0 = _protected_list(script_p, config_p, module0)
+    except (ValueError, RuntimeError, OSError,
+            FileNotFoundError, PermissionError) as error:
+        return _build_receipt(local_edit_state="ERROR", local_problems=[str(error)],
+                              source_commit_state="NOT_WRITTEN",
+                              figure_qa={"blocking": [], "glyph_floor": [], "pass": False},
+                              qa_before={"blocking": [], "glyph_floor": [], "pass": False},
+                              target_effects=[], science_unchanged=False,
+                              science_notes=[str(error)], audit_summary={},
+                              overlay_path=str(overlay_p), draft=False,
+                              drift=str(error), protected_sources=[str(script_p)])
     if str(overlay_p) in {str(Path(p).resolve()) for p in protected0}:
         problem = (f"REFUSED: overlay output {overlay_p} would overwrite "
                    "a protected source/dependency")
@@ -1012,11 +1297,73 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
                               science_notes=[problem], audit_summary={},
                               overlay_path=str(overlay_p), draft=False,
                               drift=problem, protected_sources=protected0)
-    want = [(item["target_id"], item["value"], None) for item in clean]
-    seen_ident: set[str] = set()
-    # Structural identity must be checked before value ranges so an
-    # out-of-range value on a fabricated id never leaks which ids exist;
-    # both failure classes return receipts, never raise to the caller.
+    if prior is None:
+        if doomed:
+            missing = sorted(set(doomed))
+            problem = (f"REMOVE_MISSING: target(s) {missing} not saved "
+                       "(no prior overlay)")
+            return _build_receipt(local_edit_state="ERROR",
+                                  local_problems=[problem],
+                                  source_commit_state="NOT_WRITTEN",
+                                  figure_verification_state="ERROR",
+                                  figure_qa={"blocking": [], "glyph_floor": [], "pass": False},
+                                  qa_before={"blocking": [], "glyph_floor": [], "pass": False},
+                                  target_effects=[], science_unchanged=False,
+                                  science_notes=[problem], audit_summary={},
+                                  overlay_path=str(overlay_p), draft=False,
+                                  drift=None, protected_sources=protected0)
+        if not clean:
+            problem = ("INVALID_EDITS: nothing to apply: edits is empty and "
+                       "no prior overlay exists")
+            return _build_receipt(local_edit_state="ERROR", local_problems=[problem],
+                                  source_commit_state="NOT_WRITTEN",
+                                  figure_verification_state="ERROR",
+                                  figure_qa={"blocking": [], "glyph_floor": [], "pass": False},
+                                  qa_before={"blocking": [], "glyph_floor": [], "pass": False},
+                                  target_effects=[], science_unchanged=False,
+                                  science_notes=[problem], audit_summary={},
+                                  overlay_path=str(overlay_p), draft=False,
+                                  drift=None, protected_sources=protected0)
+    if prior is not None:
+        saved_ids = [item["id"] for item in prior["targets"]]
+        absent = [tid for tid in doomed if tid not in set(saved_ids)]
+        if absent:
+            problem = (f"REMOVE_MISSING: target(s) {absent} not in "
+                       "saved overlay")
+            return _build_receipt(local_edit_state="ERROR",
+                                  local_problems=[problem],
+                                  source_commit_state="NOT_WRITTEN",
+                                  figure_verification_state="ERROR",
+                                  figure_qa={"blocking": [], "glyph_floor": [], "pass": False},
+                                  qa_before={"blocking": [], "glyph_floor": [], "pass": False},
+                                  target_effects=[], science_unchanged=False,
+                                  science_notes=[problem], audit_summary={},
+                                  overlay_path=str(overlay_p), draft=False,
+                                  drift=None, protected_sources=protected0)
+    # Upsert + retained merge. No-op = empty request on existing overlay
+    # (retains all targets, still fully verified); removal of every saved id
+    # yields targets=[] (verified clear-to-original).
+    if prior is not None:
+        if not clean and not doomed:
+            merged_want: list[tuple] = [
+                (item["id"], float(item["value"]), item["descriptor"])
+                for item in prior["targets"]]
+            no_change_request = True
+        else:
+            doomed_set = set(doomed)
+            upsert = {item["target_id"]: item["value"] for item in clean}
+            merged_want = []
+            for item in prior["targets"]:
+                if item["id"] in doomed_set:
+                    continue
+                merged_want.append((item["id"], upsert.pop(item["id"], item["value"]),
+                                    item["descriptor"]))
+            for tid, value in upsert.items():
+                merged_want.append((tid, value, None))
+            no_change_request = False
+    else:
+        merged_want = [(item["target_id"], item["value"], None) for item in clean]
+        no_change_request = False
     from figpact import style_identity as ident
     try:
         probe_mod, _, probe_fig, _, probe_scope = _fresh_build(
@@ -1024,14 +1371,54 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
         try:
             probe_descs = {d["id"]: d for d in ident.inventory(
                 probe_fig, scope=probe_scope)}
-            for tid, _, _ in want:
-                desc = probe_descs.get(tid)
-                if desc is None:
-                    raise _VerifyFail([f"UNKNOWN_ID: {tid!r} not inventoried"])
-                if not desc.get("unique") or not desc.get("eligible"):
-                    raise _VerifyFail([f"AMBIGUOUS: {tid!r} not uniquely identifiable "
-                                       f"({desc.get('reason') or 'ambiguous'})"])
-                key = json.dumps(ident.match_identity(desc), sort_keys=True)
+            if prior is not None and probe_scope != prior["scope"]:
+                raise _VerifyFail([f"SCOPE_MISMATCH: live scope {probe_scope!r} "
+                                   f"!= prior overlay scope {prior['scope']!r}"])
+            seen_ident: set[str] = set()
+            # Removal bypass guard: every REMOVED id must still resolve to a
+            # structurally identical live target. A disappeared target cannot
+            # be laundered through `remove`. Retained ids are rechecked below
+            # via merged_want; no double-counting (no fake DUPLICATE on upsert
+            # of an already-saved id, since merged dedups prior+new).
+            if prior is not None:
+                doomed_now = set(doomed)
+                for item in prior["targets"]:
+                    if item["id"] not in doomed_now:
+                        continue
+                    probe = probe_descs.get(item["id"])
+                    if probe is None:
+                        raise _VerifyFail([f"UNKNOWN_ID: {item['id']!r} not inventoried"])
+                    if not probe.get("unique") or not probe.get("eligible"):
+                        raise _VerifyFail([f"AMBIGUOUS: {item['id']!r} not uniquely identifiable "
+                                           f"({probe.get('reason') or 'ambiguous'})"])
+                    if (json.dumps(ident.match_identity(item["descriptor"]), sort_keys=True)
+                            != json.dumps(ident.match_identity(probe), sort_keys=True)):
+                        raise _VerifyFail([f"DRIFT: target {item['id']!r} structural identity "
+                                           "changed; refusing nearest match"])
+            for tid, _, desc in merged_want:
+                probe = None if desc is None else probe_descs.get(tid)
+                if desc is not None:
+                    # Retained descriptor: still inventoried, structurally
+                    # identical, unique/eligible (identity via resolve, not
+                    # the stale `current` reading).
+                    if probe is None:
+                        raise _VerifyFail([f"UNKNOWN_ID: {tid!r} not inventoried"])
+                    if not probe.get("unique") or not probe.get("eligible"):
+                        raise _VerifyFail([f"AMBIGUOUS: {tid!r} not uniquely identifiable "
+                                           f"({probe.get('reason') or 'ambiguous'})"])
+                    if (json.dumps(ident.match_identity(desc), sort_keys=True)
+                            != json.dumps(ident.match_identity(probe), sort_keys=True)):
+                        raise _VerifyFail([f"DRIFT: target {tid!r} structural identity "
+                                           "changed; refusing nearest match"])
+                    key = json.dumps(ident.match_identity(probe), sort_keys=True)
+                else:
+                    fresh = probe_descs.get(tid)
+                    if fresh is None:
+                        raise _VerifyFail([f"UNKNOWN_ID: {tid!r} not inventoried"])
+                    if not fresh.get("unique") or not fresh.get("eligible"):
+                        raise _VerifyFail([f"AMBIGUOUS: {tid!r} not uniquely identifiable "
+                                           f"({fresh.get('reason') or 'ambiguous'})"])
+                    key = json.dumps(ident.match_identity(fresh), sort_keys=True)
                 if key in seen_ident:
                     raise _VerifyFail([f"DUPLICATE_TARGET: {tid!r} duplicates an "
                                        "already requested identity"])
@@ -1041,8 +1428,17 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
                 plt.close(probe_fig)
             except Exception:
                 pass
-        run1 = _pair_run(script_p, config_p, scope, want)
-        run2 = _pair_run(script_p, config_p, scope, want)
+        if prior is not None and not merged_want:
+            cleared = _verify_clear(script_p, config_p, scope, prior,
+                                    overlay_p, protected0,
+                                    no_change_request=no_change_request,
+                                    actual_expected=expected_before_sha256,
+                                    allow_draft=allow_draft, module0=module0)
+            if cleared is not None:
+                return cleared
+            raise _VerifyFail(["CLEAR_FAILED: original-baseline rebuild failed"])
+        run1 = _pair_run(script_p, config_p, scope, merged_want)
+        run2 = _pair_run(script_p, config_p, scope, merged_want)
     except _VerifyFail as failure:
         return _build_receipt(local_edit_state="ERROR",
                               local_problems=failure.problems,
@@ -1079,6 +1475,13 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
     base_receipt["local_problems"] = list(verdict["problems"])
     effects, effect_problems = _effects_of(run1, verdict)
     base_receipt["target_effects"] = effects
+    base_receipt["audit_summary"]["transition"] = {
+        "requested_upserts": [item["target_id"] for item in clean],
+        "requested_removals": list(doomed),
+        "retained": [tid for tid, _, _ in merged_want
+                     if tid not in {c["target_id"] for c in clean}
+                     and tid not in set(doomed)],
+        "no_change_request": bool(no_change_request)}
     if effect_problems:
         base_receipt["local_edit_state"] = "FAIL"
         base_receipt["local_problems"] = list(verdict["problems"]) + effect_problems
@@ -1093,9 +1496,16 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
         return _receipt(base_receipt, source_commit_state="NOT_WRITTEN",
                         figure_verification_state="FAIL", draft=False)
     # Drift between verification and persist refuses to write (exact set).
-    deps_now = _live_dependencies(module0, script_p, config_p)
-    drift = _live_drift_check(
-        {k: {"sha256": v[1]} for k, v in run1["deps"].items()}, deps_now)
+    # ``_live_drift_check`` takes live ``(path, hash)`` tuples directly.
+    try:
+        deps_now = _live_dependencies(module0, script_p, config_p)
+    except (ValueError, RuntimeError, OSError,
+            FileNotFoundError, PermissionError) as error:
+        return _receipt(base_receipt, source_commit_state="NOT_WRITTEN",
+                        figure_verification_state="ERROR",
+                        draft=False, drift=str(error))
+    live_named = {k: {"sha256": v[1]} for k, v in run1["deps"].items()}
+    drift = _live_drift_check(live_named, deps_now)
     if drift is not None:
         return _receipt(base_receipt, source_commit_state="NOT_WRITTEN",
                         figure_verification_state="ERROR",
@@ -1123,11 +1533,11 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
                 "generator": "figpact.style_overlay/1"}
     _validate_overlay_shape({**doc_core, "created_at": "1970-01-01T00:00:00+00:00"})
     from figpact import source_writes as _sw  # noqa: F401 (single-writer note)
-    existed = overlay_p.exists()
-    if existed:
+    if prior is not None:
         try:
-            prior = json.loads(overlay_p.read_bytes().decode("utf-8"))
-            prior_core = {k: prior.get(k) for k in
+            prior_raw = overlay_p.read_bytes()
+            prior_doc = json.loads(prior_raw.decode("utf-8"))
+            prior_core = {k: prior_doc.get(k) for k in
                           ("schema", "script", "config", "scope",
                            "targets", "dependencies", "generator")}
             if json.dumps(prior_core, sort_keys=True, ensure_ascii=False,
@@ -1141,21 +1551,6 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
                                 draft=draft)
         except (OSError, ValueError):
             pass
-    if expected_before_sha256 is None:
-        if existed:
-            return _receipt(
-                base_receipt, source_commit_state="NOT_WRITTEN",
-                figure_verification_state="ERROR", draft=False,
-                drift="CREATE_CONFLICT: overlay already exists; pass "
-                      "expected_before_sha256 to update")
-    else:
-        actual = _sha256_file(overlay_p)
-        if actual != expected_before_sha256:
-            return _receipt(
-                base_receipt, source_commit_state="NOT_WRITTEN",
-                figure_verification_state="ERROR", draft=False,
-                drift=f"STALE_SOURCE: overlay before {expected_before_sha256} "
-                      f"!= disk {actual}")
     doc = dict(doc_core)
     doc["created_at"] = datetime.now(timezone.utc).isoformat()
     _validate_overlay_shape(doc)
@@ -1342,8 +1737,20 @@ def load(overlay_path: Any) -> tuple:
             audit_summary={}, overlay_path=str(overlay_p), draft=False,
             drift=str(error), protected_sources=protected)
         return None, None, receipt
-    protected = _protected_list(script_p, config_p, module0)
-    live = _live_dependencies(module0, script_p, config_p)
+    try:
+        protected = _protected_list(script_p, config_p, module0)
+        live = _live_dependencies(module0, script_p, config_p)
+    except (ValueError, RuntimeError, OSError,
+            FileNotFoundError, PermissionError) as error:
+        receipt = _build_receipt(
+            local_edit_state="ERROR", local_problems=[str(error)],
+            source_commit_state="NOT_WRITTEN", figure_verification_state="ERROR",
+            figure_qa={"blocking": [], "glyph_floor": [], "pass": False},
+            qa_before={"blocking": [], "glyph_floor": [], "pass": False},
+            target_effects=[], science_unchanged=False, science_notes=[str(error)],
+            audit_summary={}, overlay_path=str(overlay_p), draft=False,
+            drift=str(error), protected_sources=protected)
+        return None, None, receipt
     drift = _live_drift_check(stored_files, live)
     if drift is not None:
         receipt = _build_receipt(
@@ -1354,7 +1761,80 @@ def load(overlay_path: Any) -> tuple:
             target_effects=[], science_unchanged=False, science_notes=[drift],
             audit_summary={}, overlay_path=str(overlay_p), draft=False,
             drift=drift, protected_sources=protected)
-        return None, None, receipt
+    if not doc["targets"]:
+        import matplotlib.pyplot as _plt
+        try:
+            _m1, _, _f1, _g1, _s1 = _fresh_build(script_p, config_p, scope)
+            _n1 = _manifest_of(_m1)
+            _p1 = _snapshots(_f1, _g1, _n1, {})
+        finally:
+            try:
+                _plt.close(_f1)
+            except Exception:
+                pass
+        try:
+            _m2, _, _f2, _g2, _s2 = _fresh_build(script_p, config_p, scope)
+            _n2 = _manifest_of(_m2)
+            _p2 = _snapshots(_f2, _g2, _n2, {})
+        finally:
+            try:
+                _plt.close(_f2)
+            except Exception:
+                pass
+        if _s1 != scope or _s2 != scope:
+            _fail = _build_receipt(
+                local_edit_state="ERROR",
+                local_problems=[f"SCOPE_MISMATCH: {_s1!r}/{_s2!r} != {scope!r}"],
+                source_commit_state="NOT_WRITTEN", figure_verification_state="ERROR",
+                figure_qa={"blocking": [], "glyph_floor": [], "pass": False},
+                qa_before={"blocking": [], "glyph_floor": [], "pass": False},
+                target_effects=[], science_unchanged=False, science_notes=[],
+                audit_summary={}, overlay_path=str(overlay_p), draft=False,
+                drift=None, protected_sources=protected)
+            return None, None, _fail
+        _vd = _verify_pair(_p1, _p2, allowed_styles={}, required=[], proven=True)
+        _agree = True
+        _qa = _qa_of(_p2)
+        _qb = _qa_of(_p1)
+        _base = {"qa_before": _qb, "figure_qa": _qa,
+                 "science_unchanged": _vd["science_ok"],
+                 "science_notes": [str(n)[:300] for n in (_vd["sci_notes"] or [])],
+                 "audit_summary": {"hard": len(_vd["hard"]),
+                                   "derived_total": len(_vd["derived"]),
+                                   "derived_allowed": len(_vd["derived"])
+                                   if _vd["derived_ok"] else 0,
+                                   "required_changed": _vd["required_changed"],
+                                   "agreement": _agree, "pair_runs": 2, "cleared": True},
+                 "overlay_path": str(overlay_p), "drift": None,
+                 "protected_sources": protected,
+                 "target_effects": [], "local_problems": list(_vd["problems"])}
+        _base["local_edit_state"] = "PASS" if _vd["ok"] else "FAIL"
+        _qp = bool(_qa["pass"])
+        if not _vd["ok"]:
+            _fail = _build_receipt(**_base, source_commit_state="NOT_WRITTEN",
+                                   figure_verification_state=_figure_state("FAIL", _qp),
+                                   draft=False)
+            return None, None, _fail
+        try:
+            _fig, _reg = _open_styled(script_p, config_p, scope, [],
+                                      {"after_vals": {},
+                                       "before": _p1, "after": _p2, "qa": _qa})
+        except _VerifyFail as _failure:
+            _fail = _build_receipt(**_base, source_commit_state="NOT_WRITTEN",
+                                   figure_verification_state="ERROR", draft=False,
+                                   local_edit_state="ERROR",
+                                   local_problems=_failure.problems)
+            return None, None, _fail
+        _done = _build_receipt(**_base, source_commit_state="NOT_WRITTEN",
+                               figure_verification_state=_figure_state("PASS", _qp),
+                               draft=bool(not _qp))
+        if not _qp:
+            try:
+                _plt.close(_fig)
+            except Exception:
+                pass
+            return None, None, _done
+        return _fig, _reg, _done
     want = [(item["id"], float(item["value"]), item["descriptor"])
             for item in doc["targets"]]
     try:

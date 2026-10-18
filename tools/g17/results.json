@@ -1,0 +1,111 @@
+{
+  "condition": "G17 composable R2",
+  "steps": [
+    {
+      "step": "A",
+      "values": {
+        "ylabel": 8.0,
+        "xticks": [
+          10.0,
+          10.0,
+          10.0
+        ]
+      },
+      "local_edit_state": "PASS",
+      "figure_verification_state": "PASS",
+      "source_commit_state": "COMMITTED",
+      "science_unchanged": true,
+      "audited_target_count": 1,
+      "transition": {
+        "no_change_request": false,
+        "requested_removals": [],
+        "requested_upserts": [
+          "main.ax[sa547ab9390fe].ylabel.fontsize"
+        ],
+        "retained": []
+      }
+    },
+    {
+      "step": "B",
+      "values": {
+        "ylabel": 8.0,
+        "xticks": [
+          8.0,
+          8.0,
+          8.0
+        ]
+      },
+      "local_edit_state": "PASS",
+      "figure_verification_state": "PASS",
+      "source_commit_state": "COMMITTED",
+      "science_unchanged": true,
+      "audited_target_count": 2,
+      "transition": {
+        "no_change_request": false,
+        "requested_removals": [],
+        "requested_upserts": [
+          "main.ax[sa547ab9390fe].tick.x.fontsize"
+        ],
+        "retained": [
+          "main.ax[sa547ab9390fe].ylabel.fontsize"
+        ]
+      }
+    },
+    {
+      "step": "update_A",
+      "values": {
+        "ylabel": 9.0,
+        "xticks": [
+          8.0,
+          8.0,
+          8.0
+        ]
+      },
+      "local_edit_state": "PASS",
+      "figure_verification_state": "PASS",
+      "source_commit_state": "COMMITTED",
+      "science_unchanged": true,
+      "audited_target_count": 2,
+      "transition": {
+        "no_change_request": false,
+        "requested_removals": [],
+        "requested_upserts": [
+          "main.ax[sa547ab9390fe].ylabel.fontsize"
+        ],
+        "retained": [
+          "main.ax[sa547ab9390fe].tick.x.fontsize"
+        ]
+      }
+    },
+    {
+      "step": "remove_A",
+      "values": {
+        "ylabel": 10.0,
+        "xticks": [
+          8.0,
+          8.0,
+          8.0
+        ]
+      },
+      "local_edit_state": "PASS",
+      "figure_verification_state": "PASS",
+      "source_commit_state": "COMMITTED",
+      "science_unchanged": true,
+      "audited_target_count": 1,
+      "transition": {
+        "no_change_request": false,
+        "requested_removals": [
+          "main.ax[sa547ab9390fe].ylabel.fontsize"
+        ],
+        "requested_upserts": [],
+        "retained": [
+          "main.ax[sa547ab9390fe].tick.x.fontsize"
+        ]
+      }
+    }
+  ],
+  "stale_refused_bytes_unchanged": true,
+  "source_unchanged": true,
+  "g16_strict_positive_cases": 3,
+  "targeted_regression": "41 passed"
+}
