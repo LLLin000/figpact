@@ -56,7 +56,7 @@ def _plan_route(path: str):
 class InspectorServer(http.server.HTTPServer):
     # Single request owner: Matplotlib and the accepted set are never concurrently mutated.
     def __init__(self, session: IntentSession, address: tuple[str, int] = ('127.0.0.1', 0), *,
-                 frontend=FRONTEND, state_home=None, source=None):
+                 frontend=FRONTEND, state_home=None, source=None, style=None):
         if address[0] != '127.0.0.1':
             raise ValueError('Inspector 只允许绑定 127.0.0.1')
         self.session = session
@@ -64,6 +64,8 @@ class InspectorServer(http.server.HTTPServer):
         self.ui_token = secrets.token_urlsafe(32)
         self.hub = SessionHub(state_home=state_home, source=source, ui_token=self.ui_token)
         self.frontend = Path(frontend).resolve()
+        #: Style-only session (G18): None in native geometry mode; startup --overlay binds it.
+        self.style = style
         super().__init__(address, _Handler)
 
 
@@ -119,12 +121,26 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return
         path = urlsplit(self.path).path
         if path == '/api/frame':
-            self._send(self._app.session.snapshot())
+            if getattr(self._app, 'style', None) is not None:
+                # Style mode: the cached verified style frame IS the frame.
+                # Never graft style onto the geometry snapshot: the two are
+                # different figures with different revisions, so the grafted
+                # revision could never pass the strict preview gate.
+                self._send(self._app.style.snapshot())
+            else:
+                self._send(self._app.session.snapshot())
+            return
+        if path == '/api/style/state' and getattr(self._app, 'style', None) is not None:
+            self._send(*self._app.style.state())
             return
         if path == '/frame.js':
             # 既有 frame 行为字节不变，只追加一行：页面会话令牌（授权请求必须带回来的那个）。
+            if getattr(self._app, 'style', None) is not None:
+                _frame = self._app.style.snapshot()
+            else:
+                _frame = self._app.session.snapshot()
             body = ('window.FIGPACT_INSPECTOR_FRAME=' + json.dumps(
-                self._app.session.snapshot(), ensure_ascii=True, allow_nan=False) + ';\n'
+                _frame, ensure_ascii=True, allow_nan=False) + ';\n'
                 'window.FIGPACT_UI_TOKEN=' + json.dumps(self._app.ui_token) + ';\n')
             self._send(body, media='text/javascript; charset=utf-8')
             return
@@ -206,6 +222,35 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return
         path = urlsplit(self.path).path
         plan = _plan_route(path)
+        STYLE_PATHS = {'/api/style/preview', '/api/style/commit', '/api/style/cancel'}
+        if path in STYLE_PATHS:
+            style = getattr(self._app, 'style', None)
+            if style is None:
+                self._send({'status': 'NOT_FOUND',
+                            'message': 'style 会话未启用（启动时加 --overlay）'}, 404)
+                return
+            if path == '/api/style/commit':
+                import hmac as _hmac
+                token = self.headers.get('X-Figpact-Ui')
+                if not token or not _hmac.compare_digest(token, self._app.ui_token):
+                    self._send({'status': 'FORBIDDEN',
+                                'message': 'commit 需要页面会话令牌 X-Figpact-Ui'}, 403)
+                    return
+            body = self._json_body()
+            if body is None:
+                return
+            try:
+                if path == '/api/style/preview':
+                    result, code = style.preview(body)
+                elif path == '/api/style/commit':
+                    result, code = style.commit(body)
+                else:
+                    result, code = style.cancel(body)
+            except (ValueError, RuntimeError, OSError) as error:
+                self._send({'status': 'STYLE_REJECTED', 'message': str(error)}, 400)
+                return
+            self._send(result, code)
+            return
         routes = {'/api/intents/evaluate': self._app.session.evaluate,
                   '/api/intents/decision': self._app.session.decide,
                   '/api/frame/quality': self._app.session.set_quality}
@@ -253,8 +298,12 @@ def main(argv=None):
                         help='Display resolution only; originals and publication files are never changed')
     parser.add_argument('--frontend', type=Path, default=FRONTEND,
                         help='Trusted local Inspector assets (development worktree only)')
+    parser.add_argument('--overlay', type=Path, default=None,
+                        help='Trusted fixed style-overlay file; enables the style-only session')
     args = parser.parse_args(argv)
-    if bool(args.script) != bool(args.config):
+    if args.overlay is not None and args.script is None:
+        parser.error('--overlay 需要 --script（无 config 时 style 启动合法，config 可选）')
+    if bool(args.script) != bool(args.config) and args.overlay is None:
         parser.error('--script 和 --config 必须同时指定')
     import matplotlib
     matplotlib.use('Agg')
@@ -266,9 +315,21 @@ def main(argv=None):
     figure = None
     source = None
     if args.script is not None:
-        session = IntentSession(script=args.script, config=args.config, scope=args.scope, dpi=args.dpi)
-        # history 工作区身份：G5b 授权写入的 source_change 检查点落在同一个工作区里。
-        source = {'script': str(args.script), 'config': str(args.config), 'scope': args.scope}
+        if args.config is None and args.overlay is not None:
+            # Config-optional style startup: geometry stays a read-only
+            # measurement figure from the trusted script; verification
+            # lives in the style session, not here.
+            from figpact.final_size import _build_figure, _import_script, _load_config
+            _module = _import_script(Path(args.script).resolve())
+            _cfg = _load_config(_module, Path(args.script).resolve(), None)
+            (figure, _reg), _resolved = _build_figure(
+                _module, __import__('copy').deepcopy(_cfg), args.scope)
+            session = IntentSession(figure=figure, scope=args.scope)
+            source = {'script': str(args.script), 'config': None, 'scope': args.scope}
+        else:
+            session = IntentSession(script=args.script, config=args.config, scope=args.scope, dpi=args.dpi)
+            # history 工作区身份：G5b 授权写入的 source_change 检查点落在同一个工作区里。
+            source = {'script': str(args.script), 'config': str(args.config), 'scope': args.scope}
     elif args.example == 'plain':
         if plain_figure is None:
             parser.error('演示资源 tools.inspector_demo 不可用（正式入口请用 --script/--config）')
@@ -285,9 +346,17 @@ def main(argv=None):
             parser.error(f'演示资源缺失：{script} / {config}')
         session = IntentSession(script=script, config=config, scope=args.scope, dpi=args.dpi)
         source = {'script': str(script), 'config': str(config), 'scope': args.scope}
+    style = None
+    if args.overlay is not None:
+        from figpact.inspector_style import StyleSession
+        try:
+            style = StyleSession(script=args.script, config=args.config,
+                                 scope=args.scope, overlay=args.overlay)
+        except RuntimeError as error:
+            parser.error(f'style overlay 启动被拒绝：{error}')
     try:
         with session, InspectorServer(session, ('127.0.0.1', args.port), frontend=args.frontend,
-                                      source=source) as server:
+                                      source=source, style=style) as server:
             print(f'Inspector: http://127.0.0.1:{server.server_address[1]}', flush=True)
             print('G2/G5a: session acceptance only; G5b source writes land only after the page '
                   'session token consents to a minted plan', flush=True)

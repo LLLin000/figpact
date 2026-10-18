@@ -611,9 +611,13 @@
     operationStack: createOperationStack(),
     inFlightGuard: createInFlightGuard(),
     pendingOperationId: null,
-    plans: [],
-    pendingSaves: [],
-    plansSignature: '',
+    styleSelected: null,
+    stylePending: null,
+    styleBusy: false,
+    styleTargets: [],
+    styleOverlaySha: null,
+    styleClientMs: null,
+    styleServerMs: null,
     plansError: '',
     planNotice: '',
     planErrors: new Map(),
@@ -1027,6 +1031,7 @@
     const section = byId('intent-section');
     if (!section) return;
     const node = state.nodes.get(state.selected);
+    try { if (typeof isStyleOnly === 'function' && isStyleOnly()) { section.hidden = true; return; } } catch (e) {}
     if (!state.intentSession) {
       section.hidden = !minimal;
       return;
@@ -1142,7 +1147,16 @@
       const canGhost = canGhostNode(node);
 
       // 1. 第一视线：通俗易懂的核心对象属性
-      fields(byId('detail-fields'), [
+      // style-only 且 exact 命中样式目标：显示样式来源，不谈位置权限。
+      const hitTarget = (state.styleTargets || []).find(t => Array.isArray(t.scene_ids) && t.scene_ids.includes(node.id)) || null;
+      // 1. 第一视线：通俗易懂的核心对象属性
+      fields(byId('detail-fields'), hitTarget ? [
+        ['对象名称', cleanTitle],
+        ['对象类型', typeText],
+        ['位置与尺寸', formatBounds(node.bounds_mm)],
+        ['样式目标', hitTarget.label || hitTarget.target_id],
+        ['样式属性', `${hitTarget.property || ''} · 当前 ${hitTarget.current_pt} pt · ${hitTarget.saved_pt == null ? '尚未保存' : `已保存 ${hitTarget.saved_pt} pt`}`]
+      ] : [
         ['对象名称', cleanTitle],
         ['对象类型', typeText],
         ['位置与尺寸', formatBounds(node.bounds_mm)],
@@ -1157,8 +1171,9 @@
         const techPairs = [
           ['全局标识 (GID)', node.gid || '未分配'],
           ['底层节点 (ID)', node.id],
-          ['显示模式', canRebuild ? '可微调（不改原文件）' : '仅查看（不可编辑）']
+          ['显示模式', hitTarget ? '样式可调（右侧样式微调）' : (canRebuild ? '可微调（不改原文件）' : '仅查看（不可编辑）')]
         ];
+        if (hitTarget) techPairs.push(['样式目标 ID', hitTarget.target_id]);
         if (rawText && rawText !== cleanTitle) {
           techPairs.push(['原始科学文本', rawText]);
         }
@@ -1184,10 +1199,16 @@
       byId('detail-ephemeral').hidden = node.identity_stability !== 'ephemeral';
       byId('detail-ephemeral').textContent = '这个编号只在当前图上有效。重新生成图后，请重新选择对象。';
 
-      byId('detail-readonly').hidden = false;
-      byId('detail-readonly').textContent = canRebuild
-        ? '可以预览位置调整；不会修改原始脚本、配置或正式图片。'
-        : '不会修改原图。可移动对象的轮廓来示范位置，但不能保留到图中。';
+      if (hitTarget) {
+        // exact 样式目标：隐藏位置未授权提示，改说样式控制来源（下方样式微调可保存）。
+        byId('detail-readonly').hidden = false;
+        byId('detail-readonly').textContent = `样式可调：在右侧“样式微调”中改 ${hitTarget.label || hitTarget.target_id}（${hitTarget.property || ''}），预览后确认保存。`;
+      } else {
+        byId('detail-readonly').hidden = false;
+        byId('detail-readonly').textContent = canRebuild
+          ? '可以预览位置调整；不会修改原始脚本、配置或正式图片。'
+          : '不会修改原图。可移动对象的轮廓来示范位置，但不能保留到图中。';
+      }
 
       if (node.annotation || node.linked_guide_gid || node.type === 'guide') {
         byId('detail-annotation').hidden = false;
@@ -1200,12 +1221,16 @@
       }
     }
     updateIntentUI();
-    highlights();
-    if (byId('object-list')) {
-      for (const btn of byId('object-list').querySelectorAll('button')) {
-        btn.setAttribute('aria-current', String(btn.dataset.nodeId === state.selected));
+    try {
+      if (!state.stylePending && state.styleTargets.length && node) {
+        for (const t of state.styleTargets) {
+          if (Array.isArray(t.scene_ids) && t.scene_ids.includes(node.id) && t.target_id !== state.styleSelected) {
+            state.styleSelected = t.target_id; renderStyle(); break;
+          }
+        }
       }
-    }
+    } catch (e) {}
+    highlights();
   }
 
   function outline(node, className) {
@@ -1451,7 +1476,8 @@
       viewport.classList.add('panning');
       return;
     }
-    // 只拖"当前选中且可 ghost"的对象：指针按在别处时仍旧走点选 / Alt 轮换那条老路
+    // 只拖"当前选中且可 ghost"的对象：指针按在别处时仍旧走点选 / Alt 轮换那条老路；样式模式不拖动。
+    if (isStyleOnly()) return;
     const node = state.nodes.get(state.selected);
     if (event.button !== 0 || event.altKey || !state.intentSession || !canGhostNode(node)) return;
     if (candidates(event)[0]?.id !== state.selected) return;
@@ -1798,6 +1824,269 @@
   root.addEventListener('blur', () => { state.space = false; state.pan = null; viewport.classList.remove('panning'); if (state.drag) endDrag(); });
   root.addEventListener('resize', fit);
 
+  // ---------- G18 样式微调：只读选择 + 预览/确认，几何 UI 不动 ----------
+  function styleSetBusy(busy) {
+    state.styleBusy = busy;
+    for (const id of ['style-preview', 'style-restore', 'style-confirm', 'style-cancel', 'style-value', 'style-target']) {
+      const el = byId(id); if (el) el.disabled = busy;
+    }
+    for (const id of ['btn-evaluate', 'btn-accept', 'btn-apply-delta', 'save-changes']) {
+      const el = byId(id); if (el && busy) el.disabled = true;
+    }
+    if (!busy) updateIntentUI();
+  }
+  function styleNote(msg, show) {
+    const el = byId('style-notice'); if (!el) return;
+    el.hidden = !show; if (show && msg) el.textContent = msg;
+  }
+  // 可读标签 + data-style-state 供测试断言：verifying/validated/saving/saved/failed/cancelled/previewed/idle。
+  function styleBadge(text, st) {
+    const el = byId('style-status'); if (!el) return;
+    el.textContent = text; el.className = 'tag';
+    const map = { verifying: 'verifying', validated: 'validated', saving: 'saving', saved: 'saved', failed: 'failed', cancelled: 'cancelled', previewed: 'previewed', idle: 'idle' };
+    el.dataset.styleState = map[st] || 'idle';
+  }
+  function styleSelect() { return byId('style-target'); }
+  function styleLabel(t) {
+    const labels = { ylabel: 'Y轴标签', xlabel: 'X轴标签', 'x tick labels': 'X轴刻度', 'y tick labels': 'Y轴刻度' };
+    return labels[t?.label] || t?.label || t?.target_id || '';
+  }
+  function frameHasStyle(fr) {
+    return !!(fr && fr.style && Array.isArray(fr.style.targets) && fr.style.targets.length);
+  }
+  function isStyleOnly() {
+    const fr = state.acceptedFrame || state.frame || {};
+    if (state.styleTargets.length || frameHasStyle(fr)) return true;
+    const sess = fr.session;
+    return !!(sess && sess.can_evaluate === false);
+  }
+  function styleDisable(msg) {
+    const sec = byId('style-section'); if (sec) sec.hidden = false;
+    for (const id of ['style-preview', 'style-restore', 'style-confirm', 'style-cancel', 'style-value', 'style-target']) {
+      const el = byId(id); if (el) el.disabled = true;
+    }
+    styleBadge('样式不可用', 'failed');
+    styleNote(msg || '样式数据异常，已拒绝样式编辑', true);
+  }
+  function refreshStyleFromFrame(frame) {
+    const sec = byId('style-section'); if (!sec) return;
+    const st = frame && frame.style ? frame.style : null;
+    if (st) {
+      const finiteNum = v => typeof v === 'number' && Number.isFinite(v);
+      // current 必须 finite number；saved 允许 null（尚未保存）或 finite number。
+      const bad = typeof st.overlay_sha256 !== 'string' || !(st.overlay_sha256 === '' || /^[0-9a-f]{64}$/.test(st.overlay_sha256))
+        || !Array.isArray(st.targets)
+        || st.targets.some(t => !t || typeof t.target_id !== 'string' || !t.target_id
+          || !finiteNum(t.current_pt) || !(t.saved_pt == null || finiteNum(t.saved_pt))
+          || (t.scene_ids != null && !Array.isArray(t.scene_ids)));
+      if (bad) {
+        state.styleTargets = []; state.styleOverlaySha = null; state.stylePending = null;
+        sec.hidden = false; styleDisable('样式数据校验失败，已拒绝样式编辑（正式文件未改动）');
+        const tm = byId('style-timings'); if (tm) tm.hidden = true;
+        return;
+      }
+    }
+    const targets = st && Array.isArray(st.targets) ? st.targets : [];
+    sec.hidden = !st;
+    state.styleTargets = targets;
+    // '' 代表尚未保存（无 overlay 文件），合法；server-bound 修订优先用 base_frame_revision。
+    state.styleOverlaySha = st ? (st.overlay_sha256 || '') : '';
+    state.styleBaseRev = (st && st.base_frame_revision) || (frame && frame.frame_revision) || null;
+    if (!targets.length) { state.stylePending = null; renderStyle(); return; }
+    const still = targets.some(t => t.target_id === state.styleSelected);
+    if (!still) {
+      const node = state.nodes.get(state.selected);
+      let mapped = null;
+      if (node) {
+        for (const t of targets) {
+          if (Array.isArray(t.scene_ids) && t.scene_ids.includes(node.id)) { mapped = t.target_id; break; }
+        }
+      }
+      state.styleSelected = mapped || targets[0].target_id;
+    }
+    if (state.stylePending && st && !st.pending && !st.candidate_id) state.stylePending = null;
+    renderStyle();
+  }
+  function styleTarget() {
+    return state.styleTargets.find(t => t.target_id === state.styleSelected) || null;
+  }
+  // exact scene_id 映射（服务端注册身份），无则 null；绝不做邻近/文本猜测。
+  function mapStyleToScene(target) {
+    if (!target || !Array.isArray(target.scene_ids) || !target.scene_ids.length) return null;
+    for (const sid of target.scene_ids) { if (state.nodes.has(sid)) return sid; }
+    return null;
+  }
+  function renderStyle() {
+    const sel = styleSelect(); if (!sel) return;
+    sel.replaceChildren();
+    for (const t of state.styleTargets) {
+      const o = document.createElement('option');
+      o.value = t.target_id;
+      o.textContent = styleLabel(t);
+      sel.append(o);
+    }
+    if (state.styleSelected) sel.value = state.styleSelected;
+    const t = styleTarget();
+    const input = byId('style-value');
+    if (input && t) { input.value = t.current_pt; input.setAttribute('aria-label', `${styleLabel(t)}（${t.property || ''}，当前 ${t.current_pt} pt）`); }
+    const p = state.stylePending;
+    const pw = byId('style-pending');
+    if (pw) pw.hidden = !p;
+    if (p) {
+      const pt = byId('style-pending-text');
+      const pl = styleLabel(state.styleTargets.find(x => x.target_id === p.target_id)) || p.target_id;
+      if (pt) pt.textContent = p.new_pt == null
+        ? `待确认：${pl} ${p.old_pt} pt → 原始样式（移除覆盖）（影响 ${Array.isArray(p.affected) ? p.affected.length : 0} 个对象）`
+        : `待确认：${pl} ${p.old_pt} → ${p.new_pt} pt（影响 ${Array.isArray(p.affected) ? p.affected.length : 0} 个对象）`;
+      styleBadge('已验证 · 待确认', 'validated');
+    } else if (t && !state.styleBusy && !['verifying', 'saving', 'saved', 'failed', 'cancelled'].includes(byId('style-status')?.dataset.styleState)) {
+      styleBadge(t.saved_pt == null ? `当前 ${t.current_pt} pt · 原始样式` : `当前 ${t.current_pt} pt · 已保存`, 'idle');
+    }
+    const tm = byId('style-timings');
+    const tw = byId('style-timing-wrap');
+    if (tm) {
+      const parts = [];
+      if (state.styleClientMs != null) parts.push(['本机渲染耗时', `${Math.round(state.styleClientMs)} ms`]);
+      if (state.styleServerMs != null) parts.push(['服务端耗时', `${Math.round(state.styleServerMs)} ms`]);
+      if (state.styleOverlaySha) parts.push(['样式版本', String(state.styleOverlaySha).slice(0, 12)]);
+      if (parts.length) fields(tm, parts);
+      if (tw) tw.hidden = parts.length === 0;
+    }
+    const rs = byId('style-restore');
+    if (rs && !state.styleBusy) rs.disabled = !t || t.saved_pt == null;
+  }
+  async function styleJson(url, body, withToken) {
+    const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (withToken) headers['X-Figpact-Ui'] = uiToken();
+    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+    let data = null; try { data = await res.json(); } catch (e) { data = null; }
+    return { res, data };
+  }
+  function styleFail(data, res) {
+    const code = data && typeof data.status === 'string' ? data.status : `HTTP ${res.status}`;
+    const msg = data && typeof data.message === 'string' && data.message ? `：${data.message}` : '';
+    return `${code}${msg}`;
+  }
+  async function stylePreview(remove) {
+    const t = styleTarget(); if (!t || state.styleBusy) return;
+    const input = byId('style-value');
+    const value = remove ? undefined : Number(input ? input.value : NaN);
+    if (!remove && (!Number.isFinite(value) || value < 1 || value > 72)) { styleNote('请输入 1–72 之间的 pt 数值', true); return; }
+    const rev = (state.acceptedFrame || state.frame || {}).frame_revision;
+    if (!rev) { styleNote('当前帧无效，请刷新', true); return; }
+    styleSetBusy(true); styleBadge('验证中…', 'verifying'); styleNote('', false);
+    const t0 = performance.now();
+    try {
+      const body = remove ? { frame_revision: rev, target_id: t.target_id, remove: true }
+        : { frame_revision: rev, target_id: t.target_id, value };
+      const { res, data } = await styleJson('/api/style/preview', body, false);
+      if (data && data.style && data.style.timings_ms) {
+        const tm = data.style.timings_ms;
+        state.styleServerMs = tm.preview_ms ?? tm.commit_ms ?? tm.rebuild_ms ?? null;
+      }
+      if (!res.ok || !data || !data.frame) throw new Error(styleFail(data, res));
+      if (data.style && data.style.pending) {
+        state.stylePending = data.style.pending;
+        // 后端 pending 自带 base_frame_revision + expected_sha256；缺失才用包络回退。
+        if (state.stylePending.base_frame_revision == null && data.style.base_frame_revision) state.stylePending.base_frame_revision = data.style.base_frame_revision;
+        if (state.stylePending.expected_sha256 == null && data.style.overlay_sha256 != null) state.stylePending.expected_sha256 = data.style.overlay_sha256;
+      }
+      await loadFrame(data.frame, undefined, false);
+      state.styleClientMs = Math.round(performance.now() - t0);
+      renderStyle();
+      styleBadge(state.stylePending ? '已验证 · 待确认' : '已预览', state.stylePending ? 'validated' : 'previewed');
+    } catch (e) {
+      const msg = String((e && e.message) || '');
+      if (/OVERLAY_CONFLICT|STALE_REVISION|UNKNOWN_ID|STYLE_REJECTED|INVALID/.test(msg)) {
+        state.stylePending = null;
+        try {
+          const fr = await (await fetch('/api/frame', { headers: { Accept: 'application/json' } })).json();
+          if (fr && fr.schema === 'figpact.inspector/1') await loadFrame(fr, undefined, true);
+        } catch (ee) {}
+      }
+      styleBadge('预览失败', 'failed'); styleNote(`样式预览失败：${msg}`, true);
+    }
+    finally { styleSetBusy(false); renderStyle(); }
+  }
+  async function styleCommit() {
+    const p = state.stylePending; if (!p || state.styleBusy) return;
+    // pending 自带 server-bound 修订（base_frame_revision + expected_sha256），原样回送；
+    // 缺失才用 style 包络/accepted 帧回退，绝不用 candidate 修订。
+    const rev = p.base_frame_revision || state.styleBaseRev
+      || (state.acceptedFrame || state.frame || {}).frame_revision;
+    const sha = (p.expected_sha256 != null) ? p.expected_sha256
+      : (((state.acceptedFrame || state.frame || {}).style || {}).overlay_sha256 ?? state.styleOverlaySha ?? '');
+    if (!rev || sha == null) { styleNote('版本信息缺失，请刷新后重试', true); return; }
+    // '' 合法（尚未保存），只拒绝缺失。
+    styleSetBusy(true); styleBadge('保存中…', 'saving');
+    try {
+      const { res, data } = await styleJson('/api/style/commit',
+        { candidate_id: p.candidate_id, frame_revision: rev, expected_sha256: sha }, true);
+      if (data && data.style && data.style.timings_ms) {
+        const tm = data.style.timings_ms;
+        state.styleServerMs = tm.commit_ms ?? tm.preview_ms ?? tm.rebuild_ms ?? null;
+      }
+      if (!res.ok || !data || !data.frame) throw new Error(styleFail(data, res));
+      state.stylePending = null;
+      let uiError = null;
+      try {
+        await loadFrame(data.frame, undefined, true);
+        if (state.styleSelected) {
+          const sid = mapStyleToScene(styleTarget());
+          if (sid) select(sid);
+        }
+        styleBadge('已保存并验证', 'saved'); styleNote('', false);
+      } catch (uiE) { uiError = uiE; }
+      if (uiError) {
+        // receipt 已 COMMITTED/PASS：正式文件已保存，只报 UI 呈现问题，绝不说未改动。
+        styleBadge('已保存 · 显示刷新异常', 'saved');
+        styleNote(`已保存并通过验证，但结果显示刷新失败：${uiError && uiError.message ? uiError.message : uiError}。请刷新页面核对。`, true);
+      }
+    } catch (e) {
+      const msg = String((e && e.message) || '');
+      if (/OVERLAY_CONFLICT|CANDIDATE_UNKNOWN|STALE_REVISION|FORBIDDEN/.test(msg)) {
+        state.stylePending = null;
+        try {
+          const fr = await (await fetch('/api/frame', { headers: { Accept: 'application/json' } })).json();
+          if (fr && fr.schema === 'figpact.inspector/1') await loadFrame(fr, undefined, true);
+        } catch (ee) {}
+      }
+      styleBadge('保存失败', 'failed');
+      styleNote(/NOT_WRITTEN/.test(msg) ? `样式保存失败：${msg}（正式文件未改动）` : `样式保存结果未知：${msg}。请刷新页面核对正式文件。`, true);
+    }
+    finally { styleSetBusy(false); renderStyle(); }
+  }
+  async function styleCancel() {
+    const p = state.stylePending; if (!p || state.styleBusy) return;
+    styleSetBusy(true);
+    try {
+      const { res, data } = await styleJson('/api/style/cancel', { candidate_id: p.candidate_id }, true);
+      if (!res.ok) throw new Error(styleFail(data, res));
+      state.stylePending = null;
+      const fr = await (await fetch('/api/frame', { headers: { Accept: 'application/json' } })).json();
+      if (fr && fr.schema === 'figpact.inspector/1') await loadFrame(fr, undefined, true);
+      styleBadge('已取消', 'cancelled');
+    } catch (e) { styleNote(`取消失败：${e.message}`, true); }
+    finally { styleSetBusy(false); renderStyle(); }
+  }
+  function wireStyle() {
+    const sel = styleSelect(); if (!sel || sel.dataset.wired) return;
+    sel.dataset.wired = '1';
+    sel.addEventListener('change', () => {
+      if (state.stylePending) {
+        styleNote('有待确认的样式预览，请先确认保存或取消，再切换目标', true);
+        sel.value = state.styleSelected;
+        return;
+      }
+      state.styleSelected = sel.value; renderStyle();
+    });
+    byId('style-preview')?.addEventListener('click', () => stylePreview(false));
+    byId('style-restore')?.addEventListener('click', () => stylePreview(true));
+    byId('style-confirm')?.addEventListener('click', styleCommit);
+    byId('style-cancel')?.addEventListener('click', styleCancel);
+  }
+  wireStyle();
+
   async function loadFrame(frame, expectedSourceRevision, isNewAccepted = true) {
     const epoch = ++state.epoch;
     state.ready = false;
@@ -1851,6 +2140,7 @@
         { btn: byId('btn-dpi-600'), dpi: 600, title: '精细视图 (600 DPI)，仅改变显示' }
       ];
       const currentDpi = scene.measurement?.dpi;
+      try { const seg = document.querySelector('.segmented-dpi'); if (seg) seg.hidden = frameHasStyle(frame); } catch (e) {}
       for (const item of dpiButtons) {
         if (!item.btn) continue;
         item.btn.disabled = !canRebuild;
@@ -1886,7 +2176,10 @@
 
       const badge = byId('badge-readonly');
       if (badge) {
-        if (canRebuild) {
+        if (frame.style && Array.isArray(frame.style.targets) && frame.style.targets.length) {
+          badge.textContent = 'Style Overlay';
+          badge.className = 'tag mode-session';
+        } else if (canRebuild) {
           badge.textContent = '可试调 / 不改原文件';
           badge.className = 'tag mode-session';
         } else {
@@ -1915,13 +2208,30 @@
         select(null);
       } else if (state.candidateFrame) {
         byId('frame-revision').textContent = `${state.acceptedFrame?.frame_revision?.slice(0, 12) || ''} (预览: ${frame.frame_revision.slice(0, 8)})`;
-        status('已更新位置预览 · 尚未保留本次调整', 'pending');
+        status(frame.style || state.stylePending ? '样式预览 · 尚未保存' : '已更新位置预览 · 尚未保留本次调整', 'pending');
         select(state.selected);
       } else {
         byId('frame-revision').textContent = frame.frame_revision.slice(0, 12);
         select(state.selected);
       }
       updateIntentUI();
+      try {
+        refreshStyleFromFrame(frame);
+      } catch (e) {
+        styleDisable(`样式数据异常，已拒绝样式编辑：${e && e.message ? e.message : e}（正式文件未改动）`);
+      }
+      try {
+        if (isStyleOnly()) {
+          const isec = byId('intent-section'); if (isec) isec.hidden = true;
+          const hint = byId('stage-hint');
+          if (hint) hint.textContent = '悬停查看 · 单击选中样式目标 · 右侧样式微调只改字号与线宽';
+        } else {
+          const hint = byId('stage-hint');
+          if (hint && hint.dataset.orig == null) hint.dataset.orig = hint.textContent;
+        }
+      } catch (e) {}
+      try { root.FIGPACT_INSPECTOR_FRAME = frame; } catch (e) {}
+      api.currentFrame = () => state.candidateFrame || state.acceptedFrame || state.frame || null;
       highlights();
     } catch (error) {
       if (epoch !== state.epoch) return;

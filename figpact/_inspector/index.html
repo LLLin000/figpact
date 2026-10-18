@@ -128,6 +128,40 @@
           <p class="session-note" id="session-note">只保留在当前服务中，未保存到文件；停止服务后会丢失</p>
           <p id="intent-notice" class="notice notice-warning" hidden></p>
         </section>
+        <section id="style-section" aria-label="样式微调" hidden>
+          <div class="section-header">
+            <h3>样式微调</h3>
+            <span id="style-status" class="tag">未加载</span>
+          </div>
+          <p class="hint">只改字号与线宽（pt）。预览不写盘，确认后才保存。</p>
+          <div class="intent-inputs">
+            <div class="input-group">
+              <label for="style-target">目标</label>
+              <select id="style-target" aria-label="样式目标"></select>
+            </div>
+            <div class="input-group">
+              <label for="style-value">字号/线宽</label>
+              <input id="style-value" type="number" step="0.5" min="1" max="72" aria-label="字号或线宽（pt）">
+              <span class="unit">pt</span>
+            </div>
+            <button id="style-preview" type="button">预览样式</button>
+          </div>
+          <div class="intent-actions">
+            <button id="style-restore" type="button">恢复原始</button>
+          </div>
+          <div id="style-pending" hidden>
+            <p id="style-pending-text" class="hint"></p>
+            <div class="intent-actions">
+              <button id="style-confirm" type="button">确认保存</button>
+              <button id="style-cancel" type="button">取消</button>
+            </div>
+          </div>
+          <details class="technical-details" id="style-timing-wrap" hidden>
+            <summary>验证耗时</summary>
+            <dl id="style-timings" class="eval-results"></dl>
+          </details>
+          <p id="style-notice" class="notice notice-warning" hidden></p>
+        </section>
       </aside>
     </main>
 

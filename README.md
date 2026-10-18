@@ -185,6 +185,17 @@ python -m figpact overlay render style.json --output edited.png
 三个异构陌生图的真实 R2 验收与限制见 [G16 报告](docs/G16_REPORT.md)。
 连续编辑、新进程重开、删除与拒绝不落盘证据见 [G17 报告](docs/G17_REPORT.md)。
 
+### 在正式 Inspector 中连续改样式（G18）
+
+```bash
+python -m figpact ui --script tools/g15/B/g15b_barchart_decl.py --scope main --overlay work/style.json --port 0
+```
+
+打开终端地址，画布点选轴标签/刻度 → 右侧改数值 → **预览样式** → 查看旧值、新值与影响范围 → **确认保存**。
+预览不写正式 Overlay；继续选其他对象会保留已保存编辑。“恢复原始”显式移除该目标覆盖，不影响其他目标。
+关闭服务后用同一命令重开可恢复状态。位置编辑与样式控制分开，源路径仅启动时指定；HTTP不接受任意路径或方法。
+秒级独立验证不会伪装成即时完成，耗时可展开查看。浏览器证据、安全拒绝和极简性审查见 [G18 报告](docs/G18_REPORT.md)。
+
 
 ## 测试
 

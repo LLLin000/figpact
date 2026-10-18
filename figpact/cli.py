@@ -895,6 +895,8 @@ def cmd_ui(args: argparse.Namespace) -> int:
         argv += ["--port", str(args.port)]
     if getattr(args, "dpi", None) is not None:
         argv += ["--dpi", str(args.dpi)]
+    if getattr(args, "overlay", None):
+        argv += ["--overlay", str(args.overlay)]
     return int(run_inspector(argv) or 0)
 
 
@@ -1002,6 +1004,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_ui.add_argument("--scope", default="main", help="作用域")
     p_ui.add_argument("--port", type=int, default=0, help="端口")
     p_ui.add_argument("--dpi", type=int, default=600, choices=(120, 240, 600), help="显示分辨率")
+    p_ui.add_argument("--overlay", default=None, help="启动时固定的 Style Overlay 路径")
 
     # agent --script <py> --config <yaml> --scope <name> [--output-dir <dir>]
     p_agent = subparsers.add_parser("agent", help="本机持久 JSON-RPC 会话：snapshot/inspect/try_layout/render_preview/commit")

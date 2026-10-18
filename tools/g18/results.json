@@ -1,0 +1,34 @@
+{
+  "scenario": "Chromium continuous style edits plus new-process reopen",
+  "timings_s": {
+    "page_ready_s": 0.6557147999992594,
+    "select_s": 0.09597579999899608,
+    "preview_s": 3.9346016999988933,
+    "confirm_s": 3.75042250000115
+  },
+  "server_timings_ms": {
+    "rebuild_ms": 1566.8369999984861,
+    "preview_ms": 1649.6138999973482,
+    "commit_ms": 1239.7215999990294
+  },
+  "final_targets": [
+    {
+      "target_id": "main.ax[sa547ab9390fe].tick.x.fontsize",
+      "current_pt": 8,
+      "saved_pt": 8
+    },
+    {
+      "target_id": "main.ax[sa547ab9390fe].tick.y.fontsize",
+      "current_pt": 10,
+      "saved_pt": null
+    },
+    {
+      "target_id": "main.ax[sa547ab9390fe].ylabel.fontsize",
+      "current_pt": 10,
+      "saved_pt": null
+    }
+  ],
+  "restart_overlay_sha_matches": true,
+  "restart_page_ready_s": 0.27156119999926887,
+  "source_case": "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g18-style\\case-g6l30ovw"
+}
