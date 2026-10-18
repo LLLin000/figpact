@@ -219,3 +219,64 @@ def test_remove_restores_original_and_retains_sibling(tmp_path):
         assert rows[a]['current_pt'] == 10.0 and rows[a]['saved_pt'] is None
         assert rows[b]['saved_pt'] == 8.0
         plt.close('all')
+
+def test_commit_refresh_failure_stays_committed(tmp_path):
+    """A real commit survives display failure; stale frames grant no new edit."""
+    a, _b = _ids()
+    overlay = tmp_path / 'style.json'
+    with _server(tmp_path, overlay) as (server, port):
+        rev = _req(port, 'GET', '/api/frame')[1]['frame_revision']
+        status, prev, _ = _req(port, 'POST', '/api/style/preview',
+                               {'frame_revision': rev, 'target_id': a, 'value': 8})
+        assert status == 200, prev
+        cand = prev['style']['candidate_id']
+        before = overlay.read_bytes() if overlay.exists() else None
+        real_rebuild = server.style._rebuild
+
+        def _boom(overlay_path=None):
+            raise RuntimeError('injected post-commit rebuild failure')
+
+        server.style._rebuild = _boom
+        try:
+            status, done, _ = _req(port, 'POST', '/api/style/commit',
+                                   {'candidate_id': cand, 'frame_revision': rev,
+                                    'expected_sha256': ''}, **_ui(server))
+        finally:
+            server.style._rebuild = real_rebuild
+        # 真实提交语义：HTTP 200 + COMMITTED + 收据 COMMITTED/PASS，但无新帧且要求刷新。
+        assert status == 200, done
+        assert done['status'] == 'COMMITTED', done
+        assert done['frame'] is None, done
+        assert done['style']['refresh_required'] is True, done
+        assert done['style']['receipt']['source_commit_state'] == 'COMMITTED', done
+        assert done['style']['receipt']['figure_verification_state'] == 'PASS', done
+        # 字节事实：apply 已写盘且真实有效。
+        assert overlay.exists(), 'refresh 失败不许回滚正式写盘'
+        saved = {t['id']: float(t['value']) for t in
+                 json.loads(overlay.read_text(encoding='utf-8'))['targets']}
+        assert saved.get(a) == 8.0, saved
+        if before is not None:
+            assert overlay.read_bytes() != before
+        # 旧帧已标 stale：/api/frame 带 refresh_required。
+        status, frame = _req(port, 'GET', '/api/frame')[:2]
+        assert status == 200 and frame['style'].get('refresh_required') is True, frame
+        stable = overlay.read_bytes()
+        status, rejected, _ = _req(port, 'POST', '/api/style/preview',
+                                   {'frame_revision': rev, 'target_id': a, 'value': 9})
+        assert status == 409 and rejected['status'] == 'REFRESH_REQUIRED'
+        assert overlay.read_bytes() == stable
+        plt.close('all')
+
+
+def test_preview_explains_local_success_but_whole_qa_failure(tmp_path):
+    a, _ = _ids()
+    overlay = tmp_path / 'style.json'
+    with _server(tmp_path, overlay) as (server, port):
+        frame = _req(port, 'GET', '/api/frame')[1]
+        status, refused, _ = _req(port, 'POST', '/api/style/preview',
+                                 {'frame_revision': frame['frame_revision'], 'target_id': a, 'value': 4})
+        assert status == 400
+        assert refused['receipt']['local_edit_state'] == 'PASS'
+        assert refused['receipt']['figure_verification_state'] == 'FAIL'
+        assert 'QA' in refused['message'] and '4.0' in refused['message']
+        assert not overlay.exists()

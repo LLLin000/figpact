@@ -1,0 +1,258 @@
+{
+  "scope": "real FTIR/NMR integrated derivatives plus user-approved original single-Axes CCK8 copy",
+  "rounds_per_sample": 5,
+  "samples": {
+    "ftir": {
+      "summary": {
+        "total_s": {
+          "n": 5,
+          "p50": 4.76049570000032,
+          "p95": 5.763022040000214
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 4.03671839999879,
+          "p95": 4.742535120002867
+        },
+        "commit_s": {
+          "n": 0,
+          "p50": null,
+          "p95": null
+        },
+        "import": {
+          "n": 5,
+          "calls": 40,
+          "p50": 0.08278090000385419,
+          "p95": 0.1017454400040151
+        },
+        "build": {
+          "n": 5,
+          "calls": 35,
+          "p50": 0.8153340000026219,
+          "p95": 0.9679460799976368
+        },
+        "identity": {
+          "n": 5,
+          "calls": 80,
+          "p50": 0.40891380000539357,
+          "p95": 0.5558667800039985
+        },
+        "audit": {
+          "n": 5,
+          "calls": 55,
+          "p50": 0.5342441999964649,
+          "p95": 0.6796562000032281
+        },
+        "qa": {
+          "n": 5,
+          "calls": 60,
+          "p50": 0.32708789999378496,
+          "p95": 0.35821088000011514
+        },
+        "save": {
+          "n": 0,
+          "calls": 0,
+          "p50": null,
+          "p95": null
+        },
+        "render": {
+          "n": 5,
+          "calls": 5,
+          "p50": 0.2969889999985753,
+          "p95": 0.45051583999811556
+        }
+      },
+      "round_statuses": [
+        "STYLE_REJECTED",
+        "STYLE_REJECTED",
+        "STYLE_REJECTED",
+        "STYLE_REJECTED",
+        "STYLE_REJECTED"
+      ],
+      "local_edit_state": "PASS",
+      "figure_verification_state": "FAIL",
+      "source_commit_state": "NOT_WRITTEN",
+      "qa": {
+        "blocking": [],
+        "glyph_floor": [
+          "4.7 pt \u2192 \u5b57\u5f62 3.29 pt  \u00abHA + HAMA/Cu$^{2+}$/ZnO\u00bb",
+          "4.7 pt \u2192 \u5b57\u5f62 3.29 pt  \u00abHAMA/Cu$^{2+}$/ZnO\u00bb",
+          "plain 4.7 pt < 5.0 pt floor \u00abHA + HAMA/Cu$^{2+}$/ZnO\u00bb"
+        ],
+        "pass": false
+      },
+      "artifact_directory": "profile-ftir-release"
+    },
+    "nmr": {
+      "summary": {
+        "total_s": {
+          "n": 5,
+          "p50": 5.793083200002002,
+          "p95": 6.0651824799999305
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 3.991022400001384,
+          "p95": 3.999081080000906
+        },
+        "commit_s": {
+          "n": 0,
+          "p50": null,
+          "p95": null
+        },
+        "import": {
+          "n": 5,
+          "calls": 40,
+          "p50": 0.07648900000276626,
+          "p95": 0.7054959599940047
+        },
+        "build": {
+          "n": 5,
+          "calls": 35,
+          "p50": 1.2422995000051742,
+          "p95": 1.3433350199913547
+        },
+        "identity": {
+          "n": 5,
+          "calls": 130,
+          "p50": 0.9943561000036425,
+          "p95": 1.0819307599929744
+        },
+        "audit": {
+          "n": 5,
+          "calls": 55,
+          "p50": 0.7525645999958215,
+          "p95": 0.8582533599983435
+        },
+        "qa": {
+          "n": 5,
+          "calls": 60,
+          "p50": 0.47047200000088196,
+          "p95": 0.5478451599985419
+        },
+        "save": {
+          "n": 0,
+          "calls": 0,
+          "p50": null,
+          "p95": null
+        },
+        "render": {
+          "n": 5,
+          "calls": 5,
+          "p50": 0.6055731999986165,
+          "p95": 0.69791309999855
+        }
+      },
+      "round_statuses": [
+        "STYLE_REJECTED",
+        "STYLE_REJECTED",
+        "STYLE_REJECTED",
+        "STYLE_REJECTED",
+        "STYLE_REJECTED"
+      ],
+      "local_edit_state": "PASS",
+      "figure_verification_state": "FAIL",
+      "source_commit_state": "NOT_WRITTEN",
+      "qa": {
+        "blocking": [],
+        "glyph_floor": [
+          "6.0 pt \u2192 \u5b57\u5f62 4.20 pt  \u00ab=CH$_2$ (MA)\u00bb",
+          "6.0 pt \u2192 \u5b57\u5f62 4.20 pt  \u00ab\u2013CH$_2$OH\u00bb",
+          "6.0 pt \u2192 \u5b57\u5f62 4.20 pt  \u00abAr\u2013OCH$_3$\u00bb",
+          "6.0 pt \u2192 \u5b57\u5f62 4.20 pt  \u00ab\u2013CH$_2$NH$_2$\u00bb",
+          "6.0 pt \u2192 \u5b57\u5f62 4.20 pt  \u00ab\u2013COCH$_3$ (HA)\u00bb",
+          "6.0 pt \u2192 \u5b57\u5f62 4.20 pt  \u00ab\u2013COOCH$_3$\u00bb",
+          "6.0 pt \u2192 \u5b57\u5f62 4.20 pt  \u00abVan-NH$_2$ (4)\u00bb"
+        ],
+        "pass": false
+      },
+      "artifact_directory": "profile-nmr-release"
+    },
+    "cck8": {
+      "summary": {
+        "total_s": {
+          "n": 5,
+          "p50": 13.65303589999894,
+          "p95": 15.077065379999112
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 9.645548500000587,
+          "p95": 11.29828790000247
+        },
+        "commit_s": {
+          "n": 0,
+          "p50": null,
+          "p95": null
+        },
+        "import": {
+          "n": 5,
+          "calls": 40,
+          "p50": 0.07054279999283608,
+          "p95": 0.07589569999690866
+        },
+        "build": {
+          "n": 5,
+          "calls": 35,
+          "p50": 8.146029100014857,
+          "p95": 9.08406378001455
+        },
+        "identity": {
+          "n": 5,
+          "calls": 60,
+          "p50": 0.37688029999117134,
+          "p95": 0.5814918599950033
+        },
+        "audit": {
+          "n": 5,
+          "calls": 55,
+          "p50": 0.2527907000039704,
+          "p95": 0.29867869999070534
+        },
+        "qa": {
+          "n": 5,
+          "calls": 60,
+          "p50": 0.44040640000093845,
+          "p95": 0.5053040200007672
+        },
+        "save": {
+          "n": 0,
+          "calls": 0,
+          "p50": null,
+          "p95": null
+        },
+        "render": {
+          "n": 5,
+          "calls": 110,
+          "p50": 4.210684999998193,
+          "p95": 4.547866419992351
+        }
+      },
+      "round_statuses": [
+        "STYLE_REJECTED",
+        "STYLE_REJECTED",
+        "STYLE_REJECTED",
+        "STYLE_REJECTED",
+        "STYLE_REJECTED"
+      ],
+      "local_edit_state": "PASS",
+      "figure_verification_state": "FAIL",
+      "source_commit_state": "NOT_WRITTEN",
+      "qa": {
+        "blocking": [
+          "\u300clegend\u300d\u8d85\u51fa\u5750\u6807\u6846 7.07 mm\uff08\u5df2\u88ab\u88c1\u5207\uff09"
+        ],
+        "glyph_floor": [],
+        "pass": false
+      },
+      "artifact_directory": "profile-cck8-release"
+    }
+  },
+  "regression": {
+    "browser": "25 passed",
+    "inspector_backend": "5 passed",
+    "combined": "30 passed in 431.18s",
+    "node": "54 passed",
+    "full_nonbrowser_rerun": false
+  }
+}

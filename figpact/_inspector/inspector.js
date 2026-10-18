@@ -1886,13 +1886,22 @@
         return;
       }
     }
-    const targets = st && Array.isArray(st.targets) ? st.targets : [];
-    sec.hidden = !st;
-    state.styleTargets = targets;
-    // '' 代表尚未保存（无 overlay 文件），合法；server-bound 修订优先用 base_frame_revision。
+    if (st && st.refresh_required) {
+      state.styleRefreshFailed = true;
+      state.styleTargets = [];
+      state.stylePending = null;
+      if (typeof st.overlay_sha256 === 'string') state.styleOverlaySha = st.overlay_sha256;
+      renderStyle();
+      styleBadge('文件已保存，但界面刷新失败', 'saved');
+      styleNote('文件已保存，但界面刷新失败。请重载页面核对（正式文件已保存，无需重做）。', true);
+      return;
+    }
+    state.styleRefreshFailed = false;
+    const sec2 = byId('style-section'); if (sec2) sec2.hidden = !st;
+    state.styleTargets = st && Array.isArray(st.targets) ? st.targets : [];
     state.styleOverlaySha = st ? (st.overlay_sha256 || '') : '';
     state.styleBaseRev = (st && st.base_frame_revision) || (frame && frame.frame_revision) || null;
-    if (!targets.length) { state.stylePending = null; renderStyle(); return; }
+    const targets = state.styleTargets;
     const still = targets.some(t => t.target_id === state.styleSelected);
     if (!still) {
       const node = state.nodes.get(state.selected);
@@ -1953,7 +1962,11 @@
       if (tw) tw.hidden = parts.length === 0;
     }
     const rs = byId('style-restore');
-    if (rs && !state.styleBusy) rs.disabled = !t || t.saved_pt == null;
+    const frozen = !!state.styleRefreshFailed;
+    if (frozen) for (const id of ['style-preview', 'style-restore', 'style-confirm', 'style-cancel', 'style-value', 'style-target']) {
+      const el = byId(id); if (el) el.disabled = true;
+    }
+    if (rs && !state.styleBusy && !frozen) rs.disabled = !t || t.saved_pt == null;
   }
   async function styleJson(url, body, withToken) {
     const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
@@ -2026,7 +2039,27 @@
         const tm = data.style.timings_ms;
         state.styleServerMs = tm.commit_ms ?? tm.preview_ms ?? tm.rebuild_ms ?? null;
       }
-      if (!res.ok || !data || !data.frame) throw new Error(styleFail(data, res));
+      if (!res.ok || !data) throw new Error(styleFail(data, res));
+      // Commit truth: ov.apply 已写盘且 COMMITTED/PASS，但服务端刷新新帧失败
+      // （frame 为 null + style.refresh_required）。绝不报"保存失败"：正式文件
+      // 已保存；作废无新帧的编辑/选区，提示重载恢复。
+      if (data.status === 'COMMITTED' && !data.frame) {
+        state.stylePending = null;
+        state.styleRefreshFailed = true;
+        state.styleTargets = [];
+        if (data.style && typeof data.style.overlay_sha256 === 'string') state.styleOverlaySha = data.style.overlay_sha256;
+        try { select(null); } catch (e) {}
+        try {
+          const fr = await (await fetch('/api/frame', { headers: { Accept: 'application/json' } })).json();
+          if (fr && fr.schema === 'figpact.inspector/1' && fr.style && !fr.style.refresh_required) {
+            state.styleRefreshFailed = false;
+            await loadFrame(fr, undefined, true);
+          }
+        } catch (ee) {}
+        styleBadge('文件已保存，但界面刷新失败', 'saved');
+        styleNote('文件已保存，但界面刷新失败。请重载页面核对（正式文件已保存，无需重做）。', true);
+        return;
+      }
       state.stylePending = null;
       let uiError = null;
       try {

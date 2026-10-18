@@ -59,6 +59,7 @@ class StyleSession:
         self._frame, self._style = self._rebuild()
         self._timings = {"rebuild_ms": (time.perf_counter() - t0) * 1000.0}
         self._pending: dict[str, Any] | None = None
+        self._refresh_failed = False
 
     # -- figures ------------------------------------------------------
     @staticmethod
@@ -215,6 +216,8 @@ class StyleSession:
         else:
             style.pop("candidate_id", None)
             style.pop("pending", None)
+        if getattr(self, "_refresh_failed", False):
+            style["refresh_required"] = True
         frame["style"] = style
         return frame
 
@@ -240,6 +243,8 @@ class StyleSession:
 
     def preview(self, body: Any) -> tuple[dict, int]:
         from figpact import style_overlay as ov
+        if getattr(self, "_refresh_failed", False):
+            return _fail("REFRESH_REQUIRED", "文件已保存，但界面刷新失败；请重新打开后再编辑", 409)
         if not isinstance(body, dict):
             return _fail("INVALID", "请求必须是 JSON 对象", 400)
         remove_mode = body.get("remove") is True
@@ -314,9 +319,14 @@ class StyleSession:
                 temp.unlink(missing_ok=True)
             except OSError:
                 pass
-            problems = receipt.get("local_problems") or [receipt.get("drift")]
-            return _fail("STYLE_REJECTED",
-                         "; ".join(map(str, problems or ["验证失败"])), 400,
+            problems = [str(p) for p in receipt.get("local_problems", []) if p]
+            if receipt.get("local_edit_state") == "PASS":
+                qa = receipt.get("figure_qa") or {}
+                problems = ["对象样式修改已通过局部审计，但整图 QA 未通过；正式文件未改动"]
+                problems += [str(p) for p in (*qa.get("blocking", []), *qa.get("glyph_floor", [])) if p]
+            elif receipt.get("drift"):
+                problems.append(str(receipt["drift"]))
+            return _fail("STYLE_REJECTED", "; ".join(problems or ["验证失败，正式文件未改动"]), 400,
                          receipt=receipt)
         t1 = time.perf_counter()
         try:
@@ -405,9 +415,29 @@ class StyleSession:
                          "; ".join(map(str, problems or ["提交验证失败"])), 409,
                          receipt=receipt)
         self._drop_pending()
+        # Commit truth: ov.apply already wrote + verified (COMMITTED/PASS
+        # above), so bytes on disk are the fact. A post-commit _rebuild
+        # failure must never rewrite that fact into a save failure: report
+        # COMMITTED + PASS receipt with HTTP 200, no fresh frame, and an
+        # explicit refresh_required flag. No new transaction/retry here.
         t1 = time.perf_counter()
-        self._frame, self._style = self._rebuild()
+        try:
+            self._frame, self._style = self._rebuild()
+        except Exception as error:
+            self._timings["rebuild_ms"] = (time.perf_counter() - t1) * 1000.0
+            self._refresh_failed = True
+            out_style = {
+                "targets": [],
+                "overlay_sha256": _official_sha(self.overlay),
+                "receipt": copy_of(receipt),
+                "timings_ms": dict(self._timings),
+                "refresh_required": True,
+                "refresh_error": str(error),
+            }
+            return {"status": "COMMITTED", "frame": None,
+                    "style": out_style}, 200
         self._timings["rebuild_ms"] = (time.perf_counter() - t1) * 1000.0
+        self._refresh_failed = False
         out_style = copy_of(self._style)
         out_style["overlay_sha256"] = _official_sha(self.overlay)
         out_style["receipt"] = copy_of(receipt)
