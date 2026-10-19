@@ -40,27 +40,30 @@ def diagnostic_key(d: Diagnostic) -> tuple:
 #: 规则表：(rule_id, severity, 正则)。同一 rule_id 可有多条（同一缺陷的不同措辞）。
 #: 正则里的 o1/o2/o3 命名组按顺序成为 object_ids。**先具体、后笼统**。
 _RULES: tuple[tuple[str, str, re.Pattern], ...] = (
-    ("NO_FEASIBLE_SLOT", "blocking", re.compile(r"「(?P<o1>[^」]+)」无可行避让位置")),
-    ("GUIDE_CROSSES_LEGEND", "blocking", re.compile(r"「(?P<o1>[^」]+)」引线穿过图例")),
-    ("OUT_OF_FRAME", "blocking", re.compile(r"「(?P<o1>[^」]+)」[^「]*?超出坐标框")),
-    ("OUT_OF_FRAME", "blocking", re.compile(r"「(?P<o1>[^」]+)」[^「]*?超出画布")),
-    ("UNMEASURED_GEOMETRY", "blocking", re.compile(r"「(?P<o1>[^」]+)」图幅图像几何无法测量")),
-    ("UNKNOWN_LABEL_GID", "blocking", re.compile(r"未知标注 gid[:：](?P<o1>[^（(]+)")),
-    ("TEXT_OVERLAP", "blocking", re.compile(r"«(?P<o1>[^»]+)»\s*与\s*«(?P<o2>[^»]+)»\s*重叠")),
-    ("TEXT_OVERLAP", "blocking", re.compile(r"重叠[^«]*«(?P<o1>[^»]+)»\s*×\s*«(?P<o2>[^»]+)»")),
-    ("SERIES_ORDER", "blocking", re.compile(r"「(?P<o1>[^」]+)」与「(?P<o2>[^」]+)」最近处")),
-    ("TEXT_ON_DATA", "blocking", re.compile(r"«(?P<o1>[^»]+)»\s*压在\s*(?P<o2>\S+)\s*上")),
-    ("TEXT_ON_DATA", "blocking", re.compile(r"压线[^«]*«(?P<o1>[^»]+)»")),
-    ("EDGE_CLEARANCE", "warning", re.compile(r"«(?P<o1>[^»]+)»\s*距(?P<o2>[上下左右])边框仅")),
-    ("EDGE_CLEARANCE", "warning", re.compile(r"贴(?P<o2>[上下左右])边框[^«]*«(?P<o1>[^»]+)»")),
-    ("GLYPH_FLOOR", "warning", re.compile(r"[-\d.]+ pt\s*→\s*字形[^«]*«(?P<o1>[^»]+)»")),
-    # 汇总行（`[QA] <图名>: 发现 N 处…`）：只留规则与图名，数字是计数。
-    ("QA_GLYPH_FLOOR", "warning", re.compile(r"^(\d+) 处上下标字号跌破字形下限")),
-    ("QA_TEXT_OVERLAP", "blocking", re.compile(r"^发现 \d+ 处文字重叠")),
-    ("QA_TEXT_ON_DATA", "blocking", re.compile(r"^发现 \d+ 处文字压线")),
-    ("QA_EDGE_CLEARANCE", "warning", re.compile(r"^发现 \d+ 处贴边")),
-    ("QA_BLOCKING", "blocking", re.compile(r"^发现 \d+ 处阻断项")),
-    ("QA_SHIFT_BOUNDS", "blocking", re.compile(r"^\d+ 处(显示位移越界|越界)")),
+    ("TICK_CLIP", "blocking", re.compile(r"「(?P<o1>[^」]+)」刻度标签超出画布")),
+    ("UNMEASURED_GEOMETRY", "blocking", re.compile(r"「(?P<o1>[^」]+)」刻度标签几何无法测量")),
+    ("UNMEASURED_GEOMETRY", "blocking", re.compile(r"刻度标签身份[^「]*「(?P<o1>[^」]+)」")),
+     ("NO_FEASIBLE_SLOT", "blocking", re.compile(r"「(?P<o1>[^」]+)」无可行避让位置")),
+     ("GUIDE_CROSSES_LEGEND", "blocking", re.compile(r"「(?P<o1>[^」]+)」引线穿过图例")),
+     ("OUT_OF_FRAME", "blocking", re.compile(r"「(?P<o1>[^」]+)」[^「]*?超出坐标框")),
+     ("OUT_OF_FRAME", "blocking", re.compile(r"「(?P<o1>[^」]+)」[^「]*?超出画布")),
+     ("UNMEASURED_GEOMETRY", "blocking", re.compile(r"「(?P<o1>[^」]+)」图幅图像几何无法测量")),
+     ("UNKNOWN_LABEL_GID", "blocking", re.compile(r"未知标注 gid[:：](?P<o1>[^「(]+)")),
+     ("TEXT_OVERLAP", "blocking", re.compile(r"«(?P<o1>[^»]+)»\s*与\s*«(?P<o2>[^»]+)»\s*重叠")),
+     ("TEXT_OVERLAP", "blocking", re.compile(r"重叠[^«]*«(?P<o1>[^»]+)»\s*×\s*«(?P<o2>[^»]+)»")),
+     ("SERIES_ORDER", "blocking", re.compile(r"「(?P<o1>[^」]+)」与「(?P<o2>[^」]+)」最近处")),
+     ("TEXT_ON_DATA", "blocking", re.compile(r"«(?P<o1>[^»]+)»\s*压在\s*(?P<o2>\S+)\s*上")),
+     ("TEXT_ON_DATA", "blocking", re.compile(r"压线[^«]*«(?P<o1>[^»]+)»")),
+     ("EDGE_CLEARANCE", "warning", re.compile(r"«(?P<o1>[^»]+)»\s*距(?P<o2>[上下左右])边框仅")),
+     ("EDGE_CLEARANCE", "warning", re.compile(r"贴(?P<o2>[上下左右])边框[^«]*«(?P<o1>[^»]+)»")),
+     ("GLYPH_FLOOR", "warning", re.compile(r"[-\d.]+ pt\s*→\s*字形[^«]*«(?P<o1>[^»]+)»")),
+     # 汇总行（`[QA] <图名>: 发现 N 处…`）：只留规则与图名，数字是计数。
+     ("QA_GLYPH_FLOOR", "warning", re.compile(r"^(\d+) 处上下标字号跌破字形下限")),
+     ("QA_TEXT_OVERLAP", "blocking", re.compile(r"^发现 \d+ 处文字重叠")),
+     ("QA_TEXT_ON_DATA", "blocking", re.compile(r"^发现 \d+ 处文字压线")),
+     ("QA_EDGE_CLEARANCE", "warning", re.compile(r"^发现 \d+ 处贴边")),
+     ("QA_BLOCKING", "blocking", re.compile(r"^发现 \d+ 处阻断项")),
+     ("QA_SHIFT_BOUNDS", "blocking", re.compile(r"^\d+ 处(显示位移越界|越界)")),
 )
 
 _QA_LINE_RE = re.compile(r"^\[QA\]\s*(?P<name>[^:：]+)[：:]\s*(?P<body>.*)$")
@@ -232,6 +235,467 @@ def _legend_truly_clipped(fig, leg, renderer) -> tuple[bool, Optional[float]]:
     return False, 0.0
 
 
+_TICK_EPS_MM = 1e-7  # ponytail: pure float-noise floor; any real canvas overflow blocks, no physical blind spot
+
+
+def _tick_drawn_selection(ax, which: str):
+    """实际绘制的 tick 选择：复刻 Axis._update_ticks 的区间包含判定。
+
+    可见 ticklabel 属性≠被绘制（locator 可返回视图外位置）；只认 draw 真选集合。
+    失败抛异常（调用方记 unmeasured），绝不静默返回空集冒充无刻度。
+    """
+    axis = ax.xaxis if which == "x" else ax.yaxis
+    return list(axis._update_ticks())
+
+
+def _rect_from_path(path):
+    """clip path → 显示矩形；只有轴对齐矩形才返回，否则 None。
+
+    菱形/多边形/旋转矩形/bowtie/重叠点一律 None（fail-unmeasured）：两对角不能证明矩形。
+    要求：4 互异笛卡尔角 + 相邻边轴对齐 + codes 仅 MOVETO/LINETO/CLOSEPOLY（无 CURVE）
+    + 有限角范围。
+    """
+    import math as _m
+    import matplotlib.transforms as _mt
+    from matplotlib.path import Path as _Path
+    from matplotlib.transforms import Bbox as _Bbox
+    tpath, transform = None, None
+    try:
+        if isinstance(path, _mt.TransformedPath):
+            tpath, transform = path._path, path._transform
+        elif isinstance(path, tuple) and len(path) == 2:
+            tpath, transform = path[0], path[1]
+    except Exception:
+        return None
+    if tpath is None or transform is None:
+        return None
+    try:
+        verts = tpath.vertices
+        n = len(verts)
+        if n not in (4, 5):
+            return None
+        if n == 5 and not bool((verts[0] == verts[-1]).all()):
+            return None
+        corners = verts[:4]
+        codes = tpath.codes
+        if codes is not None:
+            allowed = {_Path.MOVETO, _Path.LINETO, _Path.CLOSEPOLY}
+            if len(codes) != n or any(int(c) not in allowed for c in codes):
+                return None  # 含 CURVE → 不能证明为矩形
+            if int(codes[0]) != int(_Path.MOVETO):
+                return None
+        disp = transform.transform(corners)
+    except Exception:
+        return None
+    try:
+        pts = [(float(v[0]), float(v[1])) for v in disp]
+    except Exception:
+        return None
+    if not all(_m.isfinite(x) and _m.isfinite(y) for x, y in pts):
+        return None
+    xs = sorted({round(x, 6) for x, _ in pts})
+    ys = sorted({round(y, 6) for _, y in pts})
+    if len(xs) != 2 or len(ys) != 2:
+        return None  # 非轴对齐（菱形/旋转）→ 不能证明
+    combos = {(xs[0], ys[0]), (xs[0], ys[1]), (xs[1], ys[0]), (xs[1], ys[1])}
+    if {(round(x, 6), round(y, 6)) for x, y in pts} != combos:
+        return None  # bowtie/重叠点/缺角 → 4 角集合不是精确笛卡尔积
+    for i in range(4):
+        x0, y0 = pts[i]
+        x1, y1 = pts[(i + 1) % 4]
+        if not ((abs(x1 - x0) < 1e-9 and abs(y1 - y0) > 1e-9)
+                or (abs(y1 - y0) < 1e-9 and abs(x1 - x0) > 1e-9)):
+            return None  # 相邻边必须轴对齐
+    try:
+        r = _Bbox([[xs[0], ys[0]], [xs[1], ys[1]]])
+        if not (float(r.width) > 0 and float(r.height) > 0):
+            return None
+        if not all(_m.isfinite(v) for v in
+                   (float(r.x0), float(r.y0), float(r.x1), float(r.y1))):
+            return None
+        return r
+    except Exception:
+        return None
+
+
+def _tick_clip_rects(artist, renderer):
+    """刻度bbox外的裁切证据：clip box/path/patch 全求交（非任一直接返回）。
+
+    返回 (rects, provable)：rects 为显示矩形列表；"none" 表不受裁；
+    任一存在但不可换算 → (None, False)（fail-unmeasured，绝不假判通过/裁切）。
+    """
+    try:
+        if not bool(artist.get_clip_on()):
+            return "none", True
+    except Exception:
+        return None, False
+    rects = []
+    import math as _m2
+    def _extent_ok(r):
+        try:
+            vals = (float(r.x0), float(r.y0), float(r.x1), float(r.y1))
+        except Exception:
+            return False
+        if not all(_m2.isfinite(v) for v in vals):
+            return False
+        try:
+            return bool(float(r.width) > 0 and float(r.height) > 0)
+        except Exception:
+            return False
+    try:
+        box = artist.get_clip_box()
+    except Exception:
+        return None, False
+    if box is not None:
+        if not _extent_ok(box):
+            return None, False  # NaN/退化 clip 矩形 → fail-unmeasured，不吞 NaN
+        rects.append(box)
+    try:
+        path = artist.get_clip_path()
+    except Exception:
+        return None, False
+    if path is not None:
+        rect = _rect_from_path(path)
+        if rect is None:
+            return None, False
+        rects.append(rect)
+    try:
+        get_patch = getattr(artist, "get_clip_patch", None)
+        patch = get_patch() if callable(get_patch) else None
+    except Exception:
+        return None, False
+    if patch is not None:
+        try:
+            pr = patch.get_window_extent(renderer)
+        except Exception:
+            return None, False
+        if not _extent_ok(pr):
+            return None, False
+        rects.append(pr)
+    if not rects:
+        return "none", True
+    return rects, True
+
+
+def _clip_loss_len_mm(bb, rects, mm_per_px):
+    """裁切长度损失 mm：有效裁切 bounds（全部 clip 矩形之交）下 bb 四边被切掉的最大长度。
+
+    与画布溢出同一 metric（长度 mm）；全部裁掉时保守取 bb 最大边（finite）。
+    任一 clip 矩形范围非法（含 NaN）→ None（fail-unmeasured，绝不 max 吞 NaN 回 0）。
+    """
+    import math as _m3
+    try:
+        mm = float(mm_per_px)
+        if not (_m3.isfinite(mm) and mm > 0):
+            return None
+    except Exception:
+        return None
+    try:
+        ix0, iy0, ix1, iy1 = float(bb.x0), float(bb.y0), float(bb.x1), float(bb.y1)
+        for r in rects:
+            vals = (float(r.x0), float(r.y0), float(r.x1), float(r.y1))
+            if not all(_m3.isfinite(v) for v in vals):
+                return None
+            if not (float(r.width) > 0 and float(r.height) > 0):
+                return None
+            ix0, iy0 = max(ix0, vals[0]), max(iy0, vals[1])
+            ix1, iy1 = min(ix1, vals[2]), min(iy1, vals[3])
+    except Exception:
+        return None
+    try:
+        w, h = float(bb.width), float(bb.height)
+        if not (w > 0 and h > 0 and _m3.isfinite(w) and _m3.isfinite(h)):
+            return None
+    except Exception:
+        return None
+    if ix1 <= ix0 or iy1 <= iy0:
+        return max(w, h) * mm  # 全裁掉：保守最大边
+    try:
+        cut = max(ix0 - float(bb.x0), float(bb.y1) - iy1,
+                  iy0 - float(bb.y0), float(bb.x1) - ix1, 0.0)
+    except Exception:
+        return None
+    if not _m3.isfinite(float(cut)):
+        return None
+    return float(cut) * mm
+
+
+def _measure_single(bb, artist, renderer, frame, mm_per_px):
+    """单个 artist 的 bbox+clip 同源几何：返回 (entry_fields, unmeasured_reason|None)。
+
+    label 与 offset 共用；collector 只构身份，几何判定全在这里。
+    entry_fields={clearance_mm, clip, clip_loss_mm}；clearance_mm<0 为画布溢出，
+    clip=True 为内部裁切（clip_loss_mm 长度 mm diagnostic）。
+    同 entry 溢出+内裁并存时统一取 max（长度 mm 同一 metric），防 qa_delta 漏恶化。
+    """
+    import math as _m
+    rects, provable = _tick_clip_rects(artist, renderer)
+    if not provable:
+        return None, "clip-unprovable"
+    loss_mm = 0.0
+    clipped = False
+    if rects != "none":
+        loss_mm = _clip_loss_len_mm(bb, rects, mm_per_px)
+        if loss_mm is None:
+            return None, "clip-unprovable"
+        clipped = loss_mm > _TICK_EPS_MM
+    try:
+        over = (max(0.0, frame.x0 - bb.x0, frame.y0 - bb.y0,
+                    bb.x1 - frame.x1, bb.y1 - frame.y1)
+                * mm_per_px)
+    except Exception:
+        return None, "clip-unprovable"
+    if not _m.isfinite(float(over)):
+        return None, "non-finite-bbox"
+    worst = max(float(over), float(loss_mm or 0.0))
+    if worst > _TICK_EPS_MM:
+        return {"clearance_mm": -float(worst), "clip": bool(clipped),
+                "clip_loss_mm": float(loss_mm or 0.0)}, None
+    try:
+        clear = min(bb.x0 - frame.x0, bb.y0 - frame.y0,
+                    frame.x1 - bb.x1, frame.y1 - bb.y1) * mm_per_px
+    except Exception:
+        return None, "non-finite-bbox"
+    if not _m.isfinite(float(clear)):
+        return None, "non-finite-bbox"
+    return {"clearance_mm": float(clear), "clip": False,
+            "clip_loss_mm": 0.0}, None
+
+
+def _axes_stable_key(fig, ax, _cached=None) -> Optional[str]:
+    """复用 style_identity._axes_infos 的布局+数据稳定键；歧义/缺失返回 None。
+
+    只按 _axes_infos unique/重复 gid 判断；合法 twinx/共享叠轴各有唯一键，不拒。
+    """
+    if _cached is None:
+        try:
+            from figpact.style_identity import _axes_infos as _mk
+            _cached = _mk(fig)
+        except Exception:
+            return None
+    infos = _cached
+    key = None
+    for info in infos:
+        try:
+            if info.get("ax") is ax:
+                if not bool(info.get("unique")):
+                    return None
+                key = str(info.get("key") or "")
+                break
+        except Exception:
+            continue
+    if not key:
+        return None
+    try:
+        n_same = sum(1 for i in infos
+                     if str(i.get("key") or "") == key and i.get("ax") is not ax)
+    except Exception:
+        return None
+    if n_same:
+        return None  # 同键多 axes → 歧义，fail-closed
+    return key
+
+
+def _collect_tick_geometry(fig, renderer):
+    """measure 与 blocking 共用的同一刻度几何采集。
+
+    返回 (entries, unmeasured)：entry={key,clearance_mm,bbox,identity,clip,clip_loss_mm}；
+    clearance_mm>0 为画布内净空（diagnostic，不阻断），<0 为真实溢出（阻断，长度 mm）；
+    内部裁切同样长度 mm（clip_loss_mm diagnostic，record 取同一长度值）。
+    身份=axes稳定键+axis/kind/pos/side/offset，无文本无序号；重复键/歧义fail-closed。
+    选择/可见性/bbox 任一步异常 → unmeasured，绝不把失败当无刻度。
+    """
+    import math as _math
+    try:
+        dpi = float(fig.dpi)
+    except Exception:
+        dpi = float("nan")
+    if not (_math.isfinite(dpi) and dpi > 0):
+        return [], [{"key": "tick:unidentified", "reason": "dpi-unavailable"}]
+    mm_per_px = MM_PER_INCH / dpi
+    entries: list[dict] = []
+    unmeasured: list[dict] = []
+    try:
+        frame = fig.bbox
+        fb = [float(frame.x0), float(frame.y0), float(frame.x1), float(frame.y1)]
+        if not all(_math.isfinite(v) for v in fb) or not (fb[2] > fb[0] and fb[3] > fb[1]):
+            return [], [{"key": "tick:unidentified", "reason": "frame-unavailable"}]
+    except Exception:
+        return [], [{"key": "tick:unidentified", "reason": "frame-unavailable"}]
+    seen: dict[str, int] = {}
+    axes_list = list(getattr(fig, "axes", None) or [])
+    try:
+        from figpact.style_identity import _axes_infos as _mk2
+        _cached_infos = _mk2(fig)
+    except Exception:
+        _cached_infos = None
+    if _cached_infos is None:
+        return [], [{"key": "tick:unidentified", "reason": "axes-infos-unavailable"}]
+    for ax in axes_list:
+        try:
+            ax_vis = bool(ax.get_visible())
+        except Exception:
+            unmeasured.append({"key": "tick:unidentified", "reason": "axes-visibility-unavailable"})
+            continue
+        if not ax_vis:
+            continue
+        akey = _axes_stable_key(fig, ax, _cached_infos)
+        for which in ("x", "y"):
+            try:
+                axis = ax.xaxis if which == "x" else ax.yaxis
+                axis_vis = bool(axis.get_visible())
+            except Exception:
+                unmeasured.append({"key": "tick:unidentified", "reason": "axis-visibility-unavailable"})
+                continue
+            if not axis_vis:
+                continue
+            try:
+                drawn = _tick_drawn_selection(ax, which)
+            except Exception:
+                unmeasured.append({"key": (akey or "tick:unidentified") + f"+axis:{which}+selection",
+                                   "reason": "selection-failure"})
+                continue
+            try:
+                tick_lists = (("major", list(axis.get_major_ticks())),
+                              ("minor", list(axis.get_minor_ticks())))
+            except Exception:
+                unmeasured.append({"key": (akey or "tick:unidentified") + f"+axis:{which}+ticks",
+                                   "reason": "ticks-unavailable"})
+                continue
+            drawn_ids = {id(t) for t in drawn}
+            for kind, ticks in tick_lists:
+                for tick in ticks:
+                    if id(tick) not in drawn_ids:
+                        continue
+                    try:
+                        tick_vis = bool(tick.get_visible())
+                    except Exception:
+                        unmeasured.append({"key": (akey or "tick:unidentified") + f"+axis:{which}+tick-vis",
+                                          "reason": "tick-visibility-unavailable"})
+                        continue
+                    if not tick_vis:
+                        continue
+                    try:
+                        pos = float(tick.get_loc())
+                    except Exception:
+                        unmeasured.append({"key": "tick:unidentified",
+                                          "reason": "non-finite-pos"})
+                        continue
+                    if not _math.isfinite(pos):
+                        unmeasured.append({"key": "tick:unidentified",
+                                          "reason": "non-finite-pos"})
+                        continue
+                    for side in ("label1", "label2"):
+                        try:
+                            lab = getattr(tick, side)
+                        except Exception:
+                            unmeasured.append({"key": (akey or "tick:unidentified") + f"+axis:{which}+label",
+                                              "reason": "label-unavailable"})
+                            continue
+                        try:
+                            vis = bool(lab.get_visible())
+                        except Exception:
+                            unmeasured.append({"key": (akey or "tick:unidentified") + f"+axis:{which}+label-vis",
+                                              "reason": "label-visibility-unavailable"})
+                            continue
+                        if not vis:
+                            continue
+                        try:
+                            txt = str(lab.get_text() or "")
+                        except Exception:
+                            unmeasured.append({"key": "tick:unidentified",
+                                              "reason": "text-unavailable"})
+                            continue
+                        if not txt.strip():
+                            continue
+                        if akey is None:
+                            unmeasured.append({"key": "tick:unidentified",
+                                              "reason": "ambiguous-axes"})
+                            continue
+                        key = (f"{akey}+axis:{which}+kind:{kind}"
+                               f"+pos:{pos!r}+side:{side}")
+                        seen[key] = seen.get(key, 0) + 1
+                        try:
+                            bb = lab.get_window_extent(renderer)
+                            bvals = [float(bb.x0), float(bb.y0),
+                                     float(bb.x1), float(bb.y1)]
+                        except Exception:
+                            unmeasured.append({"key": key, "reason": "bbox-unavailable"})
+                            continue
+                        if not all(_math.isfinite(v) for v in bvals):
+                            unmeasured.append({"key": key, "reason": "non-finite-bbox"})
+                            continue
+                        if not (bvals[2] > bvals[0] and bvals[3] > bvals[1]):
+                            unmeasured.append({"key": key, "reason": "degenerate-bbox"})
+                            continue
+                        fields, reason = _measure_single(bb, lab, renderer, frame, mm_per_px)
+                        if reason is not None:
+                            unmeasured.append({"key": key, "reason": reason})
+                            continue
+                        entries.append({"key": key, "clearance_mm": float(fields["clearance_mm"]),
+                                        "bbox": [float(bb.x0), float(bb.y0),
+                                                 float(bb.x1), float(bb.y1)],
+                                        "identity": key, "clip": bool(fields["clip"]),
+                                        "clip_loss_mm": float(fields["clip_loss_mm"])})
+            try:
+                off = axis.offsetText
+            except Exception:
+                unmeasured.append({"key": (akey or "tick:unidentified") + f"+axis:{which}+offset",
+                                   "reason": "offset-unavailable"})
+                off = None
+            if off is not None:
+                try:
+                    ovis = bool(off.get_visible())
+                except Exception:
+                    unmeasured.append({"key": (akey or "tick:unidentified") + f"+axis:{which}+offset",
+                                       "reason": "offset-visibility-unavailable"})
+                    ovis = False
+                if ovis:
+                    try:
+                        otxt = str(off.get_text() or "")
+                    except Exception:
+                        unmeasured.append({"key": "tick:unidentified", "reason": "text-unavailable"})
+                        otxt = ""
+                    if otxt.strip():
+                        if akey is None:
+                            unmeasured.append({"key": "tick:unidentified",
+                                              "reason": "ambiguous-axes"})
+                        else:
+                            okey = f"{akey}+axis:{which}+offset"
+                            seen[okey] = seen.get(okey, 0) + 1
+                            try:
+                                obb = off.get_window_extent(renderer)
+                                ob = [float(obb.x0), float(obb.y0),
+                                      float(obb.x1), float(obb.y1)]
+                            except Exception:
+                                unmeasured.append({"key": okey, "reason": "bbox-unavailable"})
+                                ob = None
+                            if ob is not None:
+                                if not all(_math.isfinite(v) for v in ob):
+                                    unmeasured.append({"key": okey, "reason": "non-finite-bbox"})
+                                elif not (ob[2] > ob[0] and ob[3] > ob[1]):
+                                    unmeasured.append({"key": okey, "reason": "degenerate-bbox"})
+                                else:
+                                    fields, reason = _measure_single(
+                                        obb, off, renderer, frame, mm_per_px)
+                                    if reason is not None:
+                                        unmeasured.append({"key": okey, "reason": reason})
+                                    else:
+                                        entries.append({"key": okey,
+                                                        "clearance_mm": float(fields["clearance_mm"]),
+                                                        "bbox": list(ob),
+                                                        "identity": okey,
+                                                        "clip": bool(fields["clip"]),
+                                                        "clip_loss_mm": float(fields["clip_loss_mm"])})
+    dupes = {k for k, c in seen.items() if c > 1}
+    if dupes:
+        kept = [e for e in entries if e["key"] not in dupes]
+        for k in sorted(dupes):
+            unmeasured.append({"key": k, "reason": "duplicate-key"})
+        entries = kept
+    return entries, unmeasured
+
+
 def _real_clip(artist) -> bool:
     """真实裁切证据：clip_on 且有 clip_box 或 patch 任一存在。默认 clip_on 无裁切盒不算裁切。"""
     try:
@@ -321,6 +785,14 @@ def check_out_of_frame(fig: matplotlib.figure.Figure, *, gid_filter: Optional[An
                        bb.x1 - frame.x1, bb.y1 - frame.y1) * mm_per_px
         if overflow > 0.05:
             out.append(f"「{gid}」超出画布 {overflow:.2f} mm（图像已被裁切）")
+    # 刻度标签画布裁切：与 gid_filter 无关（axes 曲线 selector 永不豁免 tick），强制全覆盖。
+    entries, unmeasured = _collect_tick_geometry(fig, renderer)
+    for u in unmeasured:
+        out.append(f"「{u.get('key', 'tick:unidentified')}」刻度标签几何无法测量，拒绝将裁切判为安全")
+    for e in entries:
+        if float(e.get("clearance_mm", 0.0)) < -_TICK_EPS_MM:
+            tail = "（已被裁切）" if bool(e.get("clip")) else "（已超出画布）"
+            out.append(f"「{e['key']}」刻度标签超出画布 {-float(e['clearance_mm']):.2f} mm{tail}")
     return out
 
 
@@ -544,6 +1016,7 @@ def audit_pdf(path: Path | str, min_pt: float = 5.0) -> tuple[bool, list]:
 _RECORD_SPEC: dict[str, dict] = {
     "OUT_OF_FRAME": {"unit": "mm", "threshold": 0.05, "worse": "up", "severity": "blocking"},
     "LEGEND_CLIP": {"unit": "px2", "threshold": 0.0, "worse": "up", "severity": "blocking"},
+    "TICK_CLIP": {"unit": "mm", "threshold": 0.0, "worse": "up", "severity": "blocking"},
     "UNMEASURED_GEOMETRY": {"unit": "none", "threshold": None, "worse": "up", "severity": "blocking"},
     "TEXT_OVERLAP": {"unit": "px2", "threshold": 4.0, "worse": "up", "severity": "blocking"},
     "TEXT_ON_DATA": {"unit": "count", "threshold": 1.0, "worse": "up", "severity": "blocking"},
@@ -838,13 +1311,27 @@ def measure(fig: matplotlib.figure.Figure, *, min_area_px: float = 4.0,
         elif size < min_pt - 1e-9:
             records.append(_record("GLYPH_FLOOR", key, size,
                                    f"plain {size:.1f} pt < {min_pt:.1f} pt floor «{s[:34]}»"))
+    # 5. 刻度标签画布裁切（同一 helper；正净空只进 tick_geometry，不阻断）。
+    entries, unmeasured = _collect_tick_geometry(fig, renderer)
+    tick_geometry: list[dict] = []
+    for e in entries:
+        tick_geometry.append({"key": e["key"], "clearance_mm": float(e["clearance_mm"]),
+                              "bbox": list(e["bbox"]), "identity": e["identity"]})
+        if float(e.get("clearance_mm", 0.0)) < -_TICK_EPS_MM:
+            tail = "（已被裁切）" if bool(e.get("clip")) else "（已超出画布）"
+            records.append(_record("TICK_CLIP", e["key"], -float(e["clearance_mm"]),
+                                   f"「{e['key']}」刻度标签超出画布 {-float(e['clearance_mm']):.2f} mm{tail}"))
+    for u in unmeasured:
+        key = str(u.get("key") or "tick:unidentified")
+        records.append(_record("UNMEASURED_GEOMETRY", key, None,
+                               f"「{key}」刻度标签几何无法测量，拒绝将裁切判为安全"))
     problems = [r["text"] for r in records]
     try:
         dpi = float(fig.dpi)
     except Exception:
         dpi = float("nan")
     env = {"dpi": dpi, "n_records": len(records)}
-    return {"records": records, "problems": problems, "env": env}
+    return {"records": records, "problems": problems, "env": env, "tick_geometry": tick_geometry}
 
 
 def _valid_record(r) -> bool:

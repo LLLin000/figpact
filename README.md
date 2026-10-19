@@ -124,6 +124,9 @@ spatial_risk: FTIR label bottom overflow 0.697 mm; Line2D top overflow 2.632 mm 
 - **无 YAML 的图**可以只读测量与示范，但不能保留修改。
 - 只信任**本地**脚本；figpact **不是** OS 级沙箱。
 
+第三方脚本接入的 Figure ownership：构图入口返回的 Figure 交由调用方持有／关闭；`science_manifest()`、`layout_contract()` 为提取证据额外创建的 Figure 由脚本创建者负责在 `finally` 中逐个关闭、清除引用，失败与多 scope 路径也一样。
+这些提取钩子应返回纯数据，而不是长期缓存 Figure／Canvas／Manager；不能用 `plt.close('all')` 关闭 Inspector 或调用方的 Figure。G22 只验证了 FTIR／NMR 示例，不代表任意第三方钩子已自动满足这一责任。
+
 ### 新图型接入检查：统计曲线与误差棒
 
 `examples/statistics/statistical.py` 使用固定合成均值/标准误数组，只声明现有接入协议，
