@@ -1,0 +1,86 @@
+{
+  "product_code_sha": "170578b",
+  "scope": "Evidence completion and explicit FTIR/NMR internal baseline Figure ownership only",
+  "audit_incomplete": {
+    "declared_manifest_failure_refused": true,
+    "declared_loader_failure_refused": true,
+    "qa_measure_failure_refused": true,
+    "missing_records_payload_refused": true,
+    "optional_manifest_absence_preserved": true,
+    "successful_none_manifest_preserved": true,
+    "successful_empty_qa_records_preserved": true,
+    "fault_and_normal_regression_cases": 13,
+    "official_bytes_preserved_on_refusal": true
+  },
+  "semantics": {
+    "method": "Separate old/new processes at identical fixture paths; only script bytes replaced between processes; no normalization",
+    "scopes": {"ftir": ["main", "annotated", "compare_raw", "compare_processed"], "nmr": ["main"]},
+    "all_complete_manifests_raw_equal": true,
+    "all_contracts_raw_equal": true,
+    "all_fingerprints_and_digests_raw_equal": true,
+    "all_geometry_views_object_audits_raw_equal": true,
+    "all_qa_records_problems_and_blocking_raw_equal": true,
+    "all_gids_equal": true,
+    "same_science_input_bytes": {"ftir_files": 10, "nmr_files": 12},
+    "caller_figure_and_manager_preserved": true
+  },
+  "lifecycle": {
+    "three_edits": {
+      "committed_drafts": 3,
+      "qa_refusals_with_unchanged_bytes": 3,
+      "figures_created": 236,
+      "max_internal_managed_after_operation": 0,
+      "max_internal_live_after_gc": 0,
+      "external_manager_alive_at_every_sample": true,
+      "released_session_rss_bytes": 143835136,
+      "process_peak_rss_bytes": 231505920
+    },
+    "ten_edits": {
+      "committed_drafts": 10,
+      "qa_refusals_with_unchanged_bytes": 3,
+      "figures_created": 684,
+      "max_internal_managed_after_operation": 0,
+      "max_internal_live_after_gc": 0,
+      "external_manager_alive_at_every_sample": true,
+      "released_session_rss_bytes": 210407424,
+      "process_peak_rss_bytes": 239566848,
+      "after_commit_gc_rss_bytes": [129576960, 145416192, 146419712, 147722240, 150114304, 150016000, 148881408, 149573632, 152322048, 155013120]
+    },
+    "core_build_calls": {"startup": 2, "each_preview": 12, "each_commit": 12, "qa_refusal": 6},
+    "global_cleanup_used_in_ownership_probe": false,
+    "limit": "RSS includes allocator/cache retention; final refusal raised RSS; ten cycles are not proof of zero all-day memory growth"
+  },
+  "preserved_behavior": {
+    "nmr_native_publications": ["STRICT_VERIFIED", "STRICT_VERIFIED"],
+    "nmr_strict_overlay_load": "PASS",
+    "nmr_strict_render": "PASS",
+    "nmr_actual_pdf_min_glyph_pt": 5.04,
+    "nmr_existing_edge_warnings_remain": 2,
+    "nmr_tight_tick_margin_not_changed": true,
+    "ftir_strict_returncode": 1,
+    "ftir_strict_text_on_data_blockers": 4,
+    "ftir_publication_pdf_produced": false,
+    "draft_whole_fail_retained": true
+  },
+  "performance": {
+    "file": "performance_results.json",
+    "rounds_per_sample": 5,
+    "samples": ["ftir", "nmr", "cck8-full", "cck8-pure"],
+    "total_actual_rounds": 20,
+    "core_builds_per_workflow_unchanged": 60,
+    "protocol": "G20 same full workflow and axis.title +1pt; serial single process after other jobs completed",
+    "causality_limit": "Historic same-host comparison, not a controlled concurrent A/B; CCK8 also changed despite unchanged ownership source"
+  },
+  "regressions": {
+    "nonbrowser": {"passed": 634, "skipped": 7, "subtests_passed": 95, "seconds": 732.02},
+    "chromium": {"passed": 28, "seconds": 239.41},
+    "node": {"passed": 54}
+  },
+  "remaining_limits": [
+    "Plain tick-text canvas-clipping QA coverage unchanged",
+    "FTIR scope-coupled legend control unchanged",
+    "No verifier count reduction, persistent cache, layout solver, Agent or GUI feature added",
+    "Full-suite demo Figure warnings remain; no all-program leak-free claim",
+    "Scientific data, source copies and publication images remain outside the public repository"
+  ]
+}

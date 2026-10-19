@@ -1,0 +1,1276 @@
+{
+  "product_code_sha": "170578b",
+  "rounds_per_sample": 5,
+  "samples": {
+    "ftir": {
+      "summary": {
+        "total_s": {
+          "n": 5,
+          "p50": 50.391097900000204,
+          "p95": 51.21222763999958
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 8.389207199999873,
+          "p95": 9.401523179999822
+        },
+        "commit_s": {
+          "n": 5,
+          "p50": 8.608975799999826,
+          "p95": 9.420642319999752
+        },
+        "fs_export_s": {
+          "n": 5,
+          "p50": 0.0,
+          "p95": 0.0,
+          "calls": 0
+        },
+        "savefig_s": {
+          "n": 5,
+          "p50": 0.0,
+          "p95": 0.0,
+          "calls": 0
+        },
+        "import": {
+          "n": 5,
+          "calls": 350,
+          "p50": 0.7554308999997374,
+          "p95": 0.7715444600002229
+        },
+        "build": {
+          "n": 5,
+          "calls": 300,
+          "p50": 6.361244100001386,
+          "p95": 6.581097879996742
+        },
+        "identity": {
+          "n": 5,
+          "calls": 545,
+          "p50": 2.5771026000074926,
+          "p95": 2.6510764800017568
+        },
+        "audit": {
+          "n": 5,
+          "calls": 620,
+          "p50": 6.556387299998278,
+          "p95": 7.063739340001303
+        },
+        "qa": {
+          "n": 5,
+          "calls": 955,
+          "p50": 4.391989799998555,
+          "p95": 4.562798519996977
+        },
+        "save": {
+          "n": 5,
+          "calls": 25,
+          "p50": 0.01346579999972164,
+          "p95": 0.01826881999950274
+        },
+        "render": {
+          "n": 5,
+          "calls": 30,
+          "p50": 1.83681709999928,
+          "p95": 1.864034319999155
+        }
+      },
+      "operations": {
+        "startup_and_snapshot_s": {
+          "n": 5,
+          "p50": 0.8171306999993249,
+          "p95": 0.8539450399994166
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 8.389037799999642,
+          "p95": 9.401329340000121
+        },
+        "commit_s": {
+          "n": 5,
+          "p50": 8.608802099999593,
+          "p95": 9.4202483199997
+        },
+        "restart_and_snapshot_s": {
+          "n": 5,
+          "p50": 10.942011700000876,
+          "p95": 11.664399580000099
+        },
+        "continued_preview_s": {
+          "n": 5,
+          "p50": 9.725937700000031,
+          "p95": 10.407942419999927
+        },
+        "conflict_session_and_probe_s": {
+          "n": 5,
+          "p50": 10.782081700000163,
+          "p95": 11.866757719999622
+        }
+      },
+      "rounds": [
+        {
+          "round": 0,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 0.857180499999231,
+            "preview_s": 7.818623200000729,
+            "commit_s": 8.646153599999707,
+            "restart_and_snapshot_s": 10.942011700000876,
+            "continued_preview_s": 9.769802499999969,
+            "conflict_session_and_probe_s": 12.136786899999606
+          },
+          "total_s": 50.391097900000204,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 109,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.7554308999997374,
+            "build": 6.498563399994964,
+            "identity": 2.6386223999970753,
+            "audit": 6.556387299998278,
+            "qa": 4.5732145999963905,
+            "save": 0.010168600000724837,
+            "render": 1.8532752000019173
+          },
+          "other_s": 27.505435500011117,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 1,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 0.8171306999993249,
+            "preview_s": 8.389037799999642,
+            "commit_s": 8.602601600000526,
+            "restart_and_snapshot_s": 11.827182500000163,
+            "continued_preview_s": 10.567477399999916,
+            "conflict_session_and_probe_s": 10.661613100000977
+          },
+          "total_s": 51.13474419999966,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 109,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.7727211000001262,
+            "build": 6.601731499997186,
+            "identity": 2.6541900000029273,
+            "audit": 6.853941899999882,
+            "qa": 4.521134199999324,
+            "save": 0.01845179999963875,
+            "render": 1.6960617000022467
+          },
+          "other_s": 28.01651199999833,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 2,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 0.7609323999995468,
+            "preview_s": 9.182096300000012,
+            "commit_s": 9.613771999999699,
+            "restart_and_snapshot_s": 11.013267899999846,
+            "continued_preview_s": 9.725937700000031,
+            "conflict_session_and_probe_s": 10.78664099999969
+          },
+          "total_s": 51.23159849999956,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 109,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.7668379000006098,
+            "build": 6.361244100001386,
+            "identity": 2.5771026000074926,
+            "audit": 7.116188700001658,
+            "qa": 4.391989799998555,
+            "save": 0.01346579999972164,
+            "render": 1.8667240999984642
+          },
+          "other_s": 28.138045499991676,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 3,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 0.8410032000001593,
+            "preview_s": 8.215512599999784,
+            "commit_s": 8.608802099999593,
+            "restart_and_snapshot_s": 8.451829699999507,
+            "continued_preview_s": 7.7059847999998965,
+            "conflict_session_and_probe_s": 10.782081700000163
+          },
+          "total_s": 44.734483700000055,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 109,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.6893261000013808,
+            "build": 5.55767730000025,
+            "identity": 2.3195282000006046,
+            "audit": 6.227698300003794,
+            "qa": 4.035726999997678,
+            "save": 0.011007600000084494,
+            "render": 1.83681709999928
+          },
+          "other_s": 24.056702099996983,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 4,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 0.7556853000005503,
+            "preview_s": 9.456137600000147,
+            "commit_s": 8.553839200000766,
+            "restart_and_snapshot_s": 10.08283289999963,
+            "continued_preview_s": 8.190628999999717,
+            "conflict_session_and_probe_s": 10.20868260000043
+          },
+          "total_s": 47.35148650000065,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 109,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.7083534999983385,
+            "build": 5.650447300004089,
+            "identity": 2.4526403999961985,
+            "audit": 6.329181600004631,
+            "qa": 3.896751399994173,
+            "save": 0.017536899998958688,
+            "render": 1.711350499999753
+          },
+          "other_s": 26.585224900004505,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        }
+      ]
+    },
+    "nmr": {
+      "summary": {
+        "total_s": {
+          "n": 5,
+          "p50": 49.34773089999999,
+          "p95": 51.54997655999959
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 8.758512499999597,
+          "p95": 9.400361159999921
+        },
+        "commit_s": {
+          "n": 5,
+          "p50": 8.735438799999429,
+          "p95": 9.663778659999844
+        },
+        "fs_export_s": {
+          "n": 5,
+          "p50": 0.0,
+          "p95": 0.0,
+          "calls": 0
+        },
+        "savefig_s": {
+          "n": 5,
+          "p50": 0.0,
+          "p95": 0.0,
+          "calls": 0
+        },
+        "import": {
+          "n": 5,
+          "calls": 350,
+          "p50": 0.6630242000028375,
+          "p95": 2.312043999995694
+        },
+        "build": {
+          "n": 5,
+          "calls": 300,
+          "p50": 7.2691823999994085,
+          "p95": 7.929617559995677
+        },
+        "identity": {
+          "n": 5,
+          "calls": 845,
+          "p50": 4.2610605999898326,
+          "p95": 4.709174880000864
+        },
+        "audit": {
+          "n": 5,
+          "calls": 620,
+          "p50": 8.693073299996286,
+          "p95": 8.977069039997513
+        },
+        "qa": {
+          "n": 5,
+          "calls": 955,
+          "p50": 5.188760300002286,
+          "p95": 5.323888840003201
+        },
+        "save": {
+          "n": 5,
+          "calls": 25,
+          "p50": 0.01673630000095727,
+          "p95": 0.020871880000413512
+        },
+        "render": {
+          "n": 5,
+          "calls": 30,
+          "p50": 2.522976700000072,
+          "p95": 2.8213020599998346
+        }
+      },
+      "operations": {
+        "startup_and_snapshot_s": {
+          "n": 5,
+          "p50": 1.2549443999996583,
+          "p95": 3.0764286000001446
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 8.758132699999805,
+          "p95": 9.399972280000293
+        },
+        "commit_s": {
+          "n": 5,
+          "p50": 8.734896500000104,
+          "p95": 9.663419240000076
+        },
+        "restart_and_snapshot_s": {
+          "n": 5,
+          "p50": 10.149239999999736,
+          "p95": 11.600074959999802
+        },
+        "continued_preview_s": {
+          "n": 5,
+          "p50": 9.532872799999495,
+          "p95": 9.769876039999872
+        },
+        "conflict_session_and_probe_s": {
+          "n": 5,
+          "p50": 10.059935100000985,
+          "p95": 11.400001980000344
+        }
+      },
+      "rounds": [
+        {
+          "round": 0,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 3.4951184000001376,
+            "preview_s": 9.040565799999968,
+            "commit_s": 8.572379000000183,
+            "restart_and_snapshot_s": 9.06811529999959,
+            "continued_preview_s": 8.334186500000214,
+            "conflict_session_and_probe_s": 8.433802999999898
+          },
+          "total_s": 47.26865970000017,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 169,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 2.7228106999955344,
+            "build": 6.6803310000004785,
+            "identity": 3.9795049999975163,
+            "audit": 7.614862899994478,
+            "qa": 4.793724400002247,
+            "save": 0.02166670000042359,
+            "render": 2.4829509999999573
+          },
+          "other_s": 18.972808000009536,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 1,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 1.1625950999996348,
+            "preview_s": 8.384467299999415,
+            "commit_s": 8.734896500000104,
+            "restart_and_snapshot_s": 11.878982299999734,
+            "continued_preview_s": 9.532872799999495,
+            "conflict_session_and_probe_s": 9.364005599999473
+          },
+          "total_s": 49.34773089999999,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 169,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.629780700001902,
+            "build": 7.176666399997885,
+            "identity": 4.264179200001308,
+            "audit": 8.693073299996286,
+            "qa": 5.188760300002286,
+            "save": 0.013056599998890306,
+            "render": 2.522976700000072
+          },
+          "other_s": 20.85923770000136,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 2,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 1.1594705999996222,
+            "preview_s": 8.180926099999851,
+            "commit_s": 8.519064199999775,
+            "restart_and_snapshot_s": 9.813529000000017,
+            "continued_preview_s": 9.711208599999736,
+            "conflict_session_and_probe_s": 10.403430299999854
+          },
+          "total_s": 48.16996469999958,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 169,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.6689771999963341,
+            "build": 7.2691823999994085,
+            "identity": 4.111908600003517,
+            "audit": 8.689081900008205,
+            "qa": 5.115309099994192,
+            "save": 0.017692600000373204,
+            "render": 2.829706999999871
+          },
+          "other_s": 19.46810589999768,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 3,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 1.2549443999996583,
+            "preview_s": 8.758132699999805,
+            "commit_s": 9.430124599999544,
+            "restart_and_snapshot_s": 10.484445600000072,
+            "continued_preview_s": 9.784542899999906,
+            "conflict_session_and_probe_s": 11.649144900000465
+          },
+          "total_s": 51.78763319999962,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 169,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.6596263000028557,
+            "build": 7.657813399997394,
+            "identity": 4.8204238000007535,
+            "audit": 8.985530499999186,
+            "qa": 5.267871799998829,
+            "save": 0.013485699999364442,
+            "render": 2.7876822999996875
+          },
+          "other_s": 21.595199400001547,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 4,
+          "status": "COMMITTED_DRAFT",
+          "local": "PASS",
+          "whole": "FAIL",
+          "operations": {
+            "startup_and_snapshot_s": 1.4016694000001735,
+            "preview_s": 9.489823900000374,
+            "commit_s": 9.721742900000208,
+            "restart_and_snapshot_s": 10.149239999999736,
+            "continued_preview_s": 9.365810399999646,
+            "conflict_session_and_probe_s": 10.059935100000985
+          },
+          "total_s": 50.599349999999504,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 169,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.6630242000028375,
+            "build": 7.9975685999952475,
+            "identity": 4.2610605999898326,
+            "audit": 8.943223199990825,
+            "qa": 5.337893100004294,
+            "save": 0.01673630000095727,
+            "render": 2.430069000000003
+          },
+          "other_s": 20.949775000015507,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        }
+      ]
+    },
+    "cck8-full": {
+      "summary": {
+        "total_s": {
+          "n": 5,
+          "p50": 97.30420890000005,
+          "p95": 99.60093707999968
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 19.082650499999545,
+          "p95": 20.22561619999997
+        },
+        "commit_s": {
+          "n": 5,
+          "p50": 18.413072199999988,
+          "p95": 19.679865200000496
+        },
+        "fs_export_s": {
+          "n": 5,
+          "p50": 38.12917059999927,
+          "p95": 39.06029459999699,
+          "calls": 300
+        },
+        "savefig_s": {
+          "n": 5,
+          "p50": 29.279325499999686,
+          "p95": 30.34141384000177,
+          "calls": 900
+        },
+        "import": {
+          "n": 5,
+          "calls": 350,
+          "p50": 0.25358500000220374,
+          "p95": 0.2657072399973913
+        },
+        "build": {
+          "n": 5,
+          "calls": 300,
+          "p50": 57.1035979000053,
+          "p95": 58.860661300001084
+        },
+        "identity": {
+          "n": 5,
+          "calls": 425,
+          "p50": 1.9317234000000099,
+          "p95": 2.0970205400009947
+        },
+        "audit": {
+          "n": 5,
+          "calls": 620,
+          "p50": 2.202241300004971,
+          "p95": 2.3295273399946383
+        },
+        "qa": {
+          "n": 5,
+          "calls": 955,
+          "p50": 4.85531649999939,
+          "p95": 5.1529510000027585
+        },
+        "save": {
+          "n": 5,
+          "calls": 25,
+          "p50": 0.01618400000006659,
+          "p95": 0.020208880001155193
+        },
+        "render": {
+          "n": 5,
+          "calls": 930,
+          "p50": 29.6010761000025,
+          "p95": 30.691615800002182
+        }
+      },
+      "operations": {
+        "startup_and_snapshot_s": {
+          "n": 5,
+          "p50": 3.1205822000001717,
+          "p95": 5.6933613400005925
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 19.082625799999732,
+          "p95": 20.225586299999485
+        },
+        "commit_s": {
+          "n": 5,
+          "p50": 18.413051700000324,
+          "p95": 19.679820960000505
+        },
+        "restart_and_snapshot_s": {
+          "n": 5,
+          "p50": 17.191217000000506,
+          "p95": 18.34818785999978
+        },
+        "continued_preview_s": {
+          "n": 5,
+          "p50": 19.398868299999776,
+          "p95": 20.096463860000586
+        },
+        "conflict_session_and_probe_s": {
+          "n": 5,
+          "p50": 18.647518800000398,
+          "p95": 19.775801399999544
+        }
+      },
+      "rounds": [
+        {
+          "round": 0,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 6.2418473000007,
+            "preview_s": 16.593010499999764,
+            "commit_s": 17.79127900000003,
+            "restart_and_snapshot_s": 18.47146799999973,
+            "continued_preview_s": 19.72060210000018,
+            "conflict_session_and_probe_s": 19.512053399999786
+          },
+          "total_s": 98.6208746000002,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 186
+          },
+          "exclusive_phases_s": {
+            "import": 0.24544699999933073,
+            "build": 58.97302360000231,
+            "identity": 1.9789866999972219,
+            "audit": 2.2808438999991267,
+            "qa": 4.85531649999939,
+            "save": 0.010995900000125403,
+            "render": 29.6010761000025
+          },
+          "other_s": 0.6751849000002039,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 60,
+            "fs_export_s": 38.12917059999927,
+            "savefig_calls": 180,
+            "savefig_s": 29.279325499999686
+          }
+        },
+        {
+          "round": 1,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 3.4994175000001633,
+            "preview_s": 20.395383999999467,
+            "commit_s": 17.976332100000036,
+            "restart_and_snapshot_s": 17.08655230000022,
+            "continued_preview_s": 17.88455840000006,
+            "conflict_session_and_probe_s": 17.41776409999966
+          },
+          "total_s": 94.45825030000015,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 186
+          },
+          "exclusive_phases_s": {
+            "import": 0.25358500000220374,
+            "build": 55.61819270000615,
+            "identity": 1.8775429000043005,
+            "audit": 2.150421999987884,
+            "qa": 4.84950120000849,
+            "save": 0.01962400000047637,
+            "render": 29.106359699999302
+          },
+          "other_s": 0.5830227999913404,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 60,
+            "fs_export_s": 37.40843099999802,
+            "savefig_calls": 180,
+            "savefig_s": 28.778159999993477
+          }
+        },
+        {
+          "round": 2,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 2.3530642999994598,
+            "preview_s": 17.18150810000043,
+            "commit_s": 18.413051700000324,
+            "restart_and_snapshot_s": 16.221847499999058,
+            "continued_preview_s": 17.27128200000061,
+            "conflict_session_and_probe_s": 16.79040030000033
+          },
+          "total_s": 88.47982609999963,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 186
+          },
+          "exclusive_phases_s": {
+            "import": 0.2214549000009356,
+            "build": 52.226659000004474,
+            "identity": 1.831951999996818,
+            "audit": 2.0599438999970516,
+            "qa": 4.526850600001126,
+            "save": 0.0203551000013249,
+            "render": 27.00335019999693
+          },
+          "other_s": 0.5892604000009669,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 60,
+            "fs_export_s": 34.51098860000093,
+            "savefig_calls": 180,
+            "savefig_s": 26.664839899997787
+          }
+        },
+        {
+          "round": 3,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 2.5385984999993525,
+            "preview_s": 19.546395499999562,
+            "commit_s": 19.732383000000482,
+            "restart_and_snapshot_s": 17.191217000000506,
+            "continued_preview_s": 19.398868299999776,
+            "conflict_session_and_probe_s": 18.647518800000398
+          },
+          "total_s": 97.30420890000005,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 186
+          },
+          "exclusive_phases_s": {
+            "import": 0.26668859999699634,
+            "build": 57.1035979000053,
+            "identity": 1.9317234000000099,
+            "audit": 2.202241300004971,
+            "qa": 5.0369653999941875,
+            "save": 0.01618400000006659,
+            "render": 30.080960599992977
+          },
+          "other_s": 0.6658477000055427,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 60,
+            "fs_export_s": 38.52570580000247,
+            "savefig_calls": 180,
+            "savefig_s": 29.764915199993993
+          }
+        },
+        {
+          "round": 4,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 3.1205822000001717,
+            "preview_s": 19.082625799999732,
+            "commit_s": 19.469572800000606,
+            "restart_and_snapshot_s": 17.855067299999973,
+            "continued_preview_s": 20.190429300000687,
+            "conflict_session_and_probe_s": 19.841738399999485
+          },
+          "total_s": 99.84595269999954,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 186
+          },
+          "exclusive_phases_s": {
+            "import": 0.2617817999989711,
+            "build": 58.41121209999619,
+            "identity": 2.1265290000019377,
+            "audit": 2.341698199993516,
+            "qa": 5.181947400004901,
+            "save": 0.01539039999988745,
+            "render": 30.844279600004484
+          },
+          "other_s": 0.6631141999996544,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 60,
+            "fs_export_s": 39.19394179999563,
+            "savefig_calls": 180,
+            "savefig_s": 30.485538500003713
+          }
+        }
+      ]
+    },
+    "cck8-pure": {
+      "summary": {
+        "total_s": {
+          "n": 5,
+          "p50": 56.465010699999766,
+          "p95": 57.92625557999982
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 11.192993900000147,
+          "p95": 11.95887587999987
+        },
+        "commit_s": {
+          "n": 5,
+          "p50": 10.981259399999544,
+          "p95": 11.82598143999985
+        },
+        "fs_export_s": {
+          "n": 5,
+          "p50": 0.0,
+          "p95": 0.0,
+          "calls": 0
+        },
+        "savefig_s": {
+          "n": 5,
+          "p50": 0.0,
+          "p95": 0.0,
+          "calls": 0
+        },
+        "import": {
+          "n": 5,
+          "calls": 350,
+          "p50": 0.7142022000007273,
+          "p95": 0.7863055599986183
+        },
+        "build": {
+          "n": 5,
+          "calls": 300,
+          "p50": 44.240072300000065,
+          "p95": 45.52943699999887
+        },
+        "identity": {
+          "n": 5,
+          "calls": 425,
+          "p50": 2.7394863000026817,
+          "p95": 2.921174059998157
+        },
+        "audit": {
+          "n": 5,
+          "calls": 620,
+          "p50": 2.0006970000022193,
+          "p95": 2.2613622800005033
+        },
+        "qa": {
+          "n": 5,
+          "calls": 955,
+          "p50": 5.10404450000533,
+          "p95": 5.316497579996576
+        },
+        "save": {
+          "n": 5,
+          "calls": 25,
+          "p50": 0.01418539999940549,
+          "p95": 0.014685720000306901
+        },
+        "render": {
+          "n": 5,
+          "calls": 30,
+          "p50": 0.37494950000109384,
+          "p95": 0.41053385999985037
+        }
+      },
+      "operations": {
+        "startup_and_snapshot_s": {
+          "n": 5,
+          "p50": 1.7325084999993123,
+          "p95": 1.9047780000006242
+        },
+        "preview_s": {
+          "n": 5,
+          "p50": 11.192950699999528,
+          "p95": 11.958868680000341
+        },
+        "commit_s": {
+          "n": 5,
+          "p50": 10.98121330000049,
+          "p95": 11.825972380000167
+        },
+        "restart_and_snapshot_s": {
+          "n": 5,
+          "p50": 10.287975999999617,
+          "p95": 10.669061620000866
+        },
+        "continued_preview_s": {
+          "n": 5,
+          "p50": 10.978422099999989,
+          "p95": 11.263379819999864
+        },
+        "conflict_session_and_probe_s": {
+          "n": 5,
+          "p50": 10.022240999999667,
+          "p95": 10.664694539999982
+        }
+      },
+      "rounds": [
+        {
+          "round": 0,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 1.9070593000005829,
+            "preview_s": 12.038204600000427,
+            "commit_s": 12.002558700000009,
+            "restart_and_snapshot_s": 10.287975999999617,
+            "continued_preview_s": 10.280254799999966,
+            "conflict_session_and_probe_s": 10.782938899999863
+          },
+          "total_s": 58.04344409999976,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.8008807999976852,
+            "build": 45.67569529999946,
+            "identity": 2.7394863000026817,
+            "audit": 2.1072610000055647,
+            "qa": 5.3205665999958,
+            "save": 0.014703700000609388,
+            "render": 0.37494950000109384
+          },
+          "other_s": 1.0099008999968646,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 1,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 1.368231499999638,
+            "preview_s": 10.809345100000428,
+            "commit_s": 10.672320300000138,
+            "restart_and_snapshot_s": 9.651661400000194,
+            "continued_preview_s": 10.137977200000023,
+            "conflict_session_and_probe_s": 10.022240999999667
+          },
+          "total_s": 53.376221699999405,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.7280046000023503,
+            "build": 41.78055210000184,
+            "identity": 2.6851211999983207,
+            "audit": 2.0006970000022193,
+            "qa": 4.881568599997081,
+            "save": 0.01418539999940549,
+            "render": 0.31891799999812065
+          },
+          "other_s": 0.9671748000000662,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 2,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 1.7325084999993123,
+            "preview_s": 11.192950699999528,
+            "commit_s": 10.98121330000049,
+            "restart_and_snapshot_s": 10.671040500001254,
+            "continued_preview_s": 11.195091099999445,
+            "conflict_session_and_probe_s": 9.920284200000424
+          },
+          "total_s": 56.465010699999766,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.6991823999987901,
+            "build": 44.240072300000065,
+            "identity": 2.8765038999990793,
+            "audit": 1.881310199998552,
+            "qa": 5.3002214999996795,
+            "save": 0.014613799999096955,
+            "render": 0.4142357999999149
+          },
+          "other_s": 1.038870800004588,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 3,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 1.8956528000007893,
+            "preview_s": 11.641525000000001,
+            "commit_s": 10.956019399999605,
+            "restart_and_snapshot_s": 10.661146099999314,
+            "continued_preview_s": 11.280451999999968,
+            "conflict_session_and_probe_s": 10.19171710000046
+          },
+          "total_s": 57.457501500000035,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.6833057999992889,
+            "build": 44.94440379999651,
+            "identity": 2.932341599997926,
+            "audit": 2.299887599999238,
+            "qa": 5.10404450000533,
+            "save": 0.011536400000295544,
+            "render": 0.3957260999995924
+          },
+          "other_s": 1.086255700001857,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        },
+        {
+          "round": 4,
+          "status": "COMMITTED",
+          "local": "PASS",
+          "whole": "PASS",
+          "operations": {
+            "startup_and_snapshot_s": 1.509465399999499,
+            "preview_s": 10.86592070000006,
+            "commit_s": 11.119627100000798,
+            "restart_and_snapshot_s": 10.270481800000198,
+            "continued_preview_s": 10.978422099999989,
+            "conflict_session_and_probe_s": 9.438555899999301
+          },
+          "total_s": 54.85249459999977,
+          "phase_calls": {
+            "import": 70,
+            "build": 60,
+            "identity": 85,
+            "audit": 124,
+            "qa": 191,
+            "save": 5,
+            "render": 6
+          },
+          "exclusive_phases_s": {
+            "import": 0.7142022000007273,
+            "build": 43.364094799997474,
+            "identity": 2.6930821000032665,
+            "audit": 1.8127501000044504,
+            "qa": 5.0350216999986515,
+            "save": 0.01115990000016609,
+            "render": 0.30480979999902047
+          },
+          "other_s": 0.9173739999960162,
+          "restart_matches": true,
+          "conflict_refused": true,
+          "source_exports": {
+            "fs_export_calls": 0,
+            "fs_export_s": 0,
+            "savefig_calls": 0,
+            "savefig_s": 0
+          }
+        }
+      ]
+    }
+  },
+  "protocol": "G20 full workflow, same target axis.title +1pt, serial same process; no global cleanup; extra operation instrumentation",
+  "limits": "Not an optimization of verifier counts. Extra timing hooks add instrumentation overhead. No status inferred from missing evidence."
+}

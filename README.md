@@ -205,7 +205,10 @@ G20 工作草稿：原图已有 QA 问题时，只有局部／科学／视图审
 已改善的问题不能回退到原图程度；“恢复原始”也遵守当前已保存工作状态的实测门禁。规则见 [G20 协议](docs/G20_PROTOCOL.md)，真实草稿闭环、纯构图等价与五轮结果见 [G20 报告](docs/G20_REPORT.md)。
 
 G21 已用现有 Native/YAML 控制完成真实 NMR 的字号修复、保存、新 worker 重开、继续编辑及严格出版；未新增 Overlay 角色或降低 5 pt 字形下限。
-Strict PASS 仍可能保留非阻断 warning；FTIR 本轮严格出版未通过，连续编辑的 Figure 持有问题也尚未修复。完整证据与边界见 [G21 报告](docs/G21_REPORT.md)。
+Strict PASS 仍可能保留非阻断 warning；FTIR 在 G21 中未通过严格出版。当时的 Figure 持有问题与能力边界见 [G21 报告](docs/G21_REPORT.md)。
+
+G22 已将声明 manifest／QA 测量异常改为 `AUDIT_INCOMPLETE` 失败关闭，并按明确 ownership 释放 FTIR／NMR 的内部基线 Figure，不关闭调用方 Figure、不削减独立验证。
+真实 FTIR 三轮／十轮编辑及失败拒绝后内部 Figure 无持续残留；原出版／草稿语义、完整回归和五轮耗时见 [G22 报告](docs/G22_REPORT.md)。普通刻度裁切 QA 和 FTIR scope 图例限制仍未改变。
 
 
 ## 测试
