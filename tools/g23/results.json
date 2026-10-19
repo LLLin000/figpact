@@ -1,0 +1,55 @@
+{
+  "product_code_sha": "7936980",
+  "deterministic_test_fixture_sha": "9f1da32",
+  "final_regressions": {"nonbrowser": {"passed": 665, "skipped": 7, "subtests_passed": 95, "seconds": 1778.44}, "chromium": {"passed": 28, "seconds": 684.74}, "node": {"passed": 54}},
+  "initial_full_run_failures": {"nonbrowser": "Ambient-style-dependent subpixel fixture; replaced by exact measured 0.39px geometry", "chromium": "ERR_NETWORK_IO_SUSPENDED on authorization request; full suite rerun alone without product changes"},
+  "tick_rule": {"id": "TICK_CLIP", "unit": "mm", "threshold": 0.0, "severity": "blocking", "epsilon_mm": 0.0000001},
+  "single_geometry_source": true,
+  "stable_identity": "existing stable Axes key + x/y Axis + major/minor + finite position + label1/label2; offset role separate",
+  "unknown_geometry_and_ambiguity_fail_closed": true,
+  "positive_canvas_clearance_blocks": false,
+  "new_tick_tests": 27,
+  "overlay_consumer_tests": 4,
+  "publication": {
+    "outcome": "G23_TICK_PASS",
+    "nmr_publication_runner_rc": 0,
+    "nmr_native_and_strict_overlay_pass": true,
+    "nmr_actual_pdf_min_glyph_pt": 5.04,
+    "nmr_png_pixels": [1606, 1133],
+    "nmr_pdf_size_mm": [68.0, 48.0],
+    "pdf_stages_checked": ["strict_probe", "installed", "strict_overlay"],
+    "all_pdf_word_bboxes_inside_page": true,
+    "pdf_extractable_word_count": 31,
+    "dpi_tick_sweep": {
+      "72": {"min_clearance_mm": 0.055625, "tick_clip": 0, "unmeasured": 0, "other_rules": [{"rule": "TEXT_ON_DATA", "value": 3751.0}, {"rule": "TEXT_ON_DATA", "value": 4175.0}, {"rule": "TEXT_ON_DATA", "value": 3532.0}]},
+      "120": {"min_clearance_mm": 0.08208333333333873, "tick_clip": 0, "unmeasured": 0},
+      "300": {"min_clearance_mm": 0.0715, "tick_clip": 0, "unmeasured": 0},
+      "600": {"min_clearance_mm": 0.0794375, "tick_clip": 0, "unmeasured": 0}
+    },
+    "dpi_sweep_limit": "Tick clipping legality only, not all-QA PASS at 72 DPI",
+    "nmr_existing_edge_warnings_not_removed": 2,
+    "ftir_collector_rc": 0,
+    "ftir_strict_rc": 1,
+    "ftir_text_on_data_blockers_remain": 4,
+    "ftir_pdf_produced": false
+  },
+  "build_trace": {
+    "counts": {"startup": 2, "preview": 12, "commit": 12, "restart": 11},
+    "total_builds": 37,
+    "actual_authoritative_snapshot_count": 28,
+    "each_build_has_measured_input_and_observational_output_fingerprint": true,
+    "managed_figures_after_gc": 0,
+    "input_fingerprint": "scope, config, script bytes, declared science input bytes, script style dependency bytes",
+    "output_fingerprint": "as-built content/view/size observational hash; separately actual verifier snapshots including science declarations, view and QA",
+    "unchanged_build_count": true,
+    "limits": "Hash observations and elapsed time never authorize reuse. Extra hashing changes timing; no performance benchmark. No global Figure cleanup."
+  },
+  "limits": [
+    "Axes-outside labels inside Figure are valid; tiny positive clearance is not clipping",
+    "Nonrectangular or nonfinite active clipping evidence fails closed rather than claiming containment",
+    "Text bbox geometry is conservative, not per-pixel glyph coverage",
+    "Arbitrary external postprocessing or tight-bbox output is not universally certified",
+    "No performance engine, cache, layout solver, new edit permission, Agent or GUI feature",
+    "Third-party manifest/layout_contract temporary Figure ownership is the creator's responsibility; G22 examples are not a universal guarantee"
+  ]
+}

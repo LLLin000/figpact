@@ -213,6 +213,8 @@ Strict PASS 仍可能保留非阻断 warning；FTIR 在 G21 中未通过严格�
 G22 已将声明 manifest／QA 测量异常改为 `AUDIT_INCOMPLETE` 失败关闭，并按明确 ownership 释放 FTIR／NMR 的内部基线 Figure，不关闭调用方 Figure、不削减独立验证。
 真实 FTIR 三轮／十轮编辑及失败拒绝后内部 Figure 无持续残留；原出版／草稿语义、完整回归和五轮耗时见 [G22 报告](docs/G22_REPORT.md)。普通刻度裁切 QA 和 FTIR scope 图例限制仍未改变。
 
+G23 已统一主／次刻度与 offset text 的真实画布裁切 QA：合法轴外位置和微小正净空不阻断，实际裁切与不可测量状态接入严格发布和结构化草稿门禁。真实 NMR、FTIR 拒绝与完整回归证据见 [G23 报告](docs/G23_REPORT.md)；未减少独立构图次数。
+
 
 ## 测试
 
