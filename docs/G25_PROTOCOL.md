@@ -22,23 +22,26 @@
 ## Semantic Target Hints 实验变量
 
 该实验仅验证上下文呈现是否降低目标／scope 歧义；不新增产品区域层或 `region.py`，不改变 `PLAN_SCHEMA`、控制权、身份、QA 或提交语义。重用只读 Scene、Artist 身份与 Native／Overlay 契约。
-
-配对比较两臂：
+建议把两种机制区分；若纳入实验，先比较呈现效应，不增加接口字段：
 
 | 臂 | 模型可见输入 |
 |---|---|
-| A：现有基线 | 当前完整 Scene／控制清单与固定 prompt/schema |
-| B：语义提示 | 与 A 完全相同的输入，另提供由真实来源派生的 `scope`、`panel_id`／`parent_id`、现有语义 role、`axis=x/y`；有可靠声明或身份依据时可提供 `anchored_to`，空间相对方位只作为当前渲染的非权威提示 |
+| A：生产基线 | 当前实际生产 prompt packet 的完整 Scene／控制清单、固定 prompt/schema |
+| B：呈现对照 | 与 A 完全相同的信息和控制项，只把其中已有的 scope、parent/panel ID、现有 role、axis、selector/binding 按对象邻近重组为只读提示 |
 
-两臂使用相同未见题目、模型配置、原始控制清单、来源指纹、引擎、输出 schema 和首次尝试规则；每个臂／题目用独立、无历史污染的会话。随机化或平衡题目执行顺序，并冻结该策略。分别记录 A、B 原始包及哈希；不得让一臂访问另一臂输出或金标准。
+在冻结前对逐题 A/B payload 做字段与控制 ID 集合等价检查；只允许键名/布局/措辞变化，不增删事实、控制、顺序优先级或答案线索。若研究目标是**增加来源事实**（生产包确实没有的字段），那是另一个机制：必须单独标记该字段来源、生成规则和 UNKNOWN 情况，并设置独立实验臂；不能与 B 合并后声称是“呈现改善”。只有未见集和资源支持时才加入此臂，否则本轮限于 A/B 呈现对照。
 
-定位字段规则：`scope` 是逻辑编辑／验证作用域；`panel_id` 必须来自真实 Axes/Scene 身份，不可由轴序号或“上面板”猜 ID；`spatial_relation` 是当前绘制状态下可变的观察事实，不作稳定身份或权限。语义 role 只能复用已存在的节点类型、契约和 Overlay role；不得因加上 `peak_label` 等易读标签就推导新的可编辑能力。图例、标注与曲线的 `anchored_to` 仅在 Scene／契约存在可靠关联时传递，否则明确 unknown／省略，不以邻近包围盒冒充锚定。
+### 来源约束与可行性
 
-B 臂增强提示只能是来自基线事实的只读投影；禁止增删或重排控制项以暗中提高候选显著性，禁止给出金标准目标、推荐答案或“最可能控制项”。空间关系不能覆盖稳定 ID，也不能在布局改变后沿用旧坐标关系。提示不参与 QA、授权和验证判定。
+- Native Scene nodes 已含真实 `id/type/parent/scope`；控制记录含 exact YAML `path`、`objects`、scope、unit/range/axis。A 即已携带这些事实，B 只能重组，不得假称补全新信息。
+- Native 一个逻辑 scope 可对应多个 Axes；不得按 Axes 次序推断 scope。注册 Axes ID 可来自 registry/GID，匿名 panel 的 `scope::panel.<index>` 是序号 fallback，不能把它包装成持久、可跨重排比较的语义身份。
+- Overlay inventory 已含由真实 Axes 结构指纹构造的 `axes_key`、axis、role、selector/fingerprint；Axes index 是 display hint，不是 authority。当前 `discover_overlay()` 的节点投影只有 id/type/bounds，没有 parent/scope；G25 B 若要**新增**这些事实，应单列“信息增量”臂，且确认其 parent/scope 来源是显式事实而非从邻近 bbox 猜出。
+- `anchored_to` 只可来自真实 contract relation、registry/group 显式关系或可核验 binding。当前 Scene geometry 的邻近/包含测量不等于标签锚定到曲线；无法证明时省略或 unknown。空间上下左右是当前渲染观察，不是稳定身份。
+- Overlay 的 role 限于已有 `axis.title`、`axis.tick`、`curve.linewidth`。Native 的语义 role 取自契约 `expected.kind`/操作。易读标签不得扩大可编辑对象集合或创造新 role 权限。
 
-主要比较项：目标及 scope 完全匹配率、首次 READY 完整计划正确率、错误 scope 计划率。次要指标包括绑定正确率、引擎受理率、澄清／拒绝准确率和实际错误 scope 候选影响。所有指标使用相同冻结分母并按题目配对报告差异与置信区间；不可表达、UNKNOWN、格式错误与缺失回执维持各自类别。只提升 role 文案匹配、不提升完整计划，不能视为定位方案成功。
+### 冻结与判读
 
-不预设 Semantic Target Hints 必须保留。若收益只来自 `panel_id`／`axis`，后续方案也只能考虑这些字段；未见到相对冻结 A 臂的预先规定收益，或引入身份漂移／错误 scope 风险，则不产品化提示投影。本实验协议本身不启动 G25 评测或实现。
+运行前记录每题 A/B 规范化 payload hash、可见控制 ID 集合、每项提示的来源字段与推导规则。纯重排臂必须通过事实等价检查；新增字段臂必须分别保留字段来源、schema 可表达性和 UNKNOWN 率。预注册目标定位、scope/axis、完整 READY 计划、错误 scope 计划率及拒绝/引擎可行性分层。若只改善 role/axis 词语匹配但未改善目标与完整计划，不能判为有用；引擎拒绝不抹掉定位正确，错误 scope 即使被引擎挡下仍是计划定位错误。
 
 ## 每题金标准
 
