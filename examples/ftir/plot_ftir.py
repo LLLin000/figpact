@@ -656,7 +656,7 @@ def _panel_gid(scope: str) -> str:
     return f"{FIGURE_ID}.{scope}.panel"
 
 
-def _build(science: dict, scope_target: str):
+def _build(science: dict, scope_target: str, *, _owned: list | None = None):
     """按 scope 建图。**legacy 与 native 共用这一份构建路径**（不存在第二套约定）。"""
     # 样式是**这张图**的属性，不是导入的副作用：每次构图都重新套一遍。native runtime
     # 装载脚本时把 rcParams 恢复成导入前的值（`figpact.intents` 的 `rc_context()`），
@@ -670,34 +670,52 @@ def _build(science: dict, scope_target: str):
     _DERIVED["clearance_mm"].clear()
     reg = GidRegistry()
     raw, proc = science["raw"], science["processed"]
-
-    if scope_target == "main":
-        fig, ax = plt.subplots(figsize=fs.canvas_mm(*FTIR_CANVAS))
-        fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
-        ax.set_gid(_panel_gid("main"))
-        draw_panel(ax, raw, scope="main", processed=False, annotate=False, reg=reg)
-        add_xlabel(ax, scope="main", reg=reg)
-        return fig, reg
-    elif scope_target == "annotated":
-        fig, ax = plt.subplots(figsize=fs.canvas_mm(*FTIR_CANVAS))
-        fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
-        ax.set_gid(_panel_gid("annotated"))
-        draw_panel(ax, raw, scope="annotated", processed=False, annotate=True, reg=reg)
-        add_xlabel(ax, scope="annotated", reg=reg)
-        return fig, reg
-    elif scope_target.startswith("compare"):
-        fig, axes = plt.subplots(2, 1, figsize=fs.canvas("SQ2"), sharex=True,
-                                 gridspec_kw={"hspace": 0.20})
-        fig.subplots_adjust(left=0.135, right=0.985, top=0.975, bottom=0.075)
-        axes[0].set_gid(_panel_gid("compare_raw"))
-        axes[1].set_gid(_panel_gid("compare_processed"))
-        draw_panel(axes[0], raw, scope="compare_raw", processed=False, annotate=False, reg=reg)
-        draw_panel(axes[1], proc, scope="compare_processed", processed=True, annotate=False, reg=reg)
-        add_xlabel(axes[1], scope="compare_processed", reg=reg)
-        return fig, reg
-    else:
-        raise ValueError(f"未知 scope_target: {scope_target}")
-
+    fig = None
+    try:
+        if scope_target == "main":
+            fig, ax = plt.subplots(figsize=fs.canvas_mm(*FTIR_CANVAS))
+            if _owned is not None:
+                _owned.append(fig)
+            fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
+            ax.set_gid(_panel_gid("main"))
+            draw_panel(ax, raw, scope="main", processed=False, annotate=False, reg=reg)
+            add_xlabel(ax, scope="main", reg=reg)
+            return fig, reg
+        elif scope_target == "annotated":
+            fig, ax = plt.subplots(figsize=fs.canvas_mm(*FTIR_CANVAS))
+            if _owned is not None:
+                _owned.append(fig)
+            fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
+            ax.set_gid(_panel_gid("annotated"))
+            draw_panel(ax, raw, scope="annotated", processed=False, annotate=True, reg=reg)
+            add_xlabel(ax, scope="annotated", reg=reg)
+            return fig, reg
+        elif scope_target.startswith("compare"):
+            fig, axes = plt.subplots(2, 1, figsize=fs.canvas("SQ2"), sharex=True,
+                                     gridspec_kw={"hspace": 0.20})
+            if _owned is not None:
+                _owned.append(fig)
+            fig.subplots_adjust(left=0.135, right=0.985, top=0.975, bottom=0.075)
+            axes[0].set_gid(_panel_gid("compare_raw"))
+            axes[1].set_gid(_panel_gid("compare_processed"))
+            draw_panel(axes[0], raw, scope="compare_raw", processed=False, annotate=False, reg=reg)
+            draw_panel(axes[1], proc, scope="compare_processed", processed=True, annotate=False, reg=reg)
+            add_xlabel(axes[1], scope="compare_processed", reg=reg)
+            return fig, reg
+        else:
+            raise ValueError(f"未知 scope_target: {scope_target}")
+    except BaseException:
+        if fig is not None:
+            if _owned is not None:
+                try:
+                    _owned.remove(fig)
+                except ValueError:
+                    pass
+            try:
+                plt.close(fig)
+            except Exception:
+                pass
+        raise
 
 def build_figure_and_registry(scope_target: str = "annotated"):
     """legacy 入口：用模块基线配置建图（CLI / GUI / 清点继续走这里）。"""
@@ -734,15 +752,42 @@ _EXPORT_FORMATS = ("png", "pdf", "svg", "tiff")
 
 #: 基线场景缓存：契约里的节点、类型、所属 panel 全部取自**真正建出来的一张图**，
 #: 不另抄一份「应该有哪些 gid」的清单——那种清单必然与绘图代码漂移。
+#:
+#: 生命周期：`layout_contract` / `science_manifest` 的同一次调用里可复用（同一
+#: scope 只建一次，嵌套的 `_panel_scopes` 直接命中）；调用结束时只关**本次调用
+#: 新建**的 Figure 并清空引用，不碰调用方手里的 Figure，绝不 `plt.close("all")`。
+#: 基线构建失败（`_build` 中途抛异常）时，已建出一半的 Figure 由 `_build` 自己关
+#: 掉——调用方无需、也不该去猜哪些 Figure 归谁。
 _BASELINE_SCENES: dict[str, tuple] = {}
-
+_BASELINE_DEPTH = 0
+_BASELINE_OWNED: list = []
 
 def _baseline_scene(scope: str):
-    """该 scope 的基线 (Figure, GidRegistry)，按 scope 缓存、只建一次。"""
+    """该 scope 的基线 (Figure, GidRegistry)，同一次顶层调用内按 scope 缓存。"""
     if scope not in _BASELINE_SCENES:
         _apply_config(CONFIG)
-        _BASELINE_SCENES[scope] = _build(load_science(), scope)
+        _BASELINE_SCENES[scope] = _build(load_science(), scope, _owned=_BASELINE_OWNED)
     return _BASELINE_SCENES[scope]
+
+
+def _baseline_call(func, *args, **kwargs):
+    """顶层基线调用：嵌套复用基线，退出时只关本次新建的基线 Figure。"""
+    global _BASELINE_DEPTH
+    _BASELINE_DEPTH += 1
+    owned_before = len(_BASELINE_OWNED)
+    try:
+        return func(*args, **kwargs)
+    finally:
+        _BASELINE_DEPTH -= 1
+        if _BASELINE_DEPTH == 0:
+            while len(_BASELINE_OWNED) > owned_before:
+                _fig = _BASELINE_OWNED.pop()
+                try:
+                    plt.close(_fig)
+                except Exception:
+                    pass
+            for _key in [k for k in _BASELINE_SCENES]:
+                _BASELINE_SCENES.pop(_key, None)
 
 
 def _science_policy(gid: str) -> str:
@@ -847,6 +892,11 @@ def layout_contract(scope: str) -> dict:
     **该 scene 内全部实际受影响的节点**，逐作用域参数只声明本作用域 panel 的节点——
     对照版两格同图，但改 `compare_raw` 的路径不会动 `compare_processed`。
     """
+    return _baseline_call(_layout_contract_inner, scope)
+
+
+def _layout_contract_inner(scope: str) -> dict:
+    """内层：基线复用，生命周期由外层 `_baseline_call` 拥有。"""
     if scope not in SCOPES:
         raise ValueError(f"未知作用域 {scope!r}；可用：{list(SCOPES)}")
     fig, reg = _baseline_scene(scope)
@@ -944,6 +994,11 @@ def science_manifest(science: dict) -> dict:
     FTIR 这张图没有任何引导线/基线这类装饰线（谱线、归属文字、轴文字、图例全部参与
     科学指纹），所以这里是空表；未列出的 gid 默认 LOCKED_SCIENCE，与 `_science_policy` 一致。
     """
+    return _baseline_call(_science_manifest_inner, science)
+
+
+def _science_manifest_inner(science: dict) -> dict:
+    """内层：基线复用，生命周期由外层 `_baseline_call` 拥有。"""
     troughs = {}
     for (_, _, _, sid), (x, y) in zip(SAMPLES, science["raw"]):
         troughs[sid] = {"deepest_trough_cm1": float(x[int(np.argmin(y))]),

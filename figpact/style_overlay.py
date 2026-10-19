@@ -134,28 +134,68 @@ def _fresh_build(script: Path, config: Path | None, scope: str | None):
     return module, cfg, fig, reg, resolved
 
 
-def _manifest_of(module: Any) -> Any:
+def _fresh_build_verified(script_p: Path, config_p: Path | None,
+                           scope: str | None) -> tuple:
+    """``_fresh_build`` that fails closed: a declared-hook execution failure
+    during rebuild (e.g. ``load_science`` raising) becomes ``_VerifyFail``
+    with the original classification kept in the message, never a raw
+    exception and never a silent pass."""
     try:
-        if callable(getattr(module, "science_manifest", None)) \
-                and callable(getattr(module, "load_science", None)):
-            return module.science_manifest(module.load_science())
-    except Exception:
+        return _fresh_build(script_p, config_p, scope)
+    except _VerifyFail:
+        raise
+    except Exception as error:
+        raise _VerifyFail([f"AUDIT_INCOMPLETE: rebuild failed "
+                           f"({type(error).__name__}: {error})"]) from error
+
+
+def _manifest_of(module: Any) -> Any:
+    """Declared-manifest hook with fail-closed execution.
+
+    Absent optional hooks stay ``None`` (existing protocol: e.g. the G19
+    trial wrapper whose ``science_manifest`` successfully returns ``None``,
+    or modules with neither hook). A *declared* ``science_manifest``
+    callable that cannot execute -- missing ``load_science``, a loader
+    failure, or a manifest failure -- raises ``_VerifyFail``
+    (AUDIT_INCOMPLETE), never a silent ``None``.
+    """
+    has_manifest = callable(getattr(module, "science_manifest", None))
+    has_loader = callable(getattr(module, "load_science", None))
+    if not has_manifest:
         return None
-    return None
+    if not has_loader:
+        raise _VerifyFail(["AUDIT_INCOMPLETE: science_manifest declared but "
+                           "load_science missing; science unverified"])
+    try:
+        science = module.load_science()
+    except _VerifyFail:
+        raise
+    except Exception as error:
+        raise _VerifyFail([f"AUDIT_INCOMPLETE: load_science failed "
+                           f"({type(error).__name__}: {error})"]) from error
+    try:
+        return module.science_manifest(science)
+    except _VerifyFail:
+        raise
+    except Exception as error:
+        raise _VerifyFail([f"AUDIT_INCOMPLETE: science_manifest failed "
+                           f"({type(error).__name__}: {error})"]) from error
 
 
 def inventory(script: Any, config: Any = None, scope: str | None = None) -> list[dict]:
     """Fresh-build then list stable style targets (JSON-native, id-sorted)."""
     from figpact import style_identity as ident
+    fig = None
     _, _, fig, _, resolved = _fresh_build(Path(script), config, scope)
     try:
         return ident.inventory(fig, scope=resolved)
     finally:
-        try:
-            import matplotlib.pyplot as plt
-            plt.close(fig)
-        except Exception:
-            pass
+        if fig is not None:
+            try:
+                import matplotlib.pyplot as plt
+                plt.close(fig)
+            except Exception:
+                pass
 
 
 # ------------------------------------------------------------- validation
@@ -619,9 +659,13 @@ def _snapshots(fig: Any, reg: Any, manifest: Any,
                     "error": f"{type(error).__name__}: {error}"}
     try:
         measured = qa_mod.measure(fig)
-        records: list = list(measured.get("records") or [])
-    except Exception:
-        records = []
+    except Exception as error:
+        raise _VerifyFail([f"AUDIT_INCOMPLETE: qa.measure failed "
+                           f"({type(error).__name__}: {error})"]) from error
+    if not isinstance(measured, dict) or not isinstance(measured.get("records"), list):
+        raise _VerifyFail(["AUDIT_INCOMPLETE: qa.measure returned malformed "
+                           "records; audit unmeasured"])
+    records: list = list(measured.get("records"))
     return {"styles": styles, "shapes": shapes, "view": view,
             "science": captured,
             "qa_blocking": list(qa_mod.blocking_problems(fig)),
@@ -694,6 +738,7 @@ def _saved_state_records(script_p: Path, config_p: Path | None,
     """
     import matplotlib.pyplot as plt
     from figpact import style_identity as ident
+    fig = None
     try:
         module, _, fig, reg, resolved = _fresh_build(script_p, config_p, scope)
         try:
@@ -704,10 +749,11 @@ def _saved_state_records(script_p: Path, config_p: Path | None,
             from figpact import qa as qa_mod
             return list(qa_mod.measure(fig)["records"])
         finally:
-            try:
-                plt.close(fig)
-            except Exception:
-                pass
+            if fig is not None:
+                try:
+                    plt.close(fig)
+                except Exception:
+                    pass
     except Exception:
         return None
 
@@ -718,16 +764,18 @@ def _original_records(script_p: Path, config_p: Path | None, scope: str | None) 
     ``None`` on any problem: the draft gate fails closed.
     """
     import matplotlib.pyplot as plt
+    fig = None
     try:
         _module, _, fig, _reg, _resolved = _fresh_build(script_p, config_p, scope)
         try:
             from figpact import qa as qa_mod
             return list(qa_mod.measure(fig).get("records") or [])
         finally:
-            try:
-                plt.close(fig)
-            except Exception:
-                pass
+            if fig is not None:
+                try:
+                    plt.close(fig)
+                except Exception:
+                    pass
     except Exception:
         return None
 
@@ -952,10 +1000,10 @@ def _pair_run(script_p: Path, config_p: Path | None, scope: str | None,
     """
     import matplotlib.pyplot as plt
     from figpact import style_identity as ident
-    module, _, fig_base, reg_base, resolved = _fresh_build(script_p, config_p, scope)
-    manifest = _manifest_of(module)
+    module, _, fig_base, reg_base, resolved = _fresh_build_verified(script_p, config_p, scope)
     bundle: dict[str, Any] = {"scope": resolved, "module": module}
     try:
+        manifest = _manifest_of(module)
         if any(desc is None for _, _, desc in want):
             descs = {d["id"]: d for d in ident.inventory(fig_base, scope=resolved)}
         else:
@@ -989,7 +1037,8 @@ def _pair_run(script_p: Path, config_p: Path | None, scope: str | None,
             plt.close(fig_base)
         except Exception:
             pass
-    module2, _, fig_sty, reg_sty, resolved2 = _fresh_build(script_p, config_p, scope)
+    fig_sty = None
+    module2, _, fig_sty, reg_sty, resolved2 = _fresh_build_verified(script_p, config_p, scope)
     try:
         if resolved2 != resolved:
             raise _VerifyFail([f"SCOPE_MISMATCH: {resolved2!r} != {resolved!r}"])
@@ -1021,10 +1070,11 @@ def _pair_run(script_p: Path, config_p: Path | None, scope: str | None,
         bundle["fingerprint"] = _snapshot_fingerprint(before, after)
         return bundle
     finally:
-        try:
-            plt.close(fig_sty)
-        except Exception:
-            pass
+        if fig_sty is not None:
+            try:
+                plt.close(fig_sty)
+            except Exception:
+                pass
 
 
 def _refuse(problem: str, overlay_p: Path, protected: list) -> dict:
@@ -1077,24 +1127,28 @@ def _verify_clear(script_p: Path, config_p: Path | None, scope: str | None,
     """Verify clear-to-original: empty targets rebuild, no fake effect."""
     import matplotlib.pyplot as plt
     want_scope = prior["scope"] if scope is None else scope
+    b1 = None
     try:
-        m1, _, b1, r1, s1 = _fresh_build(script_p, config_p, want_scope)
+        m1, _, b1, r1, s1 = _fresh_build_verified(script_p, config_p, want_scope)
         man1 = _manifest_of(m1)
         snap1 = _snapshots(b1, r1, man1, {})
     finally:
-        try:
-            plt.close(b1)
-        except Exception:
-            pass
+        if b1 is not None:
+            try:
+                plt.close(b1)
+            except Exception:
+                pass
+    b2 = None
     try:
-        m2, _, b2, r2, s2 = _fresh_build(script_p, config_p, want_scope)
+        m2, _, b2, r2, s2 = _fresh_build_verified(script_p, config_p, want_scope)
         man2 = _manifest_of(m2)
         snap2 = _snapshots(b2, r2, man2, {})
     finally:
-        try:
-            plt.close(b2)
-        except Exception:
-            pass
+        if b2 is not None:
+            try:
+                plt.close(b2)
+            except Exception:
+                pass
     if s1 != want_scope or s2 != want_scope:
         raise _VerifyFail([f"SCOPE_MISMATCH: {s1!r}/{s2!r} != {want_scope!r}"])
     audit = _verify_pair(snap1, snap2, allowed_styles={}, required=[],
@@ -1509,8 +1563,9 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
         merged_want = [(item["target_id"], item["value"], None) for item in clean]
         no_change_request = False
     from figpact import style_identity as ident
+    probe_fig = None
     try:
-        probe_mod, _, probe_fig, _, probe_scope = _fresh_build(
+        probe_mod, _, probe_fig, _, probe_scope = _fresh_build_verified(
             script_p, config_p, scope)
         try:
             probe_descs = {d["id"]: d for d in ident.inventory(
@@ -1568,10 +1623,11 @@ def apply(script: Any, config: Any = None, scope: str | None = None, *,
                                        "already requested identity"])
                 seen_ident.add(key)
         finally:
-            try:
-                plt.close(probe_fig)
-            except Exception:
-                pass
+            if probe_fig is not None:
+                try:
+                    plt.close(probe_fig)
+                except Exception:
+                    pass
         if prior is not None and not merged_want:
             cleared = _verify_clear(script_p, config_p, scope, prior,
                                     overlay_p, protected0,
@@ -1753,7 +1809,8 @@ def _open_styled(script_p: Path, config_p: Path | None, scope: str,
     """
     import matplotlib.pyplot as plt
     from figpact import style_identity as ident
-    module, _, fig, reg, resolved = _fresh_build(script_p, config_p, scope)
+    fig = None
+    module, _, fig, reg, resolved = _fresh_build_verified(script_p, config_p, scope)
     try:
         manifest = _manifest_of(module)
         if resolved != scope:
@@ -1789,10 +1846,11 @@ def _open_styled(script_p: Path, config_p: Path | None, scope: str,
                                "from verified candidate"])
         return fig, reg
     except Exception:
-        try:
-            plt.close(fig)
-        except Exception:
-            pass
+        if fig is not None:
+            try:
+                plt.close(fig)
+            except Exception:
+                pass
         raise
 
 
@@ -1923,23 +1981,40 @@ def _load_internal(overlay_p: Path, *, workspace: bool) -> tuple:
     if not doc["targets"]:
         import matplotlib.pyplot as _plt
         try:
-            _m1, _, _f1, _g1, _s1 = _fresh_build(script_p, config_p, scope)
-            _n1 = _manifest_of(_m1)
-            _p1 = _snapshots(_f1, _g1, _n1, {})
-        finally:
+            _f1 = None
             try:
-                _plt.close(_f1)
-            except Exception:
-                pass
-        try:
-            _m2, _, _f2, _g2, _s2 = _fresh_build(script_p, config_p, scope)
-            _n2 = _manifest_of(_m2)
-            _p2 = _snapshots(_f2, _g2, _n2, {})
-        finally:
+                _m1, _, _f1, _g1, _s1 = _fresh_build_verified(script_p, config_p, scope)
+                _n1 = _manifest_of(_m1)
+                _p1 = _snapshots(_f1, _g1, _n1, {})
+            finally:
+                if _f1 is not None:
+                    try:
+                        _plt.close(_f1)
+                    except Exception:
+                        pass
+            _f2 = None
             try:
-                _plt.close(_f2)
-            except Exception:
-                pass
+                _m2, _, _f2, _g2, _s2 = _fresh_build_verified(script_p, config_p, scope)
+                _n2 = _manifest_of(_m2)
+                _p2 = _snapshots(_f2, _g2, _n2, {})
+            finally:
+                if _f2 is not None:
+                    try:
+                        _plt.close(_f2)
+                    except Exception:
+                        pass
+        except _VerifyFail as _empty_failure:
+            _fail = _build_receipt(
+                local_edit_state="ERROR",
+                local_problems=_empty_failure.problems,
+                source_commit_state="NOT_WRITTEN", figure_verification_state="ERROR",
+                figure_qa={"blocking": [], "glyph_floor": [], "pass": False},
+                qa_before={"blocking": [], "glyph_floor": [], "pass": False},
+                target_effects=[], science_unchanged=False,
+                science_notes=_empty_failure.problems,
+                audit_summary={}, overlay_path=str(overlay_p), draft=False,
+                drift=None, protected_sources=protected)
+            return None, None, _fail
         if _s1 != scope or _s2 != scope:
             _fail = _build_receipt(
                 local_edit_state="ERROR",

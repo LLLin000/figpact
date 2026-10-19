@@ -701,59 +701,72 @@ if ARGS.list_params:
     raise SystemExit(0)
 
 
-def _draw_spectra(science: dict):
-    global reg, artists_by_sample
-    fig, ax = plt.subplots(figsize=fs.canvas_mm(*CANVAS))
-    reg = GidRegistry()
-    ax.set_gid(_gid("panel"))
-    fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
-    ax.set_xlim(PPM_LEFT, PPM_RIGHT)
-    ref = _CFG["layout_reference"]["main"]
-    height_mm = ax.get_window_extent().height * 25.4 / fig.dpi
-    ax.set_ylim(ref["axis_bottom_data"], ref["axis_bottom_data"] + ref["units_per_mm"] * height_mm)
-    fig.canvas.draw()
-    artists_by_sample = {}
-    for idx, (rel, _, color, _, _, _, _, sid) in enumerate(SAMPLES_CONFIG):
-        ppm, spec, is_trunc, ref_solv_ppm = science[rel]
-        offset = idx * Y_OFFSET_STEP
-        mask = (ppm >= PPM_RIGHT) & (ppm <= PPM_LEFT)
-        line, = ax.plot(ppm[mask], spec[mask] + offset, color=color, lw=LINEWIDTH, zorder=2)
-        curve_gid = _gid("curve", sid)
-        line.set_gid(curve_gid)
-        reg.register(line, curve_gid, params=["line_width", "pitch_mm", "group_y_mm", "shifts_mm"])
-        artists_by_sample.setdefault(sid, []).append(line)
-        base = ax.axhline(offset, color="#E2E2E2", lw=0.45, ls="--", zorder=1)
-        base_gid = _gid("baseline", sid)
-        base.set_gid(base_gid)
-        reg.register(base, base_gid, params=["pitch_mm", "group_y_mm", "shifts_mm"])
-        _LAYOUT_GIDS.add(base_gid)
-        artists_by_sample.setdefault(sid, []).append(base)
-        if is_trunc:
-            brk = ax.text(ref_solv_ppm, offset + PEAK_MAX_NORM * 1.18 + 1.0, "//",
-                          fontsize=FONTSIZE_NOTE, color=fs.c("SOLVENT"),
-                          ha="center", va="bottom", weight="bold", zorder=5)
-            brk_gid = _gid("break", sid)
-            brk.set_gid(brk_gid)
-            reg.register(brk, brk_gid, params=["note_font_pt", "shifts_mm"])
-            artists_by_sample.setdefault(sid, []).append(brk)
-    entries = [(s[7], s[1].replace("\n", " "), s[2]) for s in reversed(SAMPLES_CONFIG)]
-    handles = [Line2D([], [], color=color, lw=1.2, solid_capstyle="round", label=label)
-               for _, label, color in entries]
-    legend = ax.legend(handles=handles, loc="upper right",
-                       bbox_to_anchor=(LEGEND_ANCHOR_X, 0.98),
-                       frameon=False, fontsize=FONTSIZE_LEGEND, ncol=LEGEND_COLS,
-                       columnspacing=0.3, handlelength=0.5, handletextpad=0.2,
-                       labelspacing=0.20, borderaxespad=0.15)
-    for (sid, _, _), text in zip(entries, legend.get_texts()):
-        text.set_color(fs.c("TEXT"))
-        if reg is not None:
-            # 图例里每行样品名也是**可见文字**，给它稳定身份（否则科学指纹只能按位置编号）。
+def _draw_spectra(science: dict, *, _owned: list | None = None):
+    fig = None
+    try:
+        fig, ax = plt.subplots(figsize=fs.canvas_mm(*CANVAS))
+        if _owned is not None:
+            _owned.append(fig)
+        reg = GidRegistry()
+        ax.set_gid(_gid("panel"))
+        fig.subplots_adjust(left=0.24, right=0.97, top=0.94, bottom=0.21)
+        ax.set_xlim(PPM_LEFT, PPM_RIGHT)
+        ref = _CFG["layout_reference"]["main"]
+        height_mm = ax.get_window_extent().height * 25.4 / fig.dpi
+        ax.set_ylim(ref["axis_bottom_data"], ref["axis_bottom_data"] + ref["units_per_mm"] * height_mm)
+        fig.canvas.draw()
+        artists_by_sample: dict = {}
+        for idx, (rel, _, color, _, _, _, _, sid) in enumerate(SAMPLES_CONFIG):
+            ppm, spec, is_trunc, ref_solv_ppm = science[rel]
+            offset = idx * Y_OFFSET_STEP
+            mask = (ppm >= PPM_RIGHT) & (ppm <= PPM_LEFT)
+            line, = ax.plot(ppm[mask], spec[mask] + offset, color=color, lw=LINEWIDTH, zorder=2)
+            curve_gid = _gid("curve", sid)
+            line.set_gid(curve_gid)
+            reg.register(line, curve_gid, params=["line_width", "pitch_mm", "group_y_mm", "shifts_mm"])
+            artists_by_sample.setdefault(sid, []).append(line)
+            base = ax.axhline(offset, color="#E2E2E2", lw=0.45, ls="--", zorder=1)
+            base_gid = _gid("baseline", sid)
+            base.set_gid(base_gid)
+            reg.register(base, base_gid, params=["pitch_mm", "group_y_mm", "shifts_mm"])
+            _LAYOUT_GIDS.add(base_gid)
+            artists_by_sample.setdefault(sid, []).append(base)
+            if is_trunc:
+                brk = ax.text(ref_solv_ppm, offset + PEAK_MAX_NORM * 1.18 + 1.0, "//",
+                              fontsize=FONTSIZE_NOTE, color=fs.c("SOLVENT"),
+                              ha="center", va="bottom", weight="bold", zorder=5)
+                brk_gid = _gid("break", sid)
+                brk.set_gid(brk_gid)
+                reg.register(brk, brk_gid, params=["note_font_pt", "shifts_mm"])
+                artists_by_sample.setdefault(sid, []).append(brk)
+        entries = [(s[7], s[1].replace("\n", " "), s[2]) for s in reversed(SAMPLES_CONFIG)]
+        handles = [Line2D([], [], color=color, lw=1.2, solid_capstyle="round", label=label)
+                   for _, label, color in entries]
+        legend = ax.legend(handles=handles, loc="upper right",
+                           bbox_to_anchor=(LEGEND_ANCHOR_X, 0.98),
+                           frameon=False, fontsize=FONTSIZE_LEGEND, ncol=LEGEND_COLS,
+                           columnspacing=0.3, handlelength=0.5, handletextpad=0.2,
+                           labelspacing=0.20, borderaxespad=0.15)
+        for (sid, _, _), text in zip(entries, legend.get_texts()):
+            text.set_color(fs.c("TEXT"))
             reg.register(text, _gid("legend.text", sid), params=["legend_font_pt"])
-    leg_gid = _gid("legend")
-    legend.set_gid(leg_gid)
-    legend.set_zorder(7)
-    reg.register(legend, leg_gid, params=["legend_font_pt", "legend_cols", "legend_anchor_x"])
-    return fig, ax
+        leg_gid = _gid("legend")
+        legend.set_gid(leg_gid)
+        legend.set_zorder(7)
+        reg.register(legend, leg_gid, params=["legend_font_pt", "legend_cols", "legend_anchor_x"])
+        return fig, ax, reg, artists_by_sample
+    except BaseException:
+        if fig is not None:
+            if _owned is not None:
+                try:
+                    _owned.remove(fig)
+                except ValueError:
+                    pass
+            try:
+                plt.close(fig)
+            except Exception:
+                pass
+        raise
 # —— 第二遍：两阶段确定性避让排布峰标注（阶段 A 有界确定性避让 + 阶段 B 人工偏移）——
 def _segment_hits_box_mm(p1: tuple[float, float], p2: tuple[float, float],
                          box: tuple[float, float, float, float]) -> bool:
@@ -794,6 +807,7 @@ def place_peak_labels(
     max_dx_mm: float,
     shifts_mm: dict[str, tuple[float, float]],
     artists_by_sample_dict: dict[str, list],
+    reg,
 ) -> tuple[list[dict], list[str]]:
     """有界确定性两阶段峰标注排布引擎：
     阶段 A：在 mm 显示空间下按固定优先级与候选点进行有界确定性自动避让。
@@ -1126,60 +1140,74 @@ def _detect_peak(science: dict, sample_idx: int, approx_ppm: float, win_search: 
     return float(ppm[j]), float(min(spec[j], PEAK_MAX_NORM * 1.15))
 
 
-def _build(science: dict, scope_target: str):
+def _build(science: dict, scope_target: str, *, _owned: list | None = None):
     """按 scope 建图。**legacy 与 native 共用这一份构建路径**（不存在第二套约定）。"""
     global PLACED_RECORDS, UNPLACED_GIDS
     if scope_target not in SCOPES:
         raise ValueError(f"未知 scope：{scope_target}")
-    fig, ax = _draw_spectra(science)
-    labels_by_sample = {}
-    for approx_ppm, sample_idx, group_name, _, _, auto_ppm, win_search in PEAK_LABELS_TEMPLATE:
-        exact_ppm, peak_y = _detect_peak(science, sample_idx, approx_ppm, win_search)
-        text = f"{group_name} {exact_ppm:.2f}" if (auto_ppm and SHOW_PPM) else group_name
-        sid = SAMPLES_CONFIG[sample_idx][7]
-        labels_by_sample.setdefault(sample_idx, []).append(
-            (exact_ppm, text, peak_y, _gid("peak", sid, _gid_tag(approx_ppm))))
-    PLACED_RECORDS, UNPLACED_GIDS = place_peak_labels(
-        ax, labels_by_sample, lanes=LABEL_LANES, min_gap_mm=LABEL_MIN_GAP_MM,
-        max_dx_mm=LABEL_MAX_DX_MM, shifts_mm=_requested_peak_shifts(PEAK_LABEL_SHIFTS),
-        artists_by_sample_dict=artists_by_sample,
-    )
-    ax.set_xlabel(r"Chemical Shift $\delta$ (ppm)", fontsize=FONTSIZE_AXIS,
-                  labelpad=3.5, weight="bold")
-    ax.set_ylabel("Normalized Intensity (a.u.)", fontsize=FONTSIZE_AXIS,
-                  labelpad=3.5, weight="bold")
-    ax.tick_params(length=2.5, width=0.6, labelsize=FONTSIZE_TICK, pad=2)
-    for _i, _tk in enumerate(ax.get_xticklabels()):
-        if not (_tk.get_text() or "").strip():
-            continue
-        _tk_gid = _gid("tick", str(_i))
-        _tk.set_gid(_tk_gid)
-        reg.register(_tk, _tk_gid, params=["tick_font_pt"])
-    for label, name in ((ax.xaxis.label, "xlabel"), (ax.yaxis.label, "ylabel")):
-        gid = _gid(name)
-        label.set_gid(gid)
-        reg.register(label, gid, params=["axis_font_pt"])
-    fs.strip_yticks(ax)
-    baselines = [reg.get(_gid("baseline", sid)) for sid in SAMPLE_IDS]
-    if ARGS.migrate_config:
-        _CFG["pitch_mm"]["main"] = {SAMPLE_IDS[i]: measure_relation("baseline_pitch", baselines[i-1], baselines[i])
-                                    for i in range(1, len(baselines))}
-    for i in range(1, len(baselines)):
-        move = [art for sid in SAMPLE_IDS[i:] for art in artists_by_sample[sid]]
-        set_relation_target(kind="baseline_pitch", object_a=baselines[i-1], object_b=baselines[i],
-                            target_mm=_CFG["pitch_mm"]["main"][SAMPLE_IDS[i]], move=move)
-    for sid, group in artists_by_sample.items():
-        for artist in group:
-            apply_display_shift(artist, SHIFTS_MM[SCOPE][sid])
-    group = [art for arts in artists_by_sample.values() for art in arts]
-    for art in group:
-        apply_display_shift(art, _CFG["group_y_mm"]["main"])
-    fig._figpact_relations = [
-        {"scope": "main", "kind": "baseline_pitch", "upper": SAMPLE_IDS[i],
-         "value_mm": measure_relation("baseline_pitch", baselines[i-1], baselines[i])}
-        for i in range(1, len(baselines))]
-    fig._figpact_space = [dict(scope="main", **v) for v in remaining_space(fig, group)]
-    return fig, reg
+    fig = None
+    try:
+        fig, ax, reg, artists_by_sample = _draw_spectra(science, _owned=_owned)
+        labels_by_sample = {}
+        for approx_ppm, sample_idx, group_name, _, _, auto_ppm, win_search in PEAK_LABELS_TEMPLATE:
+            exact_ppm, peak_y = _detect_peak(science, sample_idx, approx_ppm, win_search)
+            text = f"{group_name} {exact_ppm:.2f}" if (auto_ppm and SHOW_PPM) else group_name
+            sid = SAMPLES_CONFIG[sample_idx][7]
+            labels_by_sample.setdefault(sample_idx, []).append(
+                (exact_ppm, text, peak_y, _gid("peak", sid, _gid_tag(approx_ppm))))
+        PLACED_RECORDS, UNPLACED_GIDS = place_peak_labels(
+            ax, labels_by_sample, lanes=LABEL_LANES, min_gap_mm=LABEL_MIN_GAP_MM,
+            max_dx_mm=LABEL_MAX_DX_MM, shifts_mm=_requested_peak_shifts(PEAK_LABEL_SHIFTS),
+            artists_by_sample_dict=artists_by_sample, reg=reg,
+        )
+        ax.set_xlabel(r"Chemical Shift $\delta$ (ppm)", fontsize=FONTSIZE_AXIS,
+                      labelpad=3.5, weight="bold")
+        ax.set_ylabel("Normalized Intensity (a.u.)", fontsize=FONTSIZE_AXIS,
+                      labelpad=3.5, weight="bold")
+        ax.tick_params(length=2.5, width=0.6, labelsize=FONTSIZE_TICK, pad=2)
+        for _i, _tk in enumerate(ax.get_xticklabels()):
+            if not (_tk.get_text() or "").strip():
+                continue
+            _tk_gid = _gid("tick", str(_i))
+            _tk.set_gid(_tk_gid)
+            reg.register(_tk, _tk_gid, params=["tick_font_pt"])
+        for label, name in ((ax.xaxis.label, "xlabel"), (ax.yaxis.label, "ylabel")):
+            gid = _gid(name)
+            label.set_gid(gid)
+            reg.register(label, gid, params=["axis_font_pt"])
+        fs.strip_yticks(ax)
+        baselines = [reg.get(_gid("baseline", sid)) for sid in SAMPLE_IDS]
+        if ARGS.migrate_config:
+            _CFG["pitch_mm"]["main"] = {SAMPLE_IDS[i]: measure_relation("baseline_pitch", baselines[i-1], baselines[i])
+                                        for i in range(1, len(baselines))}
+        for i in range(1, len(baselines)):
+            move = [art for sid in SAMPLE_IDS[i:] for art in artists_by_sample[sid]]
+            set_relation_target(kind="baseline_pitch", object_a=baselines[i-1], object_b=baselines[i],
+                                target_mm=_CFG["pitch_mm"]["main"][SAMPLE_IDS[i]], move=move)
+        for sid, group in artists_by_sample.items():
+            for artist in group:
+                apply_display_shift(artist, SHIFTS_MM[SCOPE][sid])
+        group = [art for arts in artists_by_sample.values() for art in arts]
+        for art in group:
+            apply_display_shift(art, _CFG["group_y_mm"]["main"])
+        fig._figpact_relations = [
+            {"scope": "main", "kind": "baseline_pitch", "upper": SAMPLE_IDS[i],
+             "value_mm": measure_relation("baseline_pitch", baselines[i-1], baselines[i])}
+            for i in range(1, len(baselines))]
+        fig._figpact_space = [dict(scope="main", **v) for v in remaining_space(fig, group)]
+        return fig, reg
+    except BaseException:
+        if fig is not None:
+            if _owned is not None:
+                try:
+                    _owned.remove(fig)
+                except ValueError:
+                    pass
+            try:
+                plt.close(fig)
+            except Exception:
+                pass
+        raise
 
 
 def build_figure_and_registry(scope_target="main"):
@@ -1212,15 +1240,42 @@ _PEAK_TAGS = {sid: tuple(_gid_tag(p) for p, i, *_ in PEAK_LABELS_TEMPLATE
                          if SAMPLES_CONFIG[i][7] == sid)
               for sid in SAMPLE_IDS}
 #: 基线场景缓存：契约的节点/角色取自**真正建出来的一张图**，不另抄一份 gid 清单。
+#:
+#: 生命周期：`layout_contract` / `science_manifest` 的同一次调用里可复用（同一
+#: scope 只建一次）；调用结束时只关**本次调用新建**的 Figure 并清空引用，不碰
+#: 调用方手里的 Figure，绝不 `plt.close("all")`。基线构建失败（`_build` 中途抛
+#: 异常）时，已建出一半的 Figure 由 `_build` 自己关掉——调用方无需猜 ownership。
 _BASELINE_SCENES: dict[str, tuple] = {}
+_BASELINE_DEPTH = 0
+_BASELINE_OWNED: list = []
 
 
 def _baseline_scene(scope: str):
-    """该 scope 的基线 (Figure, GidRegistry)，按 scope 缓存、只建一次。"""
+    """该 scope 的基线 (Figure, GidRegistry)，同一次顶层调用内按 scope 缓存。"""
     if scope not in _BASELINE_SCENES:
         _apply_config(CONFIG)
-        _BASELINE_SCENES[scope] = _build(load_science(), scope)
+        _BASELINE_SCENES[scope] = _build(load_science(), scope, _owned=_BASELINE_OWNED)
     return _BASELINE_SCENES[scope]
+
+
+def _baseline_call(func, *args, **kwargs):
+    """顶层基线调用：嵌套复用基线，退出时只关本次新建的基线 Figure。"""
+    global _BASELINE_DEPTH
+    _BASELINE_DEPTH += 1
+    owned_before = len(_BASELINE_OWNED)
+    try:
+        return func(*args, **kwargs)
+    finally:
+        _BASELINE_DEPTH -= 1
+        if _BASELINE_DEPTH == 0:
+            while len(_BASELINE_OWNED) > owned_before:
+                _fig = _BASELINE_OWNED.pop()
+                try:
+                    plt.close(_fig)
+                except Exception:
+                    pass
+            for _key in [k for k in _BASELINE_SCENES]:
+                _BASELINE_SCENES.pop(_key, None)
 
 
 def _science_policy(gid: str) -> str:
@@ -1316,6 +1371,11 @@ def layout_contract(scope: str) -> dict:
     **实际会动的那些图元**（整层或上方所有层），不声明不存在的 gid。逐标注微调同样按
     「真的画出来的标注」声明：路径第三段是 `peak.<sid>.<tag>` 整串一段，值形是 `[dx, dy]`。
     """
+    return _baseline_call(_layout_contract_inner, scope)
+
+
+def _layout_contract_inner(scope: str) -> dict:
+    """内层：基线复用，生命周期由外层 `_baseline_call` 拥有。"""
     if scope not in SCOPES:
         raise ValueError(f"未知作用域 {scope!r}；可用：{list(SCOPES)}")
     fig, reg = _baseline_scene(scope)
@@ -1434,6 +1494,11 @@ def science_manifest(science: dict) -> dict:
     （谱线、标注文字、轴文字、图例、图像像素永不豁免），与 `_science_policy` 一致。
     峰锚点用与绘图同一个 `_detect_peak`，保证「引线指的」就是「声明的」。
     """
+    return _baseline_call(_science_manifest_inner, science)
+
+
+def _science_manifest_inner(science: dict) -> dict:
+    """内层：基线复用，生命周期由外层 `_baseline_call` 拥有。"""
     _apply_config(CONFIG)
     _baseline_scene(SCOPE)          # 纯布局图元的判定来自真实建出来的图
     anchors = {}
