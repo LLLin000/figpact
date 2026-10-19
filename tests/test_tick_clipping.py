@@ -37,13 +37,18 @@ class TickCleanTest(unittest.TestCase):
 
     def test_tiny_positive_clearance_no_block(self):
         fig, ax = plt.subplots(figsize=(4, 3), dpi=100)
-        fig.subplots_adjust(bottom=0.08)
         ax.plot([0, 1], [0, 1])
+        ax.set_xticks([0.5])
+        ax.set_xticklabels(['tick'])
+        fig.canvas.draw()
+        label = ax.xaxis.get_major_ticks()[0].label1
+        from matplotlib.transforms import Affine2D
+        bb = label.get_window_extent(fig.canvas.get_renderer())
+        label.set_transform(label.get_transform() + Affine2D().translate(0, fig.bbox.y0 + 0.39 - bb.y0))
         m = qa.measure(fig)
-        self.assertTrue(m.get("tick_geometry"))
-        # 0.39-like subpixel clearance must not block (diagnostic only)
-        small = [g for g in m["tick_geometry"] if 0 <= g["clearance_mm"] < 0.39]
-        self.assertTrue(small, m["tick_geometry"])
+        small = [g for g in m['tick_geometry'] if '+axis:x+' in g['key']]
+        self.assertEqual(len(small), 1)
+        self.assertAlmostEqual(small[0]['clearance_mm'], 0.39 * 25.4 / fig.dpi, places=7)
         self.assertEqual([r for r in m["records"] if r["rule"] == "TICK_CLIP"], [])
 
     def test_hidden_out_of_range_locator_not_drawn(self):
