@@ -215,6 +215,19 @@ G22 已将声明 manifest／QA 测量异常改为 `AUDIT_INCOMPLETE` 失败关�
 
 G23 已统一主／次刻度与 offset text 的真实画布裁切 QA：合法轴外位置和微小正净空不阻断，实际裁切与不可测量状态接入严格发布和结构化草稿门禁。真实 NMR、FTIR 拒绝与完整回归证据见 [G23 报告](docs/G23_REPORT.md)；未减少独立构图次数。
 
+### 自然语言 → 受控计划（G24，离线）
+
+```bash
+python -m figpact.edit_plan --script "examples/nmr/08 NMR.py" --config examples/nmr/nmr.yaml --scope main --overlay work/nmr-style.json --request "把主图峰标注设为 7.2 pt，其他内容不变"
+```
+
+默认同时发现 Native／Overlay 的真实契约，输出固定提示、JSON schema 和模型输入包；由外部模型生成 JSON 后，用同样参数加 `--response response.json` 试算。
+无 Native 契约的图使用 `--route overlay`。父目录须存在；不自动创建正式 Overlay。
+只读发现不生成候选；响应试算仅调用既有 Native `try_layout`／`render_preview` 或 Overlay `inspect_candidate`，返回精确绑定、影响对象及原始回执。
+拒绝未知控制、过期修订、非有限数值和跨路径的部分执行；保留科学／视图不变量。`preserve` 必须含字面值 `"science"` 和 `"view"`。
+**不自动提交、不写正式配置／Overlay、不授予源码修改权限，也没有新增 GUI 或模型服务依赖。** 当前 scope 由调用方选择，不宣称跨项目／全 scope 自动搜索。
+Native 候选受理不等于 `DRAFT_SAVED` 或 `STRICT_VERIFIED`；Overlay 的局部 PASS、整图 PASS 与工作草稿资格分别报告。盲测及接口限制见 [G24 报告](docs/G24_REPORT.md)。
+
 
 ## 测试
 

@@ -1,0 +1,10 @@
+{
+  "phase": "pre-inference contract audit; no model responses existed",
+  "frozen_cases_sha256": "660b080111875503761794d01975fb483bd175212be96ded5d0d964bbb188b5a",
+  "gold_unchanged": true,
+  "invalid_gold_cases": {
+    "R11-raw-overlay-multi": "READY gold is not supported by the real contract: shared upper raw Axes has no visible x tick target. Inventory contains x ticks only on processed Axes. The request also does not identify one of five raw curves, while gold incorrectly accepts any one curve.",
+    "R12-proc-overlay-multi": "Request says the processed curve but inventory has five separate processed curves. Gold incorrectly accepts any one curve without disambiguation and lacks a panel-specific selector. Do not credit this as exact-target accuracy."
+  },
+  "scoring": "Retain strict original 24-case score plus separately labelled 22-case valid-gold subset. Never change requests, gold, or retry model outputs after results. These two cases remain visible as benchmark defects, not silently removed successes."
+}

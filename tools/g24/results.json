@@ -1,0 +1,911 @@
+{
+  "stage": "G24",
+  "decision": "Offline implementation complete; do not claim first-pass reliability or connect GUI",
+  "original_first_round": {
+    "gold": {
+      "format": "g24-blind-v1",
+      "frozen_sha256": "660b080111875503761794d01975fb483bd175212be96ded5d0d964bbb188b5a",
+      "denominators": {
+        "cases": 24,
+        "ready_cases": 13,
+        "ready_binding_attempts": 17,
+        "ready_edits_by_route": {
+          "native": 10,
+          "overlay": 7
+        },
+        "refuse_cases": 8,
+        "refuse_by_category": {
+          "LOCKED_SCIENCE": 3,
+          "UNAUTHORIZED": 2,
+          "OUT_OF_RANGE": 2,
+          "SCOPE_MISMATCH": 1
+        },
+        "clarify_cases": 3,
+        "unauthorized_attempts": 2
+      }
+    },
+    "metrics": {
+      "target_location": {
+        "correct": 0,
+        "total": 17
+      },
+      "binding_and_value": {
+        "correct": 0,
+        "total": 17
+      },
+      "ready_plan": {
+        "correct": 0,
+        "total": 13
+      },
+      "first_candidate": {
+        "accepted": 0,
+        "total": 13
+      },
+      "negative_decision": {
+        "correct": 0,
+        "total": 11
+      },
+      "unauthorized_acceptance": {
+        "accepted": 0,
+        "negative_requests": 11,
+        "missing_trials": 0
+      }
+    },
+    "verdicts": [
+      {
+        "id": "R1-nmr-lift",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R2-nmr-shift",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R3-ftir-gap",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R4-ftir-shift",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R5-compare-gap",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R6-priv-nmr-peakfont",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R7-priv-nmr-linewidth",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R8-priv-ftir-labelfont",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R9-ftir-multi",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R10-main-overlay-multi",
+        "expected_status": "READY",
+        "expected_route": "overlay",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R11-raw-overlay-multi",
+        "expected_status": "READY",
+        "expected_route": "overlay",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R12-proc-overlay-multi",
+        "expected_status": "READY",
+        "expected_route": "overlay",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "R13-synth-curve",
+        "expected_status": "READY",
+        "expected_route": "overlay",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "F1-nmr-windows",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "F2-ftir-bands",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "F3-show-ppm",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "F4-synth-caps",
+        "expected_status": "REFUSE",
+        "expected_route": "overlay",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "F5-synth-legend",
+        "expected_status": "REFUSE",
+        "expected_route": "overlay",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "F6-nmr-huge-font",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "F7-raw-huge-tick",
+        "expected_status": "REFUSE",
+        "expected_route": "overlay",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "F8-wrong-panel",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "C1-no-number",
+        "expected_status": "CLARIFY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "C2-which-peak",
+        "expected_status": "CLARIFY",
+        "expected_route": "native",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      },
+      {
+        "id": "C3-which-axis",
+        "expected_status": "CLARIFY",
+        "expected_route": "overlay",
+        "predicted": "ERROR",
+        "route": null,
+        "route_ok": false,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "first output unusable: ValueError: science and view must be preserved"
+        ]
+      }
+    ],
+    "summary": {
+      "passed": 0,
+      "failed": 24,
+      "total": 24,
+      "candidate_accept_rate_on_ready": 0.0,
+      "publications": 0,
+      "note": "first outputs only; candidate acceptance is not publication or saved state"
+    }
+  },
+  "corrective_isolated_round": {
+    "gold": {
+      "format": "g24-blind-v1",
+      "frozen_sha256": "660b080111875503761794d01975fb483bd175212be96ded5d0d964bbb188b5a",
+      "denominators": {
+        "cases": 24,
+        "ready_cases": 13,
+        "ready_binding_attempts": 17,
+        "ready_edits_by_route": {
+          "native": 10,
+          "overlay": 7
+        },
+        "refuse_cases": 8,
+        "refuse_by_category": {
+          "LOCKED_SCIENCE": 3,
+          "UNAUTHORIZED": 2,
+          "OUT_OF_RANGE": 2,
+          "SCOPE_MISMATCH": 1
+        },
+        "clarify_cases": 3,
+        "unauthorized_attempts": 2
+      }
+    },
+    "metrics": {
+      "target_location": {
+        "correct": 14,
+        "total": 17
+      },
+      "binding_and_value": {
+        "correct": 14,
+        "total": 17
+      },
+      "ready_plan": {
+        "correct": 10,
+        "total": 13
+      },
+      "first_candidate": {
+        "accepted": 6,
+        "total": 13
+      },
+      "negative_decision": {
+        "correct": 10,
+        "total": 11
+      },
+      "unauthorized_acceptance": {
+        "accepted": 0,
+        "negative_requests": 11,
+        "missing_trials": 0
+      }
+    },
+    "verdicts": [
+      {
+        "id": "R1-nmr-lift",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "READY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": true,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "first-output READY accepted at candidate level (publication_verified=false: not whole QA)"
+        ]
+      },
+      {
+        "id": "R2-nmr-shift",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "READY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "engine trial refused the candidate; not accepted"
+        ]
+      },
+      {
+        "id": "R3-ftir-gap",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "READY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": true,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "first-output READY accepted at candidate level (publication_verified=false: not whole QA)"
+        ]
+      },
+      {
+        "id": "R4-ftir-shift",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "READY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": true,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "first-output READY accepted at candidate level (publication_verified=false: not whole QA)"
+        ]
+      },
+      {
+        "id": "R5-compare-gap",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "READY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "engine trial refused the candidate; not accepted"
+        ]
+      },
+      {
+        "id": "R6-priv-nmr-peakfont",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "READY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "engine trial refused the candidate; not accepted"
+        ]
+      },
+      {
+        "id": "R7-priv-nmr-linewidth",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "READY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": true,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "first-output READY accepted at candidate level (publication_verified=false: not whole QA)"
+        ]
+      },
+      {
+        "id": "R8-priv-ftir-labelfont",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "REFUSE",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "status 'REFUSE' != gold 'READY'"
+        ]
+      },
+      {
+        "id": "R9-ftir-multi",
+        "expected_status": "READY",
+        "expected_route": "native",
+        "predicted": "READY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": true,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "first-output READY accepted at candidate level (publication_verified=false: not whole QA)"
+        ]
+      },
+      {
+        "id": "R10-main-overlay-multi",
+        "expected_status": "READY",
+        "expected_route": "overlay",
+        "predicted": "READY",
+        "route": "overlay",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": true,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "first-output READY accepted at candidate level (publication_verified=false: not whole QA)"
+        ]
+      },
+      {
+        "id": "R11-raw-overlay-multi",
+        "expected_status": "READY",
+        "expected_route": "overlay",
+        "predicted": "REFUSE",
+        "route": "overlay",
+        "route_ok": true,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "status 'REFUSE' != gold 'READY'"
+        ]
+      },
+      {
+        "id": "R12-proc-overlay-multi",
+        "expected_status": "READY",
+        "expected_route": "overlay",
+        "predicted": "READY",
+        "route": "overlay",
+        "route_ok": true,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "edit count 6 != gold 2 (partial multi-edit plans fail)"
+        ]
+      },
+      {
+        "id": "R13-synth-curve",
+        "expected_status": "READY",
+        "expected_route": "overlay",
+        "predicted": "READY",
+        "route": "overlay",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "engine trial refused the candidate; not accepted"
+        ]
+      },
+      {
+        "id": "F1-nmr-windows",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "REFUSE",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct REFUSE on gold route"
+        ]
+      },
+      {
+        "id": "F2-ftir-bands",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "REFUSE",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct REFUSE on gold route"
+        ]
+      },
+      {
+        "id": "F3-show-ppm",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "REFUSE",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct REFUSE on gold route"
+        ]
+      },
+      {
+        "id": "F4-synth-caps",
+        "expected_status": "REFUSE",
+        "expected_route": "overlay",
+        "predicted": "REFUSE",
+        "route": "overlay",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct REFUSE on gold route"
+        ]
+      },
+      {
+        "id": "F5-synth-legend",
+        "expected_status": "REFUSE",
+        "expected_route": "overlay",
+        "predicted": "REFUSE",
+        "route": "overlay",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct REFUSE on gold route"
+        ]
+      },
+      {
+        "id": "F6-nmr-huge-font",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "REFUSE",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct REFUSE on gold route"
+        ]
+      },
+      {
+        "id": "F7-raw-huge-tick",
+        "expected_status": "REFUSE",
+        "expected_route": "overlay",
+        "predicted": "REFUSE",
+        "route": "overlay",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct REFUSE on gold route"
+        ]
+      },
+      {
+        "id": "F8-wrong-panel",
+        "expected_status": "REFUSE",
+        "expected_route": "native",
+        "predicted": "REFUSE",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct REFUSE on gold route"
+        ]
+      },
+      {
+        "id": "C1-no-number",
+        "expected_status": "CLARIFY",
+        "expected_route": "native",
+        "predicted": "CLARIFY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct CLARIFY on gold route"
+        ]
+      },
+      {
+        "id": "C2-which-peak",
+        "expected_status": "CLARIFY",
+        "expected_route": "native",
+        "predicted": "CLARIFY",
+        "route": "native",
+        "route_ok": true,
+        "binding_ok": true,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": true,
+        "details": [
+          "correct CLARIFY on gold route"
+        ]
+      },
+      {
+        "id": "C3-which-axis",
+        "expected_status": "CLARIFY",
+        "expected_route": "overlay",
+        "predicted": "REFUSE",
+        "route": "overlay",
+        "route_ok": true,
+        "binding_ok": false,
+        "candidate_accepted": false,
+        "publication_verified": false,
+        "pass": false,
+        "details": [
+          "status 'REFUSE' != gold 'CLARIFY'"
+        ]
+      }
+    ],
+    "summary": {
+      "passed": 16,
+      "failed": 8,
+      "total": 24,
+      "candidate_accept_rate_on_ready": 0.46153846153846156,
+      "publications": 0,
+      "note": "first outputs only; candidate acceptance is not publication or saved state"
+    }
+  },
+  "round_history": [
+    {
+      "round": 1,
+      "result": "0/24 accepted: invariant literal contract not explicit; all original outputs retained"
+    },
+    {
+      "round": 2,
+      "result": "10/24; cross-session renderer context drift blocks 11 cases; not an accuracy benchmark"
+    },
+    {
+      "round": 3,
+      "result": "completion collection expired; no response outcomes claimed"
+    },
+    {
+      "round": 4,
+      "result": "Responses first evaluated at copied overlay path and correctly rejected; same untouched responses then evaluated at original workspace with process isolation"
+    }
+  ],
+  "regression": {
+    "nonbrowser": {
+      "passed": 675,
+      "skipped": 7,
+      "subtests_passed": 107,
+      "seconds": 858.23
+    },
+    "chromium": {
+      "passed": 28,
+      "seconds": 323.64
+    },
+    "node": {
+      "passed": 54
+    },
+    "final_targeted": {
+      "passed": 10,
+      "subtests_passed": 12,
+      "seconds": 17.18
+    }
+  },
+  "held_out_cli": {
+    "request": "峰标注 7.2 pt + 宽度 68 mm + 高度不变",
+    "resolved_paths": [
+      [
+        "peak_font_pt"
+      ],
+      [
+        "canvas_w_mm"
+      ]
+    ],
+    "status": "OK",
+    "preview_qa_count": 0,
+    "saved": false,
+    "publication_verified": false,
+    "visible_png_inspected": true
+  },
+  "source_unchanged_trials": 24,
+  "official_overlays_unwritten_trials": 24,
+  "limitations": [
+    "scope selected by caller; cross-scope search not implemented",
+    "default model backend identity unavailable: cannot claim a named-model benchmark",
+    "two gold defects registered pre-inference; original24-case results primary",
+    "R8 live config has no label_font_pt control despite source-level declaration; retained as gold/context mismatch discovered after inference",
+    "binding metric matches declared path/role not independently verified every Artist or panel",
+    "R13 requested1.5pt already equals current and existing engine rejects unchanged required target",
+    "No strict publication performed; G23 publication results not rerun or re-certified"
+  ]
+}

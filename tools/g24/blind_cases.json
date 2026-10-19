@@ -1,0 +1,696 @@
+{
+  "cases": [
+    {
+      "category": "native-layout",
+      "expected": {
+        "edits": [
+          {
+            "kind": "native-path",
+            "path": [
+              "peak_label_lift_mm"
+            ],
+            "unit": "mm",
+            "value": 3.0
+          }
+        ],
+        "note": "EDITABLE geometry knob; current 2.5 mm, range 0-6 mm.",
+        "preserve": [
+          "nmr.assignments_unchanged",
+          "nmr.peak_ppm_guides",
+          "nmr.spectrum_arrays",
+          "nmr.view_windows",
+          "nmr.windows_unchanged",
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "READY"
+      },
+      "id": "R1-nmr-lift",
+      "lang": "zh",
+      "request": "把 NMR 主图里所有归属标签整体再上抬到 3.0 mm，峰位和积分窗口保持不动。",
+      "session": "fix_nmr_main"
+    },
+    {
+      "category": "native-layout",
+      "expected": {
+        "edits": [
+          {
+            "kind": "native-path",
+            "path": [
+              "peak_shifts_mm",
+              "main",
+              "7.26"
+            ],
+            "unit": "mm",
+            "value": 1.0
+          }
+        ],
+        "note": "Per-peak display shift; current 0.0 mm, range +/-6 mm.",
+        "preserve": [
+          "nmr.assignments_unchanged",
+          "nmr.peak_ppm_guides",
+          "nmr.spectrum_arrays",
+          "nmr.view_windows",
+          "nmr.windows_unchanged",
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "READY"
+      },
+      "id": "R2-nmr-shift",
+      "lang": "en",
+      "request": "Shift only the 7.26 ppm peakvala guides plus window plus label up by 1.0 mm in the NMR main scope; leave all other peaks untouched.",
+      "session": "fix_nmr_main"
+    },
+    {
+      "category": "native-layout",
+      "expected": {
+        "edits": [
+          {
+            "kind": "native-path",
+            "path": [
+              "curve_gap_mm"
+            ],
+            "unit": "mm",
+            "value": 2.0
+          }
+        ],
+        "note": "EDITABLE stack knob; current 1.5 mm, range 0-4 mm.",
+        "preserve": [
+          "ftir.band_windows",
+          "ftir.curve_arrays",
+          "ftir.stack_order",
+          "ftir.view_windows",
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "READY"
+      },
+      "id": "R3-ftir-gap",
+      "lang": "zh",
+      "request": "把 FTIR 主图三条曲线的堆叠台阶加大到 2.0 mm，带位窗口和曲线数据保持不动。",
+      "session": "fix_ftir_main"
+    },
+    {
+      "category": "native-layout",
+      "expected": {
+        "edits": [
+          {
+            "kind": "native-path",
+            "path": [
+              "shifts_mm",
+              "main",
+              "b"
+            ],
+            "unit": "mm",
+            "value": 1.0
+          }
+        ],
+        "note": "Per-curve display shift; current 0.0 mm, range +/-6 mm.",
+        "preserve": [
+          "ftir.band_windows",
+          "ftir.curve_arrays",
+          "ftir.stack_order",
+          "ftir.view_windows",
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "READY"
+      },
+      "id": "R4-ftir-shift",
+      "lang": "en",
+      "request": "Lift only FTIR curve b by 1.0 mm in the main scope; curves a and c stay where they are.",
+      "session": "fix_ftir_main"
+    },
+    {
+      "category": "native-layout",
+      "expected": {
+        "edits": [
+          {
+            "kind": "native-path",
+            "path": [
+              "compare_gap_mm"
+            ],
+            "unit": "mm",
+            "value": 11.0
+          }
+        ],
+        "note": "EDITABLE compare knob; current 10.0 mm, range 0-20 mm; moves the upper panel.",
+        "preserve": [
+          "ftir.curve_arrays",
+          "ftir.processing_chain",
+          "ftir.view_windows",
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "READY"
+      },
+      "id": "R5-compare-gap",
+      "lang": "zh",
+      "request": "把 FTIR 对照图上格（raw）与下格的间距调到 11.0 mm，两格各自的数据和处理链保持不动。",
+      "session": "fix_ftir_raw"
+    },
+    {
+      "category": "native-style-unique",
+      "expected": {
+        "edits": [
+          {
+            "kind": "native-path",
+            "path": [
+              "peak_font_pt"
+            ],
+            "unit": "pt",
+            "value": 7.0
+          }
+        ],
+        "note": "Private NMR declares peak_font_pt EDITABLE (fixtures pin it FIXED_STYLE); current 6.0 pt, range 3-12 pt. Prefer native over generic overlay styling.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "READY"
+      },
+      "id": "R6-priv-nmr-peakfont",
+      "lang": "zh",
+      "request": "把私有 NMR 主图的诊断峰标注字号设为 7.0 pt，只改字号，不改峰位文字与谱线数据。",
+      "session": "priv_nmr_main"
+    },
+    {
+      "category": "native-style-unique",
+      "expected": {
+        "edits": [
+          {
+            "kind": "native-path",
+            "path": [
+              "line_width"
+            ],
+            "unit": "pt",
+            "value": 1.0
+          }
+        ],
+        "note": "Private NMR declares line_width EDITABLE; current 0.75 pt, range 0.2-3 pt.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "READY"
+      },
+      "id": "R7-priv-nmr-linewidth",
+      "lang": "en",
+      "request": "Set the private NMR spectrum line width to 1.0 pt; do not touch calibration, normalization, or peak text.",
+      "session": "priv_nmr_main"
+    },
+    {
+      "category": "native-style-unique",
+      "expected": {
+        "edits": [
+          {
+            "kind": "native-path",
+            "path": [
+              "label_font_pt"
+            ],
+            "unit": "pt",
+            "value": 5.5
+          }
+        ],
+        "note": "Private FTIR declares label_font_pt EDITABLE; current 4.7 pt, range 3-12 pt.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "READY"
+      },
+      "id": "R8-priv-ftir-labelfont",
+      "lang": "zh",
+      "request": "把私有 FTIR 主图的官能团归属标签字号设为 5.5 pt，标签文字内容与谱线数据保持不动。",
+      "session": "priv_ftir_main"
+    },
+    {
+      "category": "native-multi",
+      "expected": {
+        "edits": [
+          {
+            "kind": "native-path",
+            "path": [
+              "band_label_lift_mm"
+            ],
+            "unit": "mm",
+            "value": 1.5
+          },
+          {
+            "kind": "native-path",
+            "path": [
+              "curve_gap_mm"
+            ],
+            "unit": "mm",
+            "value": 2.0
+          }
+        ],
+        "note": "Atomic same-route multi-edit: both knobs EDITABLE in main scope; currents 1.2/1.5 mm. Partial plans are failures.",
+        "preserve": [
+          "ftir.band_windows",
+          "ftir.curve_arrays",
+          "ftir.stack_order",
+          "ftir.view_windows",
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "READY"
+      },
+      "id": "R9-ftir-multi",
+      "lang": "zh",
+      "request": "把 FTIR 主图的堆叠台阶设为 2.0 mm，同时把带位标签上抬设为 1.5 mm，两个一起改，不要只改一个。",
+      "session": "fix_ftir_main"
+    },
+    {
+      "category": "overlay-multi",
+      "expected": {
+        "edits": [
+          {
+            "axis": "x",
+            "kind": "overlay-target",
+            "property": "fontsize",
+            "role": "axis.title",
+            "scope": "main",
+            "value": 10.0
+          },
+          {
+            "axis": "x",
+            "kind": "overlay-target",
+            "property": "fontsize",
+            "role": "axis.tick",
+            "scope": "main",
+            "value": 9.0
+          }
+        ],
+        "note": "Atomic same-route overlay multi-edit on the single-panel scope; overlay range 0.5-100 pt.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "overlay",
+        "status": "READY"
+      },
+      "id": "R10-main-overlay-multi",
+      "lang": "en",
+      "request": "On the private FTIR main panel set the x-axis title to 10 pt and the x-axis tick labels to 9 pt together; keep all data and band windows unchanged.",
+      "session": "priv_ftir_main"
+    },
+    {
+      "category": "overlay-multi",
+      "expected": {
+        "edits": [
+          {
+            "axis": "x",
+            "kind": "overlay-target",
+            "property": "fontsize",
+            "role": "axis.tick",
+            "scope": "compare_raw",
+            "value": 9.0
+          },
+          {
+            "kind": "overlay-target",
+            "property": "linewidth",
+            "role": "curve.linewidth",
+            "scope": "compare_raw",
+            "value": 1.2
+          }
+        ],
+        "note": "Upper-panel shared-axes styling; any connected data curve in compare_raw scope is accepted (no gid pinned).",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "overlay",
+        "status": "READY"
+      },
+      "id": "R11-raw-overlay-multi",
+      "lang": "zh",
+      "request": "把私有 FTIR 对照图上格（raw）的横轴刻度设为 9 pt，同时把上格谱线线宽设为 1.2 pt，下格（processed）不要动。",
+      "session": "priv_ftir_raw"
+    },
+    {
+      "category": "overlay-multi",
+      "expected": {
+        "edits": [
+          {
+            "axis": "y",
+            "kind": "overlay-target",
+            "property": "fontsize",
+            "role": "axis.title",
+            "scope": "compare_processed",
+            "value": 10.0
+          },
+          {
+            "kind": "overlay-target",
+            "property": "linewidth",
+            "role": "curve.linewidth",
+            "scope": "compare_processed",
+            "value": 1.2
+          }
+        ],
+        "note": "Lower-panel shared-axes styling; any connected data curve in compare_processed scope is accepted.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "overlay",
+        "status": "READY"
+      },
+      "id": "R12-proc-overlay-multi",
+      "lang": "en",
+      "request": "On the private FTIR lower panel (processed) set the y-axis title to 10 pt and the processed curve width to 1.2 pt; leave the raw panel alone.",
+      "session": "priv_ftir_proc"
+    },
+    {
+      "category": "overlay-linewidth",
+      "expected": {
+        "edits": [
+          {
+            "kind": "overlay-target",
+            "property": "linewidth",
+            "role": "curve.linewidth",
+            "scope": "main",
+            "selector_gid": "fig_synth_errlegend.main.curve.a",
+            "value": 1.5
+          }
+        ],
+        "note": "Overlay-only session (no native contract); single connected data line; errorbar caps and legend are not targets.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "overlay",
+        "status": "READY"
+      },
+      "id": "R13-synth-curve",
+      "lang": "en",
+      "request": "Set the data line width to 1.5 pt on the synthetic errorbar figure; do not touch caps, legend, labels, or data.",
+      "session": "synth_errlegend"
+    },
+    {
+      "category": "sci-locked",
+      "expected": {
+        "edits": [],
+        "note": "peak_windows_ppm is LOCKED_SCIENCE: integration windows answer what the figure claims.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": "LOCKED_SCIENCE",
+        "route": "native",
+        "status": "REFUSE"
+      },
+      "id": "F1-nmr-windows",
+      "lang": "zh",
+      "request": "把 NMR 主图 7.26 ppm 的积分窗口改窄一点，左右各收 0.02 ppm。",
+      "session": "fix_nmr_main"
+    },
+    {
+      "category": "sci-locked",
+      "expected": {
+        "edits": [],
+        "note": "band_limits_cm1 is LOCKED_SCIENCE: band windows are protected display windows.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": "LOCKED_SCIENCE",
+        "route": "native",
+        "status": "REFUSE"
+      },
+      "id": "F2-ftir-bands",
+      "lang": "en",
+      "request": "Move the FTIR O-H band window to 3300-3600 cm-1 and relabel it accordingly.",
+      "session": "fix_ftir_main"
+    },
+    {
+      "category": "sci-locked",
+      "expected": {
+        "edits": [],
+        "note": "show_ppm toggles chemical-shift text content: LOCKED_SCIENCE, never a style knob.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": "LOCKED_SCIENCE",
+        "route": "native",
+        "status": "REFUSE"
+      },
+      "id": "F3-show-ppm",
+      "lang": "zh",
+      "request": "把私有 NMR 图的标注里的 ppm 数字后缀全部关掉，只留基团名。",
+      "session": "priv_nmr_main"
+    },
+    {
+      "category": "unauthorized",
+      "expected": {
+        "edits": [],
+        "note": "Errorbar caps are never overlay targets (style_identity excludes caps); no authorized control exists.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": "UNAUTHORIZED",
+        "route": "overlay",
+        "status": "REFUSE"
+      },
+      "id": "F4-synth-caps",
+      "lang": "en",
+      "request": "Make the errorbar caps on the synthetic figure thicker, 2.0 pt.",
+      "session": "synth_errlegend"
+    },
+    {
+      "category": "unauthorized",
+      "expected": {
+        "edits": [],
+        "note": "Legend bodies/handles/texts are never overlay targets; no authorized control exists.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": "UNAUTHORIZED",
+        "route": "overlay",
+        "status": "REFUSE"
+      },
+      "id": "F5-synth-legend",
+      "lang": "zh",
+      "request": "把合成图的图例文字放大到 9 pt。",
+      "session": "synth_errlegend"
+    },
+    {
+      "category": "out-of-range",
+      "expected": {
+        "edits": [],
+        "note": "50 pt is outside native 3-12 pt; REFUSE is the valid model behavior, not a miss.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": "OUT_OF_RANGE",
+        "route": "native",
+        "status": "REFUSE"
+      },
+      "id": "F6-nmr-huge-font",
+      "lang": "zh",
+      "request": "把私有 NMR 主图的诊断峰标注字号设为 50 pt。",
+      "session": "priv_nmr_main"
+    },
+    {
+      "category": "out-of-range",
+      "expected": {
+        "edits": [],
+        "note": "500 pt is outside overlay 0.5-100 pt; REFUSE is the valid model behavior.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": "OUT_OF_RANGE",
+        "route": "overlay",
+        "status": "REFUSE"
+      },
+      "id": "F7-raw-huge-tick",
+      "lang": "en",
+      "request": "Set the private FTIR upper-panel (raw) x tick labels to 500 pt.",
+      "session": "priv_ftir_raw"
+    },
+    {
+      "category": "scope-mismatch",
+      "expected": {
+        "edits": [],
+        "note": "Upper-panel objects live in compare_raw scope, unreachable from a compare_processed session; REFUSE, do not cross scopes.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": "SCOPE_MISMATCH",
+        "route": "native",
+        "status": "REFUSE"
+      },
+      "id": "F8-wrong-panel",
+      "lang": "zh",
+      "request": "在下格（processed）会话里，把上格（raw）那条曲线的位移调到 1.0 mm。",
+      "session": "fix_ftir_proc"
+    },
+    {
+      "category": "clarify-missing",
+      "expected": {
+        "edits": [],
+        "note": "No numeric value anywhere in the authorized range; READY requires an explicit number.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "CLARIFY"
+      },
+      "id": "C1-no-number",
+      "lang": "zh",
+      "request": "把私有 FTIR 主图的归属标签字号调大一点，看着清楚就行。",
+      "session": "priv_ftir_main"
+    },
+    {
+      "category": "clarify-missing",
+      "expected": {
+        "edits": [],
+        "note": "Neither the peak identity nor a value is specified; multiple peaks could move.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "native",
+        "status": "CLARIFY"
+      },
+      "id": "C2-which-peak",
+      "lang": "en",
+      "request": "Nudge the overlapping NMR peak label away a little in the main scope.",
+      "session": "fix_nmr_main"
+    },
+    {
+      "category": "clarify-missing",
+      "expected": {
+        "edits": [],
+        "note": "Axis (x vs y) and panel target unspecified; tick targets are per-axis.",
+        "preserve": [
+          "science",
+          "view"
+        ],
+        "reject_category": null,
+        "route": "overlay",
+        "status": "CLARIFY"
+      },
+      "id": "C3-which-axis",
+      "lang": "en",
+      "request": "Make the tick labels bigger on the private FTIR upper panel.",
+      "session": "priv_ftir_raw"
+    }
+  ],
+  "format": "g24-blind-v1",
+  "frozen_sha256": "660b080111875503761794d01975fb483bd175212be96ded5d0d964bbb188b5a",
+  "sessions": {
+    "fix_ftir_main": {
+      "config": "tests/fixtures/native_ftir.yaml",
+      "routes": [
+        "native",
+        "overlay"
+      ],
+      "scope": "main",
+      "script": "tests/fixtures/native_ftir.py"
+    },
+    "fix_ftir_proc": {
+      "config": "tests/fixtures/native_ftir.yaml",
+      "routes": [
+        "native",
+        "overlay"
+      ],
+      "scope": "compare_processed",
+      "script": "tests/fixtures/native_ftir.py"
+    },
+    "fix_ftir_raw": {
+      "config": "tests/fixtures/native_ftir.yaml",
+      "routes": [
+        "native",
+        "overlay"
+      ],
+      "scope": "compare_raw",
+      "script": "tests/fixtures/native_ftir.py"
+    },
+    "fix_nmr_main": {
+      "config": "tests/fixtures/native_nmr.yaml",
+      "routes": [
+        "native",
+        "overlay"
+      ],
+      "scope": "main",
+      "script": "tests/fixtures/native_nmr.py"
+    },
+    "priv_ftir_main": {
+      "config": "${FTIR_ROOT}/ftir.yaml",
+      "routes": [
+        "native",
+        "overlay"
+      ],
+      "scope": "main",
+      "script": "${FTIR_ROOT}/plot_ftir.py"
+    },
+    "priv_ftir_proc": {
+      "config": "${FTIR_ROOT}/ftir.yaml",
+      "routes": [
+        "native",
+        "overlay"
+      ],
+      "scope": "compare_processed",
+      "script": "${FTIR_ROOT}/plot_ftir.py"
+    },
+    "priv_ftir_raw": {
+      "config": "${FTIR_ROOT}/ftir.yaml",
+      "routes": [
+        "native",
+        "overlay"
+      ],
+      "scope": "compare_raw",
+      "script": "${FTIR_ROOT}/plot_ftir.py"
+    },
+    "priv_nmr_main": {
+      "config": "${NMR_ROOT}/nmr.yaml",
+      "routes": [
+        "native",
+        "overlay"
+      ],
+      "scope": "main",
+      "script": "${NMR_ROOT}/08 NMR.py"
+    },
+    "synth_errlegend": {
+      "config": null,
+      "routes": [
+        "overlay"
+      ],
+      "scope": "main",
+      "script": "tools/g24/fixtures.py"
+    }
+  }
+}
