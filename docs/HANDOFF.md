@@ -32,7 +32,24 @@ figpact handoff verify --manifest fig2.manifest.json --base <fig2> \
 
 面板身份要求**唯一匹配**：`asset` 的完整相对路径（反斜杠归一）与可选的 `layout_panel_id` 都必须对上；预期面板缺失、重复或歧义（同名 basename 在别的目录也算）直接 FAIL，不会因为其他面板仍匹配就 PASS。报告里带 `expected_panels` 与 `matched_panels` 计数。
 
-## 真实 fig2 结果
+## 反向拟合：Tavotto 占位 → figpact 候选
+
+`figpact fit-layout` 读取 Tavotto 面板的 `w/h`，在**已有授权 Native 控制**里搜索字号/图例候选，并用现有引擎真实 preview 验证；不保存、不改源文件。
+
+```bash
+figpact fit-layout --script examples/ftir/plot_ftir.py \
+  --config examples/ftir/ftir.yaml --scope annotated \
+  --layout <fig2>/tavottofile/新版面-A.json --canvas "新版面 A（180 版心）" \
+  --panel Fig2_FTIR_transmittance_stacked_annotated --min-font-pt 5
+```
+
+返回 `FEASIBLE`（含 `selected.edits` 与每个候选的 `new_qa`）、`ALREADY_OK` 或 `INFEASIBLE`。可行候选只提高低于下限的字号；字号已够时不做无意义改动。失败时给 `estimate_width_for_floor_mm`，但明确标注它只在允许等比放大整图时成立，1:1 契约下不能靠放大占位提高源字号。
+
+真实 FTIR（repo 版，48mm）：`label_font_pt`/`legend_font_pt` 4.7→5.0 的候选 `RENDER_CHECKED`、`new_qa=[]`，可直接拿去 Inspector Native 复查并确认保存。NMR 在 5pt 下限下 `ALREADY_OK`。
+
+前提：脚本必须暴露 figpact 既有 `build_figure_and_registry` 契约。项目里的旧版 `08 NMR.py`/`plot_ftir.py` 还没有这个入口，`fit-layout` 会拒绝；需要先迁移到 repo 版契约，或继续手工 Native。不要为旧脚本临时写旁路。
+
+
 
 三张矢量图的 PDF 页面都是 **48.000 × 48.000 mm**。
 

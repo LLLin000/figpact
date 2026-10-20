@@ -982,6 +982,37 @@ def cmd_handoff(args) -> int:
         return 2
 
 
+def cmd_fit_layout(args) -> int:
+    """Tavotto panel mm -> authorized Native edits, proven by real previews."""
+    from .layout_fit import fit, read_target
+    from .native_parameters import NativeParameterSession
+
+    try:
+        target = None
+        if args.target_mm:
+            parts = str(args.target_mm).lower().replace("×", "x").split("x")
+            if len(parts) != 2:
+                raise ValueError("--target-mm 格式为 48x48")
+            target = (float(parts[0]), float(parts[1]))
+        width, height, panel = read_target(
+            Path(args.layout) if args.layout else None, panel=args.panel,
+            canvas=args.canvas, target_mm=target)
+        session = NativeParameterSession(args.script, args.config, args.scope or "main")
+        try:
+            result = fit(session, target_w_mm=width, min_font_pt=args.min_font_pt,
+                         max_candidates=args.max_candidates)
+        finally:
+            session.close()
+        result["target_height_mm"] = height
+        result["panel"] = panel
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result.get("status") in ("FEASIBLE", "ALREADY_OK") else 1
+    except (ValueError, OSError, RuntimeError) as error:
+        print(json.dumps({"status": "REFUSED", "message": str(error)},
+                         ensure_ascii=False, indent=2))
+        return 2
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     """命令行主入口。"""
     if argv is None:
@@ -1061,6 +1092,18 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_hs.add_argument("--out", required=True, help="输出 manifest JSON")
     p_hs.add_argument("--canvas", default=None, help="布局 canvas 的 id 或 name")
     p_hs.add_argument("--min-font-pt", type=float, default=None, help="可选：有效字号下限（需 manifest 提供 font_roles）")
+
+    # fit-layout: Tavotto 面板尺寸 -> 授权 Native 候选（真实 preview，不保存）
+    p_fit = subparsers.add_parser("fit-layout", help="按 Tavotto 面板尺寸搜索可行的 Native 字号/图例候选")
+    p_fit.add_argument("--script", required=True)
+    p_fit.add_argument("--config", required=True)
+    p_fit.add_argument("--scope", default="main")
+    p_fit.add_argument("--layout", default=None, help=".tavotto 布局（只读）")
+    p_fit.add_argument("--canvas", default=None)
+    p_fit.add_argument("--panel", default=None, help="面板 id、fileId 或 stem；必须唯一")
+    p_fit.add_argument("--target-mm", default=None, help="显式目标 WxH；与 --layout 二选一")
+    p_fit.add_argument("--min-font-pt", type=float, default=5.0, dest="min_font_pt")
+    p_fit.add_argument("--max-candidates", type=int, default=12, dest="max_candidates")
 
     # ui --script <py> [--config <yaml>] (thin wrapper)
     p_ui = subparsers.add_parser("ui", help="启动 Inspector（薄封装，服务仍由 inspector_server 提供）")
@@ -1203,6 +1246,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             return cmd_plate_receipt(args)
     elif args.subcommand == "handoff":
         return cmd_handoff(args)
+    elif args.subcommand == "fit-layout":
+        return cmd_fit_layout(args)
     elif args.subcommand == "ui":
         return cmd_ui(args)
     elif args.subcommand == "agent":
