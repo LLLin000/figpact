@@ -141,7 +141,7 @@
             </div>
             <div class="input-group">
               <label for="style-value">字号/线宽</label>
-              <input id="style-value" type="number" step="0.5" min="1" max="72" aria-label="字号或线宽（pt）">
+              <input id="style-value" type="number" step="any" aria-label="字号或线宽（pt）">
               <span class="unit">pt</span>
             </div>
             <button id="style-preview" type="button">预览样式</button>
@@ -156,11 +156,56 @@
               <button id="style-cancel" type="button">取消</button>
             </div>
           </div>
+          <p id="style-view-row" class="hint" hidden><label><input id="style-view-original" type="checkbox"> 对比原始已保存图（勾选看原始，取消看预览；预览仍在，需确认/取消）</label></p>
           <details class="technical-details" id="style-timing-wrap" hidden>
             <summary>验证耗时</summary>
             <dl id="style-timings" class="eval-results"></dl>
           </details>
           <p id="style-notice" class="notice notice-warning" hidden></p>
+          <section id="language-section" aria-label="用文字改样式">
+            <div class="section-header">
+              <h3>用文字改样式</h3>
+              <span id="language-status" class="tag" role="status" aria-live="polite">未检查</span>
+            </div>
+            <p class="hint">先在图中点选对象，再用一句话说改动（如“改为9pt”）。只改选中的那一个目标，绝不猜测。</p>
+            <p id="language-target" class="hint" role="status" aria-live="polite">尚未选中对象。</p>
+            <div class="intent-inputs">
+              <div class="input-group language-request-group">
+                <label for="language-request">改动描述</label>
+                <input id="language-request" type="text" placeholder="例如：改为9pt" aria-describedby="language-target">
+              </div>
+              <button id="language-send" type="button">用文字改样式</button>
+            </div>
+            <p id="language-plan" class="hint language-plan" role="status" aria-live="polite" hidden></p>
+            <p id="language-notice" class="notice notice-warning" hidden></p>
+          </section>
+        </section>
+        <section id="native-section" aria-label="参数微调" hidden>
+          <div class="section-header">
+            <h3>参数微调</h3>
+            <span id="native-status" class="tag" role="status" aria-live="polite">未加载</span>
+          </div>
+          <p class="hint">只改下方列出的真实可调参数。预览不写盘，确认后才保存。</p>
+          <div id="native-controls"></div>
+          <div class="intent-inputs">
+            <div class="input-group">
+              <label for="native-kind">保存方式</label>
+              <select id="native-kind" aria-label="保存方式">
+                <option value="publication">正式保存（严格校验）</option>
+                <option value="draft">保存工作草稿</option>
+              </select>
+            </div>
+            <button id="native-preview" type="button">预览参数</button>
+          </div>
+          <div id="native-pending" hidden>
+            <p id="native-pending-text" class="hint"></p>
+            <div class="intent-actions">
+              <button id="native-confirm" type="button">确认保存</button>
+              <button id="native-cancel" type="button">取消</button>
+            </div>
+          </div>
+          <p id="native-receipt" class="hint" role="status" aria-live="polite" hidden></p>
+          <p id="native-notice" class="notice notice-warning" hidden></p>
         </section>
       </aside>
     </main>

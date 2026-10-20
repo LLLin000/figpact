@@ -897,6 +897,12 @@ def cmd_ui(args: argparse.Namespace) -> int:
         argv += ["--dpi", str(args.dpi)]
     if getattr(args, "overlay", None):
         argv += ["--overlay", str(args.overlay)]
+    if getattr(args, 'native', False):
+        argv += ['--native']
+    if getattr(args, 'browser', False):
+        argv += ['--browser']
+    if not getattr(args, 'script', None):
+        argv += ['--example', getattr(args, 'example', 'curve')]
     return int(run_inspector(argv) or 0)
 
 
@@ -936,6 +942,44 @@ def cmd_overlay(args) -> int:
         print(json.dumps({"status": "REFUSED", "local_edit_state": "ERROR",
                           "message": str(error)}, ensure_ascii=False, indent=2))
         return 1
+
+
+def cmd_handoff(args) -> int:
+    """figpact ↔ Tavotto handoff: real PDF page + real panel scale evidence."""
+    from . import handoff
+
+    base = Path(args.base).expanduser().resolve() if args.base else None
+    try:
+        if args.handoff_cmd == "scan":
+            layout_path = Path(args.layout).expanduser().resolve()
+            data = handoff.scan_layout(layout_path, base=base, canvas=args.canvas,
+                                       min_effective_font_pt=args.min_font_pt)
+            out = Path(args.out).expanduser().resolve()
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            manifest_path, manifest_base = out, base
+        elif args.handoff_cmd == "build":
+            spec_path = Path(args.spec).expanduser().resolve()
+            spec = handoff.load_json(spec_path)
+            root = base or spec_path.parent
+            data = handoff.build(spec, base=root)
+            out = Path(args.out).expanduser().resolve()
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            manifest_path, manifest_base = out, root
+        else:
+            manifest_path = Path(args.manifest).expanduser().resolve()
+            data = handoff.load_json(manifest_path)
+            manifest_base = base or manifest_path.parent
+        layout = Path(args.layout).expanduser().resolve() if args.layout else None
+        report = handoff.verify(data, base=manifest_base, layout=layout, canvas=args.canvas)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0 if report["status"] == "PASS" else 1
+    except handoff.HandoffError as error:
+        print(json.dumps({"schema": "figpact-tavotto-handoff-report/1",
+                          "status": "REFUSED", "message": str(error)},
+                         ensure_ascii=False, indent=2))
+        return 2
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -997,6 +1041,27 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_ap.add_argument("--config", default=None, help="配置文件 YAML 路径")
     p_ap.add_argument("--output", default=None, help="输出 Markdown 报告路径")
 
+    # handoff: figpact ↔ Tavotto size/identity manifest (verification only)
+    p_hand = subparsers.add_parser("handoff", help="figpact ↔ Tavotto 尺寸/身份交接（只读验证，不改布局）")
+    hand_sub = p_hand.add_subparsers(dest="handoff_cmd", required=True)
+    p_hb = hand_sub.add_parser("build", help="按 spec 生成交接清单（哈希、PDF 页面、有效字号）")
+    p_hb.add_argument("--spec", required=True, help="figpact-tavotto-handoff/1 输入 spec")
+    p_hb.add_argument("--out", required=True, help="输出 manifest JSON")
+    p_hb.add_argument("--base", default=None, help="相对路径的根（默认 spec 所在目录）")
+    p_hb.add_argument("--layout", default=None, help="可选：同时核对 .tavotto 布局")
+    p_hb.add_argument("--canvas", default=None, help="布局 canvas 的 id 或 name")
+    p_hv = hand_sub.add_parser("verify", help="重新测量 PDF 页面、来源哈希与布局缩放")
+    p_hv.add_argument("--manifest", required=True, help="交接清单 JSON")
+    p_hv.add_argument("--base", default=None, help="相对路径的根（默认 manifest 所在目录）")
+    p_hv.add_argument("--layout", default=None, help="可选：.tavotto 布局（只读）")
+    p_hv.add_argument("--canvas", default=None, help="布局 canvas 的 id 或 name")
+    p_hs = hand_sub.add_parser("scan", help="直接从 Tavotto 画布生成契约：素材原生页面=目标尺寸，1:1 放置")
+    p_hs.add_argument("--layout", required=True, help=".tavotto 布局 JSON（只读）")
+    p_hs.add_argument("--base", required=True, help="素材与脚本所在的图库根")
+    p_hs.add_argument("--out", required=True, help="输出 manifest JSON")
+    p_hs.add_argument("--canvas", default=None, help="布局 canvas 的 id 或 name")
+    p_hs.add_argument("--min-font-pt", type=float, default=None, help="可选：有效字号下限（需 manifest 提供 font_roles）")
+
     # ui --script <py> [--config <yaml>] (thin wrapper)
     p_ui = subparsers.add_parser("ui", help="启动 Inspector（薄封装，服务仍由 inspector_server 提供）")
     p_ui.add_argument("--script", default=None, help="可信本地绘图脚本")
@@ -1005,6 +1070,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_ui.add_argument("--port", type=int, default=0, help="端口")
     p_ui.add_argument("--dpi", type=int, default=600, choices=(120, 240, 600), help="显示分辨率")
     p_ui.add_argument("--overlay", default=None, help="启动时固定的 Style Overlay 路径")
+    p_ui.add_argument('--native', action='store_true', help='授权 Native YAML 参数编辑（不能与 --overlay 混用）')
+    p_ui.add_argument('--browser', action='store_true', help='启动后打开浏览器')
+    p_ui.add_argument('--example', choices=('curve', 'plain', 'nmr', 'ftir'), default='curve',
+                      help='未指定脚本时打开内置曲线演示')
 
     # agent --script <py> --config <yaml> --scope <name> [--output-dir <dir>]
     p_agent = subparsers.add_parser("agent", help="本机持久 JSON-RPC 会话：snapshot/inspect/try_layout/render_preview/commit")
@@ -1132,6 +1201,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             return cmd_plate_unify(args)
         elif args.plate_cmd == "receipt":
             return cmd_plate_receipt(args)
+    elif args.subcommand == "handoff":
+        return cmd_handoff(args)
     elif args.subcommand == "ui":
         return cmd_ui(args)
     elif args.subcommand == "agent":

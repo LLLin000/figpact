@@ -549,7 +549,76 @@
     return (Array.isArray(list) ? list : []).filter(item => item && item.id !== id);
   }
   function pendingSaveCount(list) { return Array.isArray(list) ? list.length : 0; }
-
+  // v0.1 自然语言改样式：只认服务端注册的 exact scene_ids；绝不猜测、绝不回退首个目标。
+  // 返回命中当前选中 Scene 节点的目标子集（0 个 → 请重选；多个 → 请用户先定下拉；恰 1 个 → 可发）。
+  function styleExactTargetsForScene(targets, nodeId) {
+    if (!nodeId || !Array.isArray(targets)) return [];
+    return targets.filter(t => t && Array.isArray(t.scene_ids) && t.scene_ids.includes(nodeId));
+  }
+  // 计划结果的可读文本：状态/路由/scope/版本/改动/保留/原因 + 模型与请求，一行写全，不断章取义。
+  function languagePlanText(language, fallbackRequest) {
+    if (!language || typeof language !== 'object') return typeof fallbackRequest === 'string' && fallbackRequest ? `请求“${fallbackRequest}”：服务端未返回计划（正式文件未改动）。` : '服务端未返回计划（正式文件未改动）。';
+    const plan = language.plan || language;
+    const bits = [];
+    const tgt = language.selected_target || null;
+    if (tgt && (tgt.label || tgt.target_id)) {
+      const prop = tgt.property ? `${tgt.property} ` : '';
+      const cur = tgt.current_pt != null ? `当前 ${tgt.current_pt} pt` : '';
+      bits.push(`目标：${tgt.label || tgt.target_id}（${prop}${cur}）`.replace('（）', ''));
+    }
+    if (Array.isArray(plan.edits) && plan.edits.length) {
+      bits.push('改动：' + plan.edits.map(e => {
+        if (!e || typeof e !== 'object') return '';
+        const who = e.control_id || '';
+        const val = e.value != null ? `${e.value}pt` : (e.remove ? '恢复原始' : '');
+        return `${who} → ${val}`.trim();
+      }).filter(Boolean).join('；'));
+    }
+    if (plan.status) bits.push(`状态：${plan.status}`);
+    if (plan.route) bits.push(`路由：${plan.route}`);
+    if (plan.scope) bits.push(`范围：${plan.scope}`);
+    if (plan.revision) bits.push(`版本：${String(plan.revision).slice(0, 12)}`);
+    if (plan.preserve) bits.push(`保留：${plan.preserve}`);
+    if (plan.reason) bits.push(`原因：${plan.reason}`);
+    if (language.model) bits.push(`模型：${language.model}`);
+    if (language.request || fallbackRequest) bits.push(`请求：“${language.request || fallbackRequest}”`);
+    return bits.length ? bits.join(' · ') : '服务端返回了空计划（正式文件未改动）。';
+  }
+  // Native 输入校验：只收服务端声明的真实可调标量控件；数值有限且在 [min, max] 内。
+  function nativeEditsFromInputs(controls, values) {
+    const list = Array.isArray(controls) ? controls : [];
+    const edits = [];
+    for (const c of list) {
+      if (!c || typeof c.control_id !== 'string' || !c.control_id) continue;
+      const raw = values ? values[c.control_id] : undefined;
+      if (raw == null || raw === '') continue;
+      const value = Number(raw);
+      if (!Number.isFinite(value)) return { edits: null, error: `${c.label || c.control_id}：请输入数字` };
+      if ((typeof c.min === 'number' && value < c.min) || (typeof c.max === 'number' && value > c.max)) {
+        return { edits: null, error: `${c.label || c.control_id}：${value} 超出范围 [${c.min}, ${c.max}]` };
+      }
+      if (value === c.current) continue;
+      edits.push({ control_id: c.control_id, value });
+    }
+    if (!edits.length) return { edits: null, error: '没有可预览的改动：请先改一个参数值' };
+    return { edits, error: null };
+  }
+  // Native 收据的可读文本：正式/草稿/严格状态照实说，绝不把草稿说成通过。
+  function nativeReceiptText(native) {
+    if (!native || typeof native !== 'object') return '服务端未返回收据（正式文件未改动）。';
+    const r = native.receipt || native;
+    const bits = [];
+    if (native.status || r.status) bits.push(`状态：${native.status || r.status}`);
+    const kind = native.kind || r.kind;
+    if (kind === 'draft') bits.push('工作草稿（不是 Strict PASS）');
+    else if (kind === 'publication') bits.push('严格出版路径');
+    const verification = native.verification || r.verification;
+    if (verification) bits.push(`验证：${verification}`);
+    if (typeof r.issue_count === 'number' && Number.isFinite(r.issue_count)) bits.push(`整图问题 ${r.issue_count} 项`);
+    if (r.message) bits.push(String(r.message));
+    else if (native.message) bits.push(String(native.message));
+    return bits.length ? bits.join(' · ') : '已返回（正式文件状态以收据为准）。';
+  }
   // G5b：选区序号。Hub 要求 selection_seq 跨页面会话严格递增，而模块级计数器每次刷新都
   // 从 0 重来——所以发布前先按 GET /api/selection 的 hub_revision / selection_seq 播种；
   // 被 400 INVALID_SELECTION 拒掉时按最新值再播种一次并重播。
@@ -571,8 +640,7 @@
     const http = Number(status);
     return Number.isFinite(http) ? http >= 400 && http < 500 : true;
   }
-
-  const api = { validateFrame, verifyFrame, screenToMm, dragDeltaMm, canGhostNode, previewStatusText, dragPointerAction, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys, planRequest, plansFromPayload, pendingPlans, planSummaryText, planDiffText, planFailureText, planCommitText, commitDetailText, committedPlans, seedSelectionSeq, shouldReseed, saveResultText, pendingSaveEntry, addPendingSave, removePendingSave, pendingSaveCount };
+  const api = { validateFrame, verifyFrame, screenToMm, dragDeltaMm, canGhostNode, previewStatusText, dragPointerAction, hitCandidates, cycleSelection, niceTickStep, fitViewport, zoomViewport, createIntentSession, canAcceptEvaluation, buildDecisionPayload, createOperationStack, isDecisionSuccessful, createInFlightGuard, readPanelMode, buildAgentDetail, minimalStatusText, stageSizeChanged, acceptsArrowKeys, planRequest, plansFromPayload, pendingPlans, planSummaryText, planDiffText, planFailureText, planCommitText, commitDetailText, committedPlans, seedSelectionSeq, shouldReseed, saveResultText, pendingSaveEntry, addPendingSave, removePendingSave, pendingSaveCount, styleExactTargetsForScene, languagePlanText, nativeEditsFromInputs, nativeReceiptText };
   const globalScope = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : root);
   globalScope.FigpactInspector = api;
   root.FigpactInspector = api;
@@ -621,7 +689,17 @@
     plansError: '',
     planNotice: '',
     planErrors: new Map(),
-    selectionError: ''
+    selectionError: '',
+    languageBusy: false,
+    languageSeq: 0,
+    languageTargetChoice: null,
+    nativeControls: [],
+    styleOriginalView: false,
+    nativePending: null,
+    nativeBusy: false,
+    nativeLast: null,
+    nativeRefreshFailed: false,
+    nativeSeq: 0
   };
   const svg = (tag, attrs = {}) => {
     const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -1118,10 +1196,19 @@
 
   function select(id) {
     if (!state.ready) return;
+    if (state.languageBusy && id !== state.selected) {
+      status('模型请求进行中；请等待预览结果后确认或取消', 'pending');
+      return;
+    }
     if (state.pendingOperationId && id !== state.selected) {
       status('当前有未完成的位置微调；请先保留或取消，再选择其他对象', 'pending');
       return;
     }
+    if ((state.stylePending || state.nativePending) && id !== state.selected) {
+      status('有待确认的预览；请先确认保存或取消，再选择其他对象', 'pending');
+      return;
+    }
+    if (id !== state.selected) state.languageTargetChoice = null;
     if (state.intentSession) {
       const allowed = state.intentSession.select(id);
       if (!allowed) {
@@ -1230,6 +1317,7 @@
         }
       }
     } catch (e) {}
+    try { renderLanguageTarget(); } catch (e) {}
     highlights();
   }
 
@@ -1827,7 +1915,7 @@
   // ---------- G18 样式微调：只读选择 + 预览/确认，几何 UI 不动 ----------
   function styleSetBusy(busy) {
     state.styleBusy = busy;
-    for (const id of ['style-preview', 'style-restore', 'style-confirm', 'style-cancel', 'style-value', 'style-target']) {
+    for (const id of ['style-preview', 'style-restore', 'style-confirm', 'style-cancel', 'style-value', 'style-target', 'style-view-original']) {
       const el = byId(id); if (el) el.disabled = busy;
     }
     for (const id of ['btn-evaluate', 'btn-accept', 'btn-apply-delta', 'save-changes']) {
@@ -1913,9 +2001,11 @@
           if (Array.isArray(t.scene_ids) && t.scene_ids.includes(node.id)) { mapped = t.target_id; break; }
         }
       }
-      state.styleSelected = mapped || targets[0].target_id;
+      if (!targets.length) state.styleSelected = null;
+      else state.styleSelected = mapped || targets[0].target_id;
     }
-    if (state.stylePending && st && !st.pending && !st.candidate_id) state.stylePending = null;
+    state.stylePending = st?.pending || null;
+    if (state.stylePending) state.styleSelected = state.stylePending.target_id;
     renderStyle();
   }
   function styleTarget() {
@@ -1939,7 +2029,14 @@
     if (state.styleSelected) sel.value = state.styleSelected;
     const t = styleTarget();
     const input = byId('style-value');
-    if (input && t) { input.value = t.current_pt; input.setAttribute('aria-label', `${styleLabel(t)}（${t.property || ''}，当前 ${t.current_pt} pt）`); }
+    if (input && t) {
+      input.value = t.current_pt;
+      for (const bound of ['min', 'max']) {
+        if (typeof t[bound] === 'number') input.setAttribute(bound, t[bound]);
+        else input.removeAttribute(bound);
+      }
+      input.setAttribute('aria-label', `${styleLabel(t)}（${t.property || ''}，当前 ${t.current_pt} pt）`);
+    }
     const p = state.stylePending;
     const pw = byId('style-pending');
     if (pw) pw.hidden = !p;
@@ -1979,11 +2076,13 @@
       if (tw) tw.hidden = parts.length === 0;
     }
     const rs = byId('style-restore');
-    const frozen = !!state.styleRefreshFailed;
+    const frozen = !!state.styleRefreshFailed || !state.ready;
     if (frozen) for (const id of ['style-preview', 'style-restore', 'style-confirm', 'style-cancel', 'style-value', 'style-target']) {
       const el = byId(id); if (el) el.disabled = true;
     }
     if (rs && !state.styleBusy && !frozen) rs.disabled = !t || t.saved_pt == null;
+    try { renderStyleViewToggle(); } catch (e) {}
+    try { renderLanguageTarget(); } catch (e) {}
   }
   async function styleJson(url, body, withToken) {
     const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
@@ -1998,13 +2097,16 @@
     return `${code}${msg}`;
   }
   async function stylePreview(remove) {
-    const t = styleTarget(); if (!t || state.styleBusy) return;
+    const t = styleTarget(); if (!t || state.styleBusy || !state.ready) return;
     const input = byId('style-value');
     const value = remove ? undefined : Number(input ? input.value : NaN);
-    if (!remove && (!Number.isFinite(value) || value < 1 || value > 72)) { styleNote('请输入 1–72 之间的 pt 数值', true); return; }
+    if (!remove && (!Number.isFinite(value) || !input || input.value === '' || !input.checkValidity())) { styleNote('请输入控件允许范围内的有效 pt 数值', true); return; }
     const rev = (state.acceptedFrame || state.frame || {}).frame_revision;
     if (!rev) { styleNote('当前帧无效，请刷新', true); return; }
     styleSetBusy(true); styleBadge('验证中…', 'verifying'); styleNote('', false);
+    state.languageSeq++;
+    const oldPlan = byId('language-plan'); if (oldPlan) oldPlan.hidden = true;
+    languageBadge('手工修改', 'idle');
     const t0 = performance.now();
     try {
       const body = remove ? { frame_revision: rev, target_id: t.target_id, remove: true }
@@ -2021,7 +2123,9 @@
         if (state.stylePending.base_frame_revision == null && data.style.base_frame_revision) state.stylePending.base_frame_revision = data.style.base_frame_revision;
         if (state.stylePending.expected_sha256 == null && data.style.overlay_sha256 != null) state.stylePending.expected_sha256 = data.style.overlay_sha256;
       }
+      state.styleOriginalView = false;
       await loadFrame(data.frame, undefined, false);
+      if (!state.ready) throw new Error('候选图帧校验未通过，不能确认保存；请关闭后重开');
       state.styleClientMs = Math.round(performance.now() - t0);
       renderStyle();
       styleBadge(state.stylePending ? '已验证 · 待确认' : '已预览', state.stylePending ? 'validated' : 'previewed');
@@ -2039,7 +2143,7 @@
     finally { styleSetBusy(false); renderStyle(); }
   }
   async function styleCommit() {
-    const p = state.stylePending; if (!p || state.styleBusy) return;
+    const p = state.stylePending; if (!p || state.styleBusy || !state.ready) return;
     const rev = p.base_frame_revision || state.styleBaseRev
       || (state.acceptedFrame || state.frame || {}).frame_revision;
     const sha = (p.expected_sha256 != null) ? p.expected_sha256
@@ -2062,6 +2166,7 @@
       if ((data.status === 'COMMITTED' || data.status === 'COMMITTED_DRAFT') && !data.frame) {
         state.stylePending = null;
         state.styleRefreshFailed = true;
+        state.languageSeq++;
         state.styleTargets = [];
         if (data.style && typeof data.style.overlay_sha256 === 'string') state.styleOverlaySha = data.style.overlay_sha256;
         try { select(null); } catch (e) {}
@@ -2077,9 +2182,12 @@
         return;
       }
       state.stylePending = null;
+      state.languageSeq++;
+      state.styleOriginalView = false;
       let uiError = null;
       try {
         await loadFrame(data.frame, undefined, true);
+        if (!state.ready) throw new Error('保存后的图帧校验未通过');
         if (state.styleSelected) {
           const sid = mapStyleToScene(styleTarget());
           if (sid) select(sid);
@@ -2092,9 +2200,9 @@
         styleNote('', false);
       } catch (uiE) { uiError = uiE; }
       if (uiError) {
-        // receipt 已 COMMITTED/PASS：正式文件已保存，只报 UI 呈现问题，绝不说未改动。
+        // 回执已确认提交：只报显示异常，不撤销已经落盘的事实。
         styleBadge('已保存 · 显示刷新异常', 'saved');
-        styleNote(`已保存并通过验证，但结果显示刷新失败：${uiError && uiError.message ? uiError.message : uiError}。请刷新页面核对。`, true);
+        styleNote(`文件已保存，但结果显示刷新失败：${uiError && uiError.message ? uiError.message : uiError}。请关闭后重开核对，勿重复提交。`, true);
       }
     } catch (e) {
       const msg = String((e && e.message) || '');
@@ -2117,6 +2225,8 @@
       const { res, data } = await styleJson('/api/style/cancel', { candidate_id: p.candidate_id }, true);
       if (!res.ok) throw new Error(styleFail(data, res));
       state.stylePending = null;
+      state.languageSeq++;
+      state.styleOriginalView = false;
       const fr = await (await fetch('/api/frame', { headers: { Accept: 'application/json' } })).json();
       if (fr && fr.schema === 'figpact.inspector/1') await loadFrame(fr, undefined, true);
       styleBadge('已取消', 'cancelled');
@@ -2127,12 +2237,14 @@
     const sel = styleSelect(); if (!sel || sel.dataset.wired) return;
     sel.dataset.wired = '1';
     sel.addEventListener('change', () => {
-      if (state.stylePending) {
+      if (state.stylePending || state.languageBusy) {
         styleNote('有待确认的样式预览，请先确认保存或取消，再切换目标', true);
         sel.value = state.styleSelected;
         return;
       }
-      state.styleSelected = sel.value; renderStyle();
+      state.styleSelected = sel.value;
+      state.languageTargetChoice = { scene_id: state.selected, target_id: sel.value };
+      renderStyle();
     });
     byId('style-preview')?.addEventListener('click', () => stylePreview(false));
     byId('style-restore')?.addEventListener('click', () => stylePreview(true));
@@ -2140,7 +2252,312 @@
     byId('style-cancel')?.addEventListener('click', styleCancel);
   }
   wireStyle();
+  // ---------- v0.1 自然语言改样式：选中对象 → 一句话 → 真实预览 → 复用确认/取消/手动 ----------
+  function languageBadge(text, st) {
+    const el = byId('language-status'); if (!el) return;
+    el.textContent = text; el.className = 'tag'; el.dataset.languageState = st || 'idle';
+  }
+  function languageNotice(msg, show) {
+    const el = byId('language-notice'); if (!el) return;
+    el.hidden = !show; if (show && msg) el.textContent = msg;
+  }
+  function renderLanguageTarget() {
+    const tgt = byId('language-target'); if (!tgt) return;
+    const node = state.nodes.get(state.selected) || null;
+    const hits = node ? styleExactTargetsForScene(state.styleTargets, node.id) : [];
+    if (!node) { tgt.textContent = '尚未选中对象：在图中点一个对象后再说改动。'; return; }
+    if (!state.styleTargets.length) { tgt.textContent = `已选中“${displayTitle(node)}”，但本图没有可改的样式目标。`; return; }
+    if (!hits.length) { tgt.textContent = `已选中“${displayTitle(node)}”，但它没有对应可改的样式目标（请点 Y 轴标签等可调对象）。`; return; }
+    const choice = state.languageTargetChoice;
+    const only = hits.length === 1 ? hits[0] : hits.find(t => choice?.scene_id === node.id && choice.target_id === t.target_id);
+    if (!only) { tgt.textContent = `已选中“${displayTitle(node)}”对应 ${hits.length} 个可调目标，请先在右侧“目标”下拉里选定一个，再用文字说改动。`; return; }
+    tgt.textContent = `已选中“${displayTitle(node)}”→ 目标 ${styleLabel(only)}（${only.property || ''}，当前 ${only.current_pt} pt）`.replace('（，', '（');
+  }
+  async function languageSend() {
+    if (state.languageBusy || state.styleBusy) return;
+    const input = byId('language-request');
+    const request = (input && typeof input.value === 'string' ? input.value : '').trim();
+    if (!request) { languageNotice('请先写一句话改动，例如“改为9pt”。', true); return; }
+    const rev = (state.acceptedFrame || state.frame || {}).frame_revision;
+    if (!rev) { languageNotice('当前帧无效，请刷新后重试（正式文件未改动）。', true); return; }
+    if (state.stylePending) { languageNotice('有待确认的样式预览，请先确认保存或取消，再发新的文字改动。', true); return; }
+    const node = state.nodes.get(state.selected) || null;
+    if (!node) { languageNotice('请先在图中点选一个对象，再用文字说改动（不会猜测目标）。', true); languageBadge('未选中', 'idle'); return; }
+    const hits = styleExactTargetsForScene(state.styleTargets, node.id);
+    const choice = state.languageTargetChoice;
+    const target = hits.length === 1 ? hits[0] : hits.find(t => choice?.scene_id === node.id && choice.target_id === t.target_id);
+    if (!target) {
+      languageNotice(hits.length === 0
+        ? '选中的对象没有对应可改的样式目标，请点 Y 轴标签等可调对象（正式文件未改动）。'
+        : '选中的对象对应多个可调目标，请先在右侧“目标”下拉里选定一个，再发文字（正式文件未改动）。', true);
+      languageBadge(hits.length === 0 ? '无对应目标' : '需先选定目标', 'idle');
+      return;
+    }
+    const sceneId = node.id;
+    const mySeq = ++state.languageSeq;
+    state.languageBusy = true;
+    styleSetBusy(true);
+    languageBadge('请求中…', 'working'); languageNotice('', false);
+    try {
+      const headers = { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Figpact-Ui': uiToken() };
+      const res = await fetch('/api/language/preview', { method: 'POST', headers,
+        body: JSON.stringify({ frame_revision: rev, scene_id: sceneId, target_id: target.target_id, request }) });
+      let data = null; try { data = await res.json(); } catch (e) { data = null; }
+      if (mySeq !== state.languageSeq) return;
+      if (!res.ok || !data) {
+        const plan = (data && (data.language || data.plan)) || null;
+        const pm = data && typeof data.message === 'string' && data.message ? data.message : '';
+        const code = (data && data.status) || ('HTTP ' + res.status);
+        if (plan || /NO_SELECTED_AUTHORITY|STALE|DRIFT|REVISION/i.test(code + ' ' + pm)) {
+          languageBadge('已拒绝', 'refused');
+          const planEl = byId('language-plan'); if (planEl) { planEl.hidden = false; planEl.textContent = '服务端拒绝：' + languagePlanText(plan, request); }
+          languageNotice(`已拒绝：${code}${pm ? '：' + pm : ''}（正式文件未改动）。`, true);
+          return;
+        }
+        throw new Error(pm ? `${code}：${pm}` : `HTTP ${res.status}`);
+      }
+      const st = data.status || (data.frame ? 'OK' : 'REFUSE');
+      if (st === 'REFUSE' || (!data.frame && (data.plan && (data.plan.status === 'REFUSE' || data.plan.route === 'refuse')))) {
+        languageBadge('已拒绝', 'refused');
+        const planEl = byId('language-plan'); if (planEl) { planEl.hidden = false; planEl.textContent = '服务端拒绝：' + languagePlanText(data.language || data.plan || null, request); }
+        languageNotice(`已拒绝：${data.message || '请求不可执行'}（正式文件未改动）。`, true);
+        return;
+      }
+      if (st === 'CLARIFY' || !data.frame) {
+        languageBadge('需澄清', 'clarify');
+        const planEl = byId('language-plan'); if (planEl) { planEl.hidden = false; planEl.textContent = '需要你再说清楚一点：' + languagePlanText(data.language || data.plan || null, request); }
+        languageNotice('请按提示补一句话再发（正式文件未改动）。', true);
+        return;
+      }
+      const sel = (data.language && data.language.selected_target) || null;
+      const planEl = byId('language-plan'); if (planEl) { planEl.hidden = false; planEl.textContent = languagePlanText(data.language || data.plan || null, request); }
+      if (sel && sel.target_id && sel.target_id !== target.target_id) { languageNotice('服务端选中的目标与当前选中不一致，已拒绝套用（正式文件未改动）。', true); languageBadge('目标不一致', 'refused'); return; }
+      if (data.style && data.style.pending) {
+        state.stylePending = data.style.pending;
+        if (state.stylePending.base_frame_revision == null && data.style.base_frame_revision) state.stylePending.base_frame_revision = data.style.base_frame_revision;
+        if (state.stylePending.expected_sha256 == null && data.style.overlay_sha256 != null) state.stylePending.expected_sha256 = data.style.overlay_sha256;
+      }
+      await loadFrame(data.frame, undefined, false);
+      if (!state.ready) throw new Error('候选图帧校验未通过，不能确认保存；请关闭后重开');
+      state.styleOriginalView = false; renderStyleViewToggle();
+      languageBadge(state.stylePending ? '已验证 · 待确认' : '已预览', state.stylePending ? 'validated' : 'previewed');
+      styleBadge(state.stylePending ? '已验证 · 待确认' : '已预览', state.stylePending ? 'validated' : 'previewed');
+      languageNotice(state.stylePending ? '已按你的话生成真实预览，请在右侧确认保存或取消（尚未保存）。' : '已生成预览（尚未保存）。', !!state.stylePending);
+    } catch (e) {
+      if (mySeq !== state.languageSeq) return;
+      languageBadge('失败', 'failed');
+      languageNotice(`文字改样式失败：${e && e.message ? e.message : e}（正式文件未改动）。`, true);
+    } finally {
+      if (mySeq === state.languageSeq) state.languageBusy = false;
+      styleSetBusy(false);
+      renderStyle();
+      try { renderLanguageTarget(); } catch (e) {}
+    }
+  }
+  function renderStyleViewToggle() {
+    const row = byId('style-view-row'); if (!row) return;
+    const hasPending = !!state.stylePending;
+    const hasCandidate = !!(state.candidateFrame && state.acceptedFrame);
+    row.hidden = !(hasPending && hasCandidate);
+    const box = byId('style-view-original'); if (!box) return;
+    box.checked = !!state.styleOriginalView;
+    box.disabled = state.styleBusy;
+  }
+  function styleViewOriginalChanged() {
+    const box = byId('style-view-original'); if (!box) return;
+    if (!state.stylePending || !state.acceptedFrame) { box.checked = false; return; }
+    state.styleOriginalView = box.checked;
+    const frame = box.checked ? state.acceptedFrame : state.candidateFrame;
+    const image = viewport.querySelector('image');
+    if (frame && image) image.setAttribute('href', `data:image/png;base64,${frame.png_base64}`);
+  }
+  function wireLanguage() {
+    const btn = byId('language-send'); if (!btn || btn.dataset.wired) return;
+    btn.dataset.wired = '1';
+    btn.addEventListener('click', languageSend);
+    const input = byId('language-request');
+    if (input && !input.dataset.wired) {
+      input.dataset.wired = '1';
+      input.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter' && !ev.shiftKey && !ev.altKey) { ev.preventDefault(); languageSend(); }
+      });
+    }
+    byId('style-view-original')?.addEventListener('change', styleViewOriginalChanged);
+    const sel = styleSelect();
+    if (sel && !sel.dataset.langWired) {
+      sel.dataset.langWired = '1';
+      sel.addEventListener('change', () => { try { renderLanguageTarget(); } catch (e) {} });
+    }
+  }
+  wireLanguage();
 
+  // ---------- v0.1 Native 参数微调：真实控件 → 手输 → 预览/确认/取消/重载 ----------
+  function nativeBadge(text, st) {
+    const el = byId('native-status'); if (!el) return;
+    el.textContent = text; el.className = 'tag'; el.dataset.nativeState = st || 'idle';
+  }
+  function nativeNotice(msg, show) {
+    const el = byId('native-notice'); if (!el) return;
+    el.hidden = !show; if (show && msg) el.textContent = msg;
+  }
+  function nativeValues() {
+    const out = {};
+    for (const c of (state.nativeControls || [])) {
+      const el = byId('native-' + c.control_id); if (el) out[c.control_id] = el.value;
+    }
+    return out;
+  }
+  function nativeFrame() { return state.candidateFrame || state.acceptedFrame || state.frame || null; }
+  function renderNative() {
+    const sec = byId('native-section'); if (!sec) return;
+    const fr = nativeFrame();
+    const nv = fr && fr.native ? fr.native : null;
+    const ctrls = nv && Array.isArray(nv.controls) ? nv.controls : [];
+    state.nativeControls = ctrls;
+    const frozen = state.nativeRefreshFailed || !!nv?.refresh_required || !state.ready;
+    sec.hidden = ctrls.length === 0 && !frozen;
+    if (!ctrls.length && !frozen) return;
+    for (const id of ['native-preview', 'native-confirm', 'native-cancel', 'native-kind']) {
+      const el = byId(id); if (!el) continue;
+      el.disabled = state.nativeBusy || frozen ||
+        (id === 'native-preview' ? !!state.nativePending : id === 'native-kind' ? false : !state.nativePending);
+    }
+    const holder = byId('native-controls'); if (!holder) return;
+    holder.replaceChildren();
+    for (const c of ctrls) {
+      const wrap = document.createElement('div');
+      wrap.className = 'input-group';
+      const label = document.createElement('label');
+      label.setAttribute('for', 'native-' + c.control_id);
+      label.textContent = `${c.label || c.control_id}${c.unit ? `（${c.unit}）` : ''}${typeof c.current === 'number' ? ` · 当前 ${c.current}` : ''}${typeof c.min === 'number' && typeof c.max === 'number' ? ` · 范围 [${c.min}, ${c.max}]` : ''}`;
+      const input = document.createElement('input');
+      input.id = 'native-' + c.control_id;
+      input.type = 'number';
+      input.disabled = state.nativeBusy || frozen || !!state.nativePending;
+      if (typeof c.min === 'number') input.min = String(c.min);
+      if (typeof c.max === 'number') input.max = String(c.max);
+      if (typeof c.current === 'number') { input.value = String(c.current); input.placeholder = String(c.current); }
+      input.step = 'any';
+      input.setAttribute('aria-label', `${c.label || c.control_id}${c.unit ? `（${c.unit}）` : ''}`);
+      const unit = document.createElement('span');
+      unit.className = 'unit';
+      unit.textContent = c.unit || '';
+      wrap.append(label, input, unit);
+      holder.append(wrap);
+    }
+    const p = state.nativePending;
+    const pw = byId('native-pending');
+    if (pw) pw.hidden = !p;
+    if (p) {
+      const pt = byId('native-pending-text');
+      if (pt) pt.textContent = `待确认：${(p.edits || []).map(e => `${e.control_id} → ${e.value}`).join('；')}`;
+      if (!state.nativeBusy) nativeBadge('已验证 · 待确认', 'validated');
+    }
+    const rc = byId('native-receipt');
+    if (rc) {
+      const n = nv && (nv.receipt || nv.status) ? nv : state.nativeLast;
+      if (n && (n.receipt || n.status)) { rc.hidden = false; rc.textContent = '上次结果：' + nativeReceiptText(n); }
+      else rc.hidden = true;
+    }
+  }
+  async function nativeJson(url, body, withToken) {
+    const headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
+    if (withToken) headers['X-Figpact-Ui'] = uiToken();
+    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+    let data = null; try { data = await res.json(); } catch (e) { data = null; }
+    return { res, data };
+  }
+  async function nativePreview() {
+    if (state.nativeBusy) return;
+    if (state.nativePending) { nativeNotice('有待确认的参数预览，请先确认保存或取消。', true); return; }
+    const fr = nativeFrame();
+    const rev = fr && fr.frame_revision;
+    if (!rev) { nativeNotice('当前帧无效，请刷新（正式文件未改动）。', true); return; }
+    const parsed = nativeEditsFromInputs(state.nativeControls, nativeValues());
+    if (!parsed.edits) { nativeNotice(parsed.error + '（正式文件未改动）。', true); return; }
+    const mySeq = ++state.nativeSeq;
+    state.nativeBusy = true; nativeBadge('验证中…', 'verifying'); nativeNotice('', false);
+    renderNative();
+    try {
+      const { res, data } = await nativeJson('/api/native/preview', { frame_revision: rev, edits: parsed.edits }, false);
+      if (mySeq !== state.nativeSeq) return;
+      if (!res.ok || !data || !data.frame) throw new Error((data && data.message) ? `${data.status || ('HTTP ' + res.status)}：${data.message}` : `HTTP ${res.status}`);
+      if (data.native && data.native.pending) state.nativePending = data.native.pending;
+      if (data.native) state.nativeLast = data.native;
+      await loadFrame(data.frame, undefined, false);
+      if (!state.ready) throw new Error('候选图帧未通过图像／Scene 校验；不能确认保存，请关闭后重开');
+      renderNative();
+      nativeBadge(state.nativePending ? '已验证 · 待确认' : '已预览', state.nativePending ? 'validated' : 'previewed');
+      nativeNotice(state.nativePending ? '已生成真实预览，请确认保存或取消（尚未保存）。' : '已生成预览（尚未保存）。', !!state.nativePending);
+    } catch (e) {
+      if (mySeq !== state.nativeSeq) return;
+      nativeBadge('预览失败', 'failed');
+      nativeNotice(`参数预览失败：${e && e.message ? e.message : e}（正式文件未改动）。`, true);
+    } finally {
+      if (mySeq === state.nativeSeq) state.nativeBusy = false;
+      renderNative();
+    }
+  }
+  async function nativeCommit() {
+    const p = state.nativePending; if (!p || state.nativeBusy) return;
+    const fr = nativeFrame();
+    const rev = p.base_frame_revision || (fr && fr.frame_revision);
+    if (!rev || !p.candidate_id) { nativeNotice('版本信息缺失，请刷新后重试（正式文件未改动）。', true); return; }
+    const kindSel = byId('native-kind');
+    const kind = (kindSel && kindSel.value === 'draft') ? 'draft' : 'publication';
+    state.nativeBusy = true; nativeBadge('保存中…', 'saving');
+    renderNative();
+    try {
+      const { res, data } = await nativeJson('/api/native/commit', { candidate_id: p.candidate_id, frame_revision: rev, kind }, true);
+      if (!res.ok || !data) throw new Error((data && data.message) ? `${data.status || ('HTTP ' + res.status)}：${data.message}` : `HTTP ${res.status}`);
+      if (data.status !== 'committed') throw new Error('服务端未确认文件提交；请关闭后重开核对');
+      state.nativePending = null;
+      state.nativeLast = { ...data.native, status: data.status, kind: data.kind,
+        verification: data.verification, receipt: data.receipt, message: data.message };
+      state.nativeRefreshFailed = !!data.native?.refresh_required || !data.frame;
+      if (data.frame) {
+        await loadFrame(data.frame, undefined, true);
+        if (!state.ready) state.nativeRefreshFailed = true;
+      }
+      renderNative();
+      const isDraft = data.kind === 'draft';
+      const strict = data.verification === 'STRICT_VERIFIED';
+      nativeBadge(isDraft ? '工作草稿已保存 · 非 Strict PASS' : strict ? '已保存 · Strict PASS' : '已保存 · 严格状态未确认', 'saved');
+      nativeNotice(state.nativeRefreshFailed ? '文件已保存，但界面刷新失败；请关闭程序后重新打开，勿重复提交。'
+        : isDraft ? '工作草稿已保存，尚未取得严格出版认证。'
+        : strict ? '' : '文件已保存，但没有严格出版通过证据，请核对保存回执。', state.nativeRefreshFailed || isDraft || !strict);
+    } catch (e) {
+      state.nativePending = null;
+      state.nativeRefreshFailed = true;
+      nativeBadge('保存结果未确认', 'failed');
+      nativeNotice(`保存结果未确认：${e && e.message ? e.message : e}。请关闭后重开核对正式文件。`, true);
+    } finally {
+      state.nativeBusy = false; renderNative();
+    }
+  }
+  async function nativeCancel() {
+    const p = state.nativePending; if (!p || state.nativeBusy) return;
+    state.nativeBusy = true;
+    renderNative();
+    try {
+      const { res, data } = await nativeJson('/api/native/cancel', { candidate_id: p.candidate_id }, false);
+      if (!res.ok || !data?.frame) throw new Error((data && data.message) ? `${data.status}：${data.message}` : `HTTP ${res.status}`);
+      state.nativePending = null;
+      await loadFrame(data.frame, undefined, true);
+      if (!state.ready) throw new Error('取消后图帧校验未通过，请关闭后重开');
+      renderNative();
+      nativeBadge('已取消', 'cancelled');
+    } catch (e) { nativeNotice(`取消失败：${e.message}`, true); }
+    finally { state.nativeBusy = false; renderNative(); }
+  }
+  function wireNative() {
+    if (byId('native-preview')?.dataset.wired) return;
+    if (byId('native-preview')) byId('native-preview').dataset.wired = '1';
+    byId('native-preview')?.addEventListener('click', nativePreview);
+    byId('native-confirm')?.addEventListener('click', nativeCommit);
+    byId('native-cancel')?.addEventListener('click', nativeCancel);
+  }
+  wireNative();
   async function loadFrame(frame, expectedSourceRevision, isNewAccepted = true) {
     const epoch = ++state.epoch;
     state.ready = false;
@@ -2149,6 +2566,7 @@
       state.hover = state.selected = null;
       state.nodes.clear();
       state.paths.clear();
+      state.nativeSeq++; state.nativePending = null;
       viewport.replaceChildren();
       byId('frame-scope').textContent = byId('frame-revision').textContent = '';
       byId('state-fields').replaceChildren();
@@ -2169,6 +2587,11 @@
       await image.decode();
       requireFact(image.naturalWidth === scene.image.width_px && image.naturalHeight === scene.image.height_px, 'Decoded PNG dimensions mismatch');
       if (epoch !== state.epoch) return;
+      if (frame.native) {
+        state.nativePending = frame.native.pending || null;
+        state.nativeRefreshFailed = !!frame.native.refresh_required;
+        if (frame.native.receipt || frame.native.status) state.nativeLast = frame.native;
+      }
       state.scene = scene;
       state.nodes = new Map(scene.nodes.map(node => [node.id, node]));
       state.paths.clear();
@@ -2230,8 +2653,13 @@
 
       const badge = byId('badge-readonly');
       if (badge) {
-        if (frame.style && Array.isArray(frame.style.targets) && frame.style.targets.length) {
-          badge.textContent = 'Style Overlay';
+        const hasStyle = !!(frame.style && Array.isArray(frame.style.targets) && frame.style.targets.length);
+        const hasNative = !!(frame.native && Array.isArray(frame.native.controls) && frame.native.controls.length);
+        if (hasStyle) {
+          badge.textContent = '样式可调 · 确认后保存';
+          badge.className = 'tag mode-session';
+        } else if (hasNative) {
+          badge.textContent = '参数可调 · 确认后保存';
           badge.className = 'tag mode-session';
         } else if (canRebuild) {
           badge.textContent = '可试调 / 不改原文件';
@@ -2274,6 +2702,8 @@
       } catch (e) {
         styleDisable(`样式数据异常，已拒绝样式编辑：${e && e.message ? e.message : e}（正式文件未改动）`);
       }
+      try { renderNative(); } catch (e) {}
+      try { renderLanguageTarget(); } catch (e) {}
       try {
         if (isStyleOnly()) {
           const isec = byId('intent-section'); if (isec) isec.hidden = true;

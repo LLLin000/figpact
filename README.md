@@ -1,27 +1,30 @@
-# figpact
+# figpact v0.1
 
-**直接改 Python 科研图的排版细节，并让不同尺寸的小图在最终投稿尺寸下规格统一——改动可复现地回到源文件，且每一步都有真实测量作证。**
+**点选科研图中的对象，用一句话改字号或线宽；真实预览，确认保存，重开复现。**
 
-figpact 面向两个具体痛点：
+v0.1 只编辑已有授权对象。Overlay 支持坐标轴标题字号、刻度字号和曲线线宽，保存受控样式 JSON；Native 使用图作者已授权的 YAML 参数与原有事务。科学数据、视图保护、源码漂移检查和严格出版规则不放宽。不支持的对象明确拒绝，不宣称任意 Matplotlib 图兼容或自主定位已经通过盲测。
 
-1. **改图上某个标注的位置，要反复改 Python、导出、看图、再改。** figpact 让你在真图上选中标注、拖动、看到毫米读数，松手后用**真实重建**验证，确认后**写回源文件**；下次重跑脚本，改动还在。
-2. **两张尺寸不同的图放进同一张论文 Figure，最终字号与线宽不一致。** figpact 先**只读审计**在目标宽度下每个角色会落到几个 pt，再按最终尺寸**重新渲染**（不是事后缩放 PDF），放不下的地方**如实报告**而不是偷偷缩字。
+许可证 **MIT**。安装、边界和三图操作见 [`docs/V0_1.md`](docs/V0_1.md)。G25 暂停、G25-S2 冻结；独立评测仍为 `BLOCKED`，不是这个受限点选产品的发布前置条件。
 
-许可证 **MIT**。设计取舍与阶段计划见 [`docs/G7_PLAN.md`](docs/G7_PLAN.md)；历史验收记录在 `docs/`（G0–G6b）。
-
----
+与 Tavotto 的薄交接（只读尺寸/身份核验，不改布局）见 [`docs/HANDOFF.md`](docs/HANDOFF.md)。
 
 ## Quickstart
 
 ```bash
-git clone https://github.com/LLLin000/figpact.git && cd figpact
-python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -e .
-figpact ui --script examples/demo/demo_figure.py --config examples/demo/demo.yaml
+python -m pip install "https://github.com/LLLin000/figpact/releases/download/v0.1.0/figpact-0.1.0-py3-none-any.whl"
+ollama pull qwen2.5:3b-instruct
+figpact ui --browser
 ```
 
-浏览器打开终端里打印的地址。**演示图 `examples/demo/` 的全部数据由公式生成**（固定随机种子），不含任何真实测量。
+先启动 Ollama；若未在后台运行，另开终端执行 `ollama serve`。默认使用本机 `http://127.0.0.1:11434/v1`，不需要云端密钥。模型服务不可用时仍可手工填值预览，不会伪造模型回复。
 
+点击图中的 Y 轴标题（或从对象列表选中），输入“改为 9 pt”，检查真实目标和计划，预览后显式保存。默认演示数据由公式生成；样式保存在启动目录的 `figpact-demo.style.json`。退出进程，使用相同命令、相同目录重开，修改仍在。
+
+开发安装：`git clone https://github.com/LLLin000/figpact.git`，进入仓库后执行 `python -m pip install -e .`。自有脚本必须通过本地命令行明确指定，不能从网页上传任意脚本；脚本会执行，只打开可信来源。
+
+## 历史几何编辑演示
+
+以下是既有 `examples/demo/` 的几何编辑教程，不是新的内置曲线自然语言演示；该历史示例的保存限制不代表 v0.1 Overlay 演示的能力。
 ---
 
 ## 逐步演示
@@ -63,7 +66,7 @@ tests/test_save_loop_g7b.py   （真实 NMR 夹具）    3 passed
 
 其中 NMR 全旅程的实测：位移 **0.1500000000000039 mm**（目标 0.15，误差 **3.9e-15**）、保存回执 **COMMITTED + PASS**、配置落盘 `[0.0, 0.15]`、**全新会话从磁盘重建后一致**；拒绝授权与取消时磁盘**逐字节不变**。
 
-> **已知限制（如实说明）**：上面 5 这一步**尚未在合成演示图上截到图**。演示图目前只具备"示范位置"能力，接受/保存仍被禁用（引擎要求会话声明 science manifest 才允许重新绘图验证，演示图的声明还没接上）。因此本教程的截图覆盖到**第 4 步（真实验证）**；保存链的证据是上表的测试与实测数字，**不是摆拍**。
+> **历史限制（如实说明）**：上面第 5 步的截图覆盖仍只到**第 4 步**。这一段是 `examples/demo/` 的几何编辑教程——它的接受/保存仍被禁用，因为该演示没有声明 science manifest。v0.1 的内置曲线与 FTIR 草稿使用**另一条已验收的 Overlay 保存链**（见 [`docs/V0_1.md`](docs/V0_1.md)）；不要把本段的限制读成 v0.1 全部保存不可用。
 
 ---
 

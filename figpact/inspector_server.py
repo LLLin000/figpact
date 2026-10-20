@@ -1,7 +1,8 @@
-"""Trusted, loopback-only G2 Inspector bridge; no save/publish/source-edit routes.
+"""Trusted loopback-only Inspector: selected edits, preview and explicit saves.
 
-The browser only sends geometry intents. Script/config choices belong to the
-local caller, never to HTTP requests. UI assets stay in figpact/_inspector/.
+Script/config/model credentials belong to the local caller, never to HTTP
+requests. UI assets stay in figpact/_inspector/. Native and Overlay use
+separate existing transactions; no cross-route atomicity is claimed.
 
 G5a adds read-only selection and task coordination (``/api/selection``,
 ``/api/tasks``) through an in-memory SessionHub. It still grants neither source
@@ -56,7 +57,7 @@ def _plan_route(path: str):
 class InspectorServer(http.server.HTTPServer):
     # Single request owner: Matplotlib and the accepted set are never concurrently mutated.
     def __init__(self, session: IntentSession, address: tuple[str, int] = ('127.0.0.1', 0), *,
-                 frontend=FRONTEND, state_home=None, source=None, style=None):
+                 frontend=FRONTEND, state_home=None, source=None, style=None, native=None):
         if address[0] != '127.0.0.1':
             raise ValueError('Inspector 只允许绑定 127.0.0.1')
         self.session = session
@@ -66,6 +67,16 @@ class InspectorServer(http.server.HTTPServer):
         self.frontend = Path(frontend).resolve()
         #: Style-only session (G18): None in native geometry mode; startup --overlay binds it.
         self.style = style
+        self.native = native
+        if style is not None and native is not None:
+            raise ValueError('Native YAML 与 Overlay 使用独立会话，不支持跨路径事务')
+        if style is not None:
+            from .language_edit import settings, source_identity
+            self.language_config = settings()
+            self.language_source = source_identity(style)
+        else:
+            self.language_config = None
+            self.language_source = None
         super().__init__(address, _Handler)
 
 
@@ -121,6 +132,9 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return
         path = urlsplit(self.path).path
         if path == '/api/frame':
+            if self._app.native is not None:
+                self._send(self._app.native.snapshot())
+                return
             if getattr(self._app, 'style', None) is not None:
                 # Style mode: the cached verified style frame IS the frame.
                 # Never graft style onto the geometry snapshot: the two are
@@ -130,12 +144,22 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             else:
                 self._send(self._app.session.snapshot())
             return
+        if path == '/api/language/state':
+            config = self._app.language_config
+            self._send({'available': config is not None,
+                        'model': config['model'] if config else None,
+                        'transport': 'openai-compatible',
+                        'message': '点选授权对象后输入修改要求；模型只生成候选，确认后才保存' if config else
+                                   '自然语言 v0.1 仅用于 Overlay 字号/线宽；当前模式请使用授权参数'})
+            return
         if path == '/api/style/state' and getattr(self._app, 'style', None) is not None:
             self._send(*self._app.style.state())
             return
         if path == '/frame.js':
             # 既有 frame 行为字节不变，只追加一行：页面会话令牌（授权请求必须带回来的那个）。
-            if getattr(self._app, 'style', None) is not None:
+            if self._app.native is not None:
+                _frame = self._app.native.snapshot()
+            elif getattr(self._app, 'style', None) is not None:
                 _frame = self._app.style.snapshot()
             else:
                 _frame = self._app.session.snapshot()
@@ -222,6 +246,33 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return
         path = urlsplit(self.path).path
         plan = _plan_route(path)
+        if path == '/api/language/preview' or path in ('/api/native/preview', '/api/native/commit', '/api/native/cancel'):
+            import hmac
+            if path in ('/api/language/preview', '/api/native/commit'):
+                token = self.headers.get(UI_TOKEN_HEADER)
+                if not token or not hmac.compare_digest(token, self._app.ui_token):
+                    self._send({'status': 'FORBIDDEN', 'message': '操作需要当前页面会话令牌'}, 403)
+                    return
+            body = self._json_body()
+            if body is None:
+                return
+            if path == '/api/language/preview':
+                if self._app.style is None:
+                    self._send({'status': 'NO_SELECTED_AUTHORITY', 'message': '该会话未启用 Overlay 样式编辑'}, 400)
+                    return
+                from .language_edit import preview_selected
+                self._send(*preview_selected(self._app.style, body, self._app.language_config, self._app.language_source))
+                return
+            if self._app.native is None:
+                self._send({'status': 'NOT_FOUND', 'message': '启动时使用 --native 启用授权 YAML 参数'}, 404)
+                return
+            try:
+                action = path.rsplit('/', 1)[-1]
+                result, code = getattr(self._app.native, action)(body)
+                self._send(result, code)
+            except (ValueError, RuntimeError, OSError) as exc:
+                self._send({'status': 'NATIVE_REJECTED', 'message': str(exc)}, 400)
+            return
         STYLE_PATHS = {'/api/style/preview', '/api/style/commit', '/api/style/cancel'}
         if path in STYLE_PATHS:
             style = getattr(self._app, 'style', None)
@@ -289,7 +340,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--example', choices=('plain', 'nmr', 'ftir'), default='plain')
+    parser.add_argument('--example', choices=('plain', 'nmr', 'ftir', 'curve'), default='plain')
     parser.add_argument('--script', type=Path, help='Explicitly trusted local script, never supplied by HTTP')
     parser.add_argument('--config', type=Path)
     parser.add_argument('--scope', default='main')
@@ -300,11 +351,20 @@ def main(argv=None):
                         help='Trusted local Inspector assets (development worktree only)')
     parser.add_argument('--overlay', type=Path, default=None,
                         help='Trusted fixed style-overlay file; enables the style-only session')
+    parser.add_argument('--native', action='store_true',
+                        help='授权 Native YAML 参数预览/保存；与 --overlay 分开使用')
+    parser.add_argument('--browser', action='store_true', help='启动后在默认浏览器打开 Inspector')
     args = parser.parse_args(argv)
+    if args.example == 'curve' and args.script is None:
+        args.script = Path(__file__).with_name('sample.py')
+        if args.overlay is None:
+            args.overlay = Path.cwd() / 'figpact-demo.style.json'
     if args.overlay is not None and args.script is None:
         parser.error('--overlay 需要 --script（无 config 时 style 启动合法，config 可选）')
     if bool(args.script) != bool(args.config) and args.overlay is None:
         parser.error('--script 和 --config 必须同时指定')
+    if args.native and (args.overlay is not None or args.script is None or args.config is None):
+        parser.error('--native 需要 --script/--config，不能与 --overlay 混用')
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -354,17 +414,31 @@ def main(argv=None):
                                  scope=args.scope, overlay=args.overlay)
         except RuntimeError as error:
             parser.error(f'style overlay 启动被拒绝：{error}')
+    native = None
+    if args.native:
+        from .native_parameters import NativeParameterSession
+        native = NativeParameterSession(script=args.script, config=args.config, scope=args.scope)
     try:
         with session, InspectorServer(session, ('127.0.0.1', args.port), frontend=args.frontend,
-                                      source=source, style=style) as server:
+                                      source=source, style=style, native=native) as server:
             print(f'Inspector: http://127.0.0.1:{server.server_address[1]}', flush=True)
-            print('G2/G5a: session acceptance only; G5b source writes land only after the page '
-                  'session token consents to a minted plan', flush=True)
+            if args.browser:
+                import webbrowser
+                webbrowser.open(f'http://127.0.0.1:{server.server_address[1]}')
+            if style is not None:
+                print('Overlay: selected authorized styles; real previews; explicit JSON saves. '
+                      'Working drafts are not Strict PASS.', flush=True)
+            elif native is not None:
+                print('Native: authorized YAML parameters; preview before explicit draft/publication commit.', flush=True)
+            else:
+                print('Geometry: source writes require an authorized plan and explicit page consent.', flush=True)
             try:
                 server.serve_forever()
             except KeyboardInterrupt:
                 pass
     finally:
+        if native is not None:
+            native.close()
         if figure is not None:
             plt.close(figure)
 

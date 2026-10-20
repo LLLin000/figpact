@@ -691,15 +691,30 @@ button[aria-expanded="true"] {
 
 .hint { color: var(--text-muted); font-size: 12px; }
 
-/* ---------- 样式微调 / Style Section (G18) ---------- */
-#style-section { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 10px; }
 #style-section h3 { margin: 0; font-size: 14px; }
 #style-target { max-width: 100%; padding: 4px 6px; font-size: 13px; }
 #style-value { width: 90px; }
 #style-pending { margin-top: 8px; }
+#style-view-row { margin: 8px 0 0; }
+#style-view-row label { display: flex; gap: 6px; align-items: baseline; cursor: pointer; }
 #style-timings { margin-top: 8px; }
 #style-timings dt { color: var(--text-muted); }
 #style-timings dd { margin: 0; font-family: var(--mono); }
+/* ---------- 自然语言改样式 / Language edit (v0.1) ---------- */
+#language-section { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 10px; }
+#language-section h3 { margin: 0; font-size: 14px; }
+#language-target { margin: 8px 0 0; }
+#language-request { min-width: 180px; }
+.language-request-group { flex: 1 1 auto; }
+.language-request-group input { width: 100%; }
+#language-plan { margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+/* ---------- Native 参数微调 / Native parameters (v0.1) ---------- */
+#native-section { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 10px; }
+#native-section h3 { margin: 0; font-size: 14px; }
+#native-controls { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+#native-controls .input-group input { width: 110px; }
+#native-pending { margin-top: 8px; }
+#native-receipt { margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 /* ---------- 对象大纲列表 / Object List ---------- */
 #object-list {
   list-style: none;

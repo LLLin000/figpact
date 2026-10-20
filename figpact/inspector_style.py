@@ -173,6 +173,7 @@ class StyleSession:
         figure. Ids are never derived from styled positions/labels.
         """
         from figpact import style_identity as ident
+        from figpact import style_overlay as ov
         from figpact.inspector import capture_figure
         base_descs, resolved = self._baseline_descs()
         base_by_id = {d["id"]: d for d in base_descs if d.get("eligible")}
@@ -235,10 +236,12 @@ class StyleSession:
                     scene_ids.extend(by_gid.get(gid) or [])
                 if not scene_ids:
                     continue  # unmappable target never enters the frame
+                low, high = ov.LINEWIDTH_RANGE if role == "curve.linewidth" else ov.FONTSIZE_RANGE
                 targets.append({
                     "target_id": tid,
                     "label": _label(desc),
                     "property": desc.get("property"),
+                    "min": low, "max": high,
                     "current_pt": current,
                     "saved_pt": saved.get(tid),
                     "scene_ids": scene_ids,

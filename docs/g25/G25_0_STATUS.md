@@ -2,6 +2,8 @@
 
 **Overall status: `BLOCKED`, not `COMPLETED`.** Preparation documents and consistency checks are complete; prerequisites for independent evaluation are not. Protocol artifacts remain DRAFT and unfrozen. Do not generate the 96-case gold, freeze a corpus, or call the evaluated model. Certified unseen families: **0**; frozen cases: **0**.
 
+**Product roadmap revision: G25 is PAUSED; G25-S2 is FROZEN.** The research status remains `BLOCKED` and no blind evaluation is started. It is not a prerequisite for the restricted, user-selected figpact v0.1 workflow. No additional external stress rounds or protocol expansion are planned. Product prompts/demos are development-exposed, not unseen evaluation evidence.
+
 ## Completed preparation evidence
 
 - `G24_CONTAMINATION.md`: all G24 families/cases, prompt rounds, private evidence boundaries, contamination rules and hashes. All G24 source families are DEVELOPMENT and excluded from unseen.
@@ -45,7 +47,7 @@ Other figpact development may continue separately, including FTIR scope/legend l
 
 ## Publication boundary
 
-Historical preparation checkpoint: the user's GitHub `master` lookup returned 404 before the local artifacts were published. G25-S was subsequently committed and pushed to `origin/master` as [`74ea67a`](https://github.com/LLLin000/figpact/commit/74ea67a), and the user independently confirmed remote access. The earlier 404 is historical, not the current publication state. G25-S2 changes are separate from that published baseline; no newer commit/push is claimed here.
+Historical preparation checkpoint: the user's GitHub `master` lookup returned 404 before the local artifacts were published. G25-S was subsequently pushed as [`74ea67a`](https://github.com/LLLin000/figpact/commit/74ea67a), and G25-S2 as [`613dd9c`](https://github.com/LLLin000/figpact/commit/613dd9c). The user independently confirmed access to G25-S. The earlier 404 is historical, not the current publication state. Neither publication changes the independent evaluation status.
 
 ## Preparation validation (not freeze verification)
 

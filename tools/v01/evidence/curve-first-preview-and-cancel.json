@@ -1,0 +1,349 @@
+[
+  {
+    "url": "/api/language/preview",
+    "request": {
+      "frame_revision": "5c019f42f1457cbb30adf9bb64491dd7c20df166127153f514290ad2a1563a6c",
+      "scene_id": "figpact.style.main.ax[s7b34f4a9ea23].ylabel.fontsize#0",
+      "target_id": "main.ax[s7b34f4a9ea23].ylabel.fontsize",
+      "request": "把选中的轴标题字号改为 9 pt，科学数据和视图保持不变"
+    },
+    "http_status": 200,
+    "response": {
+      "status": "OK",
+      "style": {
+        "targets": [
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].curve.da203d74f3f44.l98743feb.gfigpact_demo.main.curve.response.linewidth",
+            "label": "curve Response",
+            "property": "linewidth",
+            "min": 0.05,
+            "max": 20,
+            "current_pt": 1.5,
+            "saved_pt": null,
+            "scene_ids": [
+              "figpact_demo.main.curve.response"
+            ]
+          },
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].tick.x.fontsize",
+            "label": "x tick labels",
+            "property": "fontsize",
+            "min": 0.5,
+            "max": 100,
+            "current_pt": 9,
+            "saved_pt": null,
+            "scene_ids": [
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#0",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#1",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#2",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#3",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#4",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#5",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#6",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#7",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#8"
+            ]
+          },
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].tick.y.fontsize",
+            "label": "y tick labels",
+            "property": "fontsize",
+            "min": 0.5,
+            "max": 100,
+            "current_pt": 9,
+            "saved_pt": null,
+            "scene_ids": [
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#0",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#1",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#2",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#3",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#4",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#5",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#6",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#7"
+            ]
+          },
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].xlabel.fontsize",
+            "label": "xlabel",
+            "property": "fontsize",
+            "min": 0.5,
+            "max": 100,
+            "current_pt": 10,
+            "saved_pt": null,
+            "scene_ids": [
+              "figpact.style.main.ax[s7b34f4a9ea23].xlabel.fontsize#0"
+            ]
+          },
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].ylabel.fontsize",
+            "label": "ylabel",
+            "property": "fontsize",
+            "min": 0.5,
+            "max": 100,
+            "current_pt": 9,
+            "saved_pt": 9,
+            "scene_ids": [
+              "figpact.style.main.ax[s7b34f4a9ea23].ylabel.fontsize#0"
+            ]
+          }
+        ],
+        "overlay_sha256": "",
+        "current_qa": {
+          "blocking": [],
+          "glyph_floor": [],
+          "pass": true
+        },
+        "qa_delta": {
+          "ambiguous": [],
+          "eligible": true,
+          "inherited": [],
+          "new": [],
+          "reason": "无差异",
+          "unmeasured": [],
+          "worsened": []
+        },
+        "draft": false,
+        "issue_count": 0,
+        "candidate_id": "4OfA0qWwYGo73NKoKjuMUw",
+        "pending": {
+          "candidate_id": "4OfA0qWwYGo73NKoKjuMUw",
+          "target_id": "main.ax[s7b34f4a9ea23].ylabel.fontsize",
+          "old_pt": 10,
+          "new_pt": 9,
+          "affected": [
+            "main.ax[s7b34f4a9ea23].ylabel.fontsize"
+          ],
+          "base_frame_revision": "5c019f42f1457cbb30adf9bb64491dd7c20df166127153f514290ad2a1563a6c",
+          "expected_sha256": "",
+          "is_draft": false,
+          "issue_count": 0,
+          "current_qa": {
+            "blocking": [],
+            "glyph_floor": [],
+            "pass": true
+          },
+          "qa_delta": {
+            "ambiguous": [],
+            "eligible": true,
+            "inherited": [],
+            "new": [],
+            "reason": "无差异",
+            "unmeasured": [],
+            "worsened": []
+          }
+        },
+        "receipt": {
+          "audit_summary": {
+            "agreement": true,
+            "derived_allowed": 1,
+            "derived_total": 1,
+            "hard": 0,
+            "pair_runs": 2,
+            "required_changed": {
+              "main.ax[s7b34f4a9ea23].ylabel.fontsize.fontsize": [
+                10,
+                9
+              ]
+            },
+            "transition": {
+              "no_change_request": false,
+              "requested_removals": [],
+              "requested_upserts": [
+                "main.ax[s7b34f4a9ea23].ylabel.fontsize"
+              ],
+              "retained": []
+            }
+          },
+          "draft": false,
+          "drift": null,
+          "figure_qa": {
+            "blocking": [],
+            "glyph_floor": [],
+            "pass": true
+          },
+          "figure_verification_state": "PASS",
+          "local_edit_state": "PASS",
+          "local_problems": [],
+          "overlay_path": "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-v01-live\\.style-preview-4OfA0qWwYGo73NKoKjuMUw.json",
+          "protected_sources": [
+            "D:\\L\\AI\\figpact\\figpact\\sample.py"
+          ],
+          "qa_before": {
+            "blocking": [],
+            "glyph_floor": [],
+            "pass": true
+          },
+          "qa_delta": {
+            "ambiguous": [],
+            "eligible": true,
+            "inherited": [],
+            "new": [],
+            "reason": "无差异",
+            "unmeasured": [],
+            "worsened": []
+          },
+          "schema": "figpact.style-overlay-receipt/1",
+          "science_notes": [],
+          "science_unchanged": true,
+          "source_commit_state": "COMMITTED",
+          "target_effects": [
+            {
+              "after": [
+                9
+              ],
+              "before": [
+                10
+              ],
+              "id": "main.ax[s7b34f4a9ea23].ylabel.fontsize",
+              "property": "fontsize",
+              "requested": 9,
+              "role": "axis.title"
+            }
+          ]
+        },
+        "timings_ms": {
+          "rebuild_ms": 1958.3450999998604,
+          "preview_ms": 2483.8706999980786
+        }
+      },
+      "language": {
+        "plan": {
+          "status": "READY",
+          "route": "overlay",
+          "scope": "main",
+          "revision": "5c019f42f1457cbb30adf9bb64491dd7c20df166127153f514290ad2a1563a6c",
+          "edits": [
+            {
+              "control_id": "main.ax[s7b34f4a9ea23].ylabel.fontsize",
+              "value": 9
+            }
+          ],
+          "preserve": [
+            "science",
+            "view"
+          ],
+          "reason": "已将选中的轴标题字号改为 9 pt，科学数据和视图保持不变。"
+        },
+        "selected_target": {
+          "target_id": "main.ax[s7b34f4a9ea23].ylabel.fontsize",
+          "label": "ylabel",
+          "property": "fontsize",
+          "min": 0.5,
+          "max": 100,
+          "current_pt": 10,
+          "saved_pt": null,
+          "scene_ids": [
+            "figpact.style.main.ax[s7b34f4a9ea23].ylabel.fontsize#0"
+          ]
+        },
+        "model": "qwen2.5:3b-instruct",
+        "request": "把选中的轴标题字号改为 9 pt，科学数据和视图保持不变"
+      }
+    },
+    "frame_revision": "6777a3675a05d4b07524f237ec0ffedc3e27c0c9274b3f592cdb3e6ceecf084e"
+  },
+  {
+    "url": "/api/style/cancel",
+    "request": {
+      "candidate_id": "4OfA0qWwYGo73NKoKjuMUw"
+    },
+    "http_status": 200,
+    "response": {
+      "status": "OK",
+      "style": {
+        "targets": [
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].curve.da203d74f3f44.l98743feb.gfigpact_demo.main.curve.response.linewidth",
+            "label": "curve Response",
+            "property": "linewidth",
+            "min": 0.05,
+            "max": 20,
+            "current_pt": 1.5,
+            "saved_pt": null,
+            "scene_ids": [
+              "figpact_demo.main.curve.response"
+            ]
+          },
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].tick.x.fontsize",
+            "label": "x tick labels",
+            "property": "fontsize",
+            "min": 0.5,
+            "max": 100,
+            "current_pt": 9,
+            "saved_pt": null,
+            "scene_ids": [
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#0",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#1",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#2",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#3",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#4",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#5",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#6",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#7",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.x.fontsize#8"
+            ]
+          },
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].tick.y.fontsize",
+            "label": "y tick labels",
+            "property": "fontsize",
+            "min": 0.5,
+            "max": 100,
+            "current_pt": 9,
+            "saved_pt": null,
+            "scene_ids": [
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#0",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#1",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#2",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#3",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#4",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#5",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#6",
+              "figpact.style.main.ax[s7b34f4a9ea23].tick.y.fontsize#7"
+            ]
+          },
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].xlabel.fontsize",
+            "label": "xlabel",
+            "property": "fontsize",
+            "min": 0.5,
+            "max": 100,
+            "current_pt": 10,
+            "saved_pt": null,
+            "scene_ids": [
+              "figpact.style.main.ax[s7b34f4a9ea23].xlabel.fontsize#0"
+            ]
+          },
+          {
+            "target_id": "main.ax[s7b34f4a9ea23].ylabel.fontsize",
+            "label": "ylabel",
+            "property": "fontsize",
+            "min": 0.5,
+            "max": 100,
+            "current_pt": 10,
+            "saved_pt": null,
+            "scene_ids": [
+              "figpact.style.main.ax[s7b34f4a9ea23].ylabel.fontsize#0"
+            ]
+          }
+        ],
+        "overlay_sha256": "",
+        "current_qa": {
+          "blocking": [],
+          "glyph_floor": [],
+          "pass": true
+        },
+        "qa_delta": {},
+        "draft": false,
+        "issue_count": 0,
+        "timings_ms": {
+          "rebuild_ms": 1958.3450999998604,
+          "preview_ms": 2483.8706999980786
+        }
+      }
+    },
+    "frame_revision": "5c019f42f1457cbb30adf9bb64491dd7c20df166127153f514290ad2a1563a6c"
+  }
+]

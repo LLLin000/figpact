@@ -1,0 +1,9 @@
+{
+  "saved_badge": "已保存并验证",
+  "reopened_target": "ylabel",
+  "reopened": {
+    "current_pt": 9,
+    "saved_pt": 9
+  },
+  "note": "重开后打开的是默认选中 curve 目标；以上数值来自 ylabel 目标。"
+}

@@ -1,0 +1,135 @@
+{
+  "schema": "figpact-tavotto-handoff/1",
+  "created_at": "2026-10-20T10:54:09.505229+00:00",
+  "figures": [
+    {
+      "id": "Fig2_NMR_pure_stacked",
+      "asset": "08 核磁/Fig2_NMR_pure_stacked.pdf",
+      "asset_sha256": "ca0b48f8ef4a514c5f54d1f5f9bcd5ad888584f11300f709fd178c787f8c2299",
+      "page": {
+        "page_count": 1,
+        "media_mm": [
+          48.0,
+          48.0
+        ],
+        "crop_mm": [
+          48.0,
+          48.0
+        ],
+        "rotation": 0,
+        "user_unit": 1.0,
+        "box": "CropBox",
+        "measured_page_mm": [
+          48.0,
+          48.0
+        ]
+      },
+      "target_width_mm": 48.0,
+      "target_height_mm": 48.0,
+      "min_effective_font_pt": null,
+      "require_uniform_scale": true,
+      "require_scale": 1.0,
+      "tolerance_mm": 0.05,
+      "source_sha256": {
+        "08 核磁/08 NMR.py": "e662e0cb3bd750af07b1824703d8e602755e35926b7f4cfccbac789758532128"
+      },
+      "font_roles": [],
+      "figpact_receipt": {
+        "kind": "asset-integrity",
+        "asset_sha256": "ca0b48f8ef4a514c5f54d1f5f9bcd5ad888584f11300f709fd178c787f8c2299",
+        "page_mm": [
+          48.0,
+          48.0
+        ],
+        "status": "MEASURED",
+        "note": "只证明文件与页面尺寸；不替代图形科学/Strict PASS 验证"
+      }
+    },
+    {
+      "id": "Fig2_FTIR_transmittance_stacked_annotated",
+      "asset": "09 FTIR/Fig2_FTIR_transmittance_stacked_annotated.pdf",
+      "asset_sha256": "25b38b59a8362f4545f67c7680eb4e565095997b296b811012cf581c964a4bc3",
+      "page": {
+        "page_count": 1,
+        "media_mm": [
+          48.0,
+          48.0
+        ],
+        "crop_mm": [
+          48.0,
+          48.0
+        ],
+        "rotation": 0,
+        "user_unit": 1.0,
+        "box": "CropBox",
+        "measured_page_mm": [
+          48.0,
+          48.0
+        ]
+      },
+      "target_width_mm": 48.0,
+      "target_height_mm": 48.0,
+      "min_effective_font_pt": null,
+      "require_uniform_scale": true,
+      "require_scale": 1.0,
+      "tolerance_mm": 0.05,
+      "source_sha256": {
+        "09 FTIR/plot_ftir.py": "8ce1681c81cd10c8e4926d4c599ad46352af108306d0b6b7a0ac725e84deb6ad"
+      },
+      "font_roles": [],
+      "figpact_receipt": {
+        "kind": "asset-integrity",
+        "asset_sha256": "25b38b59a8362f4545f67c7680eb4e565095997b296b811012cf581c964a4bc3",
+        "page_mm": [
+          48.0,
+          48.0
+        ],
+        "status": "MEASURED",
+        "note": "只证明文件与页面尺寸；不替代图形科学/Strict PASS 验证"
+      }
+    },
+    {
+      "id": "Fig2_XRD_stacked",
+      "asset": "10 XRD/Fig2_XRD_stacked.pdf",
+      "asset_sha256": "d73e6dfe498e76ac394636ee3dd0948969e6d7dac0bde04aa6eb5f19b9d42b59",
+      "page": {
+        "page_count": 1,
+        "media_mm": [
+          48.0,
+          48.0
+        ],
+        "crop_mm": [
+          48.0,
+          48.0
+        ],
+        "rotation": 0,
+        "user_unit": 1.0,
+        "box": "CropBox",
+        "measured_page_mm": [
+          48.0,
+          48.0
+        ]
+      },
+      "target_width_mm": 48.0,
+      "target_height_mm": 48.0,
+      "min_effective_font_pt": null,
+      "require_uniform_scale": true,
+      "require_scale": 1.0,
+      "tolerance_mm": 0.05,
+      "source_sha256": {
+        "10 XRD/plot_xrd.py": "c8162dc3635571e6dbd06e04676a0a5a3449f392f5b2726f0f089143e0fb7629"
+      },
+      "font_roles": [],
+      "figpact_receipt": {
+        "kind": "asset-integrity",
+        "asset_sha256": "d73e6dfe498e76ac394636ee3dd0948969e6d7dac0bde04aa6eb5f19b9d42b59",
+        "page_mm": [
+          48.0,
+          48.0
+        ],
+        "status": "MEASURED",
+        "note": "只证明文件与页面尺寸；不替代图形科学/Strict PASS 验证"
+      }
+    }
+  ]
+}
