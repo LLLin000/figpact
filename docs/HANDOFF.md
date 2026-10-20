@@ -30,6 +30,8 @@ figpact handoff verify --manifest fig2.manifest.json --base <fig2> \
 
 `verify` 重新测量 PDF、重算每个 panel 的 `scale_x/scale_y`，并重验来源哈希；文件或脚本一变就 FAIL。它只读布局，绝不改 Tavotto 的 JSON。
 
+面板身份要求**唯一匹配**：`asset` 的完整相对路径（反斜杠归一）与可选的 `layout_panel_id` 都必须对上；预期面板缺失、重复或歧义（同名 basename 在别的目录也算）直接 FAIL，不会因为其他面板仍匹配就 PASS。报告里带 `expected_panels` 与 `matched_panels` 计数。
+
 ## 真实 fig2 结果
 
 三张矢量图的 PDF 页面都是 **48.000 × 48.000 mm**。
@@ -50,12 +52,27 @@ figpact handoff verify --manifest fig2.manifest.json --base <fig2> \
 | FTIR | 49.2505 × 42.9727 | 1.026053 | 0.895265 | FAIL 非等比 |
 | XRD | 53.3879 × 45.0655 | 1.112247 | 0.938865 | FAIL 非等比 |
 
-B 不是“48mm 版”：它把 48mm 原图再次非等比缩放。FTIR 的 4.7pt 标签在 B 里实际只剩 `4.7 × 0.895265 = 4.21pt`；A 虽恢复到 1:1，4.7pt 仍低于 5pt 下限。**版面契约只回答缩放；字号合格与否仍须 figpact 自己的 QA/final-size 回执**，不能靠把版面缩小来“通过”。若要求 FTIR 在等宽缩放下达到 5pt，需要约 `48 × 5 / 4.7 = 51.06mm` 的占位，或把标签/图例提高到 5.0pt 后由 figpact 重排。
+B 不是“48mm 版”：它把 48mm 原图再次非等比缩放。FTIR 的 4.7pt 标签在 B 里实际只剩 `4.7 × 0.895265 = 4.21pt`；A 虽恢复到 1:1，4.7pt 仍低于 5pt 下限。**版面契约只回答缩放；字号合格与否仍须 figpact 自己的 QA/final-size 回执**，不能靠把版面缩小来“通过”。
+
+在 1:1 契约下，单纯把占位放大到 51.06mm **不会**把源字号从 4.7 变成 5.0；只有允许整图放大 1.064 倍时才成立，而那是 scale≠1。要满足 5pt，必须由 figpact 把标签/图例改成 5.0pt 并重排；48mm 内能否容纳要实测，不能靠版面缩放替代。
+
+## Fig2 真实联动结果
+
+- 授权：用显式 `TAVOTTO_MCP_ROOTS`（figpact + fig2 项目根）启动官方 MCP server，`tavotto_health` 返回 `source=explicit_env`，`tavotto_refresh_project` 成功，不再 `path_out_of_scope`。OMP 当前已启动的 MCP 进程仍持旧 roots，需要重载/重启宿主；配置文件已包含项目根。
+- 发现：refresh 首次写入项目根 `tavotto_registry.json`，补上 `fig2/08 核磁/08 NMR.py → Fig2_NMR_pure_stacked`、`fig2/09 FTIR/plot_ftir.py → 3 个 stem`、`fig2/10 XRD/plot_xrd.py → 2 个 stem`。这解决了 `fs.export(...)` 静态扫描不到的问题；第二次 refresh 显示“脚本注册表无变化”。
+- Probe：真实 `tavotto_open_figure` 打开三张图，均为 48.0×48.0 mm：
+  - NMR：35 个可编辑元素，2 errors / 3 warns。
+  - FTIR：30 个可编辑元素，2 errors / 4 warns。
+  - XRD：35 个可编辑元素，2 errors / 3 warns。
+- 默认规范 `lab-publication-v1` 对单图要求 80/150mm 页面和 8pt 绝对下限，因此三张 48mm 面板全部报 `page-width` + `font-below-absolute-floor`。这是“单图规范”和“48mm 面板”的冲突，不应靠缩图解决。
+- 以显式面板覆盖（48mm 单双栏 + 5pt 下限）重跑：NMR 与 XRD 为 **0 errors**（仅有字体替换等警告）；FTIR 仍有 **1 error：4.70pt < 5pt**，另有图例压数据警告。
+- 导出：NMR、XRD 已由 `tavotto_export` 真实导出到 `tools/v01/tavotto-export/`，页面均为 48.0×48.0 mm，proof 报告已核验 integrity/size/carrier/fonts_embedded；FTIR 被 `preflight_blocked` 拒绝，未用 `explicit_confirm` 绕过。
+- 整版 180×254.4mm 的最终 PDF 仍只能在 Tavotto 桌面完成（MCP 工具导出“单图”，不导出画布组合）。布局 A 的 1:1 放置已由本桥核验；桌面整版导出尚未自动化。
 
 ## Tavotto 刷新状态
 
-- 只读 `python -m tavotto.engine.discover <fig2>` 只识别到 3 个脚本 / 4 个 stem，**没有** `08 NMR.py` 与 `plot_ftir.py`：它们通过 `fs.export(...)` 间接保存，Tavotto 静态扫描看不到，只能标为 `needs_probe`。需要一次 Tavotto 试运行探测或明确的 `tavotto_registry.json`；本桥不猜、不补注册表。
-- 本宿主 MCP 的 `tavotto_refresh_project` 只授权了 `D:\L\AI\figpact`，真实项目根返回 `path_out_of_scope`。放开项目根需要把该目录加入 Tavotto MCP 的宿主 roots / `TAVOTTO_MCP_ROOTS` 后重启 MCP 宿主；本桥不绕过该授权，布局核验走只读 JSON。
+- 静态 `discover` 只看到 3 个脚本 / 4 个 stem，缺 `08 NMR.py`、`plot_ftir.py`；但授权 refresh 后已由注册表补全上述 stem，后续 open 不再需要猜。
+- 本机 OMP 进程的旧 roots 仍是 `D:\L\AI\figpact`；显式 env 的独立 MCP 连接已验证可用。要让它成为宿主默认，需重载/重启 MCP 宿主；本桥不绕过该授权，布局核验走只读 JSON。
 
 ## 边界
 

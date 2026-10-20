@@ -1,0 +1,113 @@
+{
+  "kind": "tavotto-proof",
+  "version": 2,
+  "source": "codex-mcp",
+  "stem": "Fig2_NMR_pure_stacked",
+  "project": "<project:fig2>",
+  "script": "fig2/08 核磁/08 NMR.py",
+  "profile": {
+    "profile_id": "lab-publication-v1",
+    "profile_version": "1.1.0",
+    "label": "课题组出版规范 v1",
+    "journal": {
+      "widths_mm": {
+        "single": 48.0,
+        "double": 48.0
+      },
+      "min_effective_font_size_pt": 5.0,
+      "absolute_min_font_size_pt": 5.0,
+      "legend_policy": {
+        "min_font_size_pt": 5.0
+      }
+    },
+    "derived_from": "lab-publication-v1"
+  },
+  "page_mm": {
+    "w": 48.0,
+    "h": 48.0,
+    "margin": 0
+  },
+  "dpi": 600,
+  "formats": [
+    "pdf"
+  ],
+  "patch_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "patches": [],
+  "checks": [
+    {
+      "id": "font-family-substituted",
+      "severity": "warn",
+      "text": "图内文字用的是 Arial，规范要求 Times New Roman（该字体是常见的替代品，说明目标字体没装上）",
+      "count": 1,
+      "object_ids": [
+        "Fig2_NMR_pure_stacked"
+      ],
+      "gids": [
+        "axes_0.xlabel",
+        "axes_0.ylabel",
+        "axes_0.texts_0",
+        "axes_0.texts_1",
+        "axes_0.texts_2",
+        "axes_0.texts_3",
+        "axes_0.texts_4",
+        "axes_0.texts_5",
+        "axes_0.texts_6",
+        "axes_0.texts_7",
+        "axes_0.legend.texts_0",
+        "axes_0.legend.texts_1",
+        "axes_0.legend.texts_2",
+        "axes_0.legend.texts_3",
+        "axes_0.xticks"
+      ],
+      "detail": {
+        "family": "Arial"
+      }
+    },
+    {
+      "id": "line-width-off-preset",
+      "severity": "warn",
+      "text": "图例示意线宽最终有效值 1.20pt 不在规范档位 0.5/0.75/1/1.5pt 上",
+      "count": 1,
+      "object_ids": [
+        "Fig2_NMR_pure_stacked"
+      ],
+      "gids": [
+        "axes_0.legend.texts_0",
+        "axes_0.legend.texts_1",
+        "axes_0.legend.texts_2",
+        "axes_0.legend.texts_3"
+      ],
+      "detail": {
+        "effective_pt": 1.2
+      }
+    },
+    {
+      "id": "palette-line-markers",
+      "severity": "suggestion",
+      "text": "14 条曲线全部没有 marker，黑白打印或色觉障碍读者难以区分，可考虑点线图或不同线型",
+      "count": 1,
+      "object_ids": [
+        "Fig2_NMR_pure_stacked"
+      ],
+      "gids": [
+        "axes_0"
+      ],
+      "detail": {
+        "lines": 14
+      }
+    }
+  ],
+  "check_counts": {
+    "error": 0,
+    "warn": 2,
+    "not_verifiable": 0,
+    "suggestion": 1
+  },
+  "not_verifiable": [],
+  "forced": false,
+  "acknowledged": [],
+  "files": [
+    "Fig2_NMR_pure_stacked_v01_1020_201340.pdf"
+  ],
+  "exported_at": "2026-10-20 20:13:42"
+}

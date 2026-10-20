@@ -70,6 +70,7 @@ def scan_layout(layout: Path, *, base: Path, canvas: str | None = None,
         entry = {
             "id": Path(asset_rel).stem,
             "asset": asset_rel,
+            "layout_panel_id": obj.get("id"),
             "sources": [source] if source else [],
             "target_width_mm": width,
             "target_height_mm": height,
@@ -246,25 +247,36 @@ def verify_layout(path: Path, manifest: dict[str, Any], *, base: Path,
         raise HandoffError("找不到指定 canvas；请用 --canvas 指定 id 或 name")
     panels = []
     findings = []
-    by_asset = {Path(str(e.get("asset") or "")).name: e for e in manifest.get("figures") or []}
+    figures = manifest.get("figures") or []
 
-    def by_script(name: str):
-        if not name:
-            return None
-        for entry in manifest.get("figures") or []:
-            names = {Path(str(s).replace("\\", "/")).name for s in (entry.get("source_sha256") or {})}
-            if name in names:
-                return entry
-        return None
+    def norm(value: Any) -> str:
+        text = str(value or "").replace("\\", "/").strip()
+        while text.startswith("./"):
+            text = text[2:]
+        return text
 
-    for obj in selected.get("objects") or []:
-        if not isinstance(obj, dict) or obj.get("type") != "panel":
+    def matches(entry: dict[str, Any], obj: dict[str, Any]) -> bool:
+        if norm(obj.get("fileId")) != norm(entry.get("asset")):
+            return False
+        panel_id = entry.get("layout_panel_id")
+        return panel_id is None or obj.get("id") == panel_id
+
+    matched_panels: set[str] = set()
+    for entry in figures:
+        hits = [obj for obj in (selected.get("objects") or [])
+                if isinstance(obj, dict) and obj.get("type") == "panel" and matches(entry, obj)]
+        if not hits:
+            findings.append({"figure": entry.get("id"), "code": "LAYOUT_PANEL_MISSING",
+                             "asset": entry.get("asset"),
+                             "panel_id": entry.get("layout_panel_id")})
             continue
-        file_name = Path(str(obj.get("fileId") or "").replace("\\", "/")).name
-        script_name = Path(str(obj.get("script") or "").replace("\\", "/")).name
-        entry = by_asset.get(file_name) or by_script(script_name)
-        if entry is None:
+        if len(hits) > 1:
+            findings.append({"figure": entry.get("id"), "code": "LAYOUT_PANEL_AMBIGUOUS",
+                             "asset": entry.get("asset"),
+                             "panel_ids": sorted(str(h.get("id")) for h in hits)})
             continue
+        obj = hits[0]
+        matched_panels.add(str(obj.get("id")))
         asset = _resolve(base, str(entry["asset"]))
         page = measure_pdf_page_mm(asset)
         width, height = page["measured_page_mm"]
@@ -301,10 +313,9 @@ def verify_layout(path: Path, manifest: dict[str, Any], *, base: Path,
             if abs(w - target[0]) > 0.05 or abs(h - target[1]) > 0.05:
                 findings.append({"figure": entry["id"], "code": "LAYOUT_TARGET_MISMATCH",
                                  "target_mm": target, "placed_mm": [round(w, 4), round(h, 4)]})
-    if not panels:
-        findings.append({"code": "LAYOUT_NO_MATCHED_PANELS", "canvas": selected.get("name")})
     return {"canvas": selected.get("name"), "canvas_id": selected.get("id"),
             "page_mm": [(selected.get("page") or {}).get("w"), (selected.get("page") or {}).get("h")],
+            "expected_panels": len(figures), "matched_panels": len(matched_panels),
             "panels": panels, "findings": findings}
 
 
@@ -336,6 +347,7 @@ def build(spec: dict[str, Any], *, base: Path | None = None) -> dict[str, Any]:
             sources[str(source)] = _sha256(path)
         figures.append({
             "id": entry["id"], "asset": entry["asset"],
+            "layout_panel_id": entry.get("layout_panel_id"),
             "asset_sha256": _sha256(asset), "page": page,
             "target_width_mm": target_w, "target_height_mm": target_h,
             "min_effective_font_pt": entry.get("min_effective_font_pt"),

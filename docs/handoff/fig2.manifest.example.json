@@ -1,10 +1,11 @@
 {
   "schema": "figpact-tavotto-handoff/1",
-  "created_at": "2026-10-20T10:54:09.505229+00:00",
+  "created_at": "2026-10-20T12:06:45.513118+00:00",
   "figures": [
     {
       "id": "Fig2_NMR_pure_stacked",
       "asset": "08 核磁/Fig2_NMR_pure_stacked.pdf",
+      "layout_panel_id": "p_1ndgm88i",
       "asset_sha256": "ca0b48f8ef4a514c5f54d1f5f9bcd5ad888584f11300f709fd178c787f8c2299",
       "page": {
         "page_count": 1,
@@ -48,6 +49,7 @@
     {
       "id": "Fig2_FTIR_transmittance_stacked_annotated",
       "asset": "09 FTIR/Fig2_FTIR_transmittance_stacked_annotated.pdf",
+      "layout_panel_id": "p_kwi7mb58",
       "asset_sha256": "25b38b59a8362f4545f67c7680eb4e565095997b296b811012cf581c964a4bc3",
       "page": {
         "page_count": 1,
@@ -91,6 +93,7 @@
     {
       "id": "Fig2_XRD_stacked",
       "asset": "10 XRD/Fig2_XRD_stacked.pdf",
+      "layout_panel_id": "p_e9vgl3zu",
       "asset_sha256": "d73e6dfe498e76ac394636ee3dd0948969e6d7dac0bde04aa6eb5f19b9d42b59",
       "page": {
         "page_count": 1,

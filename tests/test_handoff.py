@@ -38,7 +38,7 @@ def _spec(asset: Path, source: Path, font_pt: float = 6.0) -> dict:
     return {
         "schema": handoff.SCHEMA,
         "figures": [{
-            "id": "NMR", "asset": str(asset), "sources": [str(source)],
+            "id": "NMR", "asset": asset.name, "sources": [str(source)],
             "target_width_mm": 48.0, "target_height_mm": 48.0,
             "min_effective_font_pt": 5.0,
             "font_roles": [{"role": "axis", "source_pt": 8.5},
@@ -100,6 +100,54 @@ def test_scan_uses_the_tavotto_canvas_as_the_only_layout_source(tmp_path):
     bad = _layout(tmp_path / "B.json", 52.0, 48.0)
     report = handoff.verify(manifest, base=tmp_path, layout=bad, canvas="Figure 2")
     assert {"LAYOUT_NON_UNIFORM", "LAYOUT_SCALED"} <= {f["code"] for f in report["findings"]}
+
+
+def test_layout_missing_panel_is_not_a_pass(tmp_path):
+    asset = _pdf(tmp_path / "Fig.pdf", 48.0, 48.0)
+    manifest = handoff.build({"schema": handoff.SCHEMA, "figures": [{
+        "id": "NMR", "asset": "Fig.pdf", "sources": [], "target_width_mm": 48.0,
+        "target_height_mm": 48.0}]}, base=tmp_path)
+    empty = tmp_path / "empty.json"
+    empty.write_text(json.dumps({"schema": 3, "canvases": [{
+        "id": "c1", "name": "Figure 2", "objects": []}]}), encoding="utf-8")
+    report = handoff.verify(manifest, base=tmp_path, layout=empty, canvas="Figure 2")
+    assert report["status"] == "FAIL"
+    assert {f["code"] for f in report["findings"]} == {"LAYOUT_PANEL_MISSING"}
+    assert report["layout"]["expected_panels"] == 1
+    assert report["layout"]["matched_panels"] == 0
+
+
+def test_duplicate_panels_are_ambiguous_not_matched_twice(tmp_path):
+    _pdf(tmp_path / "Fig.pdf", 48.0, 48.0)
+    manifest = handoff.build({"schema": handoff.SCHEMA, "figures": [{
+        "id": "NMR", "asset": "Fig.pdf", "sources": [], "target_width_mm": 48.0,
+        "target_height_mm": 48.0}]}, base=tmp_path)
+    layout = tmp_path / "dup.json"
+    panel = {"type": "panel", "fileId": "Fig.pdf", "nativeW": 48.0, "nativeH": 48.0,
+             "w": 48.0, "h": 48.0}
+    layout.write_text(json.dumps({"schema": 3, "canvases": [{
+        "id": "c1", "name": "Figure 2",
+        "objects": [dict(panel, id="p1"), dict(panel, id="p2")]}]}), encoding="utf-8")
+    report = handoff.verify(manifest, base=tmp_path, layout=layout, canvas="Figure 2")
+    assert report["status"] == "FAIL"
+    assert {f["code"] for f in report["findings"]} == {"LAYOUT_PANEL_AMBIGUOUS"}
+    assert report["layout"]["panels"] == []
+
+
+def test_same_basename_at_another_path_does_not_match(tmp_path):
+    (tmp_path / "sub").mkdir()
+    _pdf(tmp_path / "sub" / "Fig.pdf", 48.0, 48.0)
+    manifest = handoff.build({"schema": handoff.SCHEMA, "figures": [{
+        "id": "NMR", "asset": "sub/Fig.pdf", "sources": [],
+        "target_width_mm": 48.0, "target_height_mm": 48.0}]}, base=tmp_path)
+    layout = tmp_path / "other.json"
+    layout.write_text(json.dumps({"schema": 3, "canvases": [{
+        "id": "c1", "name": "Figure 2", "objects": [{
+            "id": "p1", "type": "panel", "fileId": "other/Fig.pdf",
+            "nativeW": 48.0, "nativeH": 48.0, "w": 48.0, "h": 48.0}]}]}),
+        encoding="utf-8")
+    report = handoff.verify(manifest, base=tmp_path, layout=layout, canvas="Figure 2")
+    assert {f["code"] for f in report["findings"]} == {"LAYOUT_PANEL_MISSING"}
 
 
 def test_changed_asset_or_source_is_not_silently_latest(tmp_path):

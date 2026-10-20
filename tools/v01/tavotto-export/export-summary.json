@@ -1,0 +1,257 @@
+{
+  "Fig2_NMR_pure_stacked": {
+    "isError": null,
+    "status": "done",
+    "code": null,
+    "files": [
+      {
+        "format": "pdf",
+        "path": "Fig2_NMR_pure_stacked_v01_1020_201340.pdf",
+        "bytes": 53786,
+        "vector": true,
+        "dpi": null,
+        "status": "done",
+        "manifest": {
+          "manifest_version": 1,
+          "format": "pdf",
+          "sha256": "8f6732ef49cf0a26f50c4ba7c1be001ad8fde5dbb94e14b17e4238b34f947479",
+          "bytes": 53786,
+          "policy": "standard",
+          "verdict": "accepted",
+          "required": [
+            "integrity",
+            "size"
+          ],
+          "checks": {
+            "integrity": "verified",
+            "size": "verified",
+            "carrier": "verified",
+            "fonts_embedded": "verified",
+            "text_layer": "unknown",
+            "image_ppi": "not_applicable",
+            "clipping": "unknown"
+          },
+          "notes": [
+            "计划里没有期望的文字行，文字层只抽不比",
+            "没有对象包围盒，裁切只对计划里的对象可判——本次无对象可判"
+          ],
+          "carrier": "vector",
+          "size_pt": [
+            136.063,
+            136.063
+          ],
+          "px": null,
+          "dpi": null,
+          "fonts_used": [
+            "ArialMT",
+            "Arial-BoldMT",
+            "Arial-ItalicMT"
+          ],
+          "plan_identity": "sha256:ad7c203c2d143f0349ee62d400eb88e5c8fb3265eeb8cdcf180ad05f6020906e",
+          "backend": "worker",
+          "identity": {
+            "identity_version": 1,
+            "semantic": "sha256:ad7c203c2d143f0349ee62d400eb88e5c8fb3265eeb8cdcf180ad05f6020906e",
+            "render": "sha256:bb128f551f8958a68ea8d3cd7d30a0972b491e4b6bb27f39715ecfa20905cfcd",
+            "artifact": "8f6732ef49cf0a26f50c4ba7c1be001ad8fde5dbb94e14b17e4238b34f947479",
+            "run": "0ce9c44441984656"
+          },
+          "provenance": {
+            "sources": [
+              {
+                "source_id": "runtime:fig2/08 核磁/08 NMR.py#Fig2_NMR_pure_stacked",
+                "origin": "execution",
+                "kind": "figure",
+                "bytes_sha256": "8f6732ef49cf0a26f50c4ba7c1be001ad8fde5dbb94e14b17e4238b34f947479",
+                "receipt_identity": "sha256:d8b5ff62da65b97babc6acdd4d45a4beb16510fd6e6f4400916ecc9151040860",
+                "patch_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+              }
+            ],
+            "execution_receipts": [
+              "sha256:d8b5ff62da65b97babc6acdd4d45a4beb16510fd6e6f4400916ecc9151040860"
+            ],
+            "receipts": [
+              {
+                "receipt_identity": "sha256:d8b5ff62da65b97babc6acdd4d45a4beb16510fd6e6f4400916ecc9151040860",
+                "receipt_id": "sha256:c1d1a56fc9de1ac7d316fc76f07f5baae887deac758e515df82466745fa9d89c",
+                "completeness": "complete",
+                "runtime_rejected": null,
+                "pid_check": "ok",
+                "control_plane": "python_pool",
+                "python_source": "system",
+                "generation": 1,
+                "source_revision": "bc1f4a9654f49861480ba9082073c570531a15a3",
+                "python_version": "3.14.0",
+                "python_implementation": "CPython",
+                "platform": "win32",
+                "machine": "AMD64",
+                "packages": {
+                  "matplotlib": "3.10.8",
+                  "numpy": "2.3.3",
+                  "pandas": "2.3.3",
+                  "scipy": "1.16.3",
+                  "pillow": "12.3.0",
+                  "seaborn": "0.13.2"
+                },
+                "cwd_origin": "script.parent",
+                "observation": "partial",
+                "binding": {
+                  "revision": "sha256:07c390f649855d471c4e1e9e6f96e628e1cb36e6890fb395b391c44a623cc8a6",
+                  "matched": true,
+                  "changed": 0,
+                  "unobserved": 0
+                }
+              }
+            ],
+            "nodes": [
+              {
+                "id": "runtime:fig2/08 核磁/08 NMR.py#Fig2_NMR_pure_stacked",
+                "node": "runtime:fig2/08 核磁/08 NMR.py#Fig2_NMR_pure_stacked",
+                "instance": 1,
+                "kind": "figure",
+                "source_id": "runtime:fig2/08 核磁/08 NMR.py#Fig2_NMR_pure_stacked",
+                "origin": "execution",
+                "receipt_identity": "sha256:d8b5ff62da65b97babc6acdd4d45a4beb16510fd6e6f4400916ecc9151040860",
+                "internal": null
+              }
+            ],
+            "nodes_truncated": false
+          }
+        }
+      }
+    ],
+    "message": null,
+    "text": "已导出：D:\\L\\AI\\figpact\\tools\\v01\\tavotto-export\\Fig2_NMR_pure_stacked_v01_1020_201340.pdf\n产物核验：D:\\L\\AI\\figpact\\tools\\v01\\tavotto-export\\Fig2_NMR_pure_stacked_v01_1020_201340.pdf：已核验 integrity, size, carrier, fonts_embedded，未核验 text_layer, clipping\n留档：D:\\L\\AI\\figpact\\tools\\v01\\tavotto-export\\Fig2_NMR_pure_stacked_v01_1020_201340_proof.json"
+  },
+  "Fig2_XRD_stacked": {
+    "isError": null,
+    "status": "done",
+    "code": null,
+    "files": [
+      {
+        "format": "pdf",
+        "path": "Fig2_XRD_stacked_v01_1020_201348.pdf",
+        "bytes": 64984,
+        "vector": true,
+        "dpi": null,
+        "status": "done",
+        "manifest": {
+          "manifest_version": 1,
+          "format": "pdf",
+          "sha256": "078d30997c9b0a8ad64c70a320f5add01785f484ccd7fece81103f0f1648b863",
+          "bytes": 64984,
+          "policy": "standard",
+          "verdict": "accepted",
+          "required": [
+            "integrity",
+            "size"
+          ],
+          "checks": {
+            "integrity": "verified",
+            "size": "verified",
+            "carrier": "verified",
+            "fonts_embedded": "verified",
+            "text_layer": "unknown",
+            "image_ppi": "not_applicable",
+            "clipping": "unknown"
+          },
+          "notes": [
+            "计划里没有期望的文字行，文字层只抽不比",
+            "没有对象包围盒，裁切只对计划里的对象可判——本次无对象可判"
+          ],
+          "carrier": "vector",
+          "size_pt": [
+            136.063,
+            136.063
+          ],
+          "px": null,
+          "dpi": null,
+          "fonts_used": [
+            "ArialMT",
+            "Arial-BoldMT"
+          ],
+          "plan_identity": "sha256:6ef3c7e583f841d29362f293fd97730b5a37bb5d9af5cdf951fbf3b6995e5145",
+          "backend": "worker",
+          "identity": {
+            "identity_version": 1,
+            "semantic": "sha256:6ef3c7e583f841d29362f293fd97730b5a37bb5d9af5cdf951fbf3b6995e5145",
+            "render": "sha256:fd11086dc6ab7b90b48531cf440d4aa1d48ecd6f3e602210ab7841e140f579dd",
+            "artifact": "078d30997c9b0a8ad64c70a320f5add01785f484ccd7fece81103f0f1648b863",
+            "run": "5b92f4ebd4a048d8"
+          },
+          "provenance": {
+            "sources": [
+              {
+                "source_id": "runtime:fig2/10 XRD/plot_xrd.py#Fig2_XRD_stacked",
+                "origin": "execution",
+                "kind": "figure",
+                "bytes_sha256": "078d30997c9b0a8ad64c70a320f5add01785f484ccd7fece81103f0f1648b863",
+                "receipt_identity": "sha256:4d9b42c6eb669dd806e5d1b58623a7c4bd36f5e63134a73f2a8859a5b014b787",
+                "patch_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+              }
+            ],
+            "execution_receipts": [
+              "sha256:4d9b42c6eb669dd806e5d1b58623a7c4bd36f5e63134a73f2a8859a5b014b787"
+            ],
+            "receipts": [
+              {
+                "receipt_identity": "sha256:4d9b42c6eb669dd806e5d1b58623a7c4bd36f5e63134a73f2a8859a5b014b787",
+                "receipt_id": "sha256:fb12fafe5d341f164dd1cb4e7b72b761393d016645d286eccd4ae714279ab54b",
+                "completeness": "complete",
+                "runtime_rejected": null,
+                "pid_check": "ok",
+                "control_plane": "python_pool",
+                "python_source": "system",
+                "generation": 1,
+                "source_revision": "3cb665a0fee82711c13ebb03487e25bd420be310",
+                "python_version": "3.14.0",
+                "python_implementation": "CPython",
+                "platform": "win32",
+                "machine": "AMD64",
+                "packages": {
+                  "matplotlib": "3.10.8",
+                  "numpy": "2.3.3",
+                  "pandas": "2.3.3",
+                  "scipy": "1.16.3",
+                  "pillow": "12.3.0",
+                  "seaborn": "0.13.2"
+                },
+                "cwd_origin": "script.parent",
+                "observation": "partial",
+                "binding": {
+                  "revision": "sha256:f66b21d3501ff8db4405a9fc9277b9c121422572075aaf0efd264294a67b7a83",
+                  "matched": null,
+                  "changed": 0,
+                  "unobserved": 3
+                }
+              }
+            ],
+            "nodes": [
+              {
+                "id": "runtime:fig2/10 XRD/plot_xrd.py#Fig2_XRD_stacked",
+                "node": "runtime:fig2/10 XRD/plot_xrd.py#Fig2_XRD_stacked",
+                "instance": 1,
+                "kind": "figure",
+                "source_id": "runtime:fig2/10 XRD/plot_xrd.py#Fig2_XRD_stacked",
+                "origin": "execution",
+                "receipt_identity": "sha256:4d9b42c6eb669dd806e5d1b58623a7c4bd36f5e63134a73f2a8859a5b014b787",
+                "internal": null
+              }
+            ],
+            "nodes_truncated": false
+          }
+        }
+      }
+    ],
+    "message": null,
+    "text": "已导出：D:\\L\\AI\\figpact\\tools\\v01\\tavotto-export\\Fig2_XRD_stacked_v01_1020_201348.pdf\n产物核验：D:\\L\\AI\\figpact\\tools\\v01\\tavotto-export\\Fig2_XRD_stacked_v01_1020_201348.pdf：已核验 integrity, size, carrier, fonts_embedded，未核验 text_layer, clipping\n留档：D:\\L\\AI\\figpact\\tools\\v01\\tavotto-export\\Fig2_XRD_stacked_v01_1020_201348_proof.json"
+  },
+  "Fig2_FTIR_transmittance_stacked_annotated": {
+    "isError": true,
+    "status": null,
+    "code": "preflight_blocked",
+    "files": null,
+    "message": null,
+    "text": "预检有 1 类阻断性问题、0 类无法核验项，未导出。修好它们，或者在用户明确要求后带 explicit_confirm=true 再调一次。"
+  }
+}
