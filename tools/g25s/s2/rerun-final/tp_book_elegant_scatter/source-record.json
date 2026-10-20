@@ -1,0 +1,24 @@
+{
+  "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+  "id": "tp_book_elegant_scatter",
+  "independent_signoff": false,
+  "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+  "local_path": "tools/g25s/thirdparty/sources/elegant_scatter.py",
+  "plot_types": [
+    "statistical",
+    "uncertainty-scatter",
+    "complex legends"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/ornaments/elegant-scatter.py",
+  "repository": "rougier/scientific-visualization-book",
+  "sha256": "7439ef7b9ffb0c4f38634e82465faa37061a0ac2cba9a3c7933e5fd3b3154a22",
+  "source_review": {
+    "dependency": "numpy + matplotlib only; no third-party/stat IO libs.",
+    "filesystem": "Upstream plt.savefig(../../figures/...) relative write + plt.show(); contained/denied by parent harness.",
+    "network": "No sockets/requests.",
+    "process": "No subprocess/shell.",
+    "risks": "Seeded RNG scatter (seed 1); custom font families fall back if absent; double legend artists via add_artist."
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "code/ornaments/elegant-scatter.py"
+}

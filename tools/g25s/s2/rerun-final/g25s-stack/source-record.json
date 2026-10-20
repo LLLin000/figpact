@@ -1,0 +1,22 @@
+{
+  "id": "g25s-stack",
+  "local_path": "tools/g25s/gallery/raw/stack_stackplot_demo.py",
+  "plot_types": [
+    "stacked area",
+    "stackplot"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/lines_bars_and_markers/stackplot_demo.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "1157b7c6d6d4da271615c45e9d131a999f33d37169a6ef1e3e186638bb69b2b7",
+  "source_review": {
+    "filesystem": "none; synthetic sine data",
+    "network": "none",
+    "process": "none; imports matplotlib.pyplot, matplotlib.ticker, numpy only",
+    "supports_deps": [
+      "matplotlib",
+      "numpy"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "lines_bars_and_markers/stackplot_demo.py"
+}

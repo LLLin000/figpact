@@ -1,0 +1,21 @@
+{
+  "name": "strict",
+  "command": [
+    "D:\\programs\\Python\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\L\\AI\\figpact\\tools\\g23\\publication_trial.py",
+    "--nmr-script",
+    "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\examples\\nmr\\08 NMR.py",
+    "--nmr-config",
+    "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\examples\\nmr\\nmr.yaml",
+    "--ftir-stage",
+    "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\examples\\ftir",
+    "--out",
+    "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\evidence"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "seconds": 108.88
+}

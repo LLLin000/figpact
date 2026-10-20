@@ -1,0 +1,129 @@
+{
+  "route": "overlay",
+  "scope": "fig2",
+  "revision": "e5308c5a3dac79944b5859f39844d12dc383c006cc9af168981100c730c4db68",
+  "controls": [],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-pie\\fig2\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/g25s-compat-pie/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-pie\\original.py",
+        "d4ac777b57cdb0a7bfe78fa3c072f7dcf9bd3a731faa30d240e7b6168976f343"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "e5308c5a3dac79944b5859f39844d12dc383c006cc9af168981100c730c4db68",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig2::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig2::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          36.3728,
+          13.4112,
+          130.25119999999998,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig2::unregistered.0",
+        "type": "text",
+        "bounds_mm": [
+          120.11635662257227,
+          77.32515834101578,
+          129.51435662257228,
+          80.88115834101578
+        ]
+      },
+      {
+        "id": "fig2::unregistered.1",
+        "type": "text",
+        "bounds_mm": [
+          61.68933401417236,
+          97.85720999494286,
+          70.54758401417236,
+          101.41320999494286
+        ]
+      },
+      {
+        "id": "fig2::unregistered.2",
+        "type": "text",
+        "bounds_mm": [
+          55.60575416328116,
+          21.7680370061722,
+          64.55925416328115,
+          25.324037006172198
+        ]
+      },
+      {
+        "id": "fig2::unregistered.3",
+        "type": "text",
+        "bounds_mm": [
+          122.59681278469377,
+          45.8079926001409,
+          130.72481278469377,
+          49.363992600140904
+        ]
+      },
+      {
+        "id": "fig2::unregistered.4",
+        "type": "shape",
+        "bounds_mm": [
+          83.312,
+          60.35039999999999,
+          120.86336000000001,
+          90.73008987143287
+        ]
+      },
+      {
+        "id": "fig2::unregistered.5",
+        "type": "shape",
+        "bounds_mm": [
+          47.59853572387695,
+          60.35039999999999,
+          105.38413306144714,
+          97.90172537748343
+        ]
+      },
+      {
+        "id": "fig2::unregistered.6",
+        "type": "shape",
+        "bounds_mm": [
+          45.76120009021593,
+          22.799448215388114,
+          113.6916864718628,
+          71.954409829216
+        ]
+      },
+      {
+        "id": "fig2::unregistered.7",
+        "type": "shape",
+        "bounds_mm": [
+          83.312,
+          38.2782624620819,
+          120.86336000000001,
+          60.3504065656883
+        ]
+      }
+    ]
+  }
+}

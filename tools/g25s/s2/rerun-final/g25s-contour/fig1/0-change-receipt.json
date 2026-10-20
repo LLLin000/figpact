@@ -1,0 +1,88 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 0,
+    "derived_total": 0,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig1.ax[sdb6e4bc0e64e].tick.x.fontsize.fontsize": [
+        10.0,
+        10.5
+      ]
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig1.ax[sdb6e4bc0e64e].tick.x.fontsize"
+      ],
+      "retained": []
+    }
+  },
+  "draft": true,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [
+      "«−0.5» 与 «−0.5» 重叠 (面积 296.0 px²)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "PASS",
+  "local_problems": [],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-contour\\fig1\\.inspect-ea728674b89a406a894cb71c731c205a.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-contour\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [
+      "«−0.5» 与 «−0.5» 重叠 (面积 296.0 px²)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "ambiguous": [],
+    "eligible": true,
+    "inherited": [
+      "overlap:ax0:Text:text:hbb77688a25b6b332L4 x ax0:Text:text:hbb77688a25b6b332L4"
+    ],
+    "new": [],
+    "reason": "无差异",
+    "unmeasured": [],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "COMMITTED_DRAFT",
+  "target_effects": [
+    {
+      "after": [
+        10.5,
+        10.5,
+        10.5,
+        10.5,
+        10.5,
+        10.5,
+        10.5
+      ],
+      "before": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "id": "fig1.ax[sdb6e4bc0e64e].tick.x.fontsize",
+      "property": "fontsize",
+      "requested": 10.5,
+      "role": "axis.tick"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "tp_book_annotation_direct",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "0eb5a0904dd333c6d2012028e2a4638370682728bd606a2cea5d5bc2a2a76c55",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [
+    {
+      "scope": "fig0",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Annotation",
+        "Axes",
+        "Figure",
+        "PathCollection",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [],
+      "inventory_count": 0,
+      "eligible_roles": []
+    }
+  ],
+  "original_figure_count": 1,
+  "source_sha256_after": "0eb5a0904dd333c6d2012028e2a4638370682728bd606a2cea5d5bc2a2a76c55",
+  "source_unchanged": true
+}

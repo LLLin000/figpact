@@ -1,0 +1,235 @@
+[
+  {
+    "id": "fig1.ax[s016f49afec79].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig1",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s016f49afec79",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -0.6400000000000001,
+            4.640000000000001
+          ],
+          "ylim": [
+            1.0,
+            1173480723.9640706
+          ],
+          "xscale": "linear",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Typical memory sizes",
+        "counts": {
+          "lines": 0,
+          "containers": 1,
+          "major_xticks": 5,
+          "major_yticks": 4
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 5,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "L1 cache",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "L2 cache",
+          "loc": 1.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "L3 cache",
+          "loc": 2.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "RAM",
+          "loc": 3.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "SSD",
+          "loc": 4.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s016f49afec79",
+      "axis": "x",
+      "count": 5
+    }
+  },
+  {
+    "id": "fig1.ax[s016f49afec79].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig1",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s016f49afec79",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -0.6400000000000001,
+            4.640000000000001
+          ],
+          "ylim": [
+            1.0,
+            1173480723.9640706
+          ],
+          "xscale": "linear",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Typical memory sizes",
+        "counts": {
+          "lines": 0,
+          "containers": 1,
+          "major_xticks": 5,
+          "major_yticks": 4
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 4,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "kB",
+          "loc": 1.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "MB",
+          "loc": 1024.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "GB",
+          "loc": 1048576.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "TB",
+          "loc": 1073741824.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s016f49afec79",
+      "axis": "y",
+      "count": 4
+    }
+  }
+]

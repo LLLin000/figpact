@@ -1,0 +1,79 @@
+{
+  "route": "overlay",
+  "scope": "fig0",
+  "revision": "8fe3ad3e04072287f8e7b42f9134120aa3207c42f507fcbaae1dffba3c0113f9",
+  "controls": [],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\tp_book_domain_coloring\\fig0\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/tp_book_domain_coloring/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\tp_book_domain_coloring\\original.py",
+        "1dd1c6fbfabaae2fb3b767c397bd5be3e508313a086341200dae1e131c58cd86"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "8fe3ad3e04072287f8e7b42f9134120aa3207c42f507fcbaae1dffba3c0113f9",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig0::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          203.2,
+          203.2
+        ]
+      },
+      {
+        "id": "fig0::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          0.20320000000000002,
+          0.20320000000000002,
+          202.9968,
+          202.9968
+        ]
+      },
+      {
+        "id": "fig0::unregistered.0",
+        "type": "image",
+        "bounds_mm": [
+          0.20320000000000002,
+          0.20320000000000002,
+          202.9968,
+          202.9968
+        ]
+      },
+      {
+        "id": "fig0::unregistered.1",
+        "type": "collection",
+        "bounds_mm": [
+          0.25271015625000004,
+          0.25271015624998266,
+          202.94728984375004,
+          202.94728984375
+        ]
+      },
+      {
+        "id": "fig0::unregistered.2",
+        "type": "collection",
+        "bounds_mm": [
+          0.25271015625000004,
+          0.25271015624998266,
+          202.94728984375004,
+          202.94728984375
+        ]
+      }
+    ]
+  }
+}

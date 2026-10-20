@@ -1,0 +1,19 @@
+{
+  "name": "chromium",
+  "command": [
+    "D:\\programs\\Python\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "-m",
+    "pytest",
+    "tests/browser",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--tb=short"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "seconds": 343.29
+}

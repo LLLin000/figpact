@@ -1,0 +1,468 @@
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+[2/1] CDCl3   校准核对: 观测溶剂峰 = 7.2788 ppm -> 标准参考值 = 7.2600 ppm (Δδ = -0.0188 ppm)
+[3/2] CDCl3   校准核对: 观测溶剂峰 = 7.1937 ppm -> 标准参考值 = 7.2600 ppm (Δδ = +0.0663 ppm)
+[4/1] DMSO-d6 校准核对: 观测溶剂峰 = 2.5040 ppm -> 标准参考值 = 2.5000 ppm (Δδ = -0.0040 ppm)
+[5/1] D2O     校准核对: 观测溶剂峰 = 4.7008 ppm -> 标准参考值 = 4.7900 ppm (Δδ = +0.0892 ppm)
+========================================================================
+{
+  "status": "OK",
+  "verification": "RENDER_CHECKED",
+  "science_unchanged": true,
+  "qa": []
+}
+{
+  "strict_returncode": 0,
+  "artifacts": [
+    "Fig2_NMR_pure_stacked.pdf",
+    "Fig2_NMR_pure_stacked.png",
+    "Fig2_NMR_pure_stacked.svg",
+    "Fig2_NMR_pure_stacked.tiff"
+  ],
+  "nonempty": [
+    "Fig2_NMR_pure_stacked.pdf",
+    "Fig2_NMR_pure_stacked.png",
+    "Fig2_NMR_pure_stacked.svg",
+    "Fig2_NMR_pure_stacked.tiff"
+  ]
+}
+{
+  "pdf_min_pt": 5.04,
+  "pdf_min_ge_5pt": true
+}
+{
+  "publication": "committed",
+  "verification": "STRICT_VERIFIED",
+  "artifacts": [
+    "Fig2_NMR_pure_stacked.pdf",
+    "Fig2_NMR_pure_stacked.png",
+    "Fig2_NMR_pure_stacked.svg",
+    "Fig2_NMR_pure_stacked.tiff"
+  ]
+}
+{
+  "reopened": {
+    "peak_font_pt": 7.2,
+    "legend_font_pt": 7.2,
+    "canvas_w_mm": 68.0,
+    "canvas_h_mm": 48.0,
+    "note_font_pt": 5.5
+  },
+  "continued": "OK",
+  "continued_verification": "RENDER_CHECKED",
+  "continued_science": true,
+  "second_publication": "committed",
+  "second_verification": "STRICT_VERIFIED",
+  "final_note": 6.0,
+  "installed_pdf_min_pt": 5.04
+}
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+========================================================================
+开始执行核磁数据化学位移严格定标 (Chemical Shift Referencing)...
+========================================================================
+{
+  "overlay_strict_load_pass": true,
+  "overlay_pdf_min_pt": 5.04
+}
+{
+  "baseline": {
+    "xlim": [
+      4000.0,
+      400.0
+    ],
+    "ylim": [
+      38.704539288663895,
+      1005.4904259390979
+    ],
+    "glyph_floor_n": 10,
+    "blocking_n": 0,
+    "glyph_records": [
+      {
+        "key": "gid:fig2_ftir.annotated.band.oh",
+        "value": 4.7,
+        "text": "plain 4.7 pt < 5.0 pt floor «O–H»"
+      },
+      {
+        "key": "gid:fig2_ftir.annotated.band.coo_cc",
+        "value": 3.29,
+        "text": "4.7 pt → 字形 3.29 pt  «COO$^{-}$/C=C»"
+      },
+      {
+        "key": "gid:fig2_ftir.annotated.band.coo",
+        "value": 3.29,
+        "text": "4.7 pt → 字形 3.29 pt  «COO$^{-}$»"
+      },
+      {
+        "key": "gid:fig2_ftir.annotated.band.coc",
+        "value": 4.7,
+        "text": "plain 4.7 pt < 5.0 pt floor «C–O–C»"
+      },
+      {
+        "key": "gid:fig2_ftir.annotated.band.zn_o",
+        "value": 4.7,
+        "text": "plain 4.7 pt < 5.0 pt floor «Zn–O»"
+      },
+      {
+        "key": "gid:fig2_ftir.annotated.legend.text.gel",
+        "value": 3.29,
+        "text": "4.7 pt → 字形 3.29 pt  «HA + HAMA/Cu$^{2+}$/ZnO»"
+      },
+      {
+        "key": "gid:fig2_ftir.annotated.legend.text.hama_cu_zno",
+        "value": 3.29,
+        "text": "4.7 pt → 字形 3.29 pt  «HAMA/Cu$^{2+}$/ZnO»"
+      },
+      {
+        "key": "gid:fig2_ftir.annotated.legend.text.hama",
+        "value": 4.7,
+        "text": "plain 4.7 pt < 5.0 pt floor «HAMA»"
+      },
+      {
+        "key": "gid:fig2_ftir.annotated.legend.text.zno",
+        "value": 4.7,
+        "text": "plain 4.7 pt < 5.0 pt floor «ZnO»"
+      },
+      {
+        "key": "gid:fig2_ftir.annotated.legend.text.ha",
+        "value": 4.7,
+        "text": "plain 4.7 pt < 5.0 pt floor «HA»"
+      }
+    ]
+  },
+  "native_try": {
+    "operations": [
+      {
+        "operation": "set_parameter",
+        "path": [
+          "legend_font_pt"
+        ],
+        "value": 7.2
+      },
+      {
+        "operation": "set_parameter",
+        "path": [
+          "label_font_pt"
+        ],
+        "value": 7.2
+      },
+      {
+        "operation": "set_parameter",
+        "path": [
+          "canvas_h_mm"
+        ],
+        "value": 57.5
+      }
+    ],
+    "status": "OK",
+    "verification": "RENDER_CHECKED",
+    "message": "候选渲染通过（preview_qa，基线原有 0 条未变）",
+    "science_unchanged": true,
+    "affected_objects": [
+      "fig2_ftir.annotated.band.coc",
+      "fig2_ftir.annotated.band.coo",
+      "fig2_ftir.annotated.band.coo_cc",
+      "fig2_ftir.annotated.band.oh",
+      "fig2_ftir.annotated.band.zn_o",
+      "fig2_ftir.annotated.curve.gel",
+      "fig2_ftir.annotated.curve.ha",
+      "fig2_ftir.annotated.curve.hama",
+      "fig2_ftir.annotated.curve.hama_cu_zno",
+      "fig2_ftir.annotated.curve.zno",
+      "fig2_ftir.annotated.legend",
+      "fig2_ftir.annotated.legend.text.gel",
+      "fig2_ftir.annotated.legend.text.ha",
+      "fig2_ftir.annotated.legend.text.hama",
+      "fig2_ftir.annotated.legend.text.hama_cu_zno",
+      "fig2_ftir.annotated.legend.text.zno",
+      "fig2_ftir.annota
+wrote C:\Users\Lin\AppData\Local\Temp\figpact-g25s2-strict-lh89qjga\evidence\g21-ftir\ftir_publication_evidence.json
+{
+  "nmr_runner_rc": 0,
+  "ftir_runner_rc": 0,
+  "ftir_strict_rc": 1,
+  "ftir_refused_as_expected": true,
+  "strict_basis": "native 120-DPI build + 600-DPI export PDFs; DPI sweep is tick-clip legality only, never all-QA clean",
+  "dpi_sweep": {
+    "scope": "TICK_CLIP/UNMEASURED_GEOMETRY only; other rules listed, not gated",
+    "dpis": {
+      "72": {
+        "n_records": 3,
+        "tick_clip": [],
+        "unmeasured": [],
+        "other_records": [
+          {
+            "rule": "TEXT_ON_DATA",
+            "value": 3751.0,
+            "unit": "count",
+            "threshold": 1.0,
+            "worse": "up",
+            "severity": "blocking"
+          },
+          {
+            "rule": "TEXT_ON_DATA",
+            "value": 4175.0,
+            "unit": "count",
+            "threshold": 1.0,
+            "worse": "up",
+            "severity": "blocking"
+          },
+          {
+            "rule": "TEXT_ON_DATA",
+            "value": 3532.0,
+            "unit": "count",
+            "threshold": 1.0,
+            "worse": "up",
+            "severity": "blocking"
+          }
+        ],
+        "n_tick_geometry": 5,
+        "min_clearance_mm": 0.0556250000000094,
+        "env_dpi": 72.0
+      },
+      "120": {
+        "n_records": 0,
+        "tick_clip": [],
+        "unmeasured": [],
+        "other_records": [],
+        "n_tick_geometry": 5,
+        "min_clearance_mm": 0.08208333333333873,
+        "env_dpi": 120.0
+      },
+      "300": {
+        "n_records": 0,
+        "tick_clip": [],
+        "unmeasured": [],
+        "other_records": [],
+        "n_tick_geometry": 5,
+        "min_clearance_mm": 0.07149999999998856,
+        "env_dpi": 300.0
+      },
+      "600": {
+        "n_records": 0,
+        "tick_clip": [],
+        "unmeasured": [],
+        "other_records": [],
+        "n_tick_geometry": 5,
+        "min_clearance_mm": 0.07943749999998856,
+        "env_dpi": 600.0
+      }
+    },
+    "refused": false,
+    "note": "72dpi carries resolution-sensitive TEXT_ON_DATA records; tick-clip legality holds at all DPIs, strict PASS is the native 120-DPI build + 600-DPI export proof, not this sweep"
+  },
+  "file_geometry": {
+    "strict_probe": {
+      "pages": [
+        [
+          0.0,
+          0.0,
+          192.76,
+          136.06
+        ]
+      ],
+      "font_sizes_pt": [
+        5.04,
+        5.5,
+        7.2,
+        8.0,
+        8.5
+      ],
+      "min_pt": 5.04,
+      "n_spans": 35,
+      "tick_bboxes": {
+        "pages": [
+          {
+            "rect": [
+              0.0,
+              0.0,
+              192.76,
+              136.06
+            ],
+            "n_words": 31,
+            "n_outside": 0
+          }
+        ],
+        "all_inside": true
+      }
+    },
+    "installed": {
+      "pages": [
+        [
+          0.0,
+          0.0,
+          192.76,
+          136.06
+        ]
+      ],
+      "font_sizes_pt": [
+        5.04,
+        6.0,
+        7.2,
+        8.0,
+        8.5
+      ],
+      "min_pt": 5.04,
+      "n_spans": 35,
+      "tick_bboxes": {
+        "pages": [
+          {
+            "rect": [
+              0.0,
+              0.0,
+              192.76,
+              136.06
+            ],
+            "n_words": 31,
+            "n_outside": 0
+          }
+        ],
+        "all_inside": true
+      }
+    },
+    "strict_overlay": {
+      "pages": [
+        [
+          0.0,
+          0.0,
+          192.76,
+          136.06
+        ]
+      ],
+      "font_sizes_pt": [
+        5.04,
+        6.0,
+        7.2,
+        8.0,
+        8.5,
+        9.5
+      ],
+      "min_pt": 5.04,
+      "n_spans": 35,
+      "tick_bboxes": {
+        "pages": [
+          {
+            "rect": [
+              0.0,
+              0.0,
+              192.76,
+              136.06
+            ],
+            "n_words": 31,
+            "n_outside": 0
+          }
+        ],
+        "all_inside": true
+      }
+    },
+    "png_pixels": [
+      1606,
+      1133
+    ],
+    "all_tick_bboxes_inside": true
+  },
+  "outcome": "G23_TICK_PASS"
+}

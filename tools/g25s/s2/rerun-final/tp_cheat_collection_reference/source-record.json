@@ -1,0 +1,23 @@
+{
+  "commit": "f65e2b11744ec89d4bcf269a92b8b977de2d0279",
+  "id": "tp_cheat_collection_reference",
+  "independent_signoff": false,
+  "license_file": "tools/g25s/thirdparty/licenses/LICENSE.matplotlib-cheatsheet.txt",
+  "local_path": "tools/g25s/thirdparty/sources/collection_reference.py",
+  "plot_types": [
+    "collections",
+    "reference-sheet"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/rougier/matplotlib-cheatsheet/f65e2b11744ec89d4bcf269a92b8b977de2d0279/reference-collection.py",
+  "repository": "rougier/matplotlib-cheatsheet",
+  "sha256": "cc6b9f6f4bfff3b4a70c339a2e3481fca3b4b14ac2548e1ddcec19af8ba0d71d",
+  "source_review": {
+    "dependency": "numpy + matplotlib (collections, path) only.",
+    "filesystem": "Upstream savefig png+pdf to CWD + show; harness-contained.",
+    "network": "None.",
+    "process": "None.",
+    "risks": "Long single-axes catalogue of 8 collection types; no TeX/data IO."
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "reference-collection.py"
+}

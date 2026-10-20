@@ -45,7 +45,7 @@ Other figpact development may continue separately, including FTIR scope/legend l
 
 ## Publication boundary
 
-This status is a local repository artifact. The user's GitHub `master` lookup returned 404; remote availability is not verified by local checks. No commit or push is claimed or performed as part of this status update.
+Historical preparation checkpoint: the user's GitHub `master` lookup returned 404 before the local artifacts were published. G25-S was subsequently committed and pushed to `origin/master` as [`74ea67a`](https://github.com/LLLin000/figpact/commit/74ea67a), and the user independently confirmed remote access. The earlier 404 is historical, not the current publication state. G25-S2 changes are separate from that published baseline; no newer commit/push is claimed here.
 
 ## Preparation validation (not freeze verification)
 
@@ -69,3 +69,9 @@ SHA256 snapshots of preparation dependencies only (not a freeze record or signof
 User-authorized sourcing and runtime stress probes are complete; **formal G25-0 remains BLOCKED**. See `G25S_STRESS_REPORT.md` and `../../tools/g25s/runs/summary.json` (repository path: `tools/g25s/runs/summary.json`). Downloaded original scripts, pinned revisions/licenses, raw results and baseline PNGs are retained.
 
 The development contamination ledger is `tools/g25s/runs/summary.json:source_records`: all 26 script versions (24 repository/upstream paths) are `DEVELOPMENT_EXPOSED`, with no independent signoff. They cannot later be relabeled unseen. Of 26 script versions, 23 rendered 51 Figures; 129 candidate probes and 130 structural plan-negative checks ran. Candidate errors, baseline incompatibilities and context failures remain in the denominator and report. No model evaluation, formal gold/freeze, product fix, source-style repair, official Overlay save or publication occurred.
+
+## G25-S2 compatibility acceptance
+
+G25-S2 compatibility fixes and regression checks are complete; **formal G25 remains BLOCKED**. See `G25S2_COMPATIBILITY_REPORT.md`. All 26 DEVELOPMENT_EXPOSED source versions were rerun; every original candidate retained its target/base/value (129/129 matched, no missing), with uncaught candidate exceptions 12→0. Context creation is 50/51, not universal support; 14 Figures still have no authorized targets.
+
+Final regressions: Python 694 passed / 7 skipped / 120 subtests, Chromium 28 passed, Node 54 passed. Isolated NMR Strict PASS / FTIR Strict FAIL semantics remain unchanged. The final run preserved unknown/nonfinite geometry refusals, no-op/range refusals, scientific mutation counterexamples and all original G25-S records. No independent source certification, gold freeze or model A/B evaluation was performed. This acceptance checkpoint preceded publication; subsequent G25-S2 commit/push state is recorded by repository history and the push receipt, not by changing the evaluation status.

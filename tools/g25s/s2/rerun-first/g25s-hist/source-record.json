@@ -1,0 +1,22 @@
+{
+  "id": "g25s-hist",
+  "local_path": "tools/g25s/gallery/raw/hist_hist.py",
+  "plot_types": [
+    "histogram",
+    "stacked histogram"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/statistics/hist.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "f53afc840701f120446118be16e0e9767648d3107e1c8f37288ff70498224237",
+  "source_review": {
+    "filesystem": "none; numpy random data",
+    "network": "none",
+    "process": "none; imports matplotlib.pyplot, matplotlib.colors, matplotlib.ticker, numpy only",
+    "supports_deps": [
+      "matplotlib",
+      "numpy"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "statistics/hist.py"
+}

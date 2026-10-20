@@ -1,0 +1,174 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 6,
+    "derived_total": 6,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig2.ax[s2c0cdc7a2558].tick.x.fontsize.fontsize": [
+        10.0,
+        10.5
+      ]
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig2.ax[s2c0cdc7a2558].tick.x.fontsize"
+      ],
+      "retained": []
+    }
+  },
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "PASS",
+  "local_problems": [
+    "DRAFT_REFUSED: 未知/不可量 1 条，失败关闭"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-heatmap\\fig2\\.inspect-5c669f2477ad4a65b9efbdfc0082ae27.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-heatmap\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全",
+      "「tick:unidentified」刻度标签几何无法测量，拒绝将裁切判为安全"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "ambiguous": [
+      "tick:unidentified"
+    ],
+    "eligible": false,
+    "inherited": [
+      "tick:unidentified"
+    ],
+    "new": [],
+    "reason": "未知/不可量 1 条，失败关闭",
+    "unmeasured": [
+      "tick:unidentified"
+    ],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": [
+    {
+      "after": [
+        10.5,
+        10.5,
+        10.5,
+        10.5,
+        10.5,
+        10.5
+      ],
+      "before": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "id": "fig2.ax[s2c0cdc7a2558].tick.x.fontsize",
+      "property": "fontsize",
+      "requested": 10.5,
+      "role": "axis.tick"
+    }
+  ]
+}

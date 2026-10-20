@@ -1,0 +1,369 @@
+{
+  "route": "overlay",
+  "scope": "fig0",
+  "revision": "a90353425cae299f25ad51442a3eec75c908bbdc5506e5b4f335fa9b97b51dbb",
+  "controls": [],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\tp_book_annotation_zoom\\fig0\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/tp_book_annotation_zoom/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\tp_book_annotation_zoom\\original.py",
+        "6fe060a8bc6a871656a12b7daf43a0beef04cdd834338461eb2581306ea0b989"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "a90353425cae299f25ad51442a3eec75c908bbdc5506e5b4f335fa9b97b51dbb",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig0::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          127.0,
+          101.6
+        ]
+      },
+      {
+        "id": "fig0::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          4.7430798440065525,
+          3.809999999999975,
+          98.72307984400658,
+          97.79
+        ]
+      },
+      {
+        "id": "fig0::panel.1",
+        "type": "panel",
+        "bounds_mm": [
+          103.65277565681446,
+          82.04200000000002,
+          119.40077565681445,
+          97.79
+        ]
+      },
+      {
+        "id": "fig0::panel.2",
+        "type": "panel",
+        "bounds_mm": [
+          103.65277565681444,
+          62.484,
+          119.40077565681445,
+          78.232
+        ]
+      },
+      {
+        "id": "fig0::panel.3",
+        "type": "panel",
+        "bounds_mm": [
+          103.65277565681444,
+          42.926,
+          119.40077565681445,
+          58.674
+        ]
+      },
+      {
+        "id": "fig0::panel.4",
+        "type": "panel",
+        "bounds_mm": [
+          103.65277565681444,
+          23.367999999999984,
+          119.40077565681445,
+          39.11599999999999
+        ]
+      },
+      {
+        "id": "fig0::panel.5",
+        "type": "panel",
+        "bounds_mm": [
+          103.65277565681444,
+          3.809999999999975,
+          119.40077565681446,
+          19.55799999999998
+        ]
+      },
+      {
+        "id": "fig0::unregistered.0",
+        "type": "shape",
+        "bounds_mm": [
+          54.448642010549634,
+          58.72053485643752,
+          61.49714201054963,
+          65.76903485643751
+        ]
+      },
+      {
+        "id": "fig0::unregistered.1",
+        "type": "shape",
+        "bounds_mm": [
+          26.733222593218777,
+          38.623094004078816,
+          33.78172259321878,
+          45.67159400407881
+        ]
+      },
+      {
+        "id": "fig0::unregistered.10",
+        "type": "text",
+        "bounds_mm": [
+          120.97557565681444,
+          65.420875,
+          123.51557565681443,
+          75.295125
+        ]
+      },
+      {
+        "id": "fig0::unregistered.11",
+        "type": "collection",
+        "bounds_mm": [
+          103.65277565681444,
+          62.484,
+          119.40077565681445,
+          78.232
+        ]
+      },
+      {
+        "id": "fig0::unregistered.12",
+        "type": "collection",
+        "bounds_mm": [
+          110.33615065681444,
+          62.484,
+          119.40077565681445,
+          78.232
+        ]
+      },
+      {
+        "id": "fig0::unregistered.13",
+        "type": "text",
+        "bounds_mm": [
+          120.97557565681444,
+          45.847,
+          123.51557565681443,
+          55.753
+        ]
+      },
+      {
+        "id": "fig0::unregistered.14",
+        "type": "collection",
+        "bounds_mm": [
+          103.65277565681444,
+          42.926,
+          119.40077565681445,
+          58.674
+        ]
+      },
+      {
+        "id": "fig0::unregistered.15",
+        "type": "collection",
+        "bounds_mm": [
+          103.65277565681444,
+          42.926,
+          119.40077565681445,
+          58.674
+        ]
+      },
+      {
+        "id": "fig0::unregistered.16",
+        "type": "text",
+        "bounds_mm": [
+          120.97557565681444,
+          26.19374999999999,
+          123.51557565681443,
+          36.290249999999986
+        ]
+      },
+      {
+        "id": "fig0::unregistered.17",
+        "type": "collection",
+        "bounds_mm": [
+          103.65277565681444,
+          23.367999999999984,
+          119.40077565681445,
+          39.11599999999999
+        ]
+      },
+      {
+        "id": "fig0::unregistered.18",
+        "type": "collection",
+        "bounds_mm": [
+          103.65277565681444,
+          23.367999999999984,
+          112.71740065681445,
+          39.11599999999999
+        ]
+      },
+      {
+        "id": "fig0::unregistered.19",
+        "type": "text",
+        "bounds_mm": [
+          120.97557565681446,
+          6.826249999999977,
+          123.51557565681445,
+          16.54174999999998
+        ]
+      },
+      {
+        "id": "fig0::unregistered.2",
+        "type": "shape",
+        "bounds_mm": [
+          40.749204387838375,
+          29.506737513645852,
+          47.79770438783837,
+          36.55523751364585
+        ]
+      },
+      {
+        "id": "fig0::unregistered.20",
+        "type": "collection",
+        "bounds_mm": [
+          103.65277565681444,
+          3.809999999999975,
+          119.40077565681446,
+          19.55799999999998
+        ]
+      },
+      {
+        "id": "fig0::unregistered.21",
+        "type": "collection",
+        "bounds_mm": [
+          103.65277565681444,
+          10.493374999999979,
+          119.40077565681446,
+          19.55799999999998
+        ]
+      },
+      {
+        "id": "fig0::unregistered.22",
+        "type": "shape",
+        "bounds_mm": [
+          61.592515359168004,
+          64.43742127368178,
+          103.39976359240627,
+          89.76273447676945
+        ]
+      },
+      {
+        "id": "fig0::unregistered.23",
+        "type": "shape",
+        "bounds_mm": [
+          33.87594525249731,
+          43.53816171530351,
+          103.37665667518479,
+          70.40417830626909
+        ]
+      },
+      {
+        "id": "fig0::unregistered.24",
+        "type": "shape",
+        "bounds_mm": [
+          47.89315025681969,
+          34.114166299091785,
+          103.36937927810074,
+          50.98659033390145
+        ]
+      },
+      {
+        "id": "fig0::unregistered.25",
+        "type": "shape",
+        "bounds_mm": [
+          71.76623086929118,
+          30.58192651454045,
+          103.35706638654209,
+          32.08730500131174
+        ]
+      },
+      {
+        "id": "fig0::unregistered.26",
+        "type": "shape",
+        "bounds_mm": [
+          66.67178808518227,
+          11.415947277982172,
+          103.36589106508907,
+          20.981878201085866
+        ]
+      },
+      {
+        "id": "fig0::unregistered.3",
+        "type": "shape",
+        "bounds_mm": [
+          64.62173598754599,
+          28.659026864205764,
+          71.670235987546,
+          35.70752686420577
+        ]
+      },
+      {
+        "id": "fig0::unregistered.4",
+        "type": "shape",
+        "bounds_mm": [
+          59.52768466215029,
+          18.367743328972637,
+          66.5761846621503,
+          25.416243328972637
+        ]
+      },
+      {
+        "id": "fig0::unregistered.5",
+        "type": "collection",
+        "bounds_mm": [
+          4.7430798440065525,
+          3.809999999999975,
+          98.72307984400658,
+          97.79
+        ]
+      },
+      {
+        "id": "fig0::unregistered.6",
+        "type": "collection",
+        "bounds_mm": [
+          29.06684759321878,
+          20.701368328972634,
+          69.336610987546,
+          63.43540985643752
+        ]
+      },
+      {
+        "id": "fig0::unregistered.7",
+        "type": "text",
+        "bounds_mm": [
+          120.97557565681444,
+          84.978875,
+          123.51557565681443,
+          94.853125
+        ]
+      },
+      {
+        "id": "fig0::unregistered.8",
+        "type": "collection",
+        "bounds_mm": [
+          103.65277565681446,
+          82.04200000000002,
+          119.40077565681445,
+          97.79
+        ]
+      },
+      {
+        "id": "fig0::unregistered.9",
+        "type": "collection",
+        "bounds_mm": [
+          103.65277565681446,
+          82.04200000000002,
+          119.40077565681445,
+          91.10662500000001
+        ]
+      }
+    ]
+  }
+}

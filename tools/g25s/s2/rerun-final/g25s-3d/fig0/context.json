@@ -1,0 +1,381 @@
+{
+  "route": "overlay",
+  "scope": "fig0",
+  "revision": "0bbe3f43c0a90ecc496fba2836ec82aebb8aeed25f55331f96a72e44dd7af14e",
+  "controls": [
+    {
+      "id": "fig0.ax[s4966b4051d59].tick.y.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s4966b4051d59].tick.y.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#0",
+        "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#1",
+        "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#2",
+        "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#3",
+        "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#4"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "y tick labels ax[1]",
+      "display": {
+        "axes_index": 1,
+        "axes_key": "s4966b4051d59",
+        "axis": "y",
+        "count": 5
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s4966b4051d59",
+        "axis": "y"
+      },
+      "description": "y tick labels ax[1]"
+    },
+    {
+      "id": "fig0.ax[s5f98dc302a66].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s5f98dc302a66].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#3",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#4",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#5",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#6"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s5f98dc302a66",
+        "axis": "x",
+        "count": 7
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s5f98dc302a66",
+        "axis": "x"
+      },
+      "description": "x tick labels"
+    },
+    {
+      "id": "fig0.ax[s5f98dc302a66].tick.y.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s5f98dc302a66].tick.y.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#0",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#1",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#2",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#3",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#4",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#5",
+        "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#6"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "y tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s5f98dc302a66",
+        "axis": "y",
+        "count": 7
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s5f98dc302a66",
+        "axis": "y"
+      },
+      "description": "y tick labels"
+    }
+  ],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-3d\\fig0\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/g25s-3d/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-3d\\original.py",
+        "c1404430c73853200543e33774c3a6338994a1547f5b1240c0808ec68bd35978"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "0bbe3f43c0a90ecc496fba2836ec82aebb8aeed25f55331f96a72e44dd7af14e",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig0::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig0::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          27.228800000000014,
+          13.4112,
+          121.10720000000002,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig0::panel.1",
+        "type": "panel",
+        "bounds_mm": [
+          127.40640000000003,
+          36.8808,
+          136.79424000000003,
+          83.82000000000001
+        ]
+      },
+      {
+        "id": "fig0::unregistered.0",
+        "type": "collection",
+        "bounds_mm": [
+          38.23119816915324,
+          28.674125005659846,
+          111.19028804936903,
+          89.44914061973283
+        ]
+      },
+      {
+        "id": "fig0::unregistered.1",
+        "type": "collection",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.2",
+        "type": "collection",
+        "bounds_mm": [
+          127.40640000000003,
+          36.8808,
+          136.79424000000003,
+          83.82
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          139.26368444444446,
+          34.53719412170987,
+          147.80443444444447,
+          38.09319412170987
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          139.26368444444446,
+          46.366155125976675,
+          147.77268444444448,
+          49.92215512597667
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          139.26368444444446,
+          58.19511613024348,
+          144.81993444444447,
+          61.751116130243474
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          139.26368444444446,
+          70.02407713451029,
+          144.81993444444447,
+          73.58007713451029
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s4966b4051d59].tick.y.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          139.26368444444446,
+          81.8530381387771,
+          144.8516844444445,
+          85.40903813877709
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          -2971.871737837838,
+          58.063027027027026,
+          -2966.664737837838,
+          61.61902702702702
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          36.80001970312342,
+          24.906934107326098,
+          41.97526970312342,
+          28.4629341073261
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          45.99295759018126,
+          21.844042024108795,
+          51.16820759018127,
+          25.400042024108796
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          56.83657927211294,
+          18.723073944467554,
+          59.05907927211294,
+          22.27907394446755
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          66.38313984639385,
+          15.5423622759938,
+          68.60563984639386,
+          19.0983622759938
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          76.11421288391988,
+          12.300174965035378,
+          78.33671288391987,
+          15.856174965035377
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.x.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          3119.0143668918918,
+          58.063027027027026,
+          3121.2686168918917,
+          61.61902702702702
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          -2971.871737837838,
+          58.063027027027026,
+          -2966.664737837838,
+          61.61902702702702
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          93.59782087622717,
+          15.83283973069304,
+          98.77307087622718,
+          19.38883973069304
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          98.77193878827046,
+          21.29462967130127,
+          103.94718878827047,
+          24.85062967130127
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          105.2565230999945,
+          26.581286779668687,
+          107.47902309999449,
+          30.137286779668685
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          110.10667770684204,
+          31.701101614273696,
+          112.32917770684205,
+          35.2571016142737
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          114.80614348091112,
+          36.661849576993966,
+          117.02864348091111,
+          40.21784957699396
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5f98dc302a66].tick.y.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          3119.0143668918918,
+          58.063027027027026,
+          3121.2686168918917,
+          61.61902702702702
+        ]
+      }
+    ]
+  }
+}

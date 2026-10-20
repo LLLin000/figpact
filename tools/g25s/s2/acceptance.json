@@ -1,0 +1,38 @@
+{
+  "kind": "G25-S2 compatibility acceptance; not independent G25 model evaluation",
+  "formal_g25_status": "BLOCKED",
+  "model_called": false,
+  "historical_g25s_files_byte_identical_to_74ea67a": 652,
+  "original_sources_sha256_match": 26,
+  "engine_matches_full_regression_snapshot": true,
+  "candidate_comparison": {
+    "historical_probes": 129,
+    "missing_probes": 0,
+    "request_drift": 0,
+    "old_uncaught_exceptions": 12,
+    "new_uncaught_exceptions": 0,
+    "change_count": 55,
+    "change_local_pass": 53,
+    "change_whole_pass": 41,
+    "official_overlay_absent": 129,
+    "no-op_count": 37,
+    "no-op_local_pass": 0,
+    "no-op_whole_pass": 0,
+    "out-of-range_count": 37,
+    "out-of-range_local_pass": 0,
+    "out-of-range_whole_pass": 0
+  },
+  "python": "694 passed, 7 skipped, 120 subtests passed",
+  "chromium": "28 passed",
+  "node": "54 passed",
+  "nmr_strict": "PASS; STRICT_VERIFIED; min font 5.04pt",
+  "ftir_strict": "EXPECTED_FAIL; strict rc1; 4 blockers; no candidate PDF",
+  "evidence_sha256": {
+    "tools\\g25s\\s2\\comparison-final.json": "20a86e55e90f5be84194b696aa4f570f4db93aedbf16d3aadca2ac627ea0b727",
+    "tools\\g25s\\s2\\outcomes-final.json": "94153462a480ab35c12196ee2ed6275f8979599f5242ad96d56c8f4f2d260046",
+    "tools\\g25s\\s2\\checks-final\\results.json": "3e80cfa5433fc03d3a15a7a832c890776c02f745695b2004aadfb5870d86cdd2",
+    "tools\\g25s\\s2\\checks-final\\strict-summary.json": "83ce2ed2a3a65deccf1ef5121f2ca044278a394f5d961202f170e0b8f3818f13",
+    "tools\\g25s\\s2\\checks-final\\strict-proof.json": "3564340fa8cba92edfaa1d1d4c8d80725f03ad97617215b468e9e48744f43e00",
+    "docs\\g25\\G25S2_COMPATIBILITY_REPORT.md": "df9f0c0c7f458b09e43fffc1c4ee23fe4ac52f14ca8fac8c78fb172ecc1d63fa"
+  }
+}

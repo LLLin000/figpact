@@ -1,0 +1,270 @@
+[
+  {
+    "id": "fig0.ax[sa1deb43d5bc6].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sa1deb43d5bc6",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -0.5,
+            6.5
+          ],
+          "ylim": [
+            6.5,
+            -0.5
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": true
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Harvest of local farmers (in tons/year)",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "Farmer Joe",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "Upland Bros.",
+          "loc": 1.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "Smith Gardening",
+          "loc": 2.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "Agrifun",
+          "loc": 3.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "Organiculture",
+          "loc": 4.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "BioGoods Ltd.",
+          "loc": 5.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "Cornylee Corp.",
+          "loc": 6.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "sa1deb43d5bc6",
+      "axis": "x",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[sa1deb43d5bc6].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sa1deb43d5bc6",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -0.5,
+            6.5
+          ],
+          "ylim": [
+            6.5,
+            -0.5
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": true
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Harvest of local farmers (in tons/year)",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "cucumber",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "tomato",
+          "loc": 1.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "lettuce",
+          "loc": 2.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "asparagus",
+          "loc": 3.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "potato",
+          "loc": 4.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "wheat",
+          "loc": 5.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "barley",
+          "loc": 6.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "sa1deb43d5bc6",
+      "axis": "y",
+      "count": 7
+    }
+  }
+]

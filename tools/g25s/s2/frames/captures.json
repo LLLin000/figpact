@@ -1,0 +1,51 @@
+[
+  {
+    "source": "tools/g25s/compatible/pie.py",
+    "scope": "fig5",
+    "frame_revision": "16295472e1066886536a33673feeb48af5436148fb147ac8aa4ced4d77618ad8",
+    "png_sha256": "8204cb5ddc0db25422d83d8ffe14848add61a84c72dde747758ae25abf32c095",
+    "scene_sha256": "0b16ba1c7ffa77546a8527776956d654caadb02d170f518e99171409d8491454"
+  },
+  {
+    "source": "tools/g25s/compatible/pie.py",
+    "scope": "fig7",
+    "frame_revision": "cf92b98bb573dbd2ba51b960880a06c5071c04d652121c01469c12b5a63d314f",
+    "png_sha256": "aabca728fad07637873d32ae50dcf853e347cbc4ab1feb39abd787b09ea8632c",
+    "scene_sha256": "c86b0f7a11db2867b679a8dc04d90150fc6109918f014d82eec5c6d2c231d19d"
+  },
+  {
+    "source": "tools/g25s/compatible/sankey.py",
+    "scope": "fig0",
+    "frame_revision": "2ef914f70d8d2d963b04d913d1bcbb14275c01e525b5c611fd9f568cdbffced3",
+    "png_sha256": "4cf5e529f48251c9f61fdd2ea060345bb5717c6b2a7b3b5d3d423f40a97cf1fc",
+    "scene_sha256": "72af933cfb7dd056c15693a3cd4e2f6f73d7ab1969cae335cf95b28cab9ea7df"
+  },
+  {
+    "source": "tools/g25s/compatible/sankey.py",
+    "scope": "fig1",
+    "frame_revision": "83b0670ccdfe554f684640515c2a13ed7b9d3a6302afea2c51a8cf1f7f45e79c",
+    "png_sha256": "41c74fa9a6a4896940f6b594d51d890a18b959a7dcb757b6243a8557723891bc",
+    "scene_sha256": "df5c4d334e5e09abc0f575cc3cc1427da2a01d4e04da273c6fff9af1b02b88a3"
+  },
+  {
+    "source": "tools/g25s/compatible/sankey.py",
+    "scope": "fig2",
+    "frame_revision": "e3b12887ecc357d21a3825159916a84d5df950af1cad9092a16f43f31f13dd16",
+    "png_sha256": "ca45a6a3e9d42f0ad2747d83ac3e5fc4bc02c7baba7660ba4fbd87e15b3d5a92",
+    "scene_sha256": "e645f5302878b97e173cd73fab01d8191ea9b3e0810fd1092895e8adaed6400e"
+  },
+  {
+    "source": "tools/g25s/gallery/raw/mplot3d_surface3d.py",
+    "scope": "fig0",
+    "frame_revision": "2b1ba8dc9b27c480c7f440e3ecc2d96f05cec1b746e49ba5b89ad191eb56623b",
+    "png_sha256": "a6c2b02423edd430decab51e6916ae16059bcf8d3a01768fd33f368de9adb270",
+    "scene_sha256": "1544081a04e0699cc5a9016b674f0d241d646e129420cab9963c85ffb30f2847"
+  },
+  {
+    "source": "tools/g25s/compatible/heatmap.py",
+    "scope": "fig1",
+    "frame_revision": "3b7dbb21e02e698ef0db61b51d4c7b296207c94225a47d43d1ce3bfb2853a3af",
+    "png_sha256": "16b5d5f6a63b1b72aace96059c5eb879132d3569a8f60028ab49e08649b8bf35",
+    "scene_sha256": "c3d9ea8488092fbdf45e6182f41f478a866b941bb8252f0221429c3fb5744e3c"
+  }
+]

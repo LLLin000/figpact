@@ -1,0 +1,77 @@
+{
+  "checks": [
+    {
+      "name": "python",
+      "command": [
+        "D:\\programs\\Python\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "tests",
+        "--ignore=tests/browser",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--tb=short"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "seconds": 870.08
+    },
+    {
+      "name": "chromium",
+      "command": [
+        "D:\\programs\\Python\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "pytest",
+        "tests/browser",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--tb=short"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "seconds": 343.29
+    },
+    {
+      "name": "node",
+      "command": [
+        "node",
+        "--test",
+        "tests/inspector/test_inspector.js"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "seconds": 0.79
+    },
+    {
+      "name": "strict",
+      "command": [
+        "D:\\programs\\Python\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "D:\\L\\AI\\figpact\\tools\\g23\\publication_trial.py",
+        "--nmr-script",
+        "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\examples\\nmr\\08 NMR.py",
+        "--nmr-config",
+        "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\examples\\nmr\\nmr.yaml",
+        "--ftir-stage",
+        "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\examples\\ftir",
+        "--out",
+        "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\evidence"
+      ],
+      "returncode": 0,
+      "timed_out": false,
+      "seconds": 108.88
+    }
+  ],
+  "private_strict_artifacts": "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga",
+  "engine_unchanged_during_checks": true
+}

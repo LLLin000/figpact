@@ -1,0 +1,796 @@
+{
+  "id": "g25s-contour",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "599394632d46acecef548955d16f3acd509f922a9f6dcb559977b482b994c7b1",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [
+    {
+      "scope": "fig0",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "wrong-scope",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched scope"
+        },
+        {
+          "name": "stale-revision",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched revision"
+        },
+        {
+          "name": "native-no-authority",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unavailable control route"
+        },
+        {
+          "name": "science-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "duplicate-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "axis.tick:change",
+          "target_id": "fig0.ax[s65f962b79d05].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.5,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "PASS",
+          "figure_verification_state": "PASS",
+          "source_commit_state": "COMMITTED",
+          "science_unchanged": true,
+          "local_problems": [],
+          "qa_delta": {
+            "ambiguous": [],
+            "eligible": true,
+            "inherited": [],
+            "new": [],
+            "reason": "无差异",
+            "unmeasured": [],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:no-op",
+          "target_id": "fig0.ax[s65f962b79d05].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "FAIL",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": true,
+          "local_problems": [
+            "required targets unchanged: {'fig0.ax[s65f962b79d05].tick.x.fontsize.fontsize': None}"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:out-of-range",
+          "target_id": "fig0.ax[s65f962b79d05].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": -1.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "ERROR",
+          "figure_verification_state": "ERROR",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "OUT_OF_RANGE: 'fig0.ax[s65f962b79d05].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ]
+    },
+    {
+      "scope": "fig1",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "wrong-scope",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched scope"
+        },
+        {
+          "name": "stale-revision",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched revision"
+        },
+        {
+          "name": "native-no-authority",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unavailable control route"
+        },
+        {
+          "name": "science-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "duplicate-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "axis.tick:change",
+          "target_id": "fig1.ax[sdb6e4bc0e64e].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.5,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "PASS",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "COMMITTED_DRAFT",
+          "science_unchanged": true,
+          "local_problems": [],
+          "qa_delta": {
+            "ambiguous": [],
+            "eligible": true,
+            "inherited": [
+              "overlap:ax0:Text:text:hbb77688a25b6b332L4 x ax0:Text:text:hbb77688a25b6b332L4"
+            ],
+            "new": [],
+            "reason": "无差异",
+            "unmeasured": [],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:no-op",
+          "target_id": "fig1.ax[sdb6e4bc0e64e].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "FAIL",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": true,
+          "local_problems": [
+            "required targets unchanged: {'fig1.ax[sdb6e4bc0e64e].tick.x.fontsize.fontsize': None}"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:out-of-range",
+          "target_id": "fig1.ax[sdb6e4bc0e64e].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": -1.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "ERROR",
+          "figure_verification_state": "ERROR",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "OUT_OF_RANGE: 'fig1.ax[sdb6e4bc0e64e].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ]
+    },
+    {
+      "scope": "fig2",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "wrong-scope",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched scope"
+        },
+        {
+          "name": "stale-revision",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched revision"
+        },
+        {
+          "name": "native-no-authority",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unavailable control route"
+        },
+        {
+          "name": "science-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "duplicate-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "axis.tick:change",
+          "target_id": "fig2.ax[sc056bfb12801].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.5,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "PASS",
+          "figure_verification_state": "PASS",
+          "source_commit_state": "COMMITTED",
+          "science_unchanged": true,
+          "local_problems": [],
+          "qa_delta": {
+            "ambiguous": [],
+            "eligible": true,
+            "inherited": [],
+            "new": [],
+            "reason": "无差异",
+            "unmeasured": [],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:no-op",
+          "target_id": "fig2.ax[sc056bfb12801].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "FAIL",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": true,
+          "local_problems": [
+            "required targets unchanged: {'fig2.ax[sc056bfb12801].tick.x.fontsize.fontsize': None}"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:out-of-range",
+          "target_id": "fig2.ax[sc056bfb12801].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": -1.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "ERROR",
+          "figure_verification_state": "ERROR",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "OUT_OF_RANGE: 'fig2.ax[sc056bfb12801].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ]
+    },
+    {
+      "scope": "fig3",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "wrong-scope",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched scope"
+        },
+        {
+          "name": "stale-revision",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched revision"
+        },
+        {
+          "name": "native-no-authority",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unavailable control route"
+        },
+        {
+          "name": "science-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "duplicate-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "axis.tick:change",
+          "target_id": "fig3.ax[s6adbdcccf947].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.5,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "PASS",
+          "figure_verification_state": "PASS",
+          "source_commit_state": "COMMITTED",
+          "science_unchanged": true,
+          "local_problems": [],
+          "qa_delta": {
+            "ambiguous": [],
+            "eligible": true,
+            "inherited": [],
+            "new": [],
+            "reason": "无差异",
+            "unmeasured": [],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:no-op",
+          "target_id": "fig3.ax[s6adbdcccf947].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "FAIL",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": true,
+          "local_problems": [
+            "required targets unchanged: {'fig3.ax[s6adbdcccf947].tick.x.fontsize.fontsize': None}"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:out-of-range",
+          "target_id": "fig3.ax[s6adbdcccf947].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": -1.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "ERROR",
+          "figure_verification_state": "ERROR",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "OUT_OF_RANGE: 'fig3.ax[s6adbdcccf947].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ]
+    },
+    {
+      "scope": "fig4",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "wrong-scope",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched scope"
+        },
+        {
+          "name": "stale-revision",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched revision"
+        },
+        {
+          "name": "native-no-authority",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unavailable control route"
+        },
+        {
+          "name": "science-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "duplicate-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "axis.tick:change",
+          "target_id": "fig4.ax[s0fd6d65d502e].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.5,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "PASS",
+          "figure_verification_state": "PASS",
+          "source_commit_state": "COMMITTED",
+          "science_unchanged": true,
+          "local_problems": [],
+          "qa_delta": {
+            "ambiguous": [],
+            "eligible": true,
+            "inherited": [],
+            "new": [],
+            "reason": "无差异",
+            "unmeasured": [],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:no-op",
+          "target_id": "fig4.ax[s0fd6d65d502e].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "FAIL",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": true,
+          "local_problems": [
+            "required targets unchanged: {'fig4.ax[s0fd6d65d502e].tick.x.fontsize.fontsize': None}"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:out-of-range",
+          "target_id": "fig4.ax[s0fd6d65d502e].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": -1.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "ERROR",
+          "figure_verification_state": "ERROR",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "OUT_OF_RANGE: 'fig4.ax[s0fd6d65d502e].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ]
+    },
+    {
+      "scope": "fig5",
+      "axes_count": 3,
+      "projections": [
+        "rectilinear",
+        "rectilinear",
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "AxesImage",
+        "Figure",
+        "Line2D",
+        "LineCollection",
+        "QuadContourSet",
+        "QuadMesh",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick",
+        "_ColorbarSpine"
+      ],
+      "probes": [
+        {
+          "name": "wrong-scope",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched scope"
+        },
+        {
+          "name": "stale-revision",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched revision"
+        },
+        {
+          "name": "native-no-authority",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unavailable control route"
+        },
+        {
+          "name": "science-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "duplicate-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "axis.tick:change",
+          "target_id": "fig5.ax[s5421e34dcbb9].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.5,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "PASS",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "COMMITTED_DRAFT",
+          "science_unchanged": true,
+          "local_problems": [],
+          "qa_delta": {
+            "ambiguous": [],
+            "eligible": true,
+            "inherited": [
+              "overlap:ax0:Text:text:h3b75a28be8e68812L4 x ax0:Text:text:h9588c3fcb43fc86fL3",
+              "overlap:ax0:Text:text:h87f8a2ee55d51e44L4 x ax0:Text:text:h9588c3fcb43fc86fL3",
+              "overlap:ax0:Text:text:h9588c3fcb43fc86fL3 x ax0:Text:text:ha26f83404b3689e9L3"
+            ],
+            "new": [],
+            "reason": "无差异",
+            "unmeasured": [],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:no-op",
+          "target_id": "fig5.ax[s5421e34dcbb9].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "FAIL",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": true,
+          "local_problems": [
+            "required targets unchanged: {'fig5.ax[s5421e34dcbb9].tick.x.fontsize.fontsize': None}"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:out-of-range",
+          "target_id": "fig5.ax[s5421e34dcbb9].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": -1.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "ERROR",
+          "figure_verification_state": "ERROR",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "OUT_OF_RANGE: 'fig5.ax[s5421e34dcbb9].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        }
+      ],
+      "inventory_count": 4,
+      "eligible_roles": [
+        "axis.tick"
+      ]
+    }
+  ],
+  "original_figure_count": 6,
+  "source_sha256_after": "599394632d46acecef548955d16f3acd509f922a9f6dcb559977b482b994c7b1",
+  "source_unchanged": true
+}

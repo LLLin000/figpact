@@ -1,0 +1,169 @@
+{
+  "route": "overlay",
+  "scope": "fig1",
+  "revision": "761a94361186e7b91bf6118fb3529278cfed17cffbac0cf4f5f81a270da5bc27",
+  "controls": [],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-pie\\fig1\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/g25s-compat-pie/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-pie\\original.py",
+        "d4ac777b57cdb0a7bfe78fa3c072f7dcf9bd3a731faa30d240e7b6168976f343"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "761a94361186e7b91bf6118fb3529278cfed17cffbac0cf4f5f81a270da5bc27",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig1::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig1::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          36.3728,
+          13.4112,
+          130.25119999999998,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig1::unregistered.0",
+        "type": "text",
+        "bounds_mm": [
+          120.11635662257227,
+          77.32515834101578,
+          129.51435662257228,
+          80.88115834101578
+        ]
+      },
+      {
+        "id": "fig1::unregistered.1",
+        "type": "text",
+        "bounds_mm": [
+          97.81497861231215,
+          68.80117727691768,
+          108.95922861231215,
+          72.3571772769177
+        ]
+      },
+      {
+        "id": "fig1::unregistered.10",
+        "type": "shape",
+        "bounds_mm": [
+          45.76120009021593,
+          22.799448215388114,
+          113.6916864718628,
+          71.954409829216
+        ]
+      },
+      {
+        "id": "fig1::unregistered.11",
+        "type": "shape",
+        "bounds_mm": [
+          83.312,
+          38.2782624620819,
+          120.86336000000001,
+          60.3504065656883
+        ]
+      },
+      {
+        "id": "fig1::unregistered.2",
+        "type": "text",
+        "bounds_mm": [
+          61.68933401417236,
+          97.85720999494286,
+          70.54758401417236,
+          101.41320999494286
+        ]
+      },
+      {
+        "id": "fig1::unregistered.3",
+        "type": "text",
+        "bounds_mm": [
+          70.79334128045764,
+          80.00047817905974,
+          81.90584128045765,
+          83.55647817905974
+        ]
+      },
+      {
+        "id": "fig1::unregistered.4",
+        "type": "text",
+        "bounds_mm": [
+          55.60575416328116,
+          21.7680370061722,
+          64.55925416328115,
+          25.324037006172198
+        ]
+      },
+      {
+        "id": "fig1::unregistered.5",
+        "type": "text",
+        "bounds_mm": [
+          67.52697954360791,
+          38.49729291245756,
+          78.6394795436079,
+          42.05329291245756
+        ]
+      },
+      {
+        "id": "fig1::unregistered.6",
+        "type": "text",
+        "bounds_mm": [
+          122.59681278469377,
+          45.8079926001409,
+          130.72481278469377,
+          49.363992600140904
+        ]
+      },
+      {
+        "id": "fig1::unregistered.7",
+        "type": "text",
+        "bounds_mm": [
+          99.16795470074206,
+          51.60999596371322,
+          110.31220470074206,
+          55.16599596371322
+        ]
+      },
+      {
+        "id": "fig1::unregistered.8",
+        "type": "shape",
+        "bounds_mm": [
+          83.312,
+          60.35039999999999,
+          120.86336000000001,
+          90.73008987143287
+        ]
+      },
+      {
+        "id": "fig1::unregistered.9",
+        "type": "shape",
+        "bounds_mm": [
+          47.59853572387695,
+          60.35039999999999,
+          105.38413306144714,
+          97.90172537748343
+        ]
+      }
+    ]
+  }
+}

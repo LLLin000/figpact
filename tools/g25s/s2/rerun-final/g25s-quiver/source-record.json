@@ -1,0 +1,21 @@
+{
+  "id": "g25s-quiver",
+  "local_path": "tools/g25s/gallery/raw/quiver_quiver_demo.py",
+  "plot_types": [
+    "quiver"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/images_contours_and_fields/quiver_demo.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "f17029f69cf733d6f847ac42d59329aac4a7c653463a7357234702f20b2f1bd6",
+  "source_review": {
+    "filesystem": "none; meshgrid synthetic data",
+    "network": "none",
+    "process": "none; imports matplotlib.pyplot, numpy only",
+    "supports_deps": [
+      "matplotlib",
+      "numpy"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "images_contours_and_fields/quiver_demo.py"
+}

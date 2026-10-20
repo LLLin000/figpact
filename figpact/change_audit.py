@@ -31,6 +31,8 @@ from typing import Any, Optional
 
 import yaml
 
+import numpy as _np
+
 from figpact import roles
 from figpact.session import FigureSession, drawn_shapes
 
@@ -71,9 +73,30 @@ def _style_entry(fig, art):
             value = fn()
         except Exception:
             continue
-        if isinstance(value, str) and len(value) > 60:
-            value = value[:60]
-        entry[prop] = _json_native(value)
+        if isinstance(value, str):
+            entry[prop] = value[:60] if len(value) > 60 else value
+            continue
+        try:
+            native = _json_native(value)
+        except Exception:
+            entry[prop] = {'class': 'AUDIT_INCOMPARABLE',
+                           'detail': f'{type(value).__name__}:unserializable'}
+            continue
+        if native is None or isinstance(native, (bool, str, int, float)):
+            entry[prop] = native
+        elif _np is not None and isinstance(native, _np.ndarray):
+            # 集合型 Artist（如 QuadContourSet.get_linewidth）返回逐元素数组：
+            # 转纯 Python 列表留痕，逐元素按既有浮点容差比较，不吞差异。
+            try:
+                entry[prop] = native.tolist()
+            except Exception:
+                entry[prop] = {'class': 'AUDIT_INCOMPARABLE',
+                               'detail': f'{type(value).__name__}:unserializable'}
+        elif isinstance(native, (list, tuple)):
+            entry[prop] = list(native)
+        else:
+            entry[prop] = {'class': 'AUDIT_INCOMPARABLE',
+                           'detail': f'{type(value).__name__}:{type(native).__name__}'}
     if art is fig or art is fig.patch:
         try:
             entry['renderer_dpi'] = float(fig.dpi)
@@ -273,7 +296,21 @@ def audit_pair(before: dict, after: dict, allowed: dict) -> dict:
     unauthorized = []
     for gid, props in sorted(style_changes.items()):
         allow_props = set((allowed_styles.get(gid) or ()))
-        for prop, (vb, va) in sorted(props.items()):
+        for prop, change in sorted(props.items()):
+            if isinstance(change, dict) and change.get('class') == 'AUDIT_INCOMPARABLE':
+                # 不可比值：允许集/豁免都不得放行——结构化拒收，fail-closed。
+                unauthorized.append({'gid': gid, 'property': prop,
+                                     'before': change.get('before'),
+                                     'after': change.get('after'),
+                                     'class': 'AUDIT_INCOMPARABLE'})
+                continue
+            try:
+                vb, va = change
+            except Exception:
+                unauthorized.append({'gid': gid, 'property': prop,
+                                     'before': None, 'after': None,
+                                     'class': 'AUDIT_INCOMPARABLE'})
+                continue
             if prop in allow_props:
                 continue
             if gid in exempt_keys:
@@ -321,8 +358,13 @@ def audit_pair(before: dict, after: dict, allowed: dict) -> dict:
         gid = target.get('gid')
         prop = target.get('property')
         change = (style_changes.get(gid) or {}).get(prop)
-        required_changed[f'{gid}.{prop}'] = (
-            list(change) if change is not None else None)
+        if isinstance(change, dict):
+            # Incomparable is not evidence of an effective target change.
+            # The structured refusal remains in actual_changes/unauthorized.
+            required_changed[f'{gid}.{prop}'] = None
+        else:
+            required_changed[f'{gid}.{prop}'] = (
+                list(change) if change is not None else None)
 
     actual = {'styles': style_changes,
               'geometry': geom_changes,
@@ -686,11 +728,21 @@ def _attribute_unregistered(session, base, role, param, current: float) -> set:
         if '..' in skey:
             continue
         try:
-            value = float((entry or {}).get('fontsize'))
+            raw = (entry or {}).get('fontsize')
+            value = raw.item() if hasattr(raw, 'item') and not isinstance(raw, str) else raw
+            value = float(value)
         except (TypeError, ValueError, AttributeError):
             continue
-        if abs(value - current) <= _STYLE_NUMERIC_TOL:
-            out.add(skey)
+        try:
+            current_f = float(current)
+        except (TypeError, ValueError):
+            break
+        if current_f != current_f or value != value:
+            if value == value or current_f == current_f:
+                continue
+        elif abs(value - current_f) > _STYLE_NUMERIC_TOL:
+            continue
+        out.add(skey)
     return out
 
 
@@ -744,19 +796,79 @@ def _legend_handle_allowlist(session, after_styles: Optional[dict] = None) -> di
     return out
 
 
+def _style_values_equal(vb: Any, va: Any) -> bool | None:
+    """Typed equality; float tolerance is 1e-9, paired NaN is unchanged.
+
+    Shape, dtype, container and bool-vs-number changes do not compare equal.
+    Object/masked arrays and unknown values are incomparable, never silently
+    accepted through a truthy equality result.
+    """
+    if any(isinstance(v, dict) and v.get('class') == 'AUDIT_INCOMPARABLE'
+           for v in (vb, va)):
+        return None
+    if isinstance(vb, _np.ndarray) or isinstance(va, _np.ndarray):
+        if any(isinstance(v, _np.ndarray) and
+               (type(v) is not _np.ndarray or v.dtype.kind not in 'biufcSU')
+               for v in (vb, va)):
+            return None
+        if not isinstance(vb, _np.ndarray) or not isinstance(va, _np.ndarray):
+            return False
+        if vb.shape != va.shape or vb.dtype != va.dtype:
+            return False
+        kind = vb.dtype.kind
+        if kind == 'f':
+            return bool(_np.allclose(vb, va, rtol=0.0, atol=_STYLE_NUMERIC_TOL, equal_nan=True))
+        return bool(_np.array_equal(vb, va, equal_nan=kind in 'iuc'))
+    if isinstance(vb, _np.generic):
+        vb = vb.item()
+    if isinstance(va, _np.generic):
+        va = va.item()
+    if vb is None or va is None:
+        return vb is None and va is None
+    if isinstance(vb, bool) or isinstance(va, bool):
+        return type(vb) is type(va) and vb == va
+    if isinstance(vb, (int, float)) and isinstance(va, (int, float)):
+        if isinstance(vb, float) and isinstance(va, float):
+            if vb == va or (vb != vb and va != va):
+                return True
+            return abs(vb - va) <= _STYLE_NUMERIC_TOL
+        return vb == va
+    if isinstance(vb, (str, bytes)) and isinstance(va, type(vb)):
+        return vb == va
+    if isinstance(vb, (list, tuple)) and isinstance(va, (list, tuple)):
+        if type(vb) is not type(va) or len(vb) != len(va):
+            return False
+        results = [_style_values_equal(x, y) for x, y in zip(vb, va)]
+    elif isinstance(vb, dict) and isinstance(va, dict):
+        if set(vb) != set(va):
+            return False
+        results = [_style_values_equal(vb[k], va[k]) for k in vb]
+    else:
+        return None
+    return None if any(r is None for r in results) else all(results)
+
+
 def _style_diff(before: dict, after: dict) -> dict:
+    """语义属性差异：值按 :func:`_style_values_equal` 保守比较。
+
+    不可比（None）不抛不吞：该属性进差异并挂 ``AUDIT_INCOMPARABLE``，
+    调用方按越权/科学保护既有 fail-closed 口径处理。
+    """
     out = {}
     for gid in sorted(set(before) | set(after)):
         b, a = before.get(gid) or {}, after.get(gid) or {}
         props = {}
         for prop in sorted(set(b) | set(a)):
             vb, va = b.get(prop), a.get(prop)
-            if isinstance(vb, float) and isinstance(va, float):
-                if abs(vb - va) <= _STYLE_NUMERIC_TOL:
-                    continue
-            elif vb == va:
+            eq = _style_values_equal(vb, va)
+            if eq is True:
                 continue
-            props[prop] = [vb, va]
+            if eq is None:
+                props[prop] = {'before': {'type': type(vb).__name__},
+                               'after': {'type': type(va).__name__},
+                               'class': 'AUDIT_INCOMPARABLE'}
+            else:
+                props[prop] = [vb, va]
         if props:
             out[gid] = props
     return out

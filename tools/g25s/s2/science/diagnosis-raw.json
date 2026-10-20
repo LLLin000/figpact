@@ -1,0 +1,212 @@
+{
+  "figures": {
+    "pie.py#fig5": {
+      "after_digest": "144beb97632d6e314d665877abaf627a039d66ac36e74c167b3f732ff67f777c",
+      "before_digest": "144beb97632d6e314d665877abaf627a039d66ac36e74c167b3f732ff67f777c",
+      "before_objects_keys": [
+        "panel.0.unregistered.patch.0",
+        "panel.0.unregistered.patch.1",
+        "panel.0.unregistered.patch.2",
+        "panel.0.unregistered.patch.3",
+        "panel.0.unregistered.patch.4",
+        "panel.0.unregistered.patch.5",
+        "panel.0.unregistered.patch.6",
+        "panel.0.unregistered.patch.7",
+        "panel.0.unregistered.text.10:text",
+        "panel.0.unregistered.text.11:text",
+        "panel.0.unregistered.text.12:text",
+        "panel.0.unregistered.text.5:text",
+        "panel.0.unregistered.text.6:text",
+        "panel.0.unregistered.text.7:text",
+        "panel.0.unregistered.text.8:text",
+        "panel.0.unregistered.text.9:text",
+        "panel.0:view"
+      ],
+      "diff_keys": [],
+      "diffs": {},
+      "equal": true,
+      "fig_index": 5,
+      "prefix_evidence": "prefix-shadow-raw.json:pie.py#fig5 (4 Shadow objects differ pre-fix)",
+      "source": "tools/g25s/compatible/pie.py"
+    },
+    "pie.py#fig7": {
+      "after_digest": "700a9f7529390f9dd0ecd07d5812b83b6adbb5023b4fefd89905fef63f3bdb80",
+      "before_digest": "700a9f7529390f9dd0ecd07d5812b83b6adbb5023b4fefd89905fef63f3bdb80",
+      "before_objects_keys": [
+        "panel.0.unregistered.patch.0",
+        "panel.0.unregistered.patch.1",
+        "panel.0.unregistered.patch.2",
+        "panel.0.unregistered.patch.3",
+        "panel.0.unregistered.patch.4",
+        "panel.0.unregistered.patch.5",
+        "panel.0.unregistered.patch.6",
+        "panel.0.unregistered.patch.7",
+        "panel.0.unregistered.text.10:text",
+        "panel.0.unregistered.text.11:text",
+        "panel.0.unregistered.text.12:text",
+        "panel.0.unregistered.text.5:text",
+        "panel.0.unregistered.text.6:text",
+        "panel.0.unregistered.text.7:text",
+        "panel.0.unregistered.text.8:text",
+        "panel.0.unregistered.text.9:text",
+        "panel.0:view"
+      ],
+      "diff_keys": [],
+      "diffs": {},
+      "equal": true,
+      "fig_index": 7,
+      "prefix_evidence": "prefix-shadow-raw.json:pie.py#fig7 (4 Shadow objects differ pre-fix)",
+      "source": "tools/g25s/compatible/pie.py"
+    },
+    "sankey.py#fig0": {
+      "after_digest": "1661bf9a6704a435edf90d17f6bf64ac4af6fbfe33251a974556e12776bfc649",
+      "before_digest": "af710a97d521e6a11ff0e3bc5872b17f0bfd2f589fdd7ed665c4056b0e210221",
+      "before_objects_keys": [
+        "panel.0.unregistered.patch.0",
+        "panel.0.unregistered.text.10:text",
+        "panel.0.unregistered.text.11:text",
+        "panel.0.unregistered.text.12:text",
+        "panel.0.unregistered.text.13:text",
+        "panel.0.unregistered.text.2:text",
+        "panel.0.unregistered.text.6:text",
+        "panel.0.unregistered.text.7:text",
+        "panel.0.unregistered.text.8:text",
+        "panel.0.unregistered.text.9:text",
+        "panel.0:view"
+      ],
+      "diff_keys": [
+        "panel.0:view"
+      ],
+      "diffs": {
+        "panel.0:view": {
+          "after": {
+            "xlim": [
+              -1.15,
+              2.1849478967296383
+            ],
+            "xscale": "linear",
+            "ylim": [
+              -1.2215595481633847,
+              1.2635145297222488
+            ],
+            "yscale": "linear"
+          },
+          "before": {
+            "xlim": [
+              -1.15,
+              2.1849478967296383
+            ],
+            "xscale": "linear",
+            "ylim": [
+              -1.3671279704941823,
+              1.4090829520530463
+            ],
+            "yscale": "linear"
+          }
+        }
+      },
+      "equal": false,
+      "fig_index": 0,
+      "source": "tools/g25s/compatible/sankey.py"
+    },
+    "sankey.py#fig1": {
+      "after_digest": "04e5adc63ab08b72723d3a46c231c9027ea9ee1a1f2b2ef9f3a913a00dbe0f77",
+      "before_digest": "031447596686b54a83aeb491f99220ee406c4d7ae9b5fe30fa5e458a7fc72970",
+      "before_objects_keys": [
+        "panel.0.unregistered.patch.0",
+        "panel.0.unregistered.text.10:text",
+        "panel.0.unregistered.text.11:text",
+        "panel.0.unregistered.text.12:text",
+        "panel.0.unregistered.text.13:text",
+        "panel.0.unregistered.text.14:text",
+        "panel.0.unregistered.text.2:text",
+        "panel.0.unregistered.text.5:text",
+        "panel.0.unregistered.text.6:text",
+        "panel.0.unregistered.text.8:text",
+        "panel.0.unregistered.text.9:text",
+        "panel.0:view"
+      ],
+      "diff_keys": [
+        "panel.0:view"
+      ],
+      "diffs": {
+        "panel.0:view": {
+          "after": {
+            "xlim": [
+              -1.5452380952380953,
+              2.1452380952380956
+            ],
+            "xscale": "linear",
+            "ylim": [
+              -1.35,
+              1.4
+            ],
+            "yscale": "linear"
+          },
+          "before": {
+            "xlim": [
+              -1.6,
+              2.2
+            ],
+            "xscale": "linear",
+            "ylim": [
+              -1.35,
+              1.4
+            ],
+            "yscale": "linear"
+          }
+        }
+      },
+      "equal": false,
+      "fig_index": 1,
+      "source": "tools/g25s/compatible/sankey.py"
+    },
+    "sankey.py#fig2": {
+      "after_digest": "f44b6e69f246db5252e50c87dfa68c03170a8655f028d961071f99ab586aa4a7",
+      "before_digest": "df3bc7e0cb624a769ea1bfe0188871dcda1e842c4f8e527b1426c63bdfff78cf",
+      "before_objects_keys": [
+        "panel.0.unregistered.patch.0",
+        "panel.0.unregistered.patch.1",
+        "panel.0.unregistered.text.19:text",
+        "panel.0.unregistered.text.20:text",
+        "panel.0.unregistered.text.2:text",
+        "panel.0:view"
+      ],
+      "diff_keys": [
+        "panel.0:view"
+      ],
+      "diffs": {
+        "panel.0:view": {
+          "after": {
+            "xlim": [
+              -1.18,
+              2.1220154243913423
+            ],
+            "xscale": "linear",
+            "ylim": [
+              -1.3528233102036782,
+              1.1077107641008381
+            ],
+            "yscale": "linear"
+          },
+          "before": {
+            "xlim": [
+              -1.18,
+              2.1220154243913423
+            ],
+            "xscale": "linear",
+            "ylim": [
+              -1.6751729889353184,
+              1.4300604428324784
+            ],
+            "yscale": "linear"
+          }
+        }
+      },
+      "equal": false,
+      "fig_index": 2,
+      "source": "tools/g25s/compatible/sankey.py"
+    }
+  },
+  "note": "post-Shadow-fix snapshot: pie before==after under the fixed Shadow record; pre-fix Shadow per-object diffs are reconstructed in prefix-shadow-raw.json; sankey rows below are RAW before-draw vs after-draw view diffs (no inspector settle)."
+}

@@ -1,0 +1,63 @@
+{
+  "zero_authorized_target_figures": 14,
+  "local_change_refusals": [
+    {
+      "source": "g25s-log",
+      "scope": "fig2",
+      "probe": "axis.tick:change",
+      "result": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "unexplained geometry: [\"data geometry moved, never reflow: shape:1:polyline:1 kind='polyline'\"]"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_complex_layout",
+      "scope": "fig0",
+      "probe": "curve.linewidth:change",
+      "result": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "science changed: [\"{'rule_id': 'SCIENCE_CHANGED', 'severity': 'blocker', 'object_ids': ['panel.1.unregistered.image.0', 'panel.10.unregistered.image.0', 'panel.11.unregistered.ima\"]"
+        ],
+        "official_overlay_absent": true
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "before": "ERROR",
+      "after": "ERROR",
+      "count": 37
+    },
+    {
+      "before": "FAIL",
+      "after": "FAIL",
+      "count": 33
+    },
+    {
+      "before": "PASS",
+      "after": "PASS",
+      "count": 47
+    },
+    {
+      "before": "UNCAUGHT",
+      "after": "FAIL",
+      "count": 6
+    },
+    {
+      "before": "UNCAUGHT",
+      "after": "PASS",
+      "count": 6
+    }
+  ],
+  "local_pass_whole_fail": 12
+}

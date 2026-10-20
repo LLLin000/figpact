@@ -1,0 +1,86 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 0,
+    "derived_total": 0,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig5.ax[s5421e34dcbb9].tick.x.fontsize.fontsize": null
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig5.ax[s5421e34dcbb9].tick.x.fontsize"
+      ],
+      "retained": []
+    }
+  },
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [
+      "«-1.0» 与 «0.2» 重叠 (面积 221.4 px²)",
+      "«-0.2» 与 «0.2» 重叠 (面积 21.4 px²)",
+      "«0.2» 与 «1.4» 重叠 (面积 181.7 px²)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "FAIL",
+  "local_problems": [
+    "required targets unchanged: {'fig5.ax[s5421e34dcbb9].tick.x.fontsize.fontsize': None}"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-first\\g25s-contour\\fig5\\.inspect-2cb33e1536d349808522dca9dbc9b69b.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-first\\g25s-contour\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [
+      "«-1.0» 与 «0.2» 重叠 (面积 221.4 px²)",
+      "«-0.2» 与 «0.2» 重叠 (面积 21.4 px²)",
+      "«0.2» 与 «1.4» 重叠 (面积 181.7 px²)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "eligible": false,
+    "inherited": [],
+    "new": [],
+    "reason": "unmeasured: no verified QA pair",
+    "unmeasured": [
+      "unmeasured: no verified QA pair"
+    ],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": [
+    {
+      "after": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "before": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "id": "fig5.ax[s5421e34dcbb9].tick.x.fontsize",
+      "property": "fontsize",
+      "requested": 10.0,
+      "role": "axis.tick"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "scope": "G25-S2 science ownership: pie.py figs5/7 + sankey.py figs0-2 capture_science before->draw->after",
+  "files": {
+    "prefix-shadow-raw.json": "PRE-FIX reconstruction of the old composed-native Shadow record across one draw (4 Shadow objects/figure differ; codes identical, vertices translated by renderer offset) + post-fix parity flag",
+    "diagnosis-raw.json": "post-fix before-draw vs after-draw objects; sankey panel.0:view diffs raw; pie equal under fixed record",
+    "postfix-captures.json": "post-fix capture_figure frame/png/scene revisions, repeat stability, node counts, blocking diagnostics, and 4 tamper counterexamples (all SCIENCE_CHANGED/refused)"
+  },
+  "root_causes": {
+    "shadow": "Shadow.get_patch_transform = wrapped transform + renderer-side _shadow_transform (points_to_pixels(ox,oy), dpi/72 scaled, rewritten in draw()); old code hashed the composed vertices => first draw looks like science change + dpi drift. Fix: geometry=shadow record {offset_points (declared points), wrapped (full native record of wrapped patch)}.",
+    "sankey_view": "Sankey.finish() leaves a pre-aspect window on aspect=1.0/adjustable=datalim axes; first draw apply_aspect rewrites xlim/ylim (stable on 2nd draw). Patch data+texts identical; only panel.0:view moves. Fix: inspector settles axes.apply_aspect() (renderer-independent, no-draw) before the science baseline; post-draw drift still fails closed."
+  },
+  "protection_retained": "wedge theta tamper, shadow offset tamper, sankey view tamper all SCIENCE_CHANGED; draw-time curve mutation refused; no exemptions added (Shadow still hashed; guide-exemption untouched); unknown/missing still fail closed.",
+  "tightening": {
+    "settle_scope": "only axes whose instance-level apply_aspect __func__ is the native Axes.apply_aspect run; subclass (incl. 3D Axes3D) and instance-dict monkeypatch overrides are skipped and keep old fail-closed behavior",
+    "failure_mode": "native settle exceptions raise InspectorError with cause (shared x+y + equal/datalim -> RuntimeError cause, verified); nothing swallowed",
+    "intrusion_guard": "pre/post settle captures compared; any non-*:view record change (e.g. xlim_changed callback mutating line data: panel.0.unregistered.line.0) raises InspectorError naming the intruders; declaration changes refused too",
+    "evidence": "postfix-captures.json: settlement_time_data_mutation, failed_settlement (cause RuntimeError), instance_override_skipped_by_settle (0 calls); frame revisions unchanged from prior run"
+  }
+}

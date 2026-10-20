@@ -1,0 +1,3213 @@
+{
+  "kind": "G25-S2 DEVELOPMENT fixed-denominator comparison",
+  "model_called": false,
+  "independent_signoff": false,
+  "g25_status": "BLOCKED",
+  "counts": {
+    "historical_probes": 129,
+    "missing_probes": 0,
+    "request_drift": 0,
+    "old_uncaught_exceptions": 12,
+    "new_uncaught_exceptions": 0,
+    "change_count": 55,
+    "change_local_pass": 53,
+    "change_whole_pass": 41,
+    "official_overlay_absent": 129,
+    "no-op_count": 37,
+    "no-op_local_pass": 0,
+    "no-op_whole_pass": 0,
+    "out-of-range_count": 37,
+    "out-of-range_local_pass": 0,
+    "out-of-range_whole_pass": 0
+  },
+  "sources": 26,
+  "baseline_failed": [
+    {
+      "id": "g25s-heatmap",
+      "error": "ValueError: 'xtick' is not a valid value for rotation_mode; supported values are 'anchor', 'default'"
+    },
+    {
+      "id": "g25s-pie",
+      "error": "TypeError: Axes.pie() got an unexpected keyword argument 'wedge_labels'"
+    },
+    {
+      "id": "tp_cheat_collection_reference",
+      "error": "TypeError: RegularPolyCollection.__init__() takes 2 positional arguments but 3 positional arguments (and 1 keyword-only argument) were given"
+    }
+  ],
+  "source_unchanged": 26,
+  "figures": 51,
+  "context_failures": [
+    {
+      "source": "g25s-log",
+      "scope": "fig2",
+      "error": "InspectorError: 快照存在阻塞级未测量数据，拒绝出帧：fig2::unregistered.4 的几何无法测量"
+    }
+  ],
+  "plan_negatives": 180,
+  "plan_negatives_rejected": 180,
+  "new_candidate_probes": 129,
+  "additional_candidates_not_in_historical_denominator": [],
+  "probe_comparison": [
+    {
+      "source": "g25s-3d",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-3d",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s4966b4051d59].tick.y.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s4966b4051d59].tick.y.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-3d",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s4966b4051d59].tick.y.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s4966b4051d59].tick.y.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s0490e61e779f].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s0490e61e779f].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s0490e61e779f].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s0490e61e779f].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig0",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig1",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig1",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[s7e217d578480].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[s7e217d578480].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig1",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[s7e217d578480].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[s7e217d578480].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig1",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig2",
+      "probe": "axis.title:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 歧义 1 处，失败关闭"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 歧义 1 处，失败关闭"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig2",
+      "probe": "axis.title:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[sc4fd7f807fc7].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[sc4fd7f807fc7].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig2",
+      "probe": "axis.title:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[sc4fd7f807fc7].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[sc4fd7f807fc7].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig2",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 新增 1 条"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 新增 1 条"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig2",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 歧义 1 处，失败关闭"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 歧义 1 处，失败关闭"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig3",
+      "probe": "axis.title:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig3",
+      "probe": "axis.title:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig3.ax[s509c2de610eb].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig3.ax[s509c2de610eb].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig3",
+      "probe": "axis.title:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig3.ax[s509c2de610eb].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig3.ax[s509c2de610eb].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig3",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig3",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig4",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig4",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig4.ax[sac6aaca74153].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig4.ax[sac6aaca74153].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig4",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig4.ax[sac6aaca74153].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig4.ax[sac6aaca74153].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-box",
+      "scope": "fig4",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s65f962b79d05].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s65f962b79d05].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s65f962b79d05].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig1",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig1",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[sdb6e4bc0e64e].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig1",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[sdb6e4bc0e64e].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[sdb6e4bc0e64e].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig2",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig2",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[sc056bfb12801].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig2",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[sc056bfb12801].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[sc056bfb12801].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig3",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig3",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig3.ax[s6adbdcccf947].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig3",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig3.ax[s6adbdcccf947].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig3.ax[s6adbdcccf947].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig4",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig4",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig4.ax[s0fd6d65d502e].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig4",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig4.ax[s0fd6d65d502e].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig4.ax[s0fd6d65d502e].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig5",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig5",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": null,
+        "figure_verification_state": null,
+        "science_unchanged": null,
+        "error": "ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()",
+        "local_problems": null,
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig5.ax[s5421e34dcbb9].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-contour",
+      "scope": "fig5",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig5.ax[s5421e34dcbb9].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig5.ax[s5421e34dcbb9].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s27fb65475ae4].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s27fb65475ae4].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s27fb65475ae4].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s27fb65475ae4].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig1",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig1",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[s27fb65475ae4].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[s27fb65475ae4].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig1",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[s27fb65475ae4].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[s27fb65475ae4].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig2",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig2",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[s7bde82219c08].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[s7bde82219c08].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig2",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[s7bde82219c08].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[s7bde82219c08].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig3",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig3",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig3.ax[sae170a5bb0f1].tick.y.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig3.ax[sae170a5bb0f1].tick.y.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-hist",
+      "scope": "fig3",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig3.ax[sae170a5bb0f1].tick.y.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig3.ax[sae170a5bb0f1].tick.y.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-inset",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-inset",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s057f058ef280].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s057f058ef280].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-inset",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s057f058ef280].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s057f058ef280].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s08ec4069c42a].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s08ec4069c42a].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s08ec4069c42a].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s08ec4069c42a].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig0",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig1",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig1",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[s016f49afec79].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[s016f49afec79].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig1",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[s016f49afec79].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[s016f49afec79].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig2",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "unexplained geometry: [\"data geometry moved, never reflow: shape:1:polyline:1 kind='polyline'\"]"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "unexplained geometry: [\"data geometry moved, never reflow: shape:1:polyline:1 kind='polyline'\"]"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig2",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[s320f174bdc44].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[s320f174bdc44].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-log",
+      "scope": "fig2",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[s320f174bdc44].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[s320f174bdc44].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-polar",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-polar",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[sbf0abf3e0cd5].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[sbf0abf3e0cd5].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-polar",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[sbf0abf3e0cd5].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[sbf0abf3e0cd5].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-polar",
+      "scope": "fig0",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-quiver",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-quiver",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s11a9806431e9].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s11a9806431e9].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-quiver",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s11a9806431e9].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s11a9806431e9].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-quiver",
+      "scope": "fig1",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-quiver",
+      "scope": "fig1",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[se325200909a9].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[se325200909a9].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-quiver",
+      "scope": "fig1",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[se325200909a9].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[se325200909a9].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-quiver",
+      "scope": "fig2",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-quiver",
+      "scope": "fig2",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[sf59f68b0cb34].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[sf59f68b0cb34].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-quiver",
+      "scope": "fig2",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[sf59f68b0cb34].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[sf59f68b0cb34].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-stack",
+      "scope": "fig0",
+      "probe": "axis.title:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-stack",
+      "scope": "fig0",
+      "probe": "axis.title:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[sa3cad03053d4].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[sa3cad03053d4].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-stack",
+      "scope": "fig0",
+      "probe": "axis.title:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[sa3cad03053d4].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[sa3cad03053d4].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-stack",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-stack",
+      "scope": "fig1",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-stack",
+      "scope": "fig1",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[se5fc22b48c54].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[se5fc22b48c54].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-stack",
+      "scope": "fig1",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[se5fc22b48c54].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[se5fc22b48c54].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-twin",
+      "scope": "fig0",
+      "probe": "axis.title:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-twin",
+      "scope": "fig0",
+      "probe": "axis.title:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s93aca29d2c77].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s93aca29d2c77].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-twin",
+      "scope": "fig0",
+      "probe": "axis.title:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s93aca29d2c77].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s93aca29d2c77].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-twin",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-twin",
+      "scope": "fig0",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-dates",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 新增 1 条"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 新增 1 条"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-dates",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s5923d2d1c222].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s5923d2d1c222].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-dates",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s5923d2d1c222].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s5923d2d1c222].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[sa1deb43d5bc6].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[sa1deb43d5bc6].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[sa1deb43d5bc6].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[sa1deb43d5bc6].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig1",
+      "probe": "axis.title:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig1",
+      "probe": "axis.title:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[sf2b796773dc4].ylabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig1.ax[sf2b796773dc4].ylabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig1",
+      "probe": "axis.title:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[sf2b796773dc4].ylabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig1.ax[sf2b796773dc4].ylabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig1",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig2",
+      "probe": "axis.title:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 未知/不可量 1 条，失败关闭"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 未知/不可量 1 条，失败关闭"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig2",
+      "probe": "axis.title:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[sacbe1bde26f2].ylabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig2.ax[sacbe1bde26f2].ylabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig2",
+      "probe": "axis.title:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[sacbe1bde26f2].ylabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig2.ax[sacbe1bde26f2].ylabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-heatmap",
+      "scope": "fig2",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 未知/不可量 1 条，失败关闭"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 未知/不可量 1 条，失败关闭"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-stream",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 未知/不可量 1 条，失败关闭"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "DRAFT_REFUSED: 未知/不可量 1 条，失败关闭"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-stream",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s1674fd6cf26c].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s1674fd6cf26c].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-stream",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s1674fd6cf26c].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s1674fd6cf26c].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-violin",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-violin",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s02069d660bcb].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s02069d660bcb].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "g25s-compat-violin",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s02069d660bcb].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s02069d660bcb].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_complex_layout",
+      "scope": "fig0",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "science changed: [\"{'rule_id': 'SCIENCE_CHANGED', 'severity': 'blocker', 'object_ids': ['panel.1.unregistered.image.0', 'panel.10.unregistered.image.0', 'panel.11.unregistered.ima\"]"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "science changed: [\"{'rule_id': 'SCIENCE_CHANGED', 'severity': 'blocker', 'object_ids': ['panel.1.unregistered.image.0', 'panel.10.unregistered.image.0', 'panel.11.unregistered.ima\"]"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_complex_layout",
+      "scope": "fig0",
+      "probe": "curve.linewidth:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "science changed: [\"{'rule_id': 'SCIENCE_CHANGED', 'severity': 'blocker', 'object_ids': ['panel.1.unregistered.image.0', 'panel.10.unregistered.image.0', 'panel.11.unregistered.ima\"]",
+          "required targets unchanged: {'fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth.linewidth': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "science changed: [\"{'rule_id': 'SCIENCE_CHANGED', 'severity': 'blocker', 'object_ids': ['panel.1.unregistered.image.0', 'panel.10.unregistered.image.0', 'panel.11.unregistered.ima\"]",
+          "required targets unchanged: {'fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth.linewidth': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_complex_layout",
+      "scope": "fig0",
+      "probe": "curve.linewidth:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth' value -1.0 outside [0.05, 20.0] for 'linewidth'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth' value -1.0 outside [0.05, 20.0] for 'linewidth'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_elegant_scatter",
+      "scope": "fig0",
+      "probe": "axis.title:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_elegant_scatter",
+      "scope": "fig0",
+      "probe": "axis.title:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s676318f5c722].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s676318f5c722].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_elegant_scatter",
+      "scope": "fig0",
+      "probe": "axis.title:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s676318f5c722].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s676318f5c722].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_elegant_scatter",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_polar_patterns",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_polar_patterns",
+      "scope": "fig0",
+      "probe": "axis.tick:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s219147f5a07c].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s219147f5a07c].tick.x.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_polar_patterns",
+      "scope": "fig0",
+      "probe": "axis.tick:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s219147f5a07c].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s219147f5a07c].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_polar_patterns",
+      "scope": "fig0",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_scales_log_log",
+      "scope": "fig0",
+      "probe": "axis.title:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_scales_log_log",
+      "scope": "fig0",
+      "probe": "axis.title:no-op",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s16d9c4c29e7b].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "FAIL",
+        "figure_verification_state": "FAIL",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [
+          "required targets unchanged: {'fig0.ax[s16d9c4c29e7b].xlabel.fontsize.fontsize': None}"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_scales_log_log",
+      "scope": "fig0",
+      "probe": "axis.title:out-of-range",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s16d9c4c29e7b].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "ERROR",
+        "figure_verification_state": "ERROR",
+        "science_unchanged": false,
+        "error": null,
+        "local_problems": [
+          "OUT_OF_RANGE: 'fig0.ax[s16d9c4c29e7b].xlabel.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+        ],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_scales_log_log",
+      "scope": "fig0",
+      "probe": "axis.tick:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    },
+    {
+      "source": "tp_book_scales_log_log",
+      "scope": "fig0",
+      "probe": "curve.linewidth:change",
+      "same_target_and_value": true,
+      "before": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      },
+      "after": {
+        "local_edit_state": "PASS",
+        "figure_verification_state": "PASS",
+        "science_unchanged": true,
+        "error": null,
+        "local_problems": [],
+        "official_overlay_absent": true
+      }
+    }
+  ]
+}

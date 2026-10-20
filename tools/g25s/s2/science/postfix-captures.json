@@ -1,0 +1,81 @@
+{
+  "counterexamples": {
+    "draw_time_curve_mutation": {
+      "message": "\u53d7\u4fdd\u62a4\u79d1\u5b66\u8f7d\u8377\u5728\u6355\u83b7\u8fc7\u7a0b\u4e2d\u53d8\u5316\uff0c\u62d2\u7edd\u51fa\u5e27\uff1aProtected scientific payload differs from the baseline\uff08capture_figure\uff09",
+      "refused": true
+    },
+    "failed_settlement": {
+      "cause": "RuntimeError",
+      "message": "\u7b49\u6bd4\u5750\u6807\u7ed3\u7b97\u5931\u8d25\uff0c\u62d2\u7edd\u51fa\u5e27\uff1aRuntimeError(\"set_aspect(..., adjustable='datalim') or axis('equal') are not allowed when both axes are shared.  Try set_aspect(..., adjustable='b",
+      "refused": true
+    },
+    "instance_override_skipped_by_settle": {
+      "settle_calls": []
+    },
+    "sankey_view_tamper": {
+      "objects": [
+        "panel.0:view"
+      ],
+      "rule": "SCIENCE_CHANGED"
+    },
+    "settlement_time_data_mutation": {
+      "message": "\u7b49\u6bd4\u5750\u6807\u7ed3\u7b97\u6539\u53d8\u4e86\u89c6\u56fe\u7a97\u53e3\u4e4b\u5916\u7684\u53d7\u4fdd\u62a4\u79d1\u5b66\u8f7d\u8377\uff0c\u62d2\u7edd\u51fa\u5e27\uff1apanel.0.unregistered.line.0",
+      "refused": true
+    },
+    "shadow_offset_tamper": {
+      "objects": [
+        "panel.0.unregistered.patch.1"
+      ],
+      "rule": "SCIENCE_CHANGED"
+    },
+    "wedge_theta_tamper": {
+      "objects": [
+        "panel.0.unregistered.patch.0",
+        "panel.0.unregistered.patch.1"
+      ],
+      "rule": "SCIENCE_CHANGED"
+    }
+  },
+  "figures": {
+    "pie.py#fig5": {
+      "blocking_diagnostics": [],
+      "frame_revision": "16295472e1066886536a33673feeb48af5436148fb147ac8aa4ced4d77618ad8",
+      "node_count": 18,
+      "png_sha256": "8204cb5ddc0db25422d83d8ffe14848add61a84c72dde747758ae25abf32c095",
+      "repeat_stable": true,
+      "scene_sha256": "0b16ba1c7ffa77546a8527776956d654caadb02d170f518e99171409d8491454"
+    },
+    "pie.py#fig7": {
+      "blocking_diagnostics": [],
+      "frame_revision": "cf92b98bb573dbd2ba51b960880a06c5071c04d652121c01469c12b5a63d314f",
+      "node_count": 18,
+      "png_sha256": "aabca728fad07637873d32ae50dcf853e347cbc4ab1feb39abd787b09ea8632c",
+      "repeat_stable": true,
+      "scene_sha256": "c86b0f7a11db2867b679a8dc04d90150fc6109918f014d82eec5c6d2c231d19d"
+    },
+    "sankey.py#fig0": {
+      "blocking_diagnostics": [],
+      "frame_revision": "2ef914f70d8d2d963b04d913d1bcbb14275c01e525b5c611fd9f568cdbffced3",
+      "node_count": 12,
+      "png_sha256": "4cf5e529f48251c9f61fdd2ea060345bb5717c6b2a7b3b5d3d423f40a97cf1fc",
+      "repeat_stable": true,
+      "scene_sha256": "72af933cfb7dd056c15693a3cd4e2f6f73d7ab1969cae335cf95b28cab9ea7df"
+    },
+    "sankey.py#fig1": {
+      "blocking_diagnostics": [],
+      "frame_revision": "83b0670ccdfe554f684640515c2a13ed7b9d3a6302afea2c51a8cf1f7f45e79c",
+      "node_count": 13,
+      "png_sha256": "41c74fa9a6a4896940f6b594d51d890a18b959a7dcb757b6243a8557723891bc",
+      "repeat_stable": true,
+      "scene_sha256": "df5c4d334e5e09abc0f575cc3cc1427da2a01d4e04da273c6fff9af1b02b88a3"
+    },
+    "sankey.py#fig2": {
+      "blocking_diagnostics": [],
+      "frame_revision": "e3b12887ecc357d21a3825159916a84d5df950af1cad9092a16f43f31f13dd16",
+      "node_count": 6,
+      "png_sha256": "ca45a6a3e9d42f0ad2747d83ac3e5fc4bc02c7baba7660ba4fbd87e15b3d5a92",
+      "repeat_stable": true,
+      "scene_sha256": "e645f5302878b97e173cd73fab01d8191ea9b3e0810fd1092895e8adaed6400e"
+    }
+  }
+}

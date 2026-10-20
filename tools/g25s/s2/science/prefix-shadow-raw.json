@@ -1,0 +1,436 @@
+{
+  "pie.py#fig5": {
+    "old_style_diff_keys": [
+      "patch.0",
+      "patch.1",
+      "patch.2",
+      "patch.3"
+    ],
+    "old_style_diffs": {
+      "patch.0": {
+        "after": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+              "dtype": "uint8",
+              "shape": [
+                9
+              ]
+            },
+            "vertices": {
+              "digest": "4c71151cf0250cd0dde91b426a6fd73bd890a4d6a0489d78dbf7802dfb4874df",
+              "dtype": "float64",
+              "shape": [
+                9,
+                2
+              ]
+            }
+          }
+        },
+        "before": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+              "dtype": "uint8",
+              "shape": [
+                9
+              ]
+            },
+            "vertices": {
+              "digest": "c56c6058eb53581f6720fd7360d03bd2a33dc9ba08b3a2becdc112618bd25c5a",
+              "dtype": "float64",
+              "shape": [
+                9,
+                2
+              ]
+            }
+          }
+        }
+      },
+      "patch.1": {
+        "after": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "21de6cfdbda0d30f45dc217e8d8ffb5ca4ad5abc7ee9fef2d3286cd83562891a",
+              "dtype": "uint8",
+              "shape": [
+                15
+              ]
+            },
+            "vertices": {
+              "digest": "519b0a9e1c1fdf27007f918c8e7c937afa6ce4a4c97b19ce8e9304e34f5d3c3e",
+              "dtype": "float64",
+              "shape": [
+                15,
+                2
+              ]
+            }
+          }
+        },
+        "before": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "21de6cfdbda0d30f45dc217e8d8ffb5ca4ad5abc7ee9fef2d3286cd83562891a",
+              "dtype": "uint8",
+              "shape": [
+                15
+              ]
+            },
+            "vertices": {
+              "digest": "cf10c3cd91cca5e70f7a9f2b6fb380f28b9ee6ff07f72644913d7a0eac37b37d",
+              "dtype": "float64",
+              "shape": [
+                15,
+                2
+              ]
+            }
+          }
+        }
+      },
+      "patch.2": {
+        "after": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "21de6cfdbda0d30f45dc217e8d8ffb5ca4ad5abc7ee9fef2d3286cd83562891a",
+              "dtype": "uint8",
+              "shape": [
+                15
+              ]
+            },
+            "vertices": {
+              "digest": "8b72eef04723813833e1ce27aa46c3556a5f722b6b17fe4770975356cbef6888",
+              "dtype": "float64",
+              "shape": [
+                15,
+                2
+              ]
+            }
+          }
+        },
+        "before": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "21de6cfdbda0d30f45dc217e8d8ffb5ca4ad5abc7ee9fef2d3286cd83562891a",
+              "dtype": "uint8",
+              "shape": [
+                15
+              ]
+            },
+            "vertices": {
+              "digest": "a5638437c74d3ad60b28bf29c33f55f2dff701a2c537e2eafc50d032dba80c94",
+              "dtype": "float64",
+              "shape": [
+                15,
+                2
+              ]
+            }
+          }
+        }
+      },
+      "patch.3": {
+        "after": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+              "dtype": "uint8",
+              "shape": [
+                9
+              ]
+            },
+            "vertices": {
+              "digest": "8246a4282ffb1a95438fcb0b3e7e0f343f2687767c5ef45d9ef78b0fa28e4972",
+              "dtype": "float64",
+              "shape": [
+                9,
+                2
+              ]
+            }
+          }
+        },
+        "before": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+              "dtype": "uint8",
+              "shape": [
+                9
+              ]
+            },
+            "vertices": {
+              "digest": "3090a11fd25926f292efe934722962fbc95d05ab0780154cb1bfaf53e18fe70c",
+              "dtype": "float64",
+              "shape": [
+                9,
+                2
+              ]
+            }
+          }
+        }
+      }
+    },
+    "post_fix_equal": true,
+    "post_fix_shadow_sample": {
+      "geometry": "shadow",
+      "kind": "Shadow",
+      "offset_points": [
+        -0.02,
+        -0.02
+      ],
+      "wrapped": {
+        "geometry": "native",
+        "kind": "Wedge",
+        "path": {
+          "codes": {
+            "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+            "dtype": "uint8",
+            "shape": [
+              9
+            ]
+          },
+          "vertices": {
+            "digest": "c56c6058eb53581f6720fd7360d03bd2a33dc9ba08b3a2becdc112618bd25c5a",
+            "dtype": "float64",
+            "shape": [
+              9,
+              2
+            ]
+          }
+        }
+      }
+    },
+    "prefixed_note": "pre-fix reconstruction: old _native_path-composed Shadow record across one draw"
+  },
+  "pie.py#fig7": {
+    "old_style_diff_keys": [
+      "patch.0",
+      "patch.1",
+      "patch.2",
+      "patch.3"
+    ],
+    "old_style_diffs": {
+      "patch.0": {
+        "after": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+              "dtype": "uint8",
+              "shape": [
+                9
+              ]
+            },
+            "vertices": {
+              "digest": "9c97a8603842521c3687e3cab539bf33caff553e43229cc68293dfc0367e75e2",
+              "dtype": "float64",
+              "shape": [
+                9,
+                2
+              ]
+            }
+          }
+        },
+        "before": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+              "dtype": "uint8",
+              "shape": [
+                9
+              ]
+            },
+            "vertices": {
+              "digest": "c56c6058eb53581f6720fd7360d03bd2a33dc9ba08b3a2becdc112618bd25c5a",
+              "dtype": "float64",
+              "shape": [
+                9,
+                2
+              ]
+            }
+          }
+        }
+      },
+      "patch.1": {
+        "after": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "21de6cfdbda0d30f45dc217e8d8ffb5ca4ad5abc7ee9fef2d3286cd83562891a",
+              "dtype": "uint8",
+              "shape": [
+                15
+              ]
+            },
+            "vertices": {
+              "digest": "b7be4ff1071dff44879b41f052e29e04b52f7b4157137adebc0ca61b58f0a028",
+              "dtype": "float64",
+              "shape": [
+                15,
+                2
+              ]
+            }
+          }
+        },
+        "before": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "21de6cfdbda0d30f45dc217e8d8ffb5ca4ad5abc7ee9fef2d3286cd83562891a",
+              "dtype": "uint8",
+              "shape": [
+                15
+              ]
+            },
+            "vertices": {
+              "digest": "cf10c3cd91cca5e70f7a9f2b6fb380f28b9ee6ff07f72644913d7a0eac37b37d",
+              "dtype": "float64",
+              "shape": [
+                15,
+                2
+              ]
+            }
+          }
+        }
+      },
+      "patch.2": {
+        "after": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "21de6cfdbda0d30f45dc217e8d8ffb5ca4ad5abc7ee9fef2d3286cd83562891a",
+              "dtype": "uint8",
+              "shape": [
+                15
+              ]
+            },
+            "vertices": {
+              "digest": "e75a4f842c5e416b904da64ad6aa301317d18c7f35468a702a1ba435b4009ee4",
+              "dtype": "float64",
+              "shape": [
+                15,
+                2
+              ]
+            }
+          }
+        },
+        "before": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "21de6cfdbda0d30f45dc217e8d8ffb5ca4ad5abc7ee9fef2d3286cd83562891a",
+              "dtype": "uint8",
+              "shape": [
+                15
+              ]
+            },
+            "vertices": {
+              "digest": "a5638437c74d3ad60b28bf29c33f55f2dff701a2c537e2eafc50d032dba80c94",
+              "dtype": "float64",
+              "shape": [
+                15,
+                2
+              ]
+            }
+          }
+        }
+      },
+      "patch.3": {
+        "after": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+              "dtype": "uint8",
+              "shape": [
+                9
+              ]
+            },
+            "vertices": {
+              "digest": "aa2c0ea9e1aa5212b1f9be1b2f624597e34f42df89a02798cdd003f70c4b055b",
+              "dtype": "float64",
+              "shape": [
+                9,
+                2
+              ]
+            }
+          }
+        },
+        "before": {
+          "geometry": "native",
+          "kind": "Shadow",
+          "path": {
+            "codes": {
+              "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+              "dtype": "uint8",
+              "shape": [
+                9
+              ]
+            },
+            "vertices": {
+              "digest": "3090a11fd25926f292efe934722962fbc95d05ab0780154cb1bfaf53e18fe70c",
+              "dtype": "float64",
+              "shape": [
+                9,
+                2
+              ]
+            }
+          }
+        }
+      }
+    },
+    "post_fix_equal": true,
+    "post_fix_shadow_sample": {
+      "geometry": "shadow",
+      "kind": "Shadow",
+      "offset_points": [
+        -0.04,
+        -0.02
+      ],
+      "wrapped": {
+        "geometry": "native",
+        "kind": "Wedge",
+        "path": {
+          "codes": {
+            "digest": "b894a11145bb7a0eaf752a52961e1bd1f5f9d15e27a1cca654b874db37127db8",
+            "dtype": "uint8",
+            "shape": [
+              9
+            ]
+          },
+          "vertices": {
+            "digest": "c56c6058eb53581f6720fd7360d03bd2a33dc9ba08b3a2becdc112618bd25c5a",
+            "dtype": "float64",
+            "shape": [
+              9,
+              2
+            ]
+          }
+        }
+      }
+    },
+    "prefixed_note": "pre-fix reconstruction: old _native_path-composed Shadow record across one draw"
+  }
+}

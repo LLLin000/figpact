@@ -1,0 +1,38 @@
+[
+  {
+    "source": "tools/g25s/gallery/raw/mplot3d_surface3d.py",
+    "case": "surface3d",
+    "scope": "fig0",
+    "blocking_diagnostics": [],
+    "blocking_nodes": [],
+    "json_finite": true,
+    "boundary": "MEASURED"
+  },
+  {
+    "source": "tools/g25s/compatible/heatmap.py",
+    "case": "heatmap",
+    "scope": "fig1",
+    "blocking_diagnostics": [],
+    "blocking_nodes": [],
+    "json_finite": true,
+    "boundary": "MEASURED"
+  },
+  {
+    "source": "tools/g25s/compatible/heatmap.py",
+    "case": "heatmap",
+    "scope": "fig2",
+    "blocking_diagnostics": [],
+    "blocking_nodes": [],
+    "json_finite": true,
+    "boundary": "MEASURED"
+  },
+  {
+    "source": "tools/g25s/compatible/stream.py",
+    "case": "streamplot",
+    "scope": "fig0",
+    "blocking_diagnostics": [],
+    "blocking_nodes": [],
+    "json_finite": true,
+    "boundary": "MEASURED"
+  }
+]

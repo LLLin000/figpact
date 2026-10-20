@@ -275,6 +275,51 @@ def _apply_manifest_links(scene_dict: dict, science_manifest) -> None:
             label['linked_guide_gid'] = guide_gid
 
 
+def _settle_native_aspect(fig, registry, science_manifest) -> None:
+    """Settle the native equal-aspect view window before the science baseline.
+    Sankey-style axes (``aspect=1.0``, ``adjustable='datalim'``) leave a pre-aspect
+    window after ``finish()``; the first ``draw()`` rewrites ``xlim``/``ylim`` through
+    the native ``Axes.apply_aspect`` lifecycle step (renderer-independent, no draw) and
+    the window is then stable. Settling that one step up front lets the guard compare
+    settled science against settled science. Narrow by construction:
+    - only axes whose ``apply_aspect`` is the unoverridden native implementation run;
+      an overridden/custom ``apply_aspect`` (3D, user subclass, monkeypatch) is left
+      alone and the figure keeps the old fail-closed behavior below;
+    - settlement failures raise ``InspectorError`` with cause, never swallowed;
+    - only ``panel.*:view`` records may move during settlement: any other protected
+      record changing (e.g. an ``xlim_changed`` callback mutating line/wedge data)
+      raises ``InspectorError`` instead of being laundered into the baseline.
+    """
+    import matplotlib.axes as _mpl_axes
+
+    native = _mpl_axes.Axes.apply_aspect
+    # Instance-dict monkeypatches count as overridden too: the instance attribute is
+    # read off the instance (instance dict shadows the class), so a per-figure test
+    # double can never slip past this check into the settle call below.
+    targets = [axes for axes in (getattr(fig, 'axes', None) or [])
+               if axes.get_aspect() != 'auto' and axes.get_adjustable() == 'datalim'
+               and getattr(getattr(axes, 'apply_aspect', None), '__func__', None) is native]
+    if not targets:
+        return
+    presettle = science.capture_science(fig, registry, declarations=science_manifest)
+    for axes in targets:
+        try:
+            native(axes)
+        except Exception as exc:
+            raise InspectorError(f'等比坐标结算失败，拒绝出帧：{exc!r}') from exc
+    settled = science.capture_science(fig, registry, declarations=science_manifest)
+    before_objects = presettle.get('objects', {})
+    after_objects = settled.get('objects', {})
+    intruders = sorted(key for key in set(before_objects) | set(after_objects)
+                       if before_objects.get(key) != after_objects.get(key)
+                       and not key.endswith(':view'))
+    if intruders:
+        raise InspectorError('等比坐标结算改变了视图窗口之外的受保护科学载荷，拒绝出帧：'
+                             + ','.join(intruders))
+    if presettle.get('declarations') != settled.get('declarations'):
+        raise InspectorError('等比坐标结算改变了科学声明，拒绝出帧：science_manifest')
+
+
 def capture_figure(fig, registry=None, *, scope='measurement', contract=None,
                    science_manifest=None, source_revision=None) -> dict:
     """对一个真实 Matplotlib Figure 取只读帧：一次 draw 的 PNG + 同一帧 Scene 几何。
@@ -284,6 +329,7 @@ def capture_figure(fig, registry=None, *, scope='measurement', contract=None,
     """
     registry = registry if registry is not None else GidRegistry()
     scope = _scope_of(scope)
+    _settle_native_aspect(fig, registry, science_manifest)
     before = science.capture_science(fig, registry, declarations=science_manifest)
 
     original_canvas = getattr(fig, 'canvas', None)

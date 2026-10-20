@@ -1,0 +1,19 @@
+{
+  "id": "g25s-compat-heatmap",
+  "repository": "matplotlib/matplotlib",
+  "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+  "upstream_path": "images_contours_and_fields/image_annotated_heatmap.py",
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/images_contours_and_fields/image_annotated_heatmap.py",
+  "local_path": "tools/g25s/compatible/heatmap.py",
+  "sha256": "c8f484ff44c02dfcd8415a38cc743b8fd6e7099c9fc1b8eacc1c0a29fbacaecc",
+  "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+  "plot_types": [
+    "heatmap",
+    "colorbar",
+    "annotation"
+  ],
+  "source_review": "Reviewed entire source: numpy/matplotlib only, seeded embedded data, no network/process/file IO; unchanged upstream original.",
+  "independent_signoff": false,
+  "split": "DEVELOPMENT_EXPOSED",
+  "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families"
+}

@@ -1,0 +1,1152 @@
+{
+  "route": "overlay",
+  "scope": "fig1",
+  "revision": "a731bf159288900551f23d2b538dfc4be0a855d45dc84738fed7f241a0001062",
+  "controls": [
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d022dc53f117f.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d022dc53f117f.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d022dc53f117f.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "022dc53f117ff2eb",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d1654e96fe569.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d1654e96fe569.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d1654e96fe569.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "1654e96fe569929f",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d199f5fd9cd9c.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d199f5fd9cd9c.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d199f5fd9cd9c.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "199f5fd9cd9ceac1",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d222b91bc9d58.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d222b91bc9d58.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d222b91bc9d58.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "222b91bc9d586e15",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d40d499b5cc61.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d40d499b5cc61.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d40d499b5cc61.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "40d499b5cc61904f",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d4a7c23efcff3.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d4a7c23efcff3.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d4a7c23efcff3.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "4a7c23efcff32844",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d6796e7bcfed8.l7f1d0a5c.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d6796e7bcfed8.l7f1d0a5c.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d6796e7bcfed8.l7f1d0a5c.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _child0",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 5,
+        "label": "_child0"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "6796e7bcfed878b8",
+        "label": "_child0",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _child0"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d6be5c3edb038.l33bfe2c5.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d6be5c3edb038.l33bfe2c5.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d6be5c3edb038.l33bfe2c5.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _child14",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 5,
+        "label": "_child14"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "6be5c3edb038e330",
+        "label": "_child14",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _child14"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d75f96582fc7c.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d75f96582fc7c.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d75f96582fc7c.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "75f96582fc7cae8f",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d7c8a576a69ec.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d7c8a576a69ec.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d7c8a576a69ec.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "7c8a576a69ec024f",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d86eae9a7c633.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d86eae9a7c633.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d86eae9a7c633.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "86eae9a7c633540e",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d919220da33e5.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d919220da33e5.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d919220da33e5.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "919220da33e5fe25",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.d92a966b1e2c3.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.d92a966b1e2c3.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.d92a966b1e2c3.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "92a966b1e2c3662b",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.db32e9241394e.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.db32e9241394e.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.db32e9241394e.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "b32e9241394e79f9",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.dcc418b1f903d.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.dcc418b1f903d.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.dcc418b1f903d.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "cc418b1f903d9406",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.de0e450269aef.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.de0e450269aef.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.de0e450269aef.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "e0e450269aef7a38",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.de563f852a6dc.leafc3f3a.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.de563f852a6dc.leafc3f3a.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.de563f852a6dc.leafc3f3a.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _child7",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 5,
+        "label": "_child7"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "e563f852a6dc3846",
+        "label": "_child7",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _child7"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].curve.dfbf26d71482c.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].curve.dfbf26d71482c.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].curve.dfbf26d71482c.l1baef315.linewidth#0"
+      ],
+      "scope": "fig1",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s7e217d578480",
+        "data": "fbf26d71482c79bb",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].tick.x.fontsize#0",
+        "figpact.style.fig1.ax[s7e217d578480].tick.x.fontsize#1",
+        "figpact.style.fig1.ax[s7e217d578480].tick.x.fontsize#2"
+      ],
+      "scope": "fig1",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "axis": "x",
+        "count": 3
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s7e217d578480",
+        "axis": "x"
+      },
+      "description": "x tick labels"
+    },
+    {
+      "id": "fig1.ax[s7e217d578480].tick.y.fontsize",
+      "path": null,
+      "target_id": "fig1.ax[s7e217d578480].tick.y.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#0",
+        "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#1",
+        "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#2",
+        "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#3",
+        "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#4",
+        "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#5",
+        "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#6",
+        "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#7",
+        "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#8"
+      ],
+      "scope": "fig1",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "y tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s7e217d578480",
+        "axis": "y",
+        "count": 9
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s7e217d578480",
+        "axis": "y"
+      },
+      "description": "y tick labels"
+    }
+  ],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-box\\fig1\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/g25s-box/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-box\\original.py",
+        "3bd17b82108953d7c4b59768aac481044cc572b3e7f358f5ef73cf4418fe75e2"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "a731bf159288900551f23d2b538dfc4be0a855d45dc84738fed7f241a0001062",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig1::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig1::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          20.32,
+          13.4112,
+          146.304,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig1::unregistered.0",
+        "type": "curve",
+        "bounds_mm": [
+          40.259,
+          16.620066666666663,
+          42.37566666666666,
+          102.40956449128711
+        ]
+      },
+      {
+        "id": "fig1::unregistered.1",
+        "type": "curve",
+        "bounds_mm": [
+          82.25366666666666,
+          18.930048037070748,
+          84.37033333333333,
+          104.08073333333334
+        ]
+      },
+      {
+        "id": "fig1::unregistered.2",
+        "type": "curve",
+        "bounds_mm": [
+          124.2483333333333,
+          23.39481462675248,
+          126.36499999999998,
+          98.8829873531501
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d022dc53f117f.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          35.01813333333333,
+          59.42881514036697,
+          47.61653333333333,
+          59.42881514036697
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d1654e96fe569.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          41.31733333333333,
+          65.88663413501098,
+          41.31733333333333,
+          80.7826467724443
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d199f5fd9cd9c.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          41.31733333333333,
+          46.204340882655806,
+          41.31733333333333,
+          54.80770216233473
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d222b91bc9d58.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          119.00746666666666,
+          56.50342505431784,
+          131.60586666666666,
+          56.50342505431784
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d40d499b5cc61.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          38.16773333333334,
+          80.7826467724443,
+          44.46693333333332,
+          80.7826467724443
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d4a7c23efcff3.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          80.1624,
+          91.10308781541869,
+          86.46159999999999,
+          91.10308781541869
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d6796e7bcfed8.l7f1d0a5c.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          35.01813333333333,
+          54.80770216233473,
+          47.61653333333333,
+          65.88663413501098
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d6be5c3edb038.l33bfe2c5.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          119.00746666666666,
+          56.16551606387088,
+          131.60586666666666,
+          68.41367636006608
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d75f96582fc7c.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          125.30666666666664,
+          43.548887776514846,
+          125.30666666666664,
+          56.16551606387088
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d7c8a576a69ec.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          80.1624,
+          34.231644431921595,
+          86.46159999999999,
+          34.231644431921595
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d86eae9a7c633.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          83.312,
+          69.45970553845174,
+          83.312,
+          91.10308781541869
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d919220da33e5.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          38.16773333333334,
+          46.204340882655806,
+          44.46693333333332,
+          46.204340882655806
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.d92a966b1e2c3.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          77.01280000000001,
+          56.50342505431784,
+          89.6112,
+          56.50342505431784
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.db32e9241394e.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          122.15706666666665,
+          78.45104661572977,
+          128.45626666666666,
+          78.45104661572977
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.dcc418b1f903d.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          122.15706666666665,
+          43.548887776514846,
+          128.45626666666666,
+          43.548887776514846
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.de0e450269aef.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          83.312,
+          34.231644431921595,
+          83.312,
+          54.78068583940865
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.de563f852a6dc.leafc3f3a.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          77.01280000000001,
+          54.78068583940865,
+          89.6112,
+          69.45970553845174
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].curve.dfbf26d71482c.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          125.30666666666664,
+          68.41367636006608,
+          125.30666666666664,
+          78.45104661572977
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          40.19020833333333,
+          7.385755555555555,
+          42.44445833333333,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          82.20075,
+          7.385755555555555,
+          84.42325,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          124.19541666666665,
+          7.385755555555555,
+          126.41791666666666,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          8.198555555555554,
+          -1.2379865806157573,
+          17.850555555555555,
+          2.3180134193842425
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          8.198555555555554,
+          13.388963849629928,
+          17.850555555555555,
+          16.94496384962993
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          10.452805555555553,
+          28.01591427987561,
+          17.850555555555555,
+          31.57191427987561
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          42.642864710121295,
+          17.850555555555555,
+          46.19886471012129
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          13.405555555555555,
+          57.26981514036697,
+          17.850555555555555,
+          60.82581514036697
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          11.151305555555554,
+          71.89676557061266,
+          17.850555555555555,
+          75.45276557061266
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          11.151305555555554,
+          86.52371600085834,
+          17.850555555555555,
+          90.07971600085834
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#7",
+        "type": "text",
+        "bounds_mm": [
+          11.183055555555555,
+          101.15066643110401,
+          17.850555555555555,
+          104.70666643110401
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[s7e217d578480].tick.y.fontsize#8",
+        "type": "text",
+        "bounds_mm": [
+          11.183055555555555,
+          115.77761686134971,
+          17.850555555555555,
+          119.33361686134971
+        ]
+      }
+    ]
+  }
+}

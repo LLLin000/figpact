@@ -1,0 +1,154 @@
+{
+  "route": "overlay",
+  "scope": "fig1",
+  "revision": "83b0670ccdfe554f684640515c2a13ed7b9d3a6302afea2c51a8cf1f7f45e79c",
+  "controls": [],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-sankey\\fig1\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/g25s-compat-sankey/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-sankey\\original.py",
+        "4cd0d6cc8774bafe4d46bcfd3631ab6ffb1d629efbb408b5468a6628c87b6c38"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "83b0670ccdfe554f684640515c2a13ed7b9d3a6302afea2c51a8cf1f7f45e79c",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig1::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig1::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          20.32,
+          13.4112,
+          146.304,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig1::unregistered.0",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig1::unregistered.1",
+        "type": "text",
+        "bounds_mm": [
+          65.99047,
+          55.66156,
+          80.15097,
+          63.33236
+        ]
+      },
+      {
+        "id": "fig1::unregistered.10",
+        "type": "shape",
+        "bounds_mm": [
+          38.93312000000001,
+          33.89376000000001,
+          127.69087999999999,
+          86.80704
+        ]
+      },
+      {
+        "id": "fig1::unregistered.2",
+        "type": "text",
+        "bounds_mm": [
+          47.845345,
+          27.848560000000006,
+          55.624095000000004,
+          31.404560000000007
+        ]
+      },
+      {
+        "id": "fig1::unregistered.3",
+        "type": "text",
+        "bounds_mm": [
+          28.200350000000007,
+          61.986160000000005,
+          36.01085000000001,
+          65.54216000000001
+        ]
+      },
+      {
+        "id": "fig1::unregistered.4",
+        "type": "text",
+        "bounds_mm": [
+          87.94115000000001,
+          88.09227999999999,
+          95.75165000000001,
+          95.76308
+        ]
+      },
+      {
+        "id": "fig1::unregistered.5",
+        "type": "text",
+        "bounds_mm": [
+          99.02444,
+          84.67852,
+          111.97844,
+          92.34932
+        ]
+      },
+      {
+        "id": "fig1::unregistered.6",
+        "type": "text",
+        "bounds_mm": [
+          113.79454,
+          89.79915999999999,
+          122.81154,
+          97.46996
+        ]
+      },
+      {
+        "id": "fig1::unregistered.7",
+        "type": "text",
+        "bounds_mm": [
+          98.96475,
+          26.644600000000004,
+          110.33125,
+          34.315400000000004
+        ]
+      },
+      {
+        "id": "fig1::unregistered.8",
+        "type": "text",
+        "bounds_mm": [
+          87.94115000000001,
+          23.23084000000001,
+          95.75165000000001,
+          30.901640000000008
+        ]
+      },
+      {
+        "id": "fig1::unregistered.9",
+        "type": "text",
+        "bounds_mm": [
+          127.80327499999999,
+          53.95468,
+          141.233525,
+          61.62548
+        ]
+      }
+    ]
+  }
+}

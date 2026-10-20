@@ -1,0 +1,178 @@
+{
+  "id": "tp_book_complex_layout",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "7be7484372566f39e36fcf3429b46e4b3f6ffa52ab5b2da211c5a5527dfaa134",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [
+    {
+      "scope": "fig0",
+      "axes_count": 32,
+      "projections": [
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "AxesImage",
+        "Figure",
+        "Line2D",
+        "PathCollection",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [
+        {
+          "name": "wrong-scope",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched scope"
+        },
+        {
+          "name": "stale-revision",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched revision"
+        },
+        {
+          "name": "native-no-authority",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unavailable control route"
+        },
+        {
+          "name": "science-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "duplicate-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "curve.linewidth:change",
+          "target_id": "fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth",
+          "base_value": 1.0,
+          "requested_value": 1.5,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "FAIL",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "science changed: [\"{'rule_id': 'SCIENCE_CHANGED', 'severity': 'blocker', 'object_ids': ['panel.1.unregistered.image.0', 'panel.10.unregistered.image.0', 'panel.11.unregistered.ima\"]"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "curve.linewidth:no-op",
+          "target_id": "fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth",
+          "base_value": 1.0,
+          "requested_value": 1.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "FAIL",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "science changed: [\"{'rule_id': 'SCIENCE_CHANGED', 'severity': 'blocker', 'object_ids': ['panel.1.unregistered.image.0', 'panel.10.unregistered.image.0', 'panel.11.unregistered.ima\"]",
+            "required targets unchanged: {'fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth.linewidth': None}"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "curve.linewidth:out-of-range",
+          "target_id": "fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth",
+          "base_value": 1.0,
+          "requested_value": -1.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "ERROR",
+          "figure_verification_state": "ERROR",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "OUT_OF_RANGE: 'fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth' value -1.0 outside [0.05, 20.0] for 'linewidth'"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        }
+      ],
+      "inventory_count": 56,
+      "eligible_roles": [
+        "curve.linewidth"
+      ]
+    }
+  ],
+  "original_figure_count": 1,
+  "source_sha256_after": "7be7484372566f39e36fcf3429b46e4b3f6ffa52ab5b2da211c5a5527dfaa134",
+  "source_unchanged": true
+}

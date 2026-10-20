@@ -1,0 +1,82 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 4,
+    "derived_total": 4,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig0.ax[s5923d2d1c222].tick.x.fontsize.fontsize": [
+        10.0,
+        10.5
+      ]
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig0.ax[s5923d2d1c222].tick.x.fontsize"
+      ],
+      "retained": []
+    }
+  },
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [
+      "「s5923d2d1c222+axis:x+kind:major+pos:11018.0+side:label1」刻度标签超出画布 0.39 mm（已超出画布）"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "PASS",
+  "local_problems": [
+    "DRAFT_REFUSED: 新增 1 条"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-dates\\fig0\\.inspect-d210ea1ded4e475891379c623ae46e79.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-dates\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [],
+    "glyph_floor": [],
+    "pass": true
+  },
+  "qa_delta": {
+    "ambiguous": [],
+    "eligible": false,
+    "inherited": [],
+    "new": [
+      "s5923d2d1c222+axis:x+kind:major+pos:11018.0+side:label1"
+    ],
+    "reason": "新增 1 条",
+    "unmeasured": [],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": [
+    {
+      "after": [
+        10.5,
+        10.5,
+        10.5,
+        10.5
+      ],
+      "before": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "id": "fig0.ax[s5923d2d1c222].tick.x.fontsize",
+      "property": "fontsize",
+      "requested": 10.5,
+      "role": "axis.tick"
+    }
+  ]
+}

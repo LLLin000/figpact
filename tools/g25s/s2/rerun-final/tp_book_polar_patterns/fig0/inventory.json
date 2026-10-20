@@ -1,0 +1,1892 @@
+[
+  {
+    "id": "fig0.ax[s219147f5a07c].curve.dfba73c34b431.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s219147f5a07c",
+      "data": "fba73c34b43180d3",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Supercardioid",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "fba73c34b43180d3:_child1",
+          "fba73c34b43180d3:_child2"
+        ]
+      },
+      "data": "fba73c34b43180d3",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s219147f5a07c",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s219147f5a07c].curve.dfba73c34b431.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s219147f5a07c",
+      "data": "fba73c34b43180d3",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Supercardioid",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "fba73c34b43180d3:_child1",
+          "fba73c34b43180d3:_child2"
+        ]
+      },
+      "data": "fba73c34b43180d3",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s219147f5a07c",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s219147f5a07c].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s219147f5a07c",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Supercardioid",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "fba73c34b43180d3:_child1",
+          "fba73c34b43180d3:_child2"
+        ]
+      },
+      "axis": "x",
+      "count": 2,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0°",
+          "loc": 0.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "180°",
+          "loc": 3.141592653589793
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s219147f5a07c",
+      "axis": "x",
+      "count": 2
+    }
+  },
+  {
+    "id": "fig0.ax[s4715cfb7a456].curve.d482b72d0b992.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s4715cfb7a456",
+      "data": "482b72d0b9925e07",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            2,
+            3
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Shotgun",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "482b72d0b9925e07:_child1",
+          "482b72d0b9925e07:_child2"
+        ]
+      },
+      "data": "482b72d0b9925e07",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 5,
+      "axes_key": "s4715cfb7a456",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s4715cfb7a456].curve.d482b72d0b992.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s4715cfb7a456",
+      "data": "482b72d0b9925e07",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            2,
+            3
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Shotgun",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "482b72d0b9925e07:_child1",
+          "482b72d0b9925e07:_child2"
+        ]
+      },
+      "data": "482b72d0b9925e07",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 5,
+      "axes_key": "s4715cfb7a456",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s4715cfb7a456].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s4715cfb7a456",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            2,
+            3
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Shotgun",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "482b72d0b9925e07:_child1",
+          "482b72d0b9925e07:_child2"
+        ]
+      },
+      "axis": "x",
+      "count": 2,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0°",
+          "loc": 0.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "180°",
+          "loc": 3.141592653589793
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 5,
+      "axes_key": "s4715cfb7a456",
+      "axis": "x",
+      "count": 2
+    }
+  },
+  {
+    "id": "fig0.ax[s60ee1be71d2a].curve.ddd2dc0423c44.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s60ee1be71d2a",
+      "data": "dd2dc0423c44e4db",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            2,
+            3
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Cardioid",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "dd2dc0423c44e4db:_child1",
+          "dd2dc0423c44e4db:_child2"
+        ]
+      },
+      "data": "dd2dc0423c44e4db",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s60ee1be71d2a",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s60ee1be71d2a].curve.ddd2dc0423c44.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s60ee1be71d2a",
+      "data": "dd2dc0423c44e4db",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            2,
+            3
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Cardioid",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "dd2dc0423c44e4db:_child1",
+          "dd2dc0423c44e4db:_child2"
+        ]
+      },
+      "data": "dd2dc0423c44e4db",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s60ee1be71d2a",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s60ee1be71d2a].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s60ee1be71d2a",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            2,
+            3
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Cardioid",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "dd2dc0423c44e4db:_child1",
+          "dd2dc0423c44e4db:_child2"
+        ]
+      },
+      "axis": "x",
+      "count": 2,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0°",
+          "loc": 0.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "180°",
+          "loc": 3.141592653589793
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s60ee1be71d2a",
+      "axis": "x",
+      "count": 2
+    }
+  },
+  {
+    "id": "fig0.ax[s65d9c849dab0].curve.d59c7d424c246.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s65d9c849dab0",
+      "data": "59c7d424c24628a7",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Bidirectional",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "59c7d424c24628a7:_child1",
+          "59c7d424c24628a7:_child2"
+        ]
+      },
+      "data": "59c7d424c24628a7",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 4,
+      "axes_key": "s65d9c849dab0",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s65d9c849dab0].curve.d59c7d424c246.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s65d9c849dab0",
+      "data": "59c7d424c24628a7",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Bidirectional",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "59c7d424c24628a7:_child1",
+          "59c7d424c24628a7:_child2"
+        ]
+      },
+      "data": "59c7d424c24628a7",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 4,
+      "axes_key": "s65d9c849dab0",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s65d9c849dab0].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s65d9c849dab0",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Bidirectional",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "59c7d424c24628a7:_child1",
+          "59c7d424c24628a7:_child2"
+        ]
+      },
+      "axis": "x",
+      "count": 2,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0°",
+          "loc": 0.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "180°",
+          "loc": 3.141592653589793
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 4,
+      "axes_key": "s65d9c849dab0",
+      "axis": "x",
+      "count": 2
+    }
+  },
+  {
+    "id": "fig0.ax[s830cf40a9c96].curve.d23d7bf1d4514.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s830cf40a9c96",
+      "data": "23d7bf1d45144a58",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Omnidirectional",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "23d7bf1d45144a58:_child1",
+          "23d7bf1d45144a58:_child2"
+        ]
+      },
+      "data": "23d7bf1d45144a58",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s830cf40a9c96",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s830cf40a9c96].curve.d23d7bf1d4514.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s830cf40a9c96",
+      "data": "23d7bf1d45144a58",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Omnidirectional",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "23d7bf1d45144a58:_child1",
+          "23d7bf1d45144a58:_child2"
+        ]
+      },
+      "data": "23d7bf1d45144a58",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s830cf40a9c96",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s830cf40a9c96].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s830cf40a9c96",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Omnidirectional",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "23d7bf1d45144a58:_child1",
+          "23d7bf1d45144a58:_child2"
+        ]
+      },
+      "axis": "x",
+      "count": 2,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0°",
+          "loc": 0.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "180°",
+          "loc": 3.141592653589793
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s830cf40a9c96",
+      "axis": "x",
+      "count": 2
+    }
+  },
+  {
+    "id": "fig0.ax[s8ea6f1060018].curve.d5c0ea2f99cb3.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s8ea6f1060018",
+      "data": "5c0ea2f99cb38b37",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Subcardioid",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "5c0ea2f99cb38b37:_child1",
+          "5c0ea2f99cb38b37:_child2"
+        ]
+      },
+      "data": "5c0ea2f99cb38b37",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "s8ea6f1060018",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s8ea6f1060018].curve.d5c0ea2f99cb3.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s8ea6f1060018",
+      "data": "5c0ea2f99cb38b37",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Subcardioid",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "5c0ea2f99cb38b37:_child1",
+          "5c0ea2f99cb38b37:_child2"
+        ]
+      },
+      "data": "5c0ea2f99cb38b37",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": ":",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "s8ea6f1060018",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s8ea6f1060018].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s8ea6f1060018",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            3
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            200.0,
+            1010.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Subcardioid",
+        "counts": {
+          "lines": 2,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": [
+          "5c0ea2f99cb38b37:_child1",
+          "5c0ea2f99cb38b37:_child2"
+        ]
+      },
+      "axis": "x",
+      "count": 2,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0°",
+          "loc": 0.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "180°",
+          "loc": 3.141592653589793
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "s8ea6f1060018",
+      "axis": "x",
+      "count": 2
+    }
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "runs": ["checks-first", "rerun-first"],
+  "status": "ABORTED_NOT_ACCEPTANCE_EVIDENCE",
+  "reason": "Integration review found that unsupported object-array dtype transitions must remain AUDIT_INCOMPARABLE even when linewidth is allow-listed. Both jobs were cancelled before completion; partial raw files are retained. Final acceptance runs use checks-final and rerun-final after the conservative guard and its public audit regression were added.",
+  "model_called": false,
+  "historical_g25s_runs_unchanged": true
+}

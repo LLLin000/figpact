@@ -1,0 +1,25 @@
+{
+  "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+  "id": "tp_book_annotation_zoom",
+  "independent_signoff": false,
+  "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+  "local_path": "tools/g25s/thirdparty/sources/annotation_zoom.py",
+  "plot_types": [
+    "multi-panel",
+    "gridspec",
+    "zoom-inset",
+    "annotated"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/ornaments/annotation-zoom.py",
+  "repository": "rougier/scientific-visualization-book",
+  "sha256": "6fe060a8bc6a871656a12b7daf43a0beef04cdd834338461eb2581306ea0b989",
+  "source_review": {
+    "dependency": "numpy + matplotlib (GridSpec, Rectangle, ConnectionPatch) only.",
+    "filesystem": "Upstream savefig/show as above.",
+    "network": "None.",
+    "process": "None.",
+    "risks": "Creates 1 main + 5 zoom subplots per run; seeded RNG; ConnectionPatch across axes."
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "code/ornaments/annotation-zoom.py"
+}

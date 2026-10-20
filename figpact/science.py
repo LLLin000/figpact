@@ -191,6 +191,21 @@ def _patch_record(patch):
         except (AttributeError, NotImplementedError):
             record['display_path'] = None
         return record
+    if kind == 'Shadow':
+        # A Shadow's composed native path carries its renderer-side offset: the spec says the
+        # shift is in points scaled by dpi/72, and draw() rewrites it via points_to_pixels, so
+        # hashing the composed vertices mistakes a first-draw lazy offset for changed science
+        # (and would drift with dpi). Hash the wrapped patch's own native geometry plus the
+        # declared point offset instead; the wrapped patch stays a full native record, so a
+        # real wedge change is still caught.
+        wrapped = getattr(patch, 'patch', None)
+        record['geometry'] = 'shadow'
+        record['offset_points'] = _floats([getattr(patch, '_ox', None), getattr(patch, '_oy', None)])
+        record['wrapped'] = _patch_record(wrapped) if wrapped is not None else None
+        values = patch.get_array() if hasattr(patch, 'get_array') else None
+        if values is not None:
+            record['values'] = _array(values)
+        return record
     path = _native_path(patch)
     record['geometry'] = 'native' if path is not None else 'unresolved'
     if path is not None:

@@ -1,0 +1,726 @@
+[
+  {
+    "id": "fig0.ax[sbf0abf3e0cd5].curve.d0cbbad8cae6c.l7f1d0a5c.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "sbf0abf3e0cd5",
+      "data": "0cbbad8cae6c61a0",
+      "label": "_child0",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            1
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            3.9269908169872414
+          ],
+          "ylim": [
+            1.0,
+            2.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Same plot, but with reduced axis limits",
+        "counts": {
+          "lines": 1,
+          "containers": 0,
+          "major_xticks": 9,
+          "major_yticks": 3
+        },
+        "curves": [
+          "0cbbad8cae6c61a0:_child0"
+        ]
+      },
+      "data": "0cbbad8cae6c61a0",
+      "label": "_child0",
+      "gid": null,
+      "n": 200,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "sbf0abf3e0cd5",
+      "n_points": 200,
+      "label": "_child0"
+    }
+  },
+  {
+    "id": "fig0.ax[sbf0abf3e0cd5].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sbf0abf3e0cd5",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            1
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            3.9269908169872414
+          ],
+          "ylim": [
+            1.0,
+            2.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Same plot, but with reduced axis limits",
+        "counts": {
+          "lines": 1,
+          "containers": 0,
+          "major_xticks": 9,
+          "major_yticks": 3
+        },
+        "curves": [
+          "0cbbad8cae6c61a0:_child0"
+        ]
+      },
+      "axis": "x",
+      "count": 9,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0°",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "30°",
+          "loc": 0.5235987755982988
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "60°",
+          "loc": 1.0471975511965976
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "90°",
+          "loc": 1.5707963267948966
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "120°",
+          "loc": 2.0943951023931953
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "150°",
+          "loc": 2.6179938779914944
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "180°",
+          "loc": 3.141592653589793
+        },
+        {
+          "tick": 7,
+          "side": "label1",
+          "text": "210°",
+          "loc": 3.6651914291880923
+        },
+        {
+          "tick": 8,
+          "side": "label1",
+          "text": "240°",
+          "loc": 4.1887902047863905
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "sbf0abf3e0cd5",
+      "axis": "x",
+      "count": 9
+    }
+  },
+  {
+    "id": "fig0.ax[sbf0abf3e0cd5].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sbf0abf3e0cd5",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            1
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            3.9269908169872414
+          ],
+          "ylim": [
+            1.0,
+            2.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Same plot, but with reduced axis limits",
+        "counts": {
+          "lines": 1,
+          "containers": 0,
+          "major_xticks": 9,
+          "major_yticks": 3
+        },
+        "curves": [
+          "0cbbad8cae6c61a0:_child0"
+        ]
+      },
+      "axis": "y",
+      "count": 3,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "1.0",
+          "loc": 1.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "1.5",
+          "loc": 1.5
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "2.0",
+          "loc": 2.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "sbf0abf3e0cd5",
+      "axis": "y",
+      "count": 3
+    }
+  },
+  {
+    "id": "fig0.ax[sdb2ffa979486].curve.d0cbbad8cae6c.l7f1d0a5c.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "sdb2ffa979486",
+      "data": "0cbbad8cae6c61a0",
+      "label": "_child0",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            0.0,
+            2.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "A line plot on a polar axis",
+        "counts": {
+          "lines": 1,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 4
+        },
+        "curves": [
+          "0cbbad8cae6c61a0:_child0"
+        ]
+      },
+      "data": "0cbbad8cae6c61a0",
+      "label": "_child0",
+      "gid": null,
+      "n": 200,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "sdb2ffa979486",
+      "n_points": 200,
+      "label": "_child0"
+    }
+  },
+  {
+    "id": "fig0.ax[sdb2ffa979486].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sdb2ffa979486",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            0.0,
+            2.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "A line plot on a polar axis",
+        "counts": {
+          "lines": 1,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 4
+        },
+        "curves": [
+          "0cbbad8cae6c61a0:_child0"
+        ]
+      },
+      "axis": "x",
+      "count": 8,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0°",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "45°",
+          "loc": 0.7853981633974483
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "90°",
+          "loc": 1.5707963267948966
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "135°",
+          "loc": 2.356194490192345
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "180°",
+          "loc": 3.141592653589793
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "225°",
+          "loc": 3.9269908169872414
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "270°",
+          "loc": 4.71238898038469
+        },
+        {
+          "tick": 7,
+          "side": "label1",
+          "text": "315°",
+          "loc": 5.497787143782138
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "sdb2ffa979486",
+      "axis": "x",
+      "count": 8
+    }
+  },
+  {
+    "id": "fig0.ax[sdb2ffa979486].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sdb2ffa979486",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "polar",
+        "view": {
+          "xlim": [
+            0.0,
+            6.283185307179586
+          ],
+          "ylim": [
+            0.0,
+            2.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "A line plot on a polar axis",
+        "counts": {
+          "lines": 1,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 4
+        },
+        "curves": [
+          "0cbbad8cae6c61a0:_child0"
+        ]
+      },
+      "axis": "y",
+      "count": 4,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0.5",
+          "loc": 0.5
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "1.0",
+          "loc": 1.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "1.5",
+          "loc": 1.5
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "2.0",
+          "loc": 2.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "sdb2ffa979486",
+      "axis": "y",
+      "count": 4
+    }
+  }
+]

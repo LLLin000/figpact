@@ -1,0 +1,20 @@
+{
+  "name": "python",
+  "command": [
+    "D:\\programs\\Python\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "-m",
+    "pytest",
+    "tests",
+    "--ignore=tests/browser",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--tb=short"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "seconds": 870.08
+}

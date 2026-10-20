@@ -1,0 +1,2492 @@
+{
+  "route": "overlay",
+  "scope": "fig0",
+  "revision": "31ee459c795dcb45f26f2292ecf0772536e8554f6f68543ff04b41c6d2588c48",
+  "controls": [
+    {
+      "id": "fig0.ax[s02069d660bcb].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s02069d660bcb].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s02069d660bcb].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s02069d660bcb].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s02069d660bcb].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s02069d660bcb].tick.x.fontsize#3"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[6]",
+      "display": {
+        "axes_index": 6,
+        "axes_key": "s02069d660bcb",
+        "axis": "x",
+        "count": 4
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s02069d660bcb",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[6]"
+    },
+    {
+      "id": "fig0.ax[s51039f3d540c].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s51039f3d540c].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#3",
+        "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#4"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[5]",
+      "display": {
+        "axes_index": 5,
+        "axes_key": "s51039f3d540c",
+        "axis": "x",
+        "count": 5
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s51039f3d540c",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[5]"
+    },
+    {
+      "id": "fig0.ax[s5bb5639f6f92].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s5bb5639f6f92].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#3",
+        "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#4"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[3]",
+      "display": {
+        "axes_index": 3,
+        "axes_key": "s5bb5639f6f92",
+        "axis": "x",
+        "count": 5
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s5bb5639f6f92",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[3]"
+    },
+    {
+      "id": "fig0.ax[s63f3b63901dc].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s63f3b63901dc].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s63f3b63901dc].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s63f3b63901dc].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s63f3b63901dc].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s63f3b63901dc].tick.x.fontsize#3"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[8]",
+      "display": {
+        "axes_index": 8,
+        "axes_key": "s63f3b63901dc",
+        "axis": "x",
+        "count": 4
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s63f3b63901dc",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[8]"
+    },
+    {
+      "id": "fig0.ax[s6a734aec74d4].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s6a734aec74d4].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s6a734aec74d4].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s6a734aec74d4].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s6a734aec74d4].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s6a734aec74d4].tick.x.fontsize#3"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[9]",
+      "display": {
+        "axes_index": 9,
+        "axes_key": "s6a734aec74d4",
+        "axis": "x",
+        "count": 4
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s6a734aec74d4",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[9]"
+    },
+    {
+      "id": "fig0.ax[s7817ca6ddc69].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s7817ca6ddc69].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s7817ca6ddc69].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s7817ca6ddc69].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s7817ca6ddc69].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s7817ca6ddc69].tick.x.fontsize#3"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[7]",
+      "display": {
+        "axes_index": 7,
+        "axes_key": "s7817ca6ddc69",
+        "axis": "x",
+        "count": 4
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s7817ca6ddc69",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[7]"
+    },
+    {
+      "id": "fig0.ax[s8a6266c6b126].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s8a6266c6b126].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#3",
+        "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#4"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[4]",
+      "display": {
+        "axes_index": 4,
+        "axes_key": "s8a6266c6b126",
+        "axis": "x",
+        "count": 5
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s8a6266c6b126",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[4]"
+    },
+    {
+      "id": "fig0.ax[s8f60fb312db5].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s8f60fb312db5].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#3",
+        "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#4"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s8f60fb312db5",
+        "axis": "x",
+        "count": 5
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s8f60fb312db5",
+        "axis": "x"
+      },
+      "description": "x tick labels"
+    },
+    {
+      "id": "fig0.ax[sad28e4475216].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[sad28e4475216].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[sad28e4475216].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[sad28e4475216].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[sad28e4475216].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[sad28e4475216].tick.x.fontsize#3"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[11]",
+      "display": {
+        "axes_index": 11,
+        "axes_key": "sad28e4475216",
+        "axis": "x",
+        "count": 4
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "sad28e4475216",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[11]"
+    },
+    {
+      "id": "fig0.ax[sc30863012e8a].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[sc30863012e8a].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[sc30863012e8a].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[sc30863012e8a].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[sc30863012e8a].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[sc30863012e8a].tick.x.fontsize#3"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[10]",
+      "display": {
+        "axes_index": 10,
+        "axes_key": "sc30863012e8a",
+        "axis": "x",
+        "count": 4
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "sc30863012e8a",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[10]"
+    },
+    {
+      "id": "fig0.ax[sc710bfbc46f1].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[sc710bfbc46f1].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#3",
+        "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#4"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[2]",
+      "display": {
+        "axes_index": 2,
+        "axes_key": "sc710bfbc46f1",
+        "axis": "x",
+        "count": 5
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "sc710bfbc46f1",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[2]"
+    },
+    {
+      "id": "fig0.ax[se54a3e5e6681].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[se54a3e5e6681].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#3",
+        "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#4"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[1]",
+      "display": {
+        "axes_index": 1,
+        "axes_key": "se54a3e5e6681",
+        "axis": "x",
+        "count": 5
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "se54a3e5e6681",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[1]"
+    }
+  ],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-violin\\fig0\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/g25s-compat-violin/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-violin\\original.py",
+        "1063d3d51c2047213c07e3dbd280703afa70a564970aeaac02aa02e1986e1b2d"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "31ee459c795dcb45f26f2292ecf0772536e8554f6f68543ff04b41c6d2588c48",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig0::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          254.0,
+          101.6
+        ]
+      },
+      {
+        "id": "fig0::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          31.75,
+          56.81133333333332,
+          59.871428571428574,
+          89.408
+        ]
+      },
+      {
+        "id": "fig0::panel.1",
+        "type": "panel",
+        "bounds_mm": [
+          65.4957142857143,
+          56.81133333333332,
+          93.61714285714287,
+          89.408
+        ]
+      },
+      {
+        "id": "fig0::panel.10",
+        "type": "panel",
+        "bounds_mm": [
+          166.73285714285714,
+          11.175999999999998,
+          194.85428571428574,
+          43.772666666666666
+        ]
+      },
+      {
+        "id": "fig0::panel.11",
+        "type": "panel",
+        "bounds_mm": [
+          200.47857142857146,
+          11.175999999999998,
+          228.60000000000002,
+          43.772666666666666
+        ]
+      },
+      {
+        "id": "fig0::panel.2",
+        "type": "panel",
+        "bounds_mm": [
+          99.24142857142857,
+          56.81133333333332,
+          127.36285714285715,
+          89.408
+        ]
+      },
+      {
+        "id": "fig0::panel.3",
+        "type": "panel",
+        "bounds_mm": [
+          132.98714285714286,
+          56.81133333333332,
+          161.10857142857145,
+          89.408
+        ]
+      },
+      {
+        "id": "fig0::panel.4",
+        "type": "panel",
+        "bounds_mm": [
+          166.73285714285714,
+          56.81133333333332,
+          194.85428571428574,
+          89.408
+        ]
+      },
+      {
+        "id": "fig0::panel.5",
+        "type": "panel",
+        "bounds_mm": [
+          200.47857142857146,
+          56.81133333333332,
+          228.60000000000002,
+          89.408
+        ]
+      },
+      {
+        "id": "fig0::panel.6",
+        "type": "panel",
+        "bounds_mm": [
+          31.75,
+          11.175999999999998,
+          59.871428571428574,
+          43.772666666666666
+        ]
+      },
+      {
+        "id": "fig0::panel.7",
+        "type": "panel",
+        "bounds_mm": [
+          65.4957142857143,
+          11.175999999999998,
+          93.61714285714287,
+          43.772666666666666
+        ]
+      },
+      {
+        "id": "fig0::panel.8",
+        "type": "panel",
+        "bounds_mm": [
+          99.24142857142857,
+          11.175999999999998,
+          127.36285714285715,
+          43.772666666666666
+        ]
+      },
+      {
+        "id": "fig0::panel.9",
+        "type": "panel",
+        "bounds_mm": [
+          132.98714285714286,
+          11.175999999999998,
+          161.10857142857145,
+          43.772666666666666
+        ]
+      },
+      {
+        "id": "fig0::unregistered.0",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.1",
+        "type": "collection",
+        "bounds_mm": [
+          33.028246753246755,
+          73.41948468876166,
+          34.0788605230386,
+          76.48967362270345
+        ]
+      },
+      {
+        "id": "fig0::unregistered.10",
+        "type": "collection",
+        "bounds_mm": [
+          33.55355363814268,
+          58.293,
+          58.06787493328589,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.100",
+        "type": "collection",
+        "bounds_mm": [
+          108.18108428063732,
+          27.291411522633744,
+          121.56455453293766,
+          31.31569135802469
+        ]
+      },
+      {
+        "id": "fig0::unregistered.101",
+        "type": "collection",
+        "bounds_mm": [
+          105.34380944612995,
+          34.60828395061728,
+          125.1086396256107,
+          38.632563786008234
+        ]
+      },
+      {
+        "id": "fig0::unregistered.102",
+        "type": "collection",
+        "bounds_mm": [
+          100.51967532467533,
+          38.26672016460905,
+          126.08461038961039,
+          42.291000000000004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.103",
+        "type": "collection",
+        "bounds_mm": [
+          115.10036009925278,
+          13.663736625514403,
+          116.1732760187455,
+          41.284930041152265
+        ]
+      },
+      {
+        "id": "fig0::unregistered.104",
+        "type": "collection",
+        "bounds_mm": [
+          116.21810433127479,
+          13.663736625514403,
+          126.08461038961039,
+          41.284930041152265
+        ]
+      },
+      {
+        "id": "fig0::unregistered.105",
+        "type": "collection",
+        "bounds_mm": [
+          100.51967532467533,
+          13.663736625514403,
+          113.56942556637138,
+          41.284930041152265
+        ]
+      },
+      {
+        "id": "fig0::unregistered.106",
+        "type": "collection",
+        "bounds_mm": [
+          100.51967532467533,
+          14.669806584362139,
+          126.08461038961039,
+          40.278860082304526
+        ]
+      },
+      {
+        "id": "fig0::unregistered.107",
+        "type": "collection",
+        "bounds_mm": [
+          115.0556279617115,
+          13.663736625514403,
+          116.4631172780755,
+          41.284930041152265
+        ]
+      },
+      {
+        "id": "fig0::unregistered.108",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.109",
+        "type": "collection",
+        "bounds_mm": [
+          147.31513985208565,
+          12.657666666666666,
+          149.96381861698907,
+          16.681946502057613
+        ]
+      },
+      {
+        "id": "fig0::unregistered.11",
+        "type": "collection",
+        "bounds_mm": [
+          33.29090019569472,
+          75.14220101368278,
+          58.33052837573385,
+          76.77367787716707
+        ]
+      },
+      {
+        "id": "fig0::unregistered.110",
+        "type": "collection",
+        "bounds_mm": [
+          145.71320642988726,
+          16.316102880658434,
+          150.7614101390327,
+          20.34038271604938
+        ]
+      },
+      {
+        "id": "fig0::unregistered.111",
+        "type": "collection",
+        "bounds_mm": [
+          143.6706026338356,
+          23.632975308641974,
+          153.24784425984848,
+          27.65725514403292
+        ]
+      },
+      {
+        "id": "fig0::unregistered.112",
+        "type": "collection",
+        "bounds_mm": [
+          141.92679856635158,
+          27.291411522633744,
+          155.31026881865193,
+          31.31569135802469
+        ]
+      },
+      {
+        "id": "fig0::unregistered.113",
+        "type": "collection",
+        "bounds_mm": [
+          139.08952373184422,
+          34.60828395061728,
+          158.854353911325,
+          38.632563786008234
+        ]
+      },
+      {
+        "id": "fig0::unregistered.114",
+        "type": "collection",
+        "bounds_mm": [
+          134.2653896103896,
+          38.26672016460905,
+          159.83032467532468,
+          42.291000000000004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.115",
+        "type": "collection",
+        "bounds_mm": [
+          148.84607438496707,
+          13.663736625514403,
+          149.91899030445978,
+          41.284930041152265
+        ]
+      },
+      {
+        "id": "fig0::unregistered.116",
+        "type": "collection",
+        "bounds_mm": [
+          149.96381861698907,
+          13.663736625514403,
+          159.83032467532468,
+          41.284930041152265
+        ]
+      },
+      {
+        "id": "fig0::unregistered.117",
+        "type": "collection",
+        "bounds_mm": [
+          134.2653896103896,
+          13.663736625514403,
+          147.31513985208565,
+          41.284930041152265
+        ]
+      },
+      {
+        "id": "fig0::unregistered.118",
+        "type": "collection",
+        "bounds_mm": [
+          134.2653896103896,
+          14.669806584362139,
+          159.83032467532468,
+          40.278860082304526
+        ]
+      },
+      {
+        "id": "fig0::unregistered.119",
+        "type": "collection",
+        "bounds_mm": [
+          148.8013422474258,
+          13.663736625514403,
+          150.20883156378977,
+          41.284930041152265
+        ]
+      },
+      {
+        "id": "fig0::unregistered.12",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.120",
+        "type": "collection",
+        "bounds_mm": [
+          146.50921338592434,
+          13.663736625514403,
+          153.0388276440772,
+          41.284930041152265
+        ]
+      },
+      {
+        "id": "fig0::unregistered.121",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.122",
+        "type": "collection",
+        "bounds_mm": [
+          168.0111038961039,
+          12.657666666666676,
+          193.576038961039,
+          42.291000000000004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.123",
+        "type": "collection",
+        "bounds_mm": [
+          183.66470459017407,
+          20.06599999999997,
+          183.66470459017407,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.124",
+        "type": "collection",
+        "bounds_mm": [
+          193.576038961039,
+          20.06599999999997,
+          193.576038961039,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.125",
+        "type": "collection",
+        "bounds_mm": [
+          168.0111038961039,
+          20.06599999999997,
+          168.0111038961039,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.126",
+        "type": "collection",
+        "bounds_mm": [
+          168.0111038961039,
+          27.474333333333323,
+          193.576038961039,
+          27.474333333333323
+        ]
+      },
+      {
+        "id": "fig0::unregistered.127",
+        "type": "collection",
+        "bounds_mm": [
+          183.95454584950406,
+          20.06599999999997,
+          183.95454584950406,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.128",
+        "type": "collection",
+        "bounds_mm": [
+          177.5394933388144,
+          20.06599999999997,
+          188.641776962714,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.129",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.13",
+        "type": "collection",
+        "bounds_mm": [
+          66.77396103896105,
+          73.41948468876166,
+          68.47829004329006,
+          76.48967362270345
+        ]
+      },
+      {
+        "id": "fig0::unregistered.130",
+        "type": "collection",
+        "bounds_mm": [
+          201.7568181818182,
+          12.657666666666676,
+          227.32175324675327,
+          27.474333333333323
+        ]
+      },
+      {
+        "id": "fig0::unregistered.131",
+        "type": "collection",
+        "bounds_mm": [
+          217.41041887588835,
+          20.06599999999997,
+          217.41041887588835,
+          27.474333333333323
+        ]
+      },
+      {
+        "id": "fig0::unregistered.132",
+        "type": "collection",
+        "bounds_mm": [
+          227.32175324675327,
+          20.06599999999997,
+          227.32175324675327,
+          27.474333333333323
+        ]
+      },
+      {
+        "id": "fig0::unregistered.133",
+        "type": "collection",
+        "bounds_mm": [
+          201.7568181818182,
+          20.06599999999997,
+          201.7568181818182,
+          27.474333333333323
+        ]
+      },
+      {
+        "id": "fig0::unregistered.134",
+        "type": "collection",
+        "bounds_mm": [
+          201.7568181818182,
+          27.474333333333323,
+          227.32175324675327,
+          27.474333333333323
+        ]
+      },
+      {
+        "id": "fig0::unregistered.135",
+        "type": "collection",
+        "bounds_mm": [
+          217.70026013521837,
+          20.06599999999997,
+          217.70026013521837,
+          27.474333333333323
+        ]
+      },
+      {
+        "id": "fig0::unregistered.136",
+        "type": "collection",
+        "bounds_mm": [
+          211.28520762452868,
+          20.06599999999997,
+          222.3874912484283,
+          27.474333333333323
+        ]
+      },
+      {
+        "id": "fig0::unregistered.137",
+        "type": "collection",
+        "bounds_mm": [
+          201.7568181818182,
+          27.474333333333323,
+          227.32175324675327,
+          42.291000000000004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.138",
+        "type": "collection",
+        "bounds_mm": [
+          217.41041887588835,
+          27.474333333333323,
+          217.41041887588835,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.139",
+        "type": "collection",
+        "bounds_mm": [
+          227.32175324675327,
+          27.474333333333323,
+          227.32175324675327,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.14",
+        "type": "collection",
+        "bounds_mm": [
+          70.18261904761906,
+          71.56261992625646,
+          71.88694805194807,
+          77.41419368804004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.140",
+        "type": "collection",
+        "bounds_mm": [
+          201.7568181818182,
+          27.474333333333323,
+          201.7568181818182,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.141",
+        "type": "collection",
+        "bounds_mm": [
+          201.7568181818182,
+          27.474333333333323,
+          227.32175324675327,
+          27.474333333333323
+        ]
+      },
+      {
+        "id": "fig0::unregistered.142",
+        "type": "collection",
+        "bounds_mm": [
+          217.70026013521837,
+          27.474333333333323,
+          217.70026013521837,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.143",
+        "type": "collection",
+        "bounds_mm": [
+          211.28520762452868,
+          27.474333333333323,
+          222.3874912484283,
+          34.88266666666668
+        ]
+      },
+      {
+        "id": "fig0::unregistered.144",
+        "type": "text",
+        "bounds_mm": [
+          101.56825,
+          94.996,
+          152.43175,
+          99.568
+        ]
+      },
+      {
+        "id": "fig0::unregistered.15",
+        "type": "collection",
+        "bounds_mm": [
+          76.99993506493509,
+          69.19495660137076,
+          78.70426406926408,
+          80.29631840012543
+        ]
+      },
+      {
+        "id": "fig0::unregistered.16",
+        "type": "collection",
+        "bounds_mm": [
+          80.40859307359308,
+          67.17364392959894,
+          82.11292207792208,
+          82.68695675968473
+        ]
+      },
+      {
+        "id": "fig0::unregistered.17",
+        "type": "collection",
+        "bounds_mm": [
+          87.2259090909091,
+          63.88484578809471,
+          88.93023809523811,
+          86.79504679183692
+        ]
+      },
+      {
+        "id": "fig0::unregistered.18",
+        "type": "collection",
+        "bounds_mm": [
+          90.63456709956711,
+          58.293,
+          92.33889610389612,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.19",
+        "type": "collection",
+        "bounds_mm": [
+          67.2000432900433,
+          75.19405181397256,
+          91.91281385281387,
+          76.43771134215875
+        ]
+      },
+      {
+        "id": "fig0::unregistered.2",
+        "type": "collection",
+        "bounds_mm": [
+          36.53029265255292,
+          71.56261992625646,
+          37.580906422344775,
+          77.41419368804004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.20",
+        "type": "collection",
+        "bounds_mm": [
+          67.2000432900433,
+          76.48967362270345,
+          91.91281385281387,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.21",
+        "type": "collection",
+        "bounds_mm": [
+          67.2000432900433,
+          58.293,
+          91.91281385281387,
+          73.41948468876166
+        ]
+      },
+      {
+        "id": "fig0::unregistered.22",
+        "type": "collection",
+        "bounds_mm": [
+          67.62612554112555,
+          58.293,
+          91.4867316017316,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.23",
+        "type": "collection",
+        "bounds_mm": [
+          67.2000432900433,
+          75.14220101368278,
+          91.91281385281387,
+          76.77367787716707
+        ]
+      },
+      {
+        "id": "fig0::unregistered.24",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.25",
+        "type": "collection",
+        "bounds_mm": [
+          100.51967532467533,
+          73.41948468876166,
+          102.84376033057852,
+          76.48967362270345
+        ]
+      },
+      {
+        "id": "fig0::unregistered.26",
+        "type": "collection",
+        "bounds_mm": [
+          103.83979676167989,
+          71.56261992625646,
+          106.16388176758308,
+          77.41419368804004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.27",
+        "type": "collection",
+        "bounds_mm": [
+          110.480039635689,
+          69.19495660137076,
+          112.80412464159218,
+          80.29631840012543
+        ]
+      },
+      {
+        "id": "fig0::unregistered.28",
+        "type": "collection",
+        "bounds_mm": [
+          113.80016107269356,
+          67.17364392959894,
+          116.12424607859673,
+          82.68695675968473
+        ]
+      },
+      {
+        "id": "fig0::unregistered.29",
+        "type": "collection",
+        "bounds_mm": [
+          120.44040394670267,
+          63.88484578809471,
+          122.76448895260584,
+          86.79504679183692
+        ]
+      },
+      {
+        "id": "fig0::unregistered.3",
+        "type": "collection",
+        "bounds_mm": [
+          43.534384451165266,
+          69.19495660137076,
+          44.584998220957125,
+          80.29631840012543
+        ]
+      },
+      {
+        "id": "fig0::unregistered.30",
+        "type": "collection",
+        "bounds_mm": [
+          123.76052538370722,
+          58.293,
+          126.0846103896104,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.31",
+        "type": "collection",
+        "bounds_mm": [
+          101.10069657615112,
+          75.19405181397256,
+          125.50358913813461,
+          76.43771134215875
+        ]
+      },
+      {
+        "id": "fig0::unregistered.32",
+        "type": "collection",
+        "bounds_mm": [
+          101.10069657615112,
+          76.48967362270345,
+          125.50358913813461,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.33",
+        "type": "collection",
+        "bounds_mm": [
+          101.10069657615112,
+          58.293,
+          125.50358913813461,
+          73.41948468876166
+        ]
+      },
+      {
+        "id": "fig0::unregistered.34",
+        "type": "collection",
+        "bounds_mm": [
+          101.68171782762693,
+          58.293,
+          124.92256788665881,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.35",
+        "type": "collection",
+        "bounds_mm": [
+          101.10069657615112,
+          75.14220101368278,
+          125.50358913813461,
+          76.77367787716707
+        ]
+      },
+      {
+        "id": "fig0::unregistered.36",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.37",
+        "type": "collection",
+        "bounds_mm": [
+          134.2653896103896,
+          73.41948468876166,
+          136.5894746162928,
+          76.48967362270345
+        ]
+      },
+      {
+        "id": "fig0::unregistered.38",
+        "type": "collection",
+        "bounds_mm": [
+          137.58551104739414,
+          71.56261992625646,
+          139.90959605329732,
+          77.41419368804004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.39",
+        "type": "collection",
+        "bounds_mm": [
+          144.22575392140328,
+          69.19495660137076,
+          146.54983892730647,
+          80.29631840012543
+        ]
+      },
+      {
+        "id": "fig0::unregistered.4",
+        "type": "collection",
+        "bounds_mm": [
+          47.03643035047144,
+          67.17364392959894,
+          48.0870441202633,
+          82.68695675968473
+        ]
+      },
+      {
+        "id": "fig0::unregistered.40",
+        "type": "collection",
+        "bounds_mm": [
+          147.54587535840784,
+          67.17364392959894,
+          149.86996036431103,
+          82.68695675968473
+        ]
+      },
+      {
+        "id": "fig0::unregistered.41",
+        "type": "collection",
+        "bounds_mm": [
+          154.18611823241693,
+          63.88484578809471,
+          156.51020323832012,
+          86.79504679183692
+        ]
+      },
+      {
+        "id": "fig0::unregistered.42",
+        "type": "collection",
+        "bounds_mm": [
+          157.5062396694215,
+          58.293,
+          159.83032467532468,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.43",
+        "type": "collection",
+        "bounds_mm": [
+          134.8464108618654,
+          75.19405181397256,
+          159.2493034238489,
+          76.43771134215875
+        ]
+      },
+      {
+        "id": "fig0::unregistered.44",
+        "type": "collection",
+        "bounds_mm": [
+          134.8464108618654,
+          76.48967362270345,
+          159.2493034238489,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.45",
+        "type": "collection",
+        "bounds_mm": [
+          134.8464108618654,
+          58.293,
+          159.2493034238489,
+          73.41948468876166
+        ]
+      },
+      {
+        "id": "fig0::unregistered.46",
+        "type": "collection",
+        "bounds_mm": [
+          135.4274321133412,
+          58.293,
+          158.6682821723731,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.47",
+        "type": "collection",
+        "bounds_mm": [
+          134.8464108618654,
+          75.14220101368278,
+          159.2493034238489,
+          76.77367787716707
+        ]
+      },
+      {
+        "id": "fig0::unregistered.48",
+        "type": "collection",
+        "bounds_mm": [
+          134.8464108618654,
+          72.48530325809296,
+          159.2493034238489,
+          80.05403892507015
+        ]
+      },
+      {
+        "id": "fig0::unregistered.49",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.5",
+        "type": "collection",
+        "bounds_mm": [
+          54.04052214908379,
+          63.88484578809471,
+          55.09113591887564,
+          86.79504679183692
+        ]
+      },
+      {
+        "id": "fig0::unregistered.50",
+        "type": "collection",
+        "bounds_mm": [
+          168.0111038961039,
+          58.293,
+          193.576038961039,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.51",
+        "type": "collection",
+        "bounds_mm": [
+          174.4023376623377,
+          76.43771134215875,
+          187.18480519480528,
+          76.43771134215875
+        ]
+      },
+      {
+        "id": "fig0::unregistered.52",
+        "type": "collection",
+        "bounds_mm": [
+          174.4023376623377,
+          87.92633333333335,
+          187.18480519480528,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.53",
+        "type": "collection",
+        "bounds_mm": [
+          174.4023376623377,
+          58.293,
+          187.18480519480528,
+          58.293
+        ]
+      },
+      {
+        "id": "fig0::unregistered.54",
+        "type": "collection",
+        "bounds_mm": [
+          180.79357142857145,
+          58.293,
+          180.79357142857145,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.55",
+        "type": "collection",
+        "bounds_mm": [
+          174.4023376623377,
+          76.77367787716707,
+          187.18480519480528,
+          76.77367787716707
+        ]
+      },
+      {
+        "id": "fig0::unregistered.56",
+        "type": "collection",
+        "bounds_mm": [
+          174.4023376623377,
+          69.33773528950745,
+          187.18480519480528,
+          82.20683394172652
+        ]
+      },
+      {
+        "id": "fig0::unregistered.57",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.58",
+        "type": "collection",
+        "bounds_mm": [
+          201.7568181818182,
+          58.293,
+          214.53928571428574,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.59",
+        "type": "collection",
+        "bounds_mm": [
+          208.14805194805197,
+          76.43771134215875,
+          214.53928571428574,
+          76.43771134215875
+        ]
+      },
+      {
+        "id": "fig0::unregistered.6",
+        "type": "collection",
+        "bounds_mm": [
+          57.54256804838996,
+          58.293,
+          58.59318181818182,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.60",
+        "type": "collection",
+        "bounds_mm": [
+          208.14805194805197,
+          87.92633333333335,
+          214.53928571428574,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.61",
+        "type": "collection",
+        "bounds_mm": [
+          208.14805194805197,
+          58.293,
+          214.53928571428574,
+          58.293
+        ]
+      },
+      {
+        "id": "fig0::unregistered.62",
+        "type": "collection",
+        "bounds_mm": [
+          214.53928571428574,
+          58.293,
+          214.53928571428574,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.63",
+        "type": "collection",
+        "bounds_mm": [
+          208.14805194805197,
+          76.77367787716707,
+          214.53928571428574,
+          76.77367787716707
+        ]
+      },
+      {
+        "id": "fig0::unregistered.64",
+        "type": "collection",
+        "bounds_mm": [
+          208.14805194805197,
+          69.33773528950745,
+          214.53928571428574,
+          82.20683394172652
+        ]
+      },
+      {
+        "id": "fig0::unregistered.65",
+        "type": "collection",
+        "bounds_mm": [
+          214.53928571428574,
+          58.293,
+          227.32175324675327,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.66",
+        "type": "collection",
+        "bounds_mm": [
+          214.53928571428574,
+          76.43771134215875,
+          220.93051948051956,
+          76.43771134215875
+        ]
+      },
+      {
+        "id": "fig0::unregistered.67",
+        "type": "collection",
+        "bounds_mm": [
+          214.53928571428574,
+          87.92633333333335,
+          220.93051948051956,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.68",
+        "type": "collection",
+        "bounds_mm": [
+          214.53928571428574,
+          58.293,
+          220.93051948051956,
+          58.293
+        ]
+      },
+      {
+        "id": "fig0::unregistered.69",
+        "type": "collection",
+        "bounds_mm": [
+          214.53928571428574,
+          58.293,
+          214.53928571428574,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.7",
+        "type": "collection",
+        "bounds_mm": [
+          33.29090019569472,
+          75.19405181397256,
+          58.33052837573385,
+          76.43771134215875
+        ]
+      },
+      {
+        "id": "fig0::unregistered.70",
+        "type": "collection",
+        "bounds_mm": [
+          214.53928571428574,
+          76.77367787716707,
+          220.93051948051956,
+          76.77367787716707
+        ]
+      },
+      {
+        "id": "fig0::unregistered.71",
+        "type": "collection",
+        "bounds_mm": [
+          214.53928571428574,
+          69.33773528950745,
+          220.93051948051956,
+          82.20683394172652
+        ]
+      },
+      {
+        "id": "fig0::unregistered.72",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.73",
+        "type": "collection",
+        "bounds_mm": [
+          46.0779969949428,
+          12.657666666666666,
+          48.72667575984621,
+          15.351606060606061
+        ]
+      },
+      {
+        "id": "fig0::unregistered.74",
+        "type": "collection",
+        "bounds_mm": [
+          44.47606357274443,
+          16.50615151515151,
+          49.524267281889834,
+          19.20009090909091
+        ]
+      },
+      {
+        "id": "fig0::unregistered.75",
+        "type": "collection",
+        "bounds_mm": [
+          42.433459776692764,
+          24.20312121212121,
+          52.01070140270561,
+          26.897060606060602
+        ]
+      },
+      {
+        "id": "fig0::unregistered.76",
+        "type": "collection",
+        "bounds_mm": [
+          40.68965570920874,
+          28.051606060606062,
+          54.073125961509085,
+          30.74554545454545
+        ]
+      },
+      {
+        "id": "fig0::unregistered.77",
+        "type": "collection",
+        "bounds_mm": [
+          37.85238087470137,
+          35.74857575757576,
+          57.61721105418212,
+          38.44251515151515
+        ]
+      },
+      {
+        "id": "fig0::unregistered.78",
+        "type": "collection",
+        "bounds_mm": [
+          33.028246753246755,
+          39.59706060606061,
+          58.59318181818182,
+          42.291000000000004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.79",
+        "type": "collection",
+        "bounds_mm": [
+          47.6089315278242,
+          13.331151515151513,
+          48.68184744731691,
+          41.61751515151515
+        ]
+      },
+      {
+        "id": "fig0::unregistered.8",
+        "type": "collection",
+        "bounds_mm": [
+          33.29090019569472,
+          76.48967362270345,
+          58.33052837573385,
+          87.92633333333335
+        ]
+      },
+      {
+        "id": "fig0::unregistered.80",
+        "type": "collection",
+        "bounds_mm": [
+          48.72667575984621,
+          13.331151515151513,
+          58.59318181818182,
+          41.61751515151515
+        ]
+      },
+      {
+        "id": "fig0::unregistered.81",
+        "type": "collection",
+        "bounds_mm": [
+          33.028246753246755,
+          13.331151515151513,
+          46.0779969949428,
+          41.61751515151515
+        ]
+      },
+      {
+        "id": "fig0::unregistered.82",
+        "type": "collection",
+        "bounds_mm": [
+          33.028246753246755,
+          14.004636363636362,
+          58.59318181818182,
+          40.9440303030303
+        ]
+      },
+      {
+        "id": "fig0::unregistered.83",
+        "type": "collection",
+        "bounds_mm": [
+          47.56419939028291,
+          13.331151515151513,
+          48.971688706646916,
+          41.61751515151515
+        ]
+      },
+      {
+        "id": "fig0::unregistered.84",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.85",
+        "type": "collection",
+        "bounds_mm": [
+          79.8237112806571,
+          12.657666666666666,
+          82.4723900455605,
+          16.033616033755273
+        ]
+      },
+      {
+        "id": "fig0::unregistered.86",
+        "type": "collection",
+        "bounds_mm": [
+          78.22177785845874,
+          16.408721518987342,
+          83.26998156760415,
+          19.78467088607595
+        ]
+      },
+      {
+        "id": "fig0::unregistered.87",
+        "type": "collection",
+        "bounds_mm": [
+          76.17917406240707,
+          23.91083122362869,
+          85.7564156884199,
+          27.2867805907173
+        ]
+      },
+      {
+        "id": "fig0::unregistered.88",
+        "type": "collection",
+        "bounds_mm": [
+          74.43536999492304,
+          27.661886075949365,
+          87.81884024722338,
+          31.037835443037974
+        ]
+      },
+      {
+        "id": "fig0::unregistered.89",
+        "type": "collection",
+        "bounds_mm": [
+          71.59809516041567,
+          35.163995780590724,
+          91.36292533989642,
+          38.539945147679326
+        ]
+      },
+      {
+        "id": "fig0::unregistered.9",
+        "type": "collection",
+        "bounds_mm": [
+          33.29090019569472,
+          58.293,
+          58.33052837573385,
+          73.41948468876166
+        ]
+      },
+      {
+        "id": "fig0::unregistered.90",
+        "type": "collection",
+        "bounds_mm": [
+          66.77396103896105,
+          38.91505063291139,
+          92.33889610389612,
+          42.291000000000004
+        ]
+      },
+      {
+        "id": "fig0::unregistered.91",
+        "type": "collection",
+        "bounds_mm": [
+          81.3546458135385,
+          13.501654008438818,
+          82.42756173303121,
+          41.44701265822785
+        ]
+      },
+      {
+        "id": "fig0::unregistered.92",
+        "type": "collection",
+        "bounds_mm": [
+          82.4723900455605,
+          13.501654008438818,
+          92.33889610389612,
+          41.44701265822785
+        ]
+      },
+      {
+        "id": "fig0::unregistered.93",
+        "type": "collection",
+        "bounds_mm": [
+          66.77396103896105,
+          13.501654008438818,
+          79.8237112806571,
+          41.44701265822785
+        ]
+      },
+      {
+        "id": "fig0::unregistered.94",
+        "type": "collection",
+        "bounds_mm": [
+          66.77396103896105,
+          14.345641350210968,
+          92.33889610389612,
+          40.60302531645569
+        ]
+      },
+      {
+        "id": "fig0::unregistered.95",
+        "type": "collection",
+        "bounds_mm": [
+          81.30991367599721,
+          13.501654008438818,
+          82.71740299236122,
+          41.44701265822785
+        ]
+      },
+      {
+        "id": "fig0::unregistered.96",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.97",
+        "type": "collection",
+        "bounds_mm": [
+          113.56942556637138,
+          12.657666666666666,
+          116.21810433127479,
+          16.681946502057613
+        ]
+      },
+      {
+        "id": "fig0::unregistered.98",
+        "type": "collection",
+        "bounds_mm": [
+          111.96749214417301,
+          16.316102880658434,
+          117.01569585331842,
+          20.34038271604938
+        ]
+      },
+      {
+        "id": "fig0::unregistered.99",
+        "type": "collection",
+        "bounds_mm": [
+          109.92488834812134,
+          23.632975308641974,
+          119.50212997413419,
+          27.65725514403292
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s02069d660bcb].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          18.58010656884902,
+          5.150555555555554,
+          25.977856568849017,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s02069d660bcb].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          31.272058790664587,
+          5.150555555555554,
+          38.66980879066459,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s02069d660bcb].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          46.55163601248015,
+          5.150555555555554,
+          48.77413601248015,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s02069d660bcb].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          58.132338234295716,
+          5.150555555555554,
+          62.577338234295716,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          192.38924281076066,
+          50.78588888888888,
+          200.16799281076067,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          201.5195767625232,
+          50.78588888888888,
+          209.2983267625232,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          210.63403571428574,
+          50.78588888888888,
+          218.44453571428573,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          219.76436966604828,
+          50.78588888888888,
+          227.57486966604827,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s51039f3d540c].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          228.89470361781082,
+          50.78588888888888,
+          236.7052036178108,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          129.32918567633664,
+          50.78588888888888,
+          134.88543567633664,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          137.62948926884803,
+          50.78588888888888,
+          143.185739268848,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          145.92979286135943,
+          50.78588888888888,
+          151.48604286135944,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          154.2300964538708,
+          50.78588888888888,
+          159.7863464538708,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s5bb5639f6f92].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          161.4032750463822,
+          50.78588888888888,
+          169.21377504638218,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s63f3b63901dc].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          86.0715351402776,
+          5.150555555555554,
+          93.4692851402776,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s63f3b63901dc].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          98.76348736209316,
+          5.150555555555554,
+          106.16123736209316,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s63f3b63901dc].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          114.04306458390873,
+          5.150555555555554,
+          116.26556458390873,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s63f3b63901dc].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          125.6237668057243,
+          5.150555555555554,
+          130.0687668057243,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s6a734aec74d4].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          119.81724942599188,
+          5.150555555555554,
+          127.21499942599186,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s6a734aec74d4].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          132.50920164780743,
+          5.150555555555554,
+          139.90695164780743,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s6a734aec74d4].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          147.788778869623,
+          5.150555555555554,
+          150.01127886962303,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s6a734aec74d4].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          159.3694810914386,
+          5.150555555555554,
+          163.8144810914386,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s7817ca6ddc69].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          52.325820854563325,
+          5.150555555555554,
+          59.72357085456332,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s7817ca6ddc69].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          65.01777307637889,
+          5.150555555555554,
+          72.41552307637888,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s7817ca6ddc69].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          80.29735029819446,
+          5.150555555555554,
+          82.51985029819446,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s7817ca6ddc69].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          91.87805252001003,
+          5.150555555555554,
+          96.32305252001002,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          158.64352852504638,
+          50.78588888888888,
+          166.42227852504638,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          167.77386247680892,
+          50.78588888888888,
+          175.55261247680892,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          176.88832142857143,
+          50.78588888888888,
+          184.69882142857145,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          186.01865538033397,
+          50.78588888888888,
+          193.829155380334,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8a6266c6b126].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          195.1489893320965,
+          50.78588888888888,
+          202.95948933209652,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          27.273382738836506,
+          50.78588888888888,
+          32.8296327388365,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          36.028497487101944,
+          50.78588888888888,
+          41.58474748710194,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          44.78361223536737,
+          50.78588888888888,
+          50.33986223536737,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          53.5387269836328,
+          50.78588888888888,
+          59.094976983632804,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s8f60fb312db5].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          61.166716731898234,
+          50.78588888888888,
+          68.97721673189824,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sad28e4475216].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          187.30867799742046,
+          5.150555555555554,
+          194.70642799742046,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sad28e4475216].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          200.000630219236,
+          5.150555555555554,
+          207.398380219236,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sad28e4475216].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          215.2802074410516,
+          5.150555555555554,
+          217.5027074410516,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sad28e4475216].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          226.8609096628672,
+          5.150555555555554,
+          231.30590966286718,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sc30863012e8a].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          153.56296371170617,
+          5.150555555555554,
+          160.96071371170615,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sc30863012e8a].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          166.25491593352172,
+          5.150555555555554,
+          173.65266593352172,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sc30863012e8a].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          181.53449315533732,
+          5.150555555555554,
+          183.7569931553373,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sc30863012e8a].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          193.1151953771529,
+          5.150555555555554,
+          197.5601953771529,
+          8.706555555555553
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          95.58347139062238,
+          50.78588888888888,
+          101.13972139062237,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          103.88377498313376,
+          50.78588888888888,
+          109.44002498313375,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          112.18407857564515,
+          50.78588888888888,
+          117.74032857564515,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          120.48438216815653,
+          50.78588888888888,
+          126.04063216815653,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[sc710bfbc46f1].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          127.65756076066793,
+          50.78588888888888,
+          135.46806076066792,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          61.43934253246754,
+          50.78588888888888,
+          66.99559253246754,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          69.96098755411256,
+          50.78588888888888,
+          75.51723755411257,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          78.48263257575759,
+          50.78588888888888,
+          84.0388825757576,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          87.0042775974026,
+          50.78588888888888,
+          92.56052759740261,
+          54.34188888888888
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[se54a3e5e6681].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          94.39879761904763,
+          50.78588888888888,
+          102.20929761904763,
+          54.34188888888888
+        ]
+      }
+    ]
+  }
+}

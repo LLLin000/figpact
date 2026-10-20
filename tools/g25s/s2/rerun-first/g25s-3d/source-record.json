@@ -1,0 +1,21 @@
+{
+  "id": "g25s-3d",
+  "local_path": "tools/g25s/gallery/raw/mplot3d_surface3d.py",
+  "plot_types": [
+    "3D surface"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/mplot3d/surface3d.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "c1404430c73853200543e33774c3a6338994a1547f5b1240c0808ec68bd35978",
+  "source_review": {
+    "filesystem": "none; synthetic meshgrid data",
+    "network": "none",
+    "process": "none; imports matplotlib.pyplot, matplotlib.ticker, numpy only",
+    "supports_deps": [
+      "matplotlib",
+      "numpy"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "mplot3d/surface3d.py"
+}

@@ -1,0 +1,186 @@
+{
+  "nmr_runner_rc": 0,
+  "ftir_runner_rc": 0,
+  "ftir_strict_rc": 1,
+  "ftir_refused_as_expected": true,
+  "strict_basis": "native 120-DPI build + 600-DPI export PDFs; DPI sweep is tick-clip legality only, never all-QA clean",
+  "dpi_sweep": {
+    "scope": "TICK_CLIP/UNMEASURED_GEOMETRY only; other rules listed, not gated",
+    "dpis": {
+      "72": {
+        "n_records": 3,
+        "tick_clip": [],
+        "unmeasured": [],
+        "other_records": [
+          {
+            "rule": "TEXT_ON_DATA",
+            "value": 3751.0,
+            "unit": "count",
+            "threshold": 1.0,
+            "worse": "up",
+            "severity": "blocking"
+          },
+          {
+            "rule": "TEXT_ON_DATA",
+            "value": 4175.0,
+            "unit": "count",
+            "threshold": 1.0,
+            "worse": "up",
+            "severity": "blocking"
+          },
+          {
+            "rule": "TEXT_ON_DATA",
+            "value": 3532.0,
+            "unit": "count",
+            "threshold": 1.0,
+            "worse": "up",
+            "severity": "blocking"
+          }
+        ],
+        "n_tick_geometry": 5,
+        "min_clearance_mm": 0.0556250000000094,
+        "env_dpi": 72.0
+      },
+      "120": {
+        "n_records": 0,
+        "tick_clip": [],
+        "unmeasured": [],
+        "other_records": [],
+        "n_tick_geometry": 5,
+        "min_clearance_mm": 0.08208333333333873,
+        "env_dpi": 120.0
+      },
+      "300": {
+        "n_records": 0,
+        "tick_clip": [],
+        "unmeasured": [],
+        "other_records": [],
+        "n_tick_geometry": 5,
+        "min_clearance_mm": 0.07149999999998856,
+        "env_dpi": 300.0
+      },
+      "600": {
+        "n_records": 0,
+        "tick_clip": [],
+        "unmeasured": [],
+        "other_records": [],
+        "n_tick_geometry": 5,
+        "min_clearance_mm": 0.07943749999998856,
+        "env_dpi": 600.0
+      }
+    },
+    "refused": false,
+    "note": "72dpi carries resolution-sensitive TEXT_ON_DATA records; tick-clip legality holds at all DPIs, strict PASS is the native 120-DPI build + 600-DPI export proof, not this sweep"
+  },
+  "file_geometry": {
+    "strict_probe": {
+      "pages": [
+        [
+          0.0,
+          0.0,
+          192.76,
+          136.06
+        ]
+      ],
+      "font_sizes_pt": [
+        5.04,
+        5.5,
+        7.2,
+        8.0,
+        8.5
+      ],
+      "min_pt": 5.04,
+      "n_spans": 35,
+      "tick_bboxes": {
+        "pages": [
+          {
+            "rect": [
+              0.0,
+              0.0,
+              192.76,
+              136.06
+            ],
+            "n_words": 31,
+            "n_outside": 0
+          }
+        ],
+        "all_inside": true
+      }
+    },
+    "installed": {
+      "pages": [
+        [
+          0.0,
+          0.0,
+          192.76,
+          136.06
+        ]
+      ],
+      "font_sizes_pt": [
+        5.04,
+        6.0,
+        7.2,
+        8.0,
+        8.5
+      ],
+      "min_pt": 5.04,
+      "n_spans": 35,
+      "tick_bboxes": {
+        "pages": [
+          {
+            "rect": [
+              0.0,
+              0.0,
+              192.76,
+              136.06
+            ],
+            "n_words": 31,
+            "n_outside": 0
+          }
+        ],
+        "all_inside": true
+      }
+    },
+    "strict_overlay": {
+      "pages": [
+        [
+          0.0,
+          0.0,
+          192.76,
+          136.06
+        ]
+      ],
+      "font_sizes_pt": [
+        5.04,
+        6.0,
+        7.2,
+        8.0,
+        8.5,
+        9.5
+      ],
+      "min_pt": 5.04,
+      "n_spans": 35,
+      "tick_bboxes": {
+        "pages": [
+          {
+            "rect": [
+              0.0,
+              0.0,
+              192.76,
+              136.06
+            ],
+            "n_words": 31,
+            "n_outside": 0
+          }
+        ],
+        "all_inside": true
+      }
+    },
+    "png_pixels": [
+      1606,
+      1133
+    ],
+    "all_tick_bboxes_inside": true
+  },
+  "outcome": "G23_TICK_PASS"
+}

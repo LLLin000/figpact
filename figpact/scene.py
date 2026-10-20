@@ -156,9 +156,12 @@ def _mm_per_px(dpi: float) -> float:
     return MM_PER_INCH / float(dpi)
 
 
-def _to_mm(box: Any, mm_per_px: float) -> list[float]:
-    return [float(box.x0) * mm_per_px, float(box.y0) * mm_per_px,
-            float(box.x1) * mm_per_px, float(box.y1) * mm_per_px]
+def _to_mm(box: Any, mm_per_px: float) -> Optional[list[float]]:
+    bounds = [float(box.x0) * mm_per_px, float(box.y0) * mm_per_px,
+              float(box.x1) * mm_per_px, float(box.y1) * mm_per_px]
+    if not all(np.isfinite(bounds)) or bounds[0] > bounds[2] or bounds[1] > bounds[3]:
+        return None
+    return bounds
 
 
 def _points_mm(points: Any, mm_per_px: float) -> list[list[float]]:
@@ -168,7 +171,7 @@ def _points_mm(points: Any, mm_per_px: float) -> list[list[float]]:
 def _anchors_from_bounds(bounds: Sequence[float], *, baseline: Optional[float] = None) -> dict[str, float]:
     x0, y0, x1, y1 = bounds
     anchors = {'left': float(x0), 'right': float(x1), 'bottom': float(y0), 'top': float(y1),
-               'center_x': float((x0 + x1) / 2.0), 'center_y': float((y0 + y1) / 2.0)}
+               'center_x': float(x0 / 2.0 + x1 / 2.0), 'center_y': float(y0 / 2.0 + y1 / 2.0)}
     if baseline is not None:
         anchors['baseline'] = float(baseline)
     return anchors
@@ -471,6 +474,12 @@ def _collection_geometry(coll: Any, mm_per_px: float, clip_rect: Optional[tuple]
         return {'collection_geometry': 'UNSUPPORTED',
                 'collection_geometry_reason': f'get_paths() 失败：{exc!r}'}
     if not paths:
+        if type(coll) is matplotlib.collections.LineCollection:
+            # A plain empty LineCollection (e.g. colorbar dividers) draws no paths.
+            # Unknown subclasses may draw independently and remain unsupported.
+            return {'collection_geometry': 'MEASURED', 'polylines_mm': [],
+                    'collection_segments': 0, 'geometry_bounds_mm': None,
+                    'collection_geometry_basis': 'empty LineCollection paths'}
         return {'collection_geometry': 'UNSUPPORTED',
                 'collection_geometry_reason': '集合没有 path'}
     try:
@@ -517,6 +526,10 @@ def _collection_geometry(coll: Any, mm_per_px: float, clip_rect: Optional[tuple]
                                                   f'超过上限 {_OFFSET_POLYLINE_LIMIT}，不假装测全'}
         polylines = [poly + off for poly in polylines for off in off_disp]
 
+    if any(not bool(np.isfinite(poly).all()) for poly in polylines):
+        return {'collection_geometry': 'UNMEASURED',
+                'collection_geometry_reason': 'non-finite display geometry; cannot prove visible bounds'}
+
     if clip_rect is not None:
         clipped = []
         for poly in polylines:
@@ -539,7 +552,7 @@ def _collection_geometry(coll: Any, mm_per_px: float, clip_rect: Optional[tuple]
 
 def _baseline_mm(artist: Any, bbox: Any, renderer: Any, mm_per_px: float) -> tuple[Optional[float], Optional[str]]:
     """文字的 baseline 锚点（毫米）。只在字体度量可测且未旋转时给出。"""
-    if not hasattr(artist, 'get_text'):
+    if not isinstance(artist, matplotlib.text.Text):
         return None, None
     try:
         if abs(float(artist.get_rotation() or 0.0)) > 0.0:
@@ -556,7 +569,8 @@ def _baseline_mm(artist: Any, bbox: Any, renderer: Any, mm_per_px: float) -> tup
         return None, None
     if not descent or not all(isinstance(v, (int, float)) for v in (width, height, descent)):
         return None, None
-    return (float(bbox.y0) + float(descent)) * mm_per_px, 'font_metrics_descent'
+    baseline = (float(bbox.y0) + float(descent)) * mm_per_px
+    return (baseline, 'font_metrics_descent') if np.isfinite(baseline) else (None, None)
 
 
 def _image_payload(artist: Any) -> dict[str, Any]:
@@ -618,7 +632,7 @@ def _artist_node(artist: Any, *, node_id: Optional[str], gid: Optional[str], sco
             pass
 
     text = None
-    if hasattr(artist, 'get_text'):
+    if isinstance(artist, matplotlib.text.Text):
         text = str(artist.get_text())
         node['text'] = text
         node['is_text'] = True
@@ -712,7 +726,7 @@ def _artist_node(artist: Any, *, node_id: Optional[str], gid: Optional[str], sco
             bbox = artist.get_window_extent(renderer)
         except Exception:
             bbox = None
-    if bbox is not None and float(bbox.width) >= 0.0 and float(bbox.height) >= 0.0:
+    if bbox is not None and _to_mm(bbox, mm_per_px) is not None:
         visible = bbox
         if clip_box is not None:
             ix0 = max(float(bbox.x0), float(clip_box.x0))
@@ -790,6 +804,13 @@ def _artist_node(artist: Any, *, node_id: Optional[str], gid: Optional[str], sco
                 node['envelope_source'] = geo.get('envelope_basis') or 'collection_conservative_envelope'
                 node['envelope_note'] = geo.get('envelope_note')
                 node['anchors'] = _anchors_from_bounds(bounds)
+    if not node['measured'] or node.get('collection_geometry') == 'UNMEASURED':
+        node['measured'] = False
+        node['bounds_mm'] = None
+        node['envelope_mm'] = None
+        node['anchors'] = None
+        node['geometry_reason'] = (node.get('collection_geometry_reason')
+                                   or 'renderer extent is unavailable or non-finite')
     return node
 
 
@@ -1031,7 +1052,8 @@ def snapshot(fig: matplotlib.figure.Figure, registry: GidRegistry, *, scope: str
         if cmeta.get('type'):
             node['type'] = _semantic_type(cmeta['type'], artist)
         if not node['measured']:
-            diag('UNMEASURED_GEOMETRY', f'{gid} 的几何未测量（渲染器/字体环境不可用）', [gid])
+            diag('UNMEASURED_GEOMETRY', f'{gid} 的几何未测量：{node.get("geometry_reason") or "渲染器/字体环境不可用"}',
+                 [gid], severity='blocking')
         collection_diag(node)
         if isinstance(artist, matplotlib.axes.Axes):
             node['structural'] = True

@@ -1,0 +1,21 @@
+{
+  "id": "g25s-box",
+  "local_path": "tools/g25s/gallery/raw/box_boxplot_demo.py",
+  "plot_types": [
+    "boxplot"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/statistics/boxplot_demo.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "3bd17b82108953d7c4b59768aac481044cc572b3e7f358f5ef73cf4418fe75e2",
+  "source_review": {
+    "filesystem": "none; numpy random data",
+    "network": "none",
+    "process": "none; imports matplotlib.pyplot, matplotlib.patches, numpy only",
+    "supports_deps": [
+      "matplotlib",
+      "numpy"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "statistics/boxplot_demo.py"
+}

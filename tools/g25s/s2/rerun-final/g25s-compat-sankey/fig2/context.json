@@ -1,0 +1,84 @@
+{
+  "route": "overlay",
+  "scope": "fig2",
+  "revision": "e3b12887ecc357d21a3825159916a84d5df950af1cad9092a16f43f31f13dd16",
+  "controls": [],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-sankey\\fig2\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/g25s-compat-sankey/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-sankey\\original.py",
+        "4cd0d6cc8774bafe4d46bcfd3631ab6ffb1d629efbb408b5468a6628c87b6c38"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "e3b12887ecc357d21a3825159916a84d5df950af1cad9092a16f43f31f13dd16",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig2::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig2::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          20.32,
+          13.4112,
+          146.304,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig2::unregistered.0",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig2::unregistered.1",
+        "type": "shape",
+        "bounds_mm": [
+          36.72607720964406,
+          33.04957388541521,
+          125.31948263882732,
+          98.60390523830466
+        ]
+      },
+      {
+        "id": "fig2::unregistered.2",
+        "type": "shape",
+        "bounds_mm": [
+          35.58146717176193,
+          16.373844572284597,
+          103.49499608610249,
+          40.41296148356872
+        ]
+      },
+      {
+        "id": "fig2::unregistered.3",
+        "type": "legend",
+        "bounds_mm": [
+          125.2996111111111,
+          93.82759999999999,
+          144.54011111111112,
+          105.52571111111111
+        ]
+      }
+    ]
+  }
+}

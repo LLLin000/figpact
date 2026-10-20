@@ -1,0 +1,86 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 0,
+    "derived_total": 0,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig1.ax[sdb6e4bc0e64e].tick.x.fontsize.fontsize": null
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig1.ax[sdb6e4bc0e64e].tick.x.fontsize"
+      ],
+      "retained": []
+    }
+  },
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [
+      "«−0.5» 与 «−0.5» 重叠 (面积 296.0 px²)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "FAIL",
+  "local_problems": [
+    "required targets unchanged: {'fig1.ax[sdb6e4bc0e64e].tick.x.fontsize.fontsize': None}"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-contour\\fig1\\.inspect-c87d3d50028b4041a3fc2a3553dad2e1.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-contour\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [
+      "«−0.5» 与 «−0.5» 重叠 (面积 296.0 px²)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "eligible": false,
+    "inherited": [],
+    "new": [],
+    "reason": "unmeasured: no verified QA pair",
+    "unmeasured": [
+      "unmeasured: no verified QA pair"
+    ],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": [
+    {
+      "after": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "before": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "id": "fig1.ax[sdb6e4bc0e64e].tick.x.fontsize",
+      "property": "fontsize",
+      "requested": 10.0,
+      "role": "axis.tick"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 11,
+    "derived_total": 11,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig2.ax[sc4fd7f807fc7].tick.x.fontsize.fontsize": [
+        8.0,
+        8.5
+      ]
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig2.ax[sc4fd7f807fc7].tick.x.fontsize"
+      ],
+      "retained": []
+    }
+  },
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [
+      "«Triangular(2, 9, 11)» 与 «500 Random Numbers» 重叠 (面积 328.2 px²)",
+      "«Triangular(2, 9, 11)» 与 «500 Random Numbers» 重叠 (面积 241.0 px²)",
+      "«2.75» 压在 曲线 上 (1 个采样点穿过文字区)",
+      "«2.53» 压在 曲线 上 (2 个采样点穿过文字区)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "PASS",
+  "local_problems": [
+    "DRAFT_REFUSED: 新增 1 条"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-first\\g25s-box\\fig2\\.inspect-efd45ebb46a048f6a6accac431a4a5a8.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-first\\g25s-box\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [
+      "«2.75» 压在 曲线 上 (1 个采样点穿过文字区)",
+      "«2.53» 压在 曲线 上 (2 个采样点穿过文字区)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "ambiguous": [
+      "ax0:Line2D:curve:h6792236dd07b4b35L5",
+      "overlap:ax-1:Text:text:hc6621cedcf33e7adL20 x ax-1:Text:text:hbe99c32409a3da17L18"
+    ],
+    "eligible": false,
+    "inherited": [
+      "ax0:Line2D:curve:h6792236dd07b4b35L5",
+      "ondata:ax0:Text:text:h95f547a31190e6cdL4 x ax0:Line2D:curve:h9c284ed78618fd69L2",
+      "ondata:ax0:Text:text:ha789e4c59e955022L4 x ax0:Line2D:curve:h9c284ed78618fd69L2"
+    ],
+    "new": [
+      "overlap:ax-1:Text:text:hc6621cedcf33e7adL20 x ax-1:Text:text:hbe99c32409a3da17L18"
+    ],
+    "reason": "新增 1 条",
+    "unmeasured": [],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": [
+    {
+      "after": [
+        8.5,
+        8.5,
+        8.5,
+        8.5,
+        8.5,
+        8.5,
+        8.5,
+        8.5,
+        8.5,
+        8.5
+      ],
+      "before": [
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0
+      ],
+      "id": "fig2.ax[sc4fd7f807fc7].tick.x.fontsize",
+      "property": "fontsize",
+      "requested": 8.5,
+      "role": "axis.tick"
+    }
+  ]
+}

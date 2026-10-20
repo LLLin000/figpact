@@ -1,0 +1,21 @@
+{
+  "id": "g25s-log",
+  "local_path": "tools/g25s/gallery/raw/log_log_demo.py",
+  "plot_types": [
+    "log scale"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/scales/log_demo.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "fb2a9ce5bbc46c6f367e4e76872be2238cb0b532dceedce501657b6356f093fb",
+  "source_review": {
+    "filesystem": "none; numpy logspace synthetic data",
+    "network": "none",
+    "process": "none; imports matplotlib.pyplot, numpy only",
+    "supports_deps": [
+      "matplotlib",
+      "numpy"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "scales/log_demo.py"
+}

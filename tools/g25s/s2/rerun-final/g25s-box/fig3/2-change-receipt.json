@@ -1,0 +1,66 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 0,
+    "derived_total": 0,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig3.ax[s509c2de610eb].curve.d0087dc8879c6.l7f1d0a5c.linewidth.linewidth": [
+        1.0,
+        1.5
+      ]
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig3.ax[s509c2de610eb].curve.d0087dc8879c6.l7f1d0a5c.linewidth"
+      ],
+      "retained": []
+    }
+  },
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [],
+    "glyph_floor": [],
+    "pass": true
+  },
+  "figure_verification_state": "PASS",
+  "local_edit_state": "PASS",
+  "local_problems": [],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-box\\fig3\\.inspect-f27c95b2fbd7461e8a0a668a36b5751b.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-box\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [],
+    "glyph_floor": [],
+    "pass": true
+  },
+  "qa_delta": {
+    "ambiguous": [],
+    "eligible": true,
+    "inherited": [],
+    "new": [],
+    "reason": "无差异",
+    "unmeasured": [],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "COMMITTED",
+  "target_effects": [
+    {
+      "after": 1.5,
+      "before": 1.0,
+      "id": "fig3.ax[s509c2de610eb].curve.d0087dc8879c6.l7f1d0a5c.linewidth",
+      "property": "linewidth",
+      "requested": 1.5,
+      "role": "curve.linewidth"
+    }
+  ]
+}

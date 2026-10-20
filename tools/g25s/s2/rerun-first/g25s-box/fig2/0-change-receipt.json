@@ -1,0 +1,84 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 1,
+    "derived_total": 1,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig2.ax[sc4fd7f807fc7].xlabel.fontsize.fontsize": [
+        10.0,
+        10.5
+      ]
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig2.ax[sc4fd7f807fc7].xlabel.fontsize"
+      ],
+      "retained": []
+    }
+  },
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [
+      "«2.75» 压在 曲线 上 (1 个采样点穿过文字区)",
+      "«2.53» 压在 曲线 上 (2 个采样点穿过文字区)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "PASS",
+  "local_problems": [
+    "DRAFT_REFUSED: 歧义 1 处，失败关闭"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-first\\g25s-box\\fig2\\.inspect-823d3c35e0b94a6a954e92f795fe7174.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-first\\g25s-box\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [
+      "«2.75» 压在 曲线 上 (1 个采样点穿过文字区)",
+      "«2.53» 压在 曲线 上 (2 个采样点穿过文字区)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "ambiguous": [
+      "ax0:Line2D:curve:h6792236dd07b4b35L5"
+    ],
+    "eligible": false,
+    "inherited": [
+      "ax0:Line2D:curve:h6792236dd07b4b35L5",
+      "ondata:ax0:Text:text:h95f547a31190e6cdL4 x ax0:Line2D:curve:h9c284ed78618fd69L2",
+      "ondata:ax0:Text:text:ha789e4c59e955022L4 x ax0:Line2D:curve:h9c284ed78618fd69L2"
+    ],
+    "new": [],
+    "reason": "歧义 1 处，失败关闭",
+    "unmeasured": [],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": [
+    {
+      "after": [
+        10.5
+      ],
+      "before": [
+        10.0
+      ],
+      "id": "fig2.ax[sc4fd7f807fc7].xlabel.fontsize",
+      "property": "fontsize",
+      "requested": 10.5,
+      "role": "axis.title"
+    }
+  ]
+}

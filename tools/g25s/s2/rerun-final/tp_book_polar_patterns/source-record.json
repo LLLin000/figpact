@@ -1,0 +1,24 @@
+{
+  "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+  "id": "tp_book_polar_patterns",
+  "independent_signoff": false,
+  "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+  "local_path": "tools/g25s/thirdparty/sources/polar_patterns.py",
+  "plot_types": [
+    "non-Cartesian",
+    "polar",
+    "multi-panel"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/scales-projections/polar-patterns.py",
+  "repository": "rougier/scientific-visualization-book",
+  "sha256": "2707bddeb12353b98ba1498c177060dff9e0d6a90a7a79f6ae8f660ec29706bc",
+  "source_review": {
+    "dependency": "numpy + matplotlib only.",
+    "filesystem": "Upstream savefig/show as above.",
+    "network": "None.",
+    "process": "None.",
+    "risks": "6 polar subplots; math formula comments only; no TeX/data IO."
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "code/scales-projections/polar-patterns.py"
+}

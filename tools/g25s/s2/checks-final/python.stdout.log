@@ -1,0 +1,30 @@
+.........................s........s......................................................s........................................................ [ 20%]
+............................................................. [ 29%]
+.............................s.......................................... [ 39%]
+........................................................................ [ 50%]
+.............................ss....................................... [ 60%]
+...................................................................... [ 70%]
+.......................................................s. [ 78%]
+.................................................... [ 85%]
+........................................................................ [ 95%]
+.............................                                            [100%]
+============================== warnings summary ===============================
+tests/test_g25s_science.py::ExternalScienceTest::test_sankey_aspect_settlement_is_not_a_science_change
+tests/test_g25s_science.py::ExternalScienceTest::test_sankey_aspect_settlement_is_not_a_science_change
+tests/test_g25s_science.py::ExternalScienceTest::test_sankey_view_and_patch_mutations_still_rejected
+  D:\L\AI\figpact\figpact\scene.py:566: UserWarning: Glyph 10 (
+  ) missing from font(s) Arial.
+    width, height, descent = renderer.get_text_width_height_descent(
+
+tests/test_init_contract_g11.py::test_plate_compare_marks_demo_editable_via_contract
+tests/test_init_contract_g11.py::test_plate_compare_marks_demo_editable_via_contract
+tests/test_init_contract_g11.py::test_plate_compare_marks_demo_editable_via_contract
+  D:\L\AI\figpact\examples\demo\demo_figure.py:232: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`). Consider using `matplotlib.pyplot.close()`.
+    fig, ax = plt.subplots(figsize=(w / 25.4, h / 25.4), dpi=100)
+
+tests/test_tick_clipping.py::TickOptionsTest::test_nan_dpi_fails_closed
+  D:\programs\Python\Lib\site-packages\matplotlib\figure.py:3147: RuntimeWarning: invalid value encountered in cast
+    manager.resize(*(size * self.dpi).astype(int))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+694 passed, 7 skipped, 7 warnings, 120 subtests passed in 865.80s (0:14:25)

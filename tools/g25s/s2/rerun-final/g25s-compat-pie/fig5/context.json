@@ -1,0 +1,209 @@
+{
+  "route": "overlay",
+  "scope": "fig5",
+  "revision": "16295472e1066886536a33673feeb48af5436148fb147ac8aa4ced4d77618ad8",
+  "controls": [],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-pie\\fig5\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/s2/rerun-final/g25s-compat-pie/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-compat-pie\\original.py",
+        "d4ac777b57cdb0a7bfe78fa3c072f7dcf9bd3a731faa30d240e7b6168976f343"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "16295472e1066886536a33673feeb48af5436148fb147ac8aa4ced4d77618ad8",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig5::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig5::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          36.3728,
+          13.4112,
+          130.25119999999998,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig5::unregistered.0",
+        "type": "text",
+        "bounds_mm": [
+          55.16124772820199,
+          95.37675971499287,
+          64.559247728202,
+          98.93275971499288
+        ]
+      },
+      {
+        "id": "fig5::unregistered.1",
+        "type": "text",
+        "bounds_mm": [
+          67.51110103356473,
+          78.64750529908702,
+          78.65535103356473,
+          82.20350529908701
+        ]
+      },
+      {
+        "id": "fig5::unregistered.10",
+        "type": "shape",
+        "bounds_mm": [
+          42.18932888928402,
+          23.47652963804042,
+          79.74065368754614,
+          81.26213369031704
+        ]
+      },
+      {
+        "id": "fig5::unregistered.11",
+        "type": "shape",
+        "bounds_mm": [
+          41.14623555595068,
+          22.43343630470709,
+          78.6975603542128,
+          80.21904035698371
+        ]
+      },
+      {
+        "id": "fig5::unregistered.12",
+        "type": "shape",
+        "bounds_mm": [
+          71.70800360019683,
+          22.79959951742787,
+          120.86295168549292,
+          90.7301021395111
+        ]
+      },
+      {
+        "id": "fig5::unregistered.13",
+        "type": "shape",
+        "bounds_mm": [
+          70.6649102668635,
+          21.756506184094537,
+          119.81985835215959,
+          89.68700880617777
+        ]
+      },
+      {
+        "id": "fig5::unregistered.14",
+        "type": "shape",
+        "bounds_mm": [
+          83.3119873164184,
+          60.35039999999999,
+          105.38411739379883,
+          97.90175999999998
+        ]
+      },
+      {
+        "id": "fig5::unregistered.15",
+        "type": "shape",
+        "bounds_mm": [
+          82.26889398308505,
+          59.30730666666666,
+          104.34102406046549,
+          96.85866666666666
+        ]
+      },
+      {
+        "id": "fig5::unregistered.2",
+        "type": "text",
+        "bounds_mm": [
+          31.59759425055366,
+          44.647580687613136,
+          40.45584425055366,
+          48.20358068761313
+        ]
+      },
+      {
+        "id": "fig5::unregistered.3",
+        "type": "text",
+        "bounds_mm": [
+          52.75632581282297,
+          50.449588734440994,
+          63.86882581282297,
+          54.00558873444099
+        ]
+      },
+      {
+        "id": "fig5::unregistered.4",
+        "type": "text",
+        "bounds_mm": [
+          120.1163660490374,
+          39.81966015947323,
+          129.0698660490374,
+          43.37566015947323
+        ]
+      },
+      {
+        "id": "fig5::unregistered.5",
+        "type": "text",
+        "bounds_mm": [
+          97.8308587540204,
+          48.34363281425812,
+          108.9433587540204,
+          51.89963281425812
+        ]
+      },
+      {
+        "id": "fig5::unregistered.6",
+        "type": "text",
+        "bounds_mm": [
+          96.07638226708958,
+          97.8572209508154,
+          104.20438226708958,
+          101.41322095081541
+        ]
+      },
+      {
+        "id": "fig5::unregistered.7",
+        "type": "text",
+        "bounds_mm": [
+          84.70226532750341,
+          80.0004841549902,
+          95.84651532750341,
+          83.5564841549902
+        ]
+      },
+      {
+        "id": "fig5::unregistered.8",
+        "type": "shape",
+        "bounds_mm": [
+          52.93231159810838,
+          60.35039999999999,
+          83.312,
+          97.90175999999998
+        ]
+      },
+      {
+        "id": "fig5::unregistered.9",
+        "type": "shape",
+        "bounds_mm": [
+          51.889218264775046,
+          59.30730666666666,
+          82.26890666666667,
+          96.85866666666666
+        ]
+      }
+    ]
+  }
+}

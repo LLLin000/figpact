@@ -1,0 +1,42 @@
+{
+  "audit_summary": {},
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "ERROR",
+  "local_edit_state": "ERROR",
+  "local_problems": [
+    "OUT_OF_RANGE: 'fig0.ax[s0490e61e779f].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-box\\fig0\\.inspect-395674f4a8a54965883d969c2f4aa6cb.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\s2\\rerun-final\\g25s-box\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "eligible": false,
+    "inherited": [],
+    "new": [],
+    "reason": "unmeasured: no verified QA pair",
+    "unmeasured": [
+      "unmeasured: no verified QA pair"
+    ],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [
+    "OUT_OF_RANGE: 'fig0.ax[s0490e61e779f].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+  ],
+  "science_unchanged": false,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": []
+}

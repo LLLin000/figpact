@@ -1,0 +1,70 @@
+{
+  "nmr": {
+    "strict_returncode": 0,
+    "verification": "STRICT_VERIFIED",
+    "status": "committed",
+    "pdf_min_pt": 5.04,
+    "strict_overlay": {
+      "preview_http": 200,
+      "commit": "COMMITTED",
+      "strict_load_fig_open": true,
+      "strict_load_pass": true,
+      "strict_load_qa": {
+        "blocking": [],
+        "glyph_floor": [],
+        "pass": true
+      },
+      "render_verification": "PASS",
+      "rendered": "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\evidence\\g21-nmr\\strict_overlay\\Fig2_NMR_overlay_strict.pdf",
+      "overlay_pdf_sizes_pt": [
+        5.04,
+        6.0,
+        7.2,
+        8.0,
+        8.5,
+        9.5
+      ],
+      "overlay_pdf_min_pt": 5.04,
+      "overlay_pdf_min_ge_5pt": true
+    }
+  },
+  "ftir": {
+    "native_try_status": "OK",
+    "strict_probe": {
+      "returncode": 1,
+      "qa_lines": [
+        "[字形审计] Fig2_FTIR_transmittance_stacked.pdf: 全部字形 ≥ 5.0 pt ✓",
+        "[QA] FTIR 主图: 上下标字号达标 ✓",
+        "[QA] FTIR 主图: 文字无重叠 ✓",
+        "[QA] FTIR 主图: 文字未压线 ✓",
+        "[QA] FTIR 主图: 发现 6 处贴边（净空 < 1.0 mm）✗",
+        "[字形审计] Fig2_FTIR_transmittance_stacked_annotated.pdf: 全部字形 ≥ 5.0 pt ✓",
+        "[QA] FTIR 归属标注版: 上下标字号达标 ✓",
+        "[QA] FTIR 归属标注版: 文字无重叠 ✓",
+        "[QA] FTIR 归属标注版: 文字未压线 ✓",
+        "[QA] FTIR 归属标注版: 发现 6 处贴边（净空 < 1.0 mm）✗",
+        "[字形审计] Fig2_FTIR_transmittance_raw_processed.pdf: 全部字形 ≥ 5.0 pt ✓",
+        "[QA] FTIR 原始/处理对照: 上下标字号达标 ✓",
+        "[QA] FTIR 原始/处理对照: 文字无重叠 ✓",
+        "[QA] FTIR 原始/处理对照: 发现 4 处文字压线 ✗",
+        "[QA] FTIR 原始/处理对照: 发现 2 处贴边（净空 < 1.0 mm）✗",
+        "[验收] 阻断 4 条，其中 0 条人工豁免：",
+        "[验收] **未豁免**阻断项 4 条：**拒绝发布**，ftir 里的正式输出未被覆盖"
+      ],
+      "artifacts": [
+        "candidate.yaml"
+      ]
+    },
+    "pdf_audit": {
+      "pdf": null,
+      "note": "not produced (strict refused)"
+    }
+  },
+  "isolation": "Exact product and source copies with private scientific inputs; all save/restart/strict artifacts stayed in temporary sandbox, not original research sources.",
+  "raw_private_evidence": {
+    "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\evidence\\g21-nmr\\publication.json": "f475b77d0d13e5b8dedb8bc718e4611235c277384a2fc9a720b07a8372addaca",
+    "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\evidence\\g21-nmr\\pdf_audit.json": "1f8daac744bc98e61a1b1b008b7d1bfb825d332e8daf14bf0500fa04598230b2",
+    "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\evidence\\g21-nmr\\strict_overlay_proof.json": "8cf3098c10a25eda58d64212682e0f4ef0d29f13681d0dab60c855e7403bc4a5",
+    "C:\\Users\\Lin\\AppData\\Local\\Temp\\figpact-g25s2-strict-lh89qjga\\evidence\\g21-ftir\\ftir_publication_evidence.json": "f126a5d7f670570ec10e1d3fff4d7d79ff803f729ba5bad2792c906f4a1ab3d9"
+  }
+}

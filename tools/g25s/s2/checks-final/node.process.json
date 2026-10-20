@@ -1,0 +1,11 @@
+{
+  "name": "node",
+  "command": [
+    "node",
+    "--test",
+    "tests/inspector/test_inspector.js"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "seconds": 0.79
+}
