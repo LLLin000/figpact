@@ -1,0 +1,272 @@
+{
+  "kind": "G25-S development stress",
+  "model_called": false,
+  "independent_signoff": false,
+  "sources": [
+    {
+      "id": "g25s-heatmap",
+      "local_path": "tools/g25s/gallery/raw/heatmap_image_annotated_heatmap.py",
+      "plot_types": [
+        "annotated heatmap",
+        "imshow",
+        "colorbar"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/images_contours_and_fields/image_annotated_heatmap.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "b341156a49ec682f1fa3a1424ae6675ff80efb24c395f929771731ef8482af52",
+      "source_review": {
+        "filesystem": "none; synthetic numpy harvest data only",
+        "network": "none",
+        "process": "none; imports matplotlib, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "images_contours_and_fields/image_annotated_heatmap.py"
+    },
+    {
+      "id": "g25s-contour",
+      "local_path": "tools/g25s/gallery/raw/contour_contour_demo.py",
+      "plot_types": [
+        "contour",
+        "contourf",
+        "colorbar"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/images_contours_and_fields/contour_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "599394632d46acecef548955d16f3acd509f922a9f6dcb559977b482b994c7b1",
+      "source_review": {
+        "filesystem": "none; synthetic numpy function",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "images_contours_and_fields/contour_demo.py"
+    },
+    {
+      "id": "g25s-quiver",
+      "local_path": "tools/g25s/gallery/raw/quiver_quiver_demo.py",
+      "plot_types": [
+        "quiver"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/images_contours_and_fields/quiver_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "f17029f69cf733d6f847ac42d59329aac4a7c653463a7357234702f20b2f1bd6",
+      "source_review": {
+        "filesystem": "none; meshgrid synthetic data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "images_contours_and_fields/quiver_demo.py"
+    },
+    {
+      "id": "g25s-box",
+      "local_path": "tools/g25s/gallery/raw/box_boxplot_demo.py",
+      "plot_types": [
+        "boxplot"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/statistics/boxplot_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "3bd17b82108953d7c4b59768aac481044cc572b3e7f358f5ef73cf4418fe75e2",
+      "source_review": {
+        "filesystem": "none; numpy random data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, matplotlib.patches, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "statistics/boxplot_demo.py"
+    },
+    {
+      "id": "g25s-hist",
+      "local_path": "tools/g25s/gallery/raw/hist_hist.py",
+      "plot_types": [
+        "histogram",
+        "stacked histogram"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/statistics/hist.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "f53afc840701f120446118be16e0e9767648d3107e1c8f37288ff70498224237",
+      "source_review": {
+        "filesystem": "none; numpy random data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, matplotlib.colors, matplotlib.ticker, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "statistics/hist.py"
+    },
+    {
+      "id": "g25s-pie",
+      "local_path": "tools/g25s/gallery/raw/pie_pie_features.py",
+      "plot_types": [
+        "pie"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/pie_and_polar_charts/pie_features.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "f369451c39d1f1480335112ce02c0d5b658e86db9e5ae5eea974148a28233833",
+      "source_review": {
+        "filesystem": "none; inline literal sizes",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot only",
+        "supports_deps": [
+          "matplotlib"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "pie_and_polar_charts/pie_features.py"
+    },
+    {
+      "id": "g25s-polar",
+      "local_path": "tools/g25s/gallery/raw/polar_polar_demo.py",
+      "plot_types": [
+        "polar line"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/pie_and_polar_charts/polar_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "8f191de521cb284609ed0610d64784e5d3ea0e0f63c7b3e08bf2eeb42649dfa7",
+      "source_review": {
+        "filesystem": "none; synthetic arange data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "pie_and_polar_charts/polar_demo.py"
+    },
+    {
+      "id": "g25s-3d",
+      "local_path": "tools/g25s/gallery/raw/mplot3d_surface3d.py",
+      "plot_types": [
+        "3D surface"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/mplot3d/surface3d.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "c1404430c73853200543e33774c3a6338994a1547f5b1240c0808ec68bd35978",
+      "source_review": {
+        "filesystem": "none; synthetic meshgrid data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, matplotlib.ticker, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "mplot3d/surface3d.py"
+    },
+    {
+      "id": "g25s-twin",
+      "local_path": "tools/g25s/gallery/raw/twin_two_scales.py",
+      "plot_types": [
+        "twin axes",
+        "two y-scales"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/subplots_axes_and_figures/two_scales.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "f4285aef5b2ea143cd414588e37f09bcbf3878d04976b83d2f2f1e402563435a",
+      "source_review": {
+        "filesystem": "none; synthetic exp data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "subplots_axes_and_figures/two_scales.py"
+    },
+    {
+      "id": "g25s-inset",
+      "local_path": "tools/g25s/gallery/raw/inset_zoom_inset_axes.py",
+      "plot_types": [
+        "inset axes",
+        "zoom effect"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/subplots_axes_and_figures/zoom_inset_axes.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "c4a33efd6de739b533a68d9ebe9656d0476c661093937863038fb931b90a51b6",
+      "source_review": {
+        "filesystem": "reads matplotlib-bundled sample data file axes_grid/bivariate_normal.npy via cbook.get_sample_data; no user files, no writes",
+        "network": "none",
+        "process": "none; imports matplotlib.cbook, matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "subplots_axes_and_figures/zoom_inset_axes.py"
+    },
+    {
+      "id": "g25s-log",
+      "local_path": "tools/g25s/gallery/raw/log_log_demo.py",
+      "plot_types": [
+        "log scale"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/scales/log_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "fb2a9ce5bbc46c6f367e4e76872be2238cb0b532dceedce501657b6356f093fb",
+      "source_review": {
+        "filesystem": "none; numpy logspace synthetic data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "scales/log_demo.py"
+    },
+    {
+      "id": "g25s-stack",
+      "local_path": "tools/g25s/gallery/raw/stack_stackplot_demo.py",
+      "plot_types": [
+        "stacked area",
+        "stackplot"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/lines_bars_and_markers/stackplot_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "1157b7c6d6d4da271615c45e9d131a999f33d37169a6ef1e3e186638bb69b2b7",
+      "source_review": {
+        "filesystem": "none; synthetic sine data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, matplotlib.ticker, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "lines_bars_and_markers/stackplot_demo.py"
+    }
+  ],
+  "timeout_per_source": 240,
+  "runner_sha256": "70f9abd416db69f23d369c5e4c8c6c78e87931c59f84970ddb7bda7b48647053",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "scope_identity": "ordinal entire original Figure; not persistent semantic panel identity",
+  "probe_policy": "all original figures; first eligible target per role, plus no-op/range and real plan-adapter negatives",
+  "isolation": "fresh child per source, write-confined Python audit + network/process denial; NOT OS sandbox"
+}

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "D:\L\AI\figpact\tools\g25s\run_stress.py", line 84, in child
+    figures = original_figures()
+  File "D:\L\AI\figpact\tools\g25s\source_adapter.py", line 25, in original_figures
+    runpy.run_path(str(SOURCE), run_name='__main__')
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\L\AI\figpact\tools\g25s\runs\gallery-first\g25s-pie\original.py", line 26, in <module>
+    ax.pie(sizes, wedge_labels=labels)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programs\Python\Lib\site-packages\matplotlib\_api\deprecation.py", line 453, in wrapper
+    return func(*args, **kwargs)
+  File "D:\programs\Python\Lib\site-packages\matplotlib\__init__.py", line 1524, in inner
+    return func(
+        ax,
+        *map(cbook.sanitize_sequence, args),
+        **{k: cbook.sanitize_sequence(v) for k, v in kwargs.items()})
+TypeError: Axes.pie() got an unexpected keyword argument 'wedge_labels'

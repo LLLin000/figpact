@@ -1,0 +1,23 @@
+{
+  "id": "g25s-heatmap",
+  "local_path": "tools/g25s/gallery/raw/heatmap_image_annotated_heatmap.py",
+  "plot_types": [
+    "annotated heatmap",
+    "imshow",
+    "colorbar"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/images_contours_and_fields/image_annotated_heatmap.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "b341156a49ec682f1fa3a1424ae6675ff80efb24c395f929771731ef8482af52",
+  "source_review": {
+    "filesystem": "none; synthetic numpy harvest data only",
+    "network": "none",
+    "process": "none; imports matplotlib, numpy only",
+    "supports_deps": [
+      "matplotlib",
+      "numpy"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "images_contours_and_fields/image_annotated_heatmap.py"
+}

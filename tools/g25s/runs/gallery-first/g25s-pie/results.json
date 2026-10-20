@@ -1,0 +1,15 @@
+{
+  "id": "g25s-pie",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "f369451c39d1f1480335112ce02c0d5b658e86db9e5ae5eea974148a28233833",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [],
+  "baseline_error": "TypeError: Axes.pie() got an unexpected keyword argument 'wedge_labels'",
+  "source_sha256_after": "f369451c39d1f1480335112ce02c0d5b658e86db9e5ae5eea974148a28233833",
+  "source_unchanged": true
+}

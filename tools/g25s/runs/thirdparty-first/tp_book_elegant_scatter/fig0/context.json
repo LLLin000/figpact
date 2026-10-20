@@ -1,0 +1,507 @@
+{
+  "route": "overlay",
+  "scope": "fig0",
+  "revision": "0adef5661e3185b9908d4550b4640e450d71b7e9db8bd3508b267530ee0ce756",
+  "controls": [
+    {
+      "id": "fig0.ax[s676318f5c722].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s676318f5c722].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#0",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#1",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#2",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#3",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#4",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#5",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#6",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#7",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#8",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#9",
+        "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#10"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s676318f5c722",
+        "axis": "x",
+        "count": 11
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s676318f5c722",
+        "axis": "x"
+      },
+      "description": "x tick labels"
+    },
+    {
+      "id": "fig0.ax[s676318f5c722].tick.y.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s676318f5c722].tick.y.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#0",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#1",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#2",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#3",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#4",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#5",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#6",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#7",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#8",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#9",
+        "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#10"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "y tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s676318f5c722",
+        "axis": "y",
+        "count": 11
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s676318f5c722",
+        "axis": "y"
+      },
+      "description": "y tick labels"
+    },
+    {
+      "id": "fig0.ax[s676318f5c722].xlabel.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s676318f5c722].xlabel.fontsize",
+      "role": "axis.title",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s676318f5c722].xlabel.fontsize#0"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "xlabel",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s676318f5c722",
+        "axis": "x"
+      },
+      "selector": {
+        "kind": "axis_label",
+        "axes": "s676318f5c722",
+        "axis": "x",
+        "gid": null,
+        "text": "Height (m)"
+      },
+      "description": "xlabel"
+    },
+    {
+      "id": "fig0.ax[s676318f5c722].ylabel.fontsize",
+      "path": null,
+      "target_id": "fig0.ax[s676318f5c722].ylabel.fontsize",
+      "role": "axis.title",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig0.ax[s676318f5c722].ylabel.fontsize#0"
+      ],
+      "scope": "fig0",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "ylabel",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s676318f5c722",
+        "axis": "y"
+      },
+      "selector": {
+        "kind": "axis_label",
+        "axes": "s676318f5c722",
+        "axis": "y",
+        "gid": null,
+        "text": "Weight (kg)"
+      },
+      "description": "ylabel"
+    }
+  ],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\thirdparty-first\\tp_book_elegant_scatter\\fig0\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/runs/thirdparty-first/tp_book_elegant_scatter/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\thirdparty-first\\tp_book_elegant_scatter\\original.py",
+        "7439ef7b9ffb0c4f38634e82465faa37061a0ac2cba9a3c7933e5fd3b3154a22"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "0adef5661e3185b9908d4550b4640e450d71b7e9db8bd3508b267530ee0ce756",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig0::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          127.0,
+          127.0
+        ]
+      },
+      {
+        "id": "fig0::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          15.875,
+          13.969999999999999,
+          114.3,
+          111.76
+        ]
+      },
+      {
+        "id": "fig0::unregistered.0",
+        "type": "text",
+        "bounds_mm": null
+      },
+      {
+        "id": "fig0::unregistered.1",
+        "type": "collection",
+        "bounds_mm": [
+          25.435728607494557,
+          20.37759609973692,
+          111.20502593771381,
+          108.69388957407743
+        ]
+      },
+      {
+        "id": "fig0::unregistered.2",
+        "type": "collection",
+        "bounds_mm": [
+          25.391631385272333,
+          20.333498877514696,
+          111.24912315993603,
+          108.73798679629967
+        ]
+      },
+      {
+        "id": "fig0::unregistered.3",
+        "type": "collection",
+        "bounds_mm": [
+          25.391631385272333,
+          20.333498877514696,
+          111.24912315993603,
+          108.73798679629967
+        ]
+      },
+      {
+        "id": "fig0::unregistered.4",
+        "type": "collection",
+        "bounds_mm": [
+          26.72642373712753,
+          17.26847222222222,
+          109.91433080808083,
+          19.56152777777778
+        ]
+      },
+      {
+        "id": "fig0::unregistered.5",
+        "type": "collection",
+        "bounds_mm": [
+          19.202335858585858,
+          21.668291229369892,
+          21.49539141414142,
+          107.40319444444447
+        ]
+      },
+      {
+        "id": "fig0::unregistered.6",
+        "type": "legend",
+        "bounds_mm": [
+          74.93,
+          18.8595,
+          89.89516578504774,
+          34.113611111111105
+        ]
+      },
+      {
+        "id": "fig0::unregistered.7",
+        "type": "legend",
+        "bounds_mm": [
+          89.69375,
+          18.8595,
+          112.68780555555556,
+          34.113611111111105
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          6.114335351607478,
+          7.944555555555554,
+          11.702335351607479,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          17.554863636363667,
+          7.944555555555554,
+          23.142863636363668,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#10",
+        "type": "text",
+        "bounds_mm": [
+          120.5354931991693,
+          7.944555555555554,
+          126.09174319916929,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          28.99539192111983,
+          7.944555555555554,
+          34.583391921119826,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          40.435920205876016,
+          7.944555555555554,
+          46.02392020587602,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          51.86057349063221,
+          7.944555555555554,
+          57.48032349063221,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          63.3169767753884,
+          7.944555555555554,
+          68.9049767753884,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          74.74163006014459,
+          7.944555555555554,
+          80.3613800601446,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#7",
+        "type": "text",
+        "bounds_mm": [
+          86.18215834490078,
+          7.944555555555554,
+          91.80190834490078,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#8",
+        "type": "text",
+        "bounds_mm": [
+          97.65443662965691,
+          7.944555555555554,
+          103.21068662965692,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.x.fontsize#9",
+        "type": "text",
+        "bounds_mm": [
+          109.0790899144131,
+          7.944555555555554,
+          114.6670899144131,
+          11.500555555555554
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          8.928805555555556,
+          6.457400687914264,
+          13.405555555555557,
+          10.013400687914265
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          8.960555555555556,
+          17.344733256898415,
+          13.405555555555557,
+          20.900733256898416
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#10",
+        "type": "text",
+        "bounds_mm": [
+          6.674555555555556,
+          115.3307263777558,
+          13.405555555555557,
+          118.88672637775579
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          8.960555555555556,
+          28.232065825882565,
+          13.405555555555557,
+          31.788065825882565
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          8.960555555555556,
+          39.11939839486672,
+          13.405555555555557,
+          42.675398394866725
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          8.960555555555556,
+          50.00673096385087,
+          13.405555555555557,
+          53.562730963850875
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          8.928805555555556,
+          60.89406353283502,
+          13.405555555555557,
+          64.45006353283502
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          8.960555555555556,
+          71.78139610181918,
+          13.405555555555557,
+          75.33739610181918
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#7",
+        "type": "text",
+        "bounds_mm": [
+          8.928805555555556,
+          82.66872867080335,
+          13.405555555555557,
+          86.22472867080334
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#8",
+        "type": "text",
+        "bounds_mm": [
+          8.928805555555556,
+          93.55606123978748,
+          13.405555555555557,
+          97.11206123978748
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].tick.y.fontsize#9",
+        "type": "text",
+        "bounds_mm": [
+          6.706305555555556,
+          104.44339380877165,
+          13.405555555555557,
+          107.99939380877164
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].xlabel.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          55.610125000000004,
+          2.9774444444444423,
+          74.564875,
+          6.533444444444442
+        ]
+      },
+      {
+        "id": "figpact.style.fig0.ax[s676318f5c722].ylabel.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          1.7391944444444438,
+          52.60975,
+          5.295194444444445,
+          73.12025
+        ]
+      }
+    ]
+  }
+}

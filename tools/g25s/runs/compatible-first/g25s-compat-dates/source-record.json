@@ -1,0 +1,18 @@
+{
+  "id": "g25s-compat-dates",
+  "repository": "matplotlib/matplotlib",
+  "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+  "upstream_path": "ticks/date_demo_convert.py",
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/ticks/date_demo_convert.py",
+  "local_path": "tools/g25s/compatible/dates.py",
+  "sha256": "5185b99d04d94f4e181ebe3eed8f0d7951a10ff7eb3d46bad27d7a93f511fa6f",
+  "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+  "plot_types": [
+    "dates",
+    "custom tick formatter"
+  ],
+  "source_review": "Reviewed entire source: datetime/numpy/matplotlib only, embedded date data, no network/process/file IO.",
+  "independent_signoff": false,
+  "split": "DEVELOPMENT_EXPOSED",
+  "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families"
+}

@@ -1,0 +1,469 @@
+[
+  {
+    "id": "fig0.ax[sa3cad03053d4].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sa3cad03053d4",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            1946.6,
+            2021.4
+          ],
+          "ylim": [
+            0.0,
+            7.531649999999999
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Year",
+        "ylabel": "Number of people (billions)",
+        "title": "World population",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 10,
+          "major_yticks": 9
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 10,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "1940",
+          "loc": 1940.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "1950",
+          "loc": 1950.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "1960",
+          "loc": 1960.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "1970",
+          "loc": 1970.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1980",
+          "loc": 1980.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "1990",
+          "loc": 1990.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "2000",
+          "loc": 2000.0
+        },
+        {
+          "tick": 7,
+          "side": "label1",
+          "text": "2010",
+          "loc": 2010.0
+        },
+        {
+          "tick": 8,
+          "side": "label1",
+          "text": "2020",
+          "loc": 2020.0
+        },
+        {
+          "tick": 9,
+          "side": "label1",
+          "text": "2030",
+          "loc": 2030.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "sa3cad03053d4",
+      "axis": "x",
+      "count": 10
+    }
+  },
+  {
+    "id": "fig0.ax[sa3cad03053d4].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sa3cad03053d4",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            1946.6,
+            2021.4
+          ],
+          "ylim": [
+            0.0,
+            7.531649999999999
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Year",
+        "ylabel": "Number of people (billions)",
+        "title": "World population",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 10,
+          "major_yticks": 9
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 9,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "4",
+          "loc": 4.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "5",
+          "loc": 5.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "6",
+          "loc": 6.0
+        },
+        {
+          "tick": 7,
+          "side": "label1",
+          "text": "7",
+          "loc": 7.0
+        },
+        {
+          "tick": 8,
+          "side": "label1",
+          "text": "8",
+          "loc": 8.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "sa3cad03053d4",
+      "axis": "y",
+      "count": 9
+    }
+  },
+  {
+    "id": "fig0.ax[sa3cad03053d4].xlabel.fontsize",
+    "role": "axis.title",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "axis_label",
+      "axes": "sa3cad03053d4",
+      "axis": "x",
+      "gid": null,
+      "text": "Year"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            1946.6,
+            2021.4
+          ],
+          "ylim": [
+            0.0,
+            7.531649999999999
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Year",
+        "ylabel": "Number of people (billions)",
+        "title": "World population",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 10,
+          "major_yticks": 9
+        },
+        "curves": []
+      },
+      "text": "Year",
+      "gid": null
+    },
+    "current": {
+      "fontsize": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "sa3cad03053d4",
+      "axis": "x"
+    }
+  },
+  {
+    "id": "fig0.ax[sa3cad03053d4].ylabel.fontsize",
+    "role": "axis.title",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "axis_label",
+      "axes": "sa3cad03053d4",
+      "axis": "y",
+      "gid": null,
+      "text": "Number of people (billions)"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            1946.6,
+            2021.4
+          ],
+          "ylim": [
+            0.0,
+            7.531649999999999
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Year",
+        "ylabel": "Number of people (billions)",
+        "title": "World population",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 10,
+          "major_yticks": 9
+        },
+        "curves": []
+      },
+      "text": "Number of people (billions)",
+      "gid": null
+    },
+    "current": {
+      "fontsize": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "sa3cad03053d4",
+      "axis": "y"
+    }
+  }
+]

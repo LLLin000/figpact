@@ -1,0 +1,39 @@
+Traceback (most recent call last):
+  File "D:\L\AI\figpact\tools\g25s\run_stress.py", line 84, in child
+    figures = original_figures()
+  File "D:\L\AI\figpact\tools\g25s\source_adapter.py", line 25, in original_figures
+    runpy.run_path(str(SOURCE), run_name='__main__')
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\L\AI\figpact\tools\g25s\runs\gallery-first\g25s-heatmap\original.py", line 66, in <module>
+    ax.set_xticks(range(len(farmers)), labels=farmers,
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                  rotation=45, rotation_mode="xtick")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programs\Python\Lib\site-packages\matplotlib\axes\_base.py", line 74, in wrapper
+    return get_method(self)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\programs\Python\Lib\site-packages\matplotlib\axis.py", line 2220, in set_ticks
+    self.set_ticklabels(labels, minor=minor, **kwargs)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programs\Python\Lib\site-packages\matplotlib\axis.py", line 2141, in set_ticklabels
+    tick.label1._internal_update(kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "D:\programs\Python\Lib\site-packages\matplotlib\artist.py", line 1233, in _internal_update
+    return self._update_props(
+           ~~~~~~~~~~~~~~~~~~^
+        kwargs, "{cls.__name__}.set() got an unexpected keyword argument "
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "{prop_name!r}")
+        ^^^^^^^^^^^^^^^^
+  File "D:\programs\Python\Lib\site-packages\matplotlib\artist.py", line 1209, in _update_props
+    ret.append(func(v))
+               ~~~~^^^
+  File "D:\programs\Python\Lib\site-packages\matplotlib\text.py", line 313, in set_rotation_mode
+    _api.check_in_list(("anchor", "default"), rotation_mode=m)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programs\Python\Lib\site-packages\matplotlib\_api\__init__.py", line 144, in check_in_list
+    raise ValueError(msg)
+ValueError: 'xtick' is not a valid value for rotation_mode; supported values are 'anchor', 'default'

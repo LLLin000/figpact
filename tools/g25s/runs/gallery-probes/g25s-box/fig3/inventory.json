@@ -1,0 +1,3510 @@
+[
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d0087dc8879c6.l7f1d0a5c.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "0087dc8879c6740a",
+      "label": "_child0",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "0087dc8879c6740a",
+      "label": "_child0",
+      "gid": null,
+      "n": 11,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 11,
+      "label": "_child0"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d14e017789a51.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "14e017789a519367",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "14e017789a519367",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d1b6917a047f6.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "1b6917a047f68070",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "1b6917a047f68070",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d20655bec33b6.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "20655bec33b64f12",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "20655bec33b64f12",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d3556e2f4d3d0.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "3556e2f4d3d0543a",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "3556e2f4d3d0543a",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d3cecc650bcce.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "3cecc650bcce9fd8",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "3cecc650bcce9fd8",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d3dcfa7a42c94.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "3dcfa7a42c942539",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "3dcfa7a42c942539",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d3f3757f825e6.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "3f3757f825e6e90c",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "3f3757f825e6e90c",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d571b6e2d59f0.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "571b6e2d59f05e36",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "571b6e2d59f05e36",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d575a39f98200.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "575a39f982009eb5",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "575a39f982009eb5",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d6193fdfadbfe.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "6193fdfadbfe05a1",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "6193fdfadbfe05a1",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d88a5858f49bb.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "88a5858f49bbf420",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "88a5858f49bbf420",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d9036652bd171.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "9036652bd171011b",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "9036652bd171011b",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d91f3b117515e.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "91f3b117515e173b",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "91f3b117515e173b",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d9e1004cfa99d.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "9e1004cfa99d1c79",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "9e1004cfa99d1c79",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.d9f9eef4dd6f6.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "9f9eef4dd6f6f7ad",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "9f9eef4dd6f6f7ad",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.daea1097ec8c6.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "aea1097ec8c63959",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "aea1097ec8c63959",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.db0c06105861a.leafc3f3a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "b0c06105861a75b9",
+      "label": "_child7",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "b0c06105861a75b9",
+      "label": "_child7",
+      "gid": null,
+      "n": 11,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 11,
+      "label": "_child7"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.db77058c8b760.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "b77058c8b7604ae3",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "b77058c8b7604ae3",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.dc2e400953d1f.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "c2e400953d1f22a7",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "c2e400953d1f22a7",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.dc94e59fe226f.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "c94e59fe226f4ab9",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "c94e59fe226f4ab9",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.dd05567d56f0b.l4fcda8e4.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "d05567d56f0b1a28",
+      "label": "_child21",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "d05567d56f0b1a28",
+      "label": "_child21",
+      "gid": null,
+      "n": 11,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 11,
+      "label": "_child21"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.dde8caf55cf44.l33bfe2c5.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "de8caf55cf443d91",
+      "label": "_child14",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "de8caf55cf443d91",
+      "label": "_child14",
+      "gid": null,
+      "n": 11,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 11,
+      "label": "_child14"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].curve.de17fb4710505.l1baef315.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig3",
+    "selector": {
+      "kind": "curve",
+      "axes": "s509c2de610eb",
+      "data": "e17fb4710505ec8f",
+      "label": "_nolegend_",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "data": "e17fb4710505ec8f",
+      "label": "_nolegend_",
+      "gid": null,
+      "n": 2,
+      "line": {
+        "linestyle": "-",
+        "marker": "",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "n_points": 2,
+      "label": "_nolegend_"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig3",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s509c2de610eb",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "axis": "x",
+      "count": 4,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "4",
+          "loc": 4.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "axis": "x",
+      "count": 4
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig3",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s509c2de610eb",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "axis": "y",
+      "count": 10,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−5",
+          "loc": -5.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−4",
+          "loc": -4.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 7,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 8,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        },
+        {
+          "tick": 9,
+          "side": "label1",
+          "text": "4",
+          "loc": 4.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "axis": "y",
+      "count": 10
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].xlabel.fontsize",
+    "role": "axis.title",
+    "property": "fontsize",
+    "scope": "fig3",
+    "selector": {
+      "kind": "axis_label",
+      "axes": "s509c2de610eb",
+      "axis": "x",
+      "gid": null,
+      "text": "treatment"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "text": "treatment",
+      "gid": null
+    },
+    "current": {
+      "fontsize": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "axis": "x"
+    }
+  },
+  {
+    "id": "fig3.ax[s509c2de610eb].ylabel.fontsize",
+    "role": "axis.title",
+    "property": "fontsize",
+    "scope": "fig3",
+    "selector": {
+      "kind": "axis_label",
+      "axes": "s509c2de610eb",
+      "axis": "y",
+      "gid": null,
+      "text": "response"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            1,
+            1
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0
+          ],
+          "height_ratios": [
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.5,
+            4.5
+          ],
+          "ylim": [
+            -4.158288208184435,
+            3.6156986430397953
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "treatment",
+        "ylabel": "response",
+        "title": "",
+        "counts": {
+          "lines": 28,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 10
+        },
+        "curves": [
+          "0087dc8879c6740a:_child0",
+          "14e017789a519367:_nolegend_",
+          "1b6917a047f68070:_nolegend_",
+          "20655bec33b64f12:_nolegend_",
+          "3556e2f4d3d0543a:_nolegend_",
+          "3cecc650bcce9fd8:_nolegend_",
+          "3dcfa7a42c942539:_nolegend_",
+          "3f3757f825e6e90c:_nolegend_",
+          "571b6e2d59f05e36:_nolegend_",
+          "575a39f982009eb5:_nolegend_",
+          "6193fdfadbfe05a1:_nolegend_",
+          "88a5858f49bbf420:_nolegend_",
+          "9036652bd171011b:_nolegend_",
+          "91f3b117515e173b:_nolegend_",
+          "9e1004cfa99d1c79:_nolegend_",
+          "9f9eef4dd6f6f7ad:_nolegend_",
+          "aea1097ec8c63959:_nolegend_",
+          "b0c06105861a75b9:_child7",
+          "b77058c8b7604ae3:_nolegend_",
+          "c2e400953d1f22a7:_nolegend_",
+          "c94e59fe226f4ab9:_nolegend_",
+          "d05567d56f0b1a28:_child21",
+          "de8caf55cf443d91:_child14",
+          "e17fb4710505ec8f:_nolegend_"
+        ]
+      },
+      "text": "response",
+      "gid": null
+    },
+    "current": {
+      "fontsize": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s509c2de610eb",
+      "axis": "y"
+    }
+  }
+]

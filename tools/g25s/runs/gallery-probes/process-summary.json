@@ -1,0 +1,86 @@
+[
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-heatmap",
+    "elapsed_seconds": 1.1,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-contour",
+    "elapsed_seconds": 28.68,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-quiver",
+    "elapsed_seconds": 9.26,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-box",
+    "elapsed_seconds": 80.49,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-hist",
+    "elapsed_seconds": 31.2,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-pie",
+    "elapsed_seconds": 0.99,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-polar",
+    "elapsed_seconds": 15.27,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-3d",
+    "elapsed_seconds": 11.27,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-twin",
+    "elapsed_seconds": 10.42,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-inset",
+    "elapsed_seconds": 4.12,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-log",
+    "elapsed_seconds": 72.12,
+    "original_source_unchanged": true
+  },
+  {
+    "exit_code": 0,
+    "timed_out": false,
+    "id": "g25s-stack",
+    "elapsed_seconds": 9.79,
+    "original_source_unchanged": true
+  }
+]

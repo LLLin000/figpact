@@ -1,0 +1,21 @@
+{
+  "id": "g25s-polar",
+  "local_path": "tools/g25s/gallery/raw/polar_polar_demo.py",
+  "plot_types": [
+    "polar line"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/pie_and_polar_charts/polar_demo.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "8f191de521cb284609ed0610d64784e5d3ea0e0f63c7b3e08bf2eeb42649dfa7",
+  "source_review": {
+    "filesystem": "none; synthetic arange data",
+    "network": "none",
+    "process": "none; imports matplotlib.pyplot, numpy only",
+    "supports_deps": [
+      "matplotlib",
+      "numpy"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "pie_and_polar_charts/polar_demo.py"
+}

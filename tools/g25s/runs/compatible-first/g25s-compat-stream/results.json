@@ -1,0 +1,134 @@
+{
+  "id": "g25s-compat-stream",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "6ece46ec6651d818c4fbe1a6758bfaec57d0d74d6a1d0a32f20365447b0e1e4f",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [
+    {
+      "scope": "fig0",
+      "axes_count": 8,
+      "projections": [
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear",
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "AxesImage",
+        "FancyArrowPatch",
+        "Figure",
+        "Line2D",
+        "LineCollection",
+        "QuadMesh",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick",
+        "_ColorbarSpine"
+      ],
+      "probes": [
+        {
+          "name": "axis.tick:change",
+          "target_id": "fig0.ax[s1674fd6cf26c].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.5,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "PASS",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": true,
+          "local_problems": [
+            "DRAFT_REFUSED: 未知/不可量 1 条，失败关闭"
+          ],
+          "qa_delta": {
+            "ambiguous": [
+              "tick:unidentified"
+            ],
+            "eligible": false,
+            "inherited": [
+              "tick:unidentified"
+            ],
+            "new": [],
+            "reason": "未知/不可量 1 条，失败关闭",
+            "unmeasured": [
+              "tick:unidentified"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:no-op",
+          "target_id": "fig0.ax[s1674fd6cf26c].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": 10.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "FAIL",
+          "figure_verification_state": "FAIL",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": true,
+          "local_problems": [
+            "required targets unchanged: {'fig0.ax[s1674fd6cf26c].tick.x.fontsize.fontsize': None}"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        },
+        {
+          "name": "axis.tick:out-of-range",
+          "target_id": "fig0.ax[s1674fd6cf26c].tick.x.fontsize",
+          "base_value": 10.0,
+          "requested_value": -1.0,
+          "boundary": "inspect_candidate",
+          "local_edit_state": "ERROR",
+          "figure_verification_state": "ERROR",
+          "source_commit_state": "NOT_WRITTEN",
+          "science_unchanged": false,
+          "local_problems": [
+            "OUT_OF_RANGE: 'fig0.ax[s1674fd6cf26c].tick.x.fontsize' value -1.0 outside [0.5, 100.0] for 'fontsize'"
+          ],
+          "qa_delta": {
+            "eligible": false,
+            "inherited": [],
+            "new": [],
+            "reason": "unmeasured: no verified QA pair",
+            "unmeasured": [
+              "unmeasured: no verified QA pair"
+            ],
+            "worsened": []
+          },
+          "official_overlay_absent": true
+        }
+      ],
+      "inventory_count": 14,
+      "eligible_roles": [
+        "axis.tick"
+      ],
+      "context_error": "InspectorError: 快照存在阻塞级未测量数据，拒绝出帧：fig0::unregistered.373 的几何无法测量；fig0::unregistered.375 的几何无法测量"
+    }
+  ],
+  "original_figure_count": 1,
+  "source_sha256_after": "6ece46ec6651d818c4fbe1a6758bfaec57d0d74d6a1d0a32f20365447b0e1e4f",
+  "source_unchanged": true
+}

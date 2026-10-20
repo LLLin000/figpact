@@ -1,0 +1,813 @@
+{
+  "kind": "G25-S external-source DEVELOPMENT stress, not independent model evaluation",
+  "recorded_at_utc": "2026-10-20T03:23:03.686726+00:00",
+  "model_called": false,
+  "g25_status": "BLOCKED",
+  "certified_unseen_families": 0,
+  "frozen_gold_cases": 0,
+  "source_records": [
+    {
+      "id": "g25s-heatmap",
+      "local_path": "tools/g25s/gallery/raw/heatmap_image_annotated_heatmap.py",
+      "plot_types": [
+        "annotated heatmap",
+        "imshow",
+        "colorbar"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/images_contours_and_fields/image_annotated_heatmap.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "b341156a49ec682f1fa3a1424ae6675ff80efb24c395f929771731ef8482af52",
+      "source_review": {
+        "filesystem": "none; synthetic numpy harvest data only",
+        "network": "none",
+        "process": "none; imports matplotlib, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "images_contours_and_fields/image_annotated_heatmap.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-contour",
+      "local_path": "tools/g25s/gallery/raw/contour_contour_demo.py",
+      "plot_types": [
+        "contour",
+        "contourf",
+        "colorbar"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/images_contours_and_fields/contour_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "599394632d46acecef548955d16f3acd509f922a9f6dcb559977b482b994c7b1",
+      "source_review": {
+        "filesystem": "none; synthetic numpy function",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "images_contours_and_fields/contour_demo.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-quiver",
+      "local_path": "tools/g25s/gallery/raw/quiver_quiver_demo.py",
+      "plot_types": [
+        "quiver"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/images_contours_and_fields/quiver_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "f17029f69cf733d6f847ac42d59329aac4a7c653463a7357234702f20b2f1bd6",
+      "source_review": {
+        "filesystem": "none; meshgrid synthetic data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "images_contours_and_fields/quiver_demo.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-box",
+      "local_path": "tools/g25s/gallery/raw/box_boxplot_demo.py",
+      "plot_types": [
+        "boxplot"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/statistics/boxplot_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "3bd17b82108953d7c4b59768aac481044cc572b3e7f358f5ef73cf4418fe75e2",
+      "source_review": {
+        "filesystem": "none; numpy random data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, matplotlib.patches, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "statistics/boxplot_demo.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-hist",
+      "local_path": "tools/g25s/gallery/raw/hist_hist.py",
+      "plot_types": [
+        "histogram",
+        "stacked histogram"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/statistics/hist.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "f53afc840701f120446118be16e0e9767648d3107e1c8f37288ff70498224237",
+      "source_review": {
+        "filesystem": "none; numpy random data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, matplotlib.colors, matplotlib.ticker, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "statistics/hist.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-pie",
+      "local_path": "tools/g25s/gallery/raw/pie_pie_features.py",
+      "plot_types": [
+        "pie"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/pie_and_polar_charts/pie_features.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "f369451c39d1f1480335112ce02c0d5b658e86db9e5ae5eea974148a28233833",
+      "source_review": {
+        "filesystem": "none; inline literal sizes",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot only",
+        "supports_deps": [
+          "matplotlib"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "pie_and_polar_charts/pie_features.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-polar",
+      "local_path": "tools/g25s/gallery/raw/polar_polar_demo.py",
+      "plot_types": [
+        "polar line"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/pie_and_polar_charts/polar_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "8f191de521cb284609ed0610d64784e5d3ea0e0f63c7b3e08bf2eeb42649dfa7",
+      "source_review": {
+        "filesystem": "none; synthetic arange data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "pie_and_polar_charts/polar_demo.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-3d",
+      "local_path": "tools/g25s/gallery/raw/mplot3d_surface3d.py",
+      "plot_types": [
+        "3D surface"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/mplot3d/surface3d.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "c1404430c73853200543e33774c3a6338994a1547f5b1240c0808ec68bd35978",
+      "source_review": {
+        "filesystem": "none; synthetic meshgrid data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, matplotlib.ticker, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "mplot3d/surface3d.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-twin",
+      "local_path": "tools/g25s/gallery/raw/twin_two_scales.py",
+      "plot_types": [
+        "twin axes",
+        "two y-scales"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/subplots_axes_and_figures/two_scales.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "f4285aef5b2ea143cd414588e37f09bcbf3878d04976b83d2f2f1e402563435a",
+      "source_review": {
+        "filesystem": "none; synthetic exp data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "subplots_axes_and_figures/two_scales.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-inset",
+      "local_path": "tools/g25s/gallery/raw/inset_zoom_inset_axes.py",
+      "plot_types": [
+        "inset axes",
+        "zoom effect"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/subplots_axes_and_figures/zoom_inset_axes.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "c4a33efd6de739b533a68d9ebe9656d0476c661093937863038fb931b90a51b6",
+      "source_review": {
+        "filesystem": "reads matplotlib-bundled sample data file axes_grid/bivariate_normal.npy via cbook.get_sample_data; no user files, no writes",
+        "network": "none",
+        "process": "none; imports matplotlib.cbook, matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "subplots_axes_and_figures/zoom_inset_axes.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-log",
+      "local_path": "tools/g25s/gallery/raw/log_log_demo.py",
+      "plot_types": [
+        "log scale"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/scales/log_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "fb2a9ce5bbc46c6f367e4e76872be2238cb0b532dceedce501657b6356f093fb",
+      "source_review": {
+        "filesystem": "none; numpy logspace synthetic data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "scales/log_demo.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-stack",
+      "local_path": "tools/g25s/gallery/raw/stack_stackplot_demo.py",
+      "plot_types": [
+        "stacked area",
+        "stackplot"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/lines_bars_and_markers/stackplot_demo.py",
+      "repository": "matplotlib/matplotlib",
+      "sha256": "1157b7c6d6d4da271615c45e9d131a999f33d37169a6ef1e3e186638bb69b2b7",
+      "source_review": {
+        "filesystem": "none; synthetic sine data",
+        "network": "none",
+        "process": "none; imports matplotlib.pyplot, matplotlib.ticker, numpy only",
+        "supports_deps": [
+          "matplotlib",
+          "numpy"
+        ]
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "lines_bars_and_markers/stackplot_demo.py",
+      "commit": "d7a19fbf48918c1a99f771c954c49c14ea95fc5d",
+      "independent_signoff": false,
+      "manifest": "tools/g25s/gallery/manifest.json"
+    },
+    {
+      "id": "g25s-compat-heatmap",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "images_contours_and_fields/image_annotated_heatmap.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/images_contours_and_fields/image_annotated_heatmap.py",
+      "local_path": "tools/g25s/compatible/heatmap.py",
+      "sha256": "c8f484ff44c02dfcd8415a38cc743b8fd6e7099c9fc1b8eacc1c0a29fbacaecc",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "heatmap",
+        "colorbar",
+        "annotation"
+      ],
+      "source_review": "Reviewed entire source: numpy/matplotlib only, seeded embedded data, no network/process/file IO; unchanged upstream original.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families",
+      "manifest": "tools/g25s/compatible/manifest.json"
+    },
+    {
+      "id": "g25s-compat-pie",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "pie_and_polar_charts/pie_features.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/pie_and_polar_charts/pie_features.py",
+      "local_path": "tools/g25s/compatible/pie.py",
+      "sha256": "d4ac777b57cdb0a7bfe78fa3c072f7dcf9bd3a731faa30d240e7b6168976f343",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "pie",
+        "wedge",
+        "legend"
+      ],
+      "source_review": "Reviewed entire source: pyplot only, embedded data, no network/process/file IO; unchanged upstream original.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families",
+      "manifest": "tools/g25s/compatible/manifest.json"
+    },
+    {
+      "id": "g25s-compat-violin",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "statistics/violinplot.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/statistics/violinplot.py",
+      "local_path": "tools/g25s/compatible/violin.py",
+      "sha256": "1063d3d51c2047213c07e3dbd280703afa70a564970aeaac02aa02e1986e1b2d",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "violin",
+        "statistics"
+      ],
+      "source_review": "Reviewed entire source: numpy/matplotlib only, seeded random data, no network/process/file IO; unchanged upstream original.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families",
+      "manifest": "tools/g25s/compatible/manifest.json"
+    },
+    {
+      "id": "g25s-compat-stream",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "images_contours_and_fields/plot_streamplot.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/images_contours_and_fields/plot_streamplot.py",
+      "local_path": "tools/g25s/compatible/stream.py",
+      "sha256": "6ece46ec6651d818c4fbe1a6758bfaec57d0d74d6a1d0a32f20365447b0e1e4f",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "streamplot",
+        "vector field",
+        "colorbar"
+      ],
+      "source_review": "Reviewed entire source: numpy/matplotlib only, embedded vector fields including intentional NaN/masking, no network/process/file IO.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families",
+      "manifest": "tools/g25s/compatible/manifest.json"
+    },
+    {
+      "id": "g25s-compat-sankey",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "specialty_plots/sankey_basics.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/specialty_plots/sankey_basics.py",
+      "local_path": "tools/g25s/compatible/sankey.py",
+      "sha256": "4cd0d6cc8774bafe4d46bcfd3631ab6ffb1d629efbb408b5468a6628c87b6c38",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "Sankey",
+        "patches",
+        "labels"
+      ],
+      "source_review": "Reviewed entire source: pyplot/matplotlib.sankey only, embedded flows, no network/process/file IO.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families",
+      "manifest": "tools/g25s/compatible/manifest.json"
+    },
+    {
+      "id": "g25s-compat-dates",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "ticks/date_demo_convert.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/ticks/date_demo_convert.py",
+      "local_path": "tools/g25s/compatible/dates.py",
+      "sha256": "5185b99d04d94f4e181ebe3eed8f0d7951a10ff7eb3d46bad27d7a93f511fa6f",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "dates",
+        "custom tick formatter"
+      ],
+      "source_review": "Reviewed entire source: datetime/numpy/matplotlib only, embedded date data, no network/process/file IO.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families",
+      "manifest": "tools/g25s/compatible/manifest.json"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_elegant_scatter",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/elegant_scatter.py",
+      "plot_types": [
+        "statistical",
+        "uncertainty-scatter",
+        "complex legends"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/ornaments/elegant-scatter.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "7439ef7b9ffb0c4f38634e82465faa37061a0ac2cba9a3c7933e5fd3b3154a22",
+      "source_review": {
+        "dependency": "numpy + matplotlib only; no third-party/stat IO libs.",
+        "filesystem": "Upstream plt.savefig(../../figures/...) relative write + plt.show(); contained/denied by parent harness.",
+        "network": "No sockets/requests.",
+        "process": "No subprocess/shell.",
+        "risks": "Seeded RNG scatter (seed 1); custom font families fall back if absent; double legend artists via add_artist."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/ornaments/elegant-scatter.py",
+      "manifest": "tools/g25s/thirdparty/manifest.json"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_annotation_direct",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/annotation_direct.py",
+      "plot_types": [
+        "annotated",
+        "arrows",
+        "path-effects"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/ornaments/annotation-direct.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "0eb5a0904dd333c6d2012028e2a4638370682728bd606a2cea5d5bc2a2a76c55",
+      "source_review": {
+        "dependency": "numpy + matplotlib (patheffects) only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "Seeded scatter; arrow/style annotations only, no TeX."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/ornaments/annotation-direct.py",
+      "manifest": "tools/g25s/thirdparty/manifest.json"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_annotation_zoom",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/annotation_zoom.py",
+      "plot_types": [
+        "multi-panel",
+        "gridspec",
+        "zoom-inset",
+        "annotated"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/ornaments/annotation-zoom.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "6fe060a8bc6a871656a12b7daf43a0beef04cdd834338461eb2581306ea0b989",
+      "source_review": {
+        "dependency": "numpy + matplotlib (GridSpec, Rectangle, ConnectionPatch) only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "Creates 1 main + 5 zoom subplots per run; seeded RNG; ConnectionPatch across axes."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/ornaments/annotation-zoom.py",
+      "manifest": "tools/g25s/thirdparty/manifest.json"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_complex_layout",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/complex_layout.py",
+      "plot_types": [
+        "publication multi-panel",
+        "gridspec"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/layout/complex-layout.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "7be7484372566f39e36fcf3429b46e4b3f6ffa52ab5b2da211c5a5527dfaa134",
+      "source_review": {
+        "dependency": "numpy + matplotlib gridspec only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "7x7 GridSpec multi-axes figure; named font families (Roboto Condensed/Roboto) fall back if missing; no TeX/data IO."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/layout/complex-layout.py",
+      "manifest": "tools/g25s/thirdparty/manifest.json"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_scales_log_log",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/scales_log_log.py",
+      "plot_types": [
+        "multi-panel",
+        "log-scales",
+        "grid"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/scales-projections/scales-log-log.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "6e3abd675a85685d2b7d6d6113d95b798a2ed0deb9f435b7ae267c8b2088dc41",
+      "source_review": {
+        "dependency": "numpy + matplotlib (ticker) only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "2x2 linear/log scale comparison incl. 10**X over/underflow-prone range (runtime warning territory, no crash); math-text labels only, usetex off."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/scales-projections/scales-log-log.py",
+      "manifest": "tools/g25s/thirdparty/manifest.json"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_polar_patterns",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/polar_patterns.py",
+      "plot_types": [
+        "non-Cartesian",
+        "polar",
+        "multi-panel"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/scales-projections/polar-patterns.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "2707bddeb12353b98ba1498c177060dff9e0d6a90a7a79f6ae8f660ec29706bc",
+      "source_review": {
+        "dependency": "numpy + matplotlib only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "6 polar subplots; math formula comments only; no TeX/data IO."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/scales-projections/polar-patterns.py",
+      "manifest": "tools/g25s/thirdparty/manifest.json"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_domain_coloring",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/domain_coloring.py",
+      "plot_types": [
+        "image",
+        "mesh",
+        "contour"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/showcases/domain-coloring.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "1dd1c6fbfabaae2fb3b767c397bd5be3e508313a086341200dae1e131c58cd86",
+      "source_review": {
+        "dependency": "numpy + matplotlib (patheffects) only.",
+        "filesystem": "Upstream 2x savefig (600dpi png + pdf) + show; heaviest IO of the set, still harness-contained.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "2048x2048 complex mesh (~32M complex) is the heaviest compute/memory item (slow, not unsafe); division Z+1/Z singular at origin (inf/nan handled by normalize); no TeX/data IO."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/showcases/domain-coloring.py",
+      "manifest": "tools/g25s/thirdparty/manifest.json"
+    },
+    {
+      "commit": "f65e2b11744ec89d4bcf269a92b8b977de2d0279",
+      "id": "tp_cheat_collection_reference",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.matplotlib-cheatsheet.txt",
+      "local_path": "tools/g25s/thirdparty/sources/collection_reference.py",
+      "plot_types": [
+        "collections",
+        "reference-sheet"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/matplotlib-cheatsheet/f65e2b11744ec89d4bcf269a92b8b977de2d0279/reference-collection.py",
+      "repository": "rougier/matplotlib-cheatsheet",
+      "sha256": "cc6b9f6f4bfff3b4a70c339a2e3481fca3b4b14ac2548e1ddcec19af8ba0d71d",
+      "source_review": {
+        "dependency": "numpy + matplotlib (collections, path) only.",
+        "filesystem": "Upstream savefig png+pdf to CWD + show; harness-contained.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "Long single-axes catalogue of 8 collection types; no TeX/data IO."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "reference-collection.py",
+      "manifest": "tools/g25s/thirdparty/manifest.json"
+    }
+  ],
+  "source_count": 26,
+  "unique_repository_upstream_paths": 24,
+  "totals": {
+    "sources": 26,
+    "baseline_ok": 23,
+    "baseline_failed": 3,
+    "figures": 51,
+    "source_unchanged": 26,
+    "context_ok": 34,
+    "context_failed": 17,
+    "zero_inventory_figures": 14,
+    "candidate_probes": 129,
+    "change_probes": 55,
+    "local_PASS": 47,
+    "changes_local_pass": 47,
+    "changes_whole_pass": 37,
+    "changes_local_pass_whole_fail": 10,
+    "changes_science_unchanged": 48,
+    "official_overlay_absent": 129,
+    "no-op_probes": 37,
+    "local_FAIL": 33,
+    "no-op_local_pass": 0,
+    "out-of-range_probes": 37,
+    "local_ERROR": 37,
+    "out-of-range_local_pass": 0,
+    "plan_negatives": 130,
+    "plan_negatives_rejected": 130,
+    "candidate_uncaught_errors": 12
+  },
+  "runs": [
+    {
+      "name": "gallery-probes",
+      "counts": {
+        "sources": 12,
+        "baseline_ok": 10,
+        "baseline_failed": 2,
+        "figures": 27,
+        "source_unchanged": 12,
+        "context_ok": 19,
+        "context_failed": 8,
+        "zero_inventory_figures": 0,
+        "candidate_probes": 93,
+        "change_probes": 39,
+        "local_PASS": 32,
+        "changes_local_pass": 32,
+        "changes_whole_pass": 26,
+        "changes_local_pass_whole_fail": 6,
+        "changes_science_unchanged": 33,
+        "official_overlay_absent": 93,
+        "no-op_probes": 27,
+        "local_FAIL": 22,
+        "no-op_local_pass": 0,
+        "out-of-range_probes": 27,
+        "local_ERROR": 27,
+        "out-of-range_local_pass": 0,
+        "plan_negatives": 95,
+        "plan_negatives_rejected": 95,
+        "candidate_uncaught_errors": 12
+      }
+    },
+    {
+      "name": "compatible-first",
+      "counts": {
+        "sources": 6,
+        "baseline_ok": 6,
+        "baseline_failed": 0,
+        "figures": 17,
+        "source_unchanged": 6,
+        "context_ok": 9,
+        "context_failed": 8,
+        "zero_inventory_figures": 11,
+        "plan_negatives": 15,
+        "plan_negatives_rejected": 15,
+        "candidate_probes": 20,
+        "change_probes": 8,
+        "local_PASS": 8,
+        "changes_local_pass": 8,
+        "changes_whole_pass": 4,
+        "changes_local_pass_whole_fail": 4,
+        "changes_science_unchanged": 8,
+        "official_overlay_absent": 20,
+        "no-op_probes": 6,
+        "local_FAIL": 6,
+        "no-op_local_pass": 0,
+        "out-of-range_probes": 6,
+        "local_ERROR": 6,
+        "out-of-range_local_pass": 0
+      }
+    },
+    {
+      "name": "thirdparty-first",
+      "counts": {
+        "sources": 8,
+        "baseline_ok": 7,
+        "baseline_failed": 1,
+        "figures": 7,
+        "source_unchanged": 8,
+        "context_ok": 6,
+        "context_failed": 1,
+        "zero_inventory_figures": 3,
+        "plan_negatives": 20,
+        "plan_negatives_rejected": 20,
+        "candidate_probes": 16,
+        "change_probes": 8,
+        "local_FAIL": 5,
+        "changes_local_pass": 7,
+        "changes_whole_pass": 7,
+        "changes_local_pass_whole_fail": 0,
+        "changes_science_unchanged": 7,
+        "official_overlay_absent": 16,
+        "no-op_probes": 4,
+        "no-op_local_pass": 0,
+        "out-of-range_probes": 4,
+        "local_ERROR": 4,
+        "out-of-range_local_pass": 0,
+        "local_PASS": 7
+      }
+    }
+  ],
+  "earlier_harness_run": {
+    "path": "gallery-first",
+    "excluded_from_probe_totals": true,
+    "reason": "descriptor current dict was wrongly treated as scalar; edit probes skipped. Raw evidence retained. Product unchanged."
+  },
+  "runtime_versions": {
+    "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+    "matplotlib": "3.10.8",
+    "numpy": "2.3.3",
+    "scipy": "1.16.3"
+  },
+  "post_run_engine_python_sha256": {
+    "figpact/__init__.py": "908d5441bea1feec0a2fe7cad0c8272b2442992893b46599c860e70903fb8d7e",
+    "figpact/__main__.py": "5dba79872d0d058be61443cb7b362be6481fc7cc1353dc3dbcdcf5266fbb940a",
+    "figpact/agent_api.py": "20c38500b54396092824fdea60009803bfce4fc253be1e31ff4eb48c94581d4c",
+    "figpact/authoring.py": "14530e52afaabde2d22a64d5b69639804e04fa3142f663e7d1ea289ae590c2ff",
+    "figpact/change_audit.py": "c62df0c038f65ebef3ce6187ca4bede7a15eb2acef1241eb90846c49f91dba9f",
+    "figpact/cli.py": "a4f74d8c2cc305ad3573aa5e08234a3826206a8674c0d74607de69d45391d1ca",
+    "figpact/config.py": "59abf8307a93dd8f03c781f52b006a6af5dfe4219eb22ea743619ad20d6947df",
+    "figpact/contracts.py": "c260968928491bfff92a9ffcc3b43db10adb209f4f008099b55b6041b4ae783d",
+    "figpact/edit_plan.py": "6fbf763c5fb936e250467824234e6ac48d2463238ecdae2199b9c231570adfa5",
+    "figpact/effects.py": "e382cb7821a0b41cecd2ddb503ee53f2b6ce08dc9358041a3b5ae787e7a67bc4",
+    "figpact/final_size.py": "d9446bc8b0c95a673191989f46a1b2dcd4a1494787e9e43bf9542bcc4b2534b5",
+    "figpact/geometry.py": "e58934816a860876f667e991ccf4a7bb1b976c3e43d9201dd4b7ee9b33c10754",
+    "figpact/history.py": "7c0a61b2d9e6150cd4018641a52f514f02a2146fd3eae99cdce25fa246fed98b",
+    "figpact/hub.py": "cc97780850983ada6c9653888d89833ea90ed8a0c95e2420948507f941e86494",
+    "figpact/init_contract.py": "68948545fcd41d462b5f7c7aa348c6502dc2d50e6250bbc1d4ece5a09b44248a",
+    "figpact/inspector.py": "6a8084a125aa9ac071b7b0ca07cfc92412d85e516417eb07dc28f69853d99384",
+    "figpact/inspector_server.py": "992194704a7d0d30e58aa9b67917eb43df0fe93843b36076fe1b5e8519689b12",
+    "figpact/inspector_style.py": "75fdb19175d8bb8c0107beb81d3f4047dd3359b47d01b25948f2f9304d9586fe",
+    "figpact/intents.py": "8a7f2e1aaa50eb3a6126d1dc5088d309f638951a3eece2665c53ae8b8ddd2012",
+    "figpact/inventory.py": "12087b5e81acc585925134e230ef8cc4f73abb1224297f7e1266f2e22b5496ea",
+    "figpact/params.py": "62526da07f393803823a5db5e01c8238b3f6d4d204c31e1556a537bd2e922592",
+    "figpact/patch.py": "b2fc1b9636989fbd09d8cef32e6c4541f5bbd59d712b060027607fbc2add9dff",
+    "figpact/plan_context.py": "dbed3fec2fd08cd0a65033ad7695c47ff824a55260bf3f0df4080fb96f2f236e",
+    "figpact/plate.py": "7827c76b9cb8abe149c0d10e1319571cc0e3eb4f6fc22c2e3970d4a2dd0489fc",
+    "figpact/preview.py": "7f12950efa4159db5f4c2aaa849991eddca37afb687b31ac0c25dcf7e7f9726a",
+    "figpact/publish.py": "027cdee95b87b5a6e36c9a23accaa853caee479b3d1e9e33b9eeff6ca07a9dfe",
+    "figpact/python_native.py": "c5427c22326c536a7530aefcea4919b18a6058063ce16aa6b6c775b9a786a00a",
+    "figpact/qa.py": "adc077c9ca4395ea0e4c029b8a1a693556def31bf646a7f6023e6b76ccadebf2",
+    "figpact/registry.py": "73d46cb112bba473a5b12bcf7910c5f83b96874bde23a8ad6b954fd30304f87a",
+    "figpact/relations.py": "4f4cda3b67b0234e576bb62b06f0ea30283efd1523f1dd83c52dcd211394d8b4",
+    "figpact/roles.py": "f3f5c753e06192ad2537a79b273ab8c4264023a1f6c7ad6d322f179f6e59e36a",
+    "figpact/runtime.py": "e1e14e4f55b2cdb07010dd9857b8285c278b39cb9001e91fa77b6879799a83ce",
+    "figpact/scene.py": "ca59f70c586bfd9a8855d4f2e3e29cce384d02d23d8f6215e5eea687411a2766",
+    "figpact/science.py": "25089df2fce469998f6bbae1137a4b3bdb227c6d04ba375071c72b0ff8aa2f0f",
+    "figpact/session.py": "3c0e8408b3e63ff2f3abe0c48669e59763b5e0516445a780f3b9407a86c16b4e",
+    "figpact/source_writes.py": "916bc2095576c0231d8362715564bdcdaba2f01e6cbc119ffa4af023393481fa",
+    "figpact/style_identity.py": "2216348104b46ff5fa3dbc5013525df9b6e33e7cef4dd8ae9ad144498824b30f",
+    "figpact/style_overlay.py": "11edda8d729234d8ec9589b12816a114d114a8f15e88da5402332f98066ad838",
+    "figpact/transform.py": "e8128b2c9cc114e3c14ad01a936fb74e32351ae073d0d2b58d7f0f3e6c069e79",
+    "figpact/units.py": "4b1f41bcca3af43927e29c1ff0042818548623690675e9aef59a5a7bdd57697d"
+  },
+  "manifest_sha256": {
+    "tools/g25s/gallery/manifest.json": "8027e8b3f530cfb491b3cc696f6f1522eac0c08aa4e2803e330df59ce90cc992",
+    "tools/g25s/compatible/manifest.json": "010e1386650440cb67bfc0763a14be6107c3e041a7071cee64f10b2207fedcbd",
+    "tools/g25s/thirdparty/manifest.json": "1ee3326e19a5f2ccf3b64bbb016076e8c5072a7b084d7cf9bf8c847723b51b51"
+  },
+  "asset_hashes": {
+    "D:\\programs\\Python\\Lib\\site-packages\\matplotlib\\mpl-data\\sample_data\\axes_grid\\bivariate_normal.npy": {
+      "sha256": "0e9599f6e74087aa2ca58aa77846b6ec3e8491180e445c07a2c69c65756ef7c5",
+      "timing": "post-run installed asset snapshot; used by inset original"
+    }
+  },
+  "limitations": [
+    "post-run engine/dependency snapshot, not a pre-run statistical freeze",
+    "no OS-level sandbox, only audited reviewed scripts and guarded child processes",
+    "one target per eligible role per original Figure, not all artists",
+    "figure ordinals are not persistent semantic scope identity",
+    "all sources development-exposed; no independent gold signoff; no model/GUI accuracy measured",
+    "transitive native dependency closure not hashed"
+  ]
+}

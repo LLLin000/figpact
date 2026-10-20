@@ -1,0 +1,1560 @@
+{
+  "route": "overlay",
+  "scope": "fig3",
+  "revision": "0a2c3e25c99f50d8c0e2a964e68079a01b0b8d385a8d51886ddd0cc31963df3a",
+  "controls": [
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d0087dc8879c6.l7f1d0a5c.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d0087dc8879c6.l7f1d0a5c.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d0087dc8879c6.l7f1d0a5c.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _child0",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 11,
+        "label": "_child0"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "0087dc8879c6740a",
+        "label": "_child0",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _child0"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d14e017789a51.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d14e017789a51.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d14e017789a51.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "14e017789a519367",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d1b6917a047f6.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d1b6917a047f6.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d1b6917a047f6.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "1b6917a047f68070",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d20655bec33b6.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d20655bec33b6.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d20655bec33b6.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "20655bec33b64f12",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d3556e2f4d3d0.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d3556e2f4d3d0.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d3556e2f4d3d0.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "3556e2f4d3d0543a",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d3cecc650bcce.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d3cecc650bcce.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d3cecc650bcce.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "3cecc650bcce9fd8",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d3dcfa7a42c94.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d3dcfa7a42c94.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d3dcfa7a42c94.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "3dcfa7a42c942539",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d3f3757f825e6.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d3f3757f825e6.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d3f3757f825e6.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "3f3757f825e6e90c",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d571b6e2d59f0.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d571b6e2d59f0.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d571b6e2d59f0.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "571b6e2d59f05e36",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d575a39f98200.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d575a39f98200.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d575a39f98200.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "575a39f982009eb5",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d6193fdfadbfe.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d6193fdfadbfe.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d6193fdfadbfe.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "6193fdfadbfe05a1",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d88a5858f49bb.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d88a5858f49bb.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d88a5858f49bb.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "88a5858f49bbf420",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d9036652bd171.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d9036652bd171.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d9036652bd171.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "9036652bd171011b",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d91f3b117515e.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d91f3b117515e.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d91f3b117515e.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "91f3b117515e173b",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d9e1004cfa99d.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d9e1004cfa99d.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d9e1004cfa99d.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "9e1004cfa99d1c79",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.d9f9eef4dd6f6.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.d9f9eef4dd6f6.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.d9f9eef4dd6f6.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "9f9eef4dd6f6f7ad",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.daea1097ec8c6.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.daea1097ec8c6.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.daea1097ec8c6.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "aea1097ec8c63959",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.db0c06105861a.leafc3f3a.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.db0c06105861a.leafc3f3a.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.db0c06105861a.leafc3f3a.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _child7",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 11,
+        "label": "_child7"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "b0c06105861a75b9",
+        "label": "_child7",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _child7"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.db77058c8b760.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.db77058c8b760.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.db77058c8b760.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "b77058c8b7604ae3",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.dc2e400953d1f.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.dc2e400953d1f.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.dc2e400953d1f.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "c2e400953d1f22a7",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.dc94e59fe226f.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.dc94e59fe226f.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.dc94e59fe226f.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "c94e59fe226f4ab9",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.dd05567d56f0b.l4fcda8e4.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.dd05567d56f0b.l4fcda8e4.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.dd05567d56f0b.l4fcda8e4.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _child21",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 11,
+        "label": "_child21"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "d05567d56f0b1a28",
+        "label": "_child21",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _child21"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.dde8caf55cf44.l33bfe2c5.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.dde8caf55cf44.l33bfe2c5.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.dde8caf55cf44.l33bfe2c5.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _child14",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 11,
+        "label": "_child14"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "de8caf55cf443d91",
+        "label": "_child14",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _child14"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].curve.de17fb4710505.l1baef315.linewidth",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].curve.de17fb4710505.l1baef315.linewidth",
+      "role": "curve.linewidth",
+      "property": "linewidth",
+      "unit": "pt",
+      "current": 1.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].curve.de17fb4710505.l1baef315.linewidth#0"
+      ],
+      "scope": "fig3",
+      "min": 0.05,
+      "max": 20.0,
+      "label": "curve _nolegend_",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "n_points": 2,
+        "label": "_nolegend_"
+      },
+      "selector": {
+        "kind": "curve",
+        "axes": "s509c2de610eb",
+        "data": "e17fb4710505ec8f",
+        "label": "_nolegend_",
+        "gid": null,
+        "line": {
+          "linestyle": "-",
+          "marker": "",
+          "drawstyle": "default",
+          "transform": "CompositeGenericTransform",
+          "is_ax_transData": true
+        }
+      },
+      "description": "curve _nolegend_"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].tick.x.fontsize#0",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.x.fontsize#1",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.x.fontsize#2",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.x.fontsize#3"
+      ],
+      "scope": "fig3",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "axis": "x",
+        "count": 4
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s509c2de610eb",
+        "axis": "x"
+      },
+      "description": "x tick labels"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].tick.y.fontsize",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].tick.y.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#0",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#1",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#2",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#3",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#4",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#5",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#6",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#7",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#8",
+        "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#9"
+      ],
+      "scope": "fig3",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "y tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "axis": "y",
+        "count": 10
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "s509c2de610eb",
+        "axis": "y"
+      },
+      "description": "y tick labels"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].xlabel.fontsize",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].xlabel.fontsize",
+      "role": "axis.title",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].xlabel.fontsize#0"
+      ],
+      "scope": "fig3",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "xlabel",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "axis": "x"
+      },
+      "selector": {
+        "kind": "axis_label",
+        "axes": "s509c2de610eb",
+        "axis": "x",
+        "gid": null,
+        "text": "treatment"
+      },
+      "description": "xlabel"
+    },
+    {
+      "id": "fig3.ax[s509c2de610eb].ylabel.fontsize",
+      "path": null,
+      "target_id": "fig3.ax[s509c2de610eb].ylabel.fontsize",
+      "role": "axis.title",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[s509c2de610eb].ylabel.fontsize#0"
+      ],
+      "scope": "fig3",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "ylabel",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "s509c2de610eb",
+        "axis": "y"
+      },
+      "selector": {
+        "kind": "axis_label",
+        "axes": "s509c2de610eb",
+        "axis": "y",
+        "gid": null,
+        "text": "response"
+      },
+      "description": "ylabel"
+    }
+  ],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-probes\\g25s-box\\fig3\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/runs/gallery-probes/g25s-box/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-probes\\g25s-box\\original.py",
+        "3bd17b82108953d7c4b59768aac481044cc572b3e7f358f5ef73cf4418fe75e2"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "0a2c3e25c99f50d8c0e2a964e68079a01b0b8d385a8d51886ddd0cc31963df3a",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig3::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig3::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          20.32,
+          13.4112,
+          146.304,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig3::unregistered.0",
+        "type": "curve",
+        "bounds_mm": [
+          35.53883333333333,
+          27.405639224772308,
+          36.597166666666666,
+          100.9550749193567
+        ]
+      },
+      {
+        "id": "fig3::unregistered.1",
+        "type": "curve",
+        "bounds_mm": [
+          67.03483333333334,
+          25.84016817192607,
+          68.09316666666666,
+          100.18118841440267
+        ]
+      },
+      {
+        "id": "fig3::unregistered.2",
+        "type": "curve",
+        "bounds_mm": [
+          98.53083333333333,
+          22.662580177468534,
+          99.58916666666666,
+          101.55761766735989
+        ]
+      },
+      {
+        "id": "fig3::unregistered.3",
+        "type": "curve",
+        "bounds_mm": [
+          130.02683333333334,
+          17.14923333333335,
+          131.08516666666668,
+          103.55156666666667
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d0087dc8879c6.l7f1d0a5c.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          28.981400000000004,
+          54.716624673281636,
+          43.1546,
+          72.32434353960188
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d14e017789a51.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          32.5247,
+          28.599490700801955,
+          39.61130000000001,
+          28.599490700801955
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d1b6917a047f6.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          99.06,
+          30.030440074032004,
+          99.06,
+          54.57879107056648
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d20655bec33b6.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          64.02069999999999,
+          64.16554762668679,
+          71.1073,
+          64.16554762668679
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d3556e2f4d3d0.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          95.5167,
+          96.4790324333042,
+          102.6033,
+          96.4790324333042
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d3cecc650bcce.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          67.56400000000001,
+          33.24525333126479,
+          67.56400000000001,
+          56.35981102238439
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d3dcfa7a42c94.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          32.5247,
+          63.26699825868358,
+          39.61130000000001,
+          63.26699825868358
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d3f3757f825e6.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          130.556,
+          29.0700669393899,
+          130.556,
+          53.1281445951243
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d571b6e2d59f0.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          99.06,
+          72.26205975901367,
+          99.06,
+          96.4790324333042
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d575a39f98200.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          36.068,
+          72.32434353960188,
+          36.068,
+          98.17310142945989
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d6193fdfadbfe.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          95.5167,
+          64.83414312734375,
+          102.6033,
+          64.83414312734375
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d88a5858f49bb.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          95.5167,
+          30.030440074032004,
+          102.6033,
+          30.030440074032004
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d9036652bd171.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          32.5247,
+          98.17310142945989,
+          39.61130000000001,
+          98.17310142945989
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d91f3b117515e.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          127.01270000000001,
+          66.04173971576886,
+          134.0993,
+          66.04173971576886
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d9e1004cfa99d.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          64.02069999999999,
+          33.24525333126479,
+          71.1073,
+          33.24525333126479
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.d9f9eef4dd6f6.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          64.02069999999999,
+          96.61216791287058,
+          71.1073,
+          96.61216791287058
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.daea1097ec8c6.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          127.01270000000001,
+          29.0700669393899,
+          134.0993,
+          29.0700669393899
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.db0c06105861a.leafc3f3a.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          60.4774,
+          56.35981102238439,
+          74.65060000000001,
+          72.76194457958913
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.db77058c8b760.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          130.556,
+          72.56112628975414,
+          130.556,
+          97.9480754621849
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.dc2e400953d1f.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          67.56400000000001,
+          72.76194457958913,
+          67.56400000000001,
+          96.61216791287058
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.dc94e59fe226f.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          36.068,
+          28.599490700801955,
+          36.068,
+          54.716624673281636
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.dd05567d56f0b.l4fcda8e4.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          123.4694,
+          53.1281445951243,
+          137.6426,
+          72.56112628975414
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.dde8caf55cf44.l33bfe2c5.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          91.9734,
+          54.57879107056648,
+          106.1466,
+          72.26205975901367
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].curve.de17fb4710505.l1baef315.linewidth#0",
+        "type": "curve",
+        "bounds_mm": [
+          127.01270000000001,
+          97.9480754621849,
+          134.0993,
+          97.9480754621849
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          34.940875,
+          7.385755555555555,
+          37.195125,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          66.45275,
+          7.385755555555555,
+          68.67525,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          97.94875,
+          7.385755555555555,
+          100.17125,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          129.44475,
+          7.385755555555555,
+          131.66725,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          12.675305555555553,
+          1.0877171176634275,
+          17.850555555555555,
+          4.643717117663428
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          12.675305555555553,
+          13.16368300191447,
+          17.850555555555555,
+          16.71968300191447
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          12.675305555555553,
+          25.23964888616551,
+          17.850555555555555,
+          28.795648886165512
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          12.675305555555553,
+          37.31561477041656,
+          17.850555555555555,
+          40.871614770416556
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          12.643555555555555,
+          49.3915806546676,
+          17.850555555555555,
+          52.947580654667604
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          61.46754653891864,
+          17.850555555555555,
+          65.02354653891864
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          15.596305555555555,
+          73.54351242316969,
+          17.850555555555555,
+          77.09951242316968
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#7",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          85.61947830742072,
+          17.850555555555555,
+          89.17547830742073
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#8",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          97.69544419167177,
+          17.850555555555555,
+          101.25144419167178
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].tick.y.fontsize#9",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          109.77141007592283,
+          17.850555555555555,
+          113.32741007592283
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].xlabel.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          74.437875,
+          2.4186444444444435,
+          92.186125,
+          5.9746444444444435
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[s509c2de610eb].ylabel.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          7.676444444444442,
+          52.36527499999999,
+          11.232444444444443,
+          68.33552499999999
+        ]
+      }
+    ]
+  }
+}

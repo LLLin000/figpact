@@ -1,0 +1,53 @@
+{
+  "id": "g25s-3d",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "c1404430c73853200543e33774c3a6338994a1547f5b1240c0808ec68bd35978",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [
+    {
+      "scope": "fig0",
+      "axes_count": 2,
+      "projections": [
+        "3d",
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Axes3D",
+        "Figure",
+        "Line2D",
+        "LineCollection",
+        "Poly3DCollection",
+        "QuadMesh",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick",
+        "ZAxis",
+        "_ColorbarSpine"
+      ],
+      "probes": [
+        {
+          "name": "axis.tick",
+          "skipped": "non-numeric current"
+        }
+      ],
+      "inventory_count": 3,
+      "eligible_roles": [
+        "axis.tick"
+      ],
+      "context_error": "InspectorError: 快照存在阻塞级未测量数据，拒绝出帧：fig0::unregistered.1 的几何无法测量"
+    }
+  ],
+  "original_figure_count": 1,
+  "source_sha256_after": "c1404430c73853200543e33774c3a6338994a1547f5b1240c0808ec68bd35978",
+  "source_unchanged": true
+}

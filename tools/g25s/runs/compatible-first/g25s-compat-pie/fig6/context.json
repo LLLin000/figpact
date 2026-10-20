@@ -1,0 +1,169 @@
+{
+  "route": "overlay",
+  "scope": "fig6",
+  "revision": "d527a76c231aacf3a4a93d507451273564ceffbaa813546246b755a0577140d0",
+  "controls": [],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\compatible-first\\g25s-compat-pie\\fig6\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/runs/compatible-first/g25s-compat-pie/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\compatible-first\\g25s-compat-pie\\original.py",
+        "d4ac777b57cdb0a7bfe78fa3c072f7dcf9bd3a731faa30d240e7b6168976f343"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "d527a76c231aacf3a4a93d507451273564ceffbaa813546246b755a0577140d0",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig6::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig6::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          36.3728,
+          13.4112,
+          130.25119999999998,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig6::unregistered.0",
+        "type": "text",
+        "bounds_mm": [
+          101.71417831128613,
+          68.07577917050789,
+          109.52467831128612,
+          71.37777917050788
+        ]
+      },
+      {
+        "id": "fig6::unregistered.1",
+        "type": "text",
+        "bounds_mm": [
+          90.06342680615607,
+          63.81378863845884,
+          96.63567680615607,
+          67.11578863845884
+        ]
+      },
+      {
+        "id": "fig6::unregistered.10",
+        "type": "shape",
+        "bounds_mm": [
+          64.53660004510796,
+          41.57492410769405,
+          98.5018432359314,
+          66.15240491460798
+        ]
+      },
+      {
+        "id": "fig6::unregistered.11",
+        "type": "shape",
+        "bounds_mm": [
+          83.312,
+          49.314331231040946,
+          102.08768,
+          60.35040328284415
+        ]
+      },
+      {
+        "id": "fig6::unregistered.2",
+        "type": "text",
+        "bounds_mm": [
+          69.50029200708619,
+          78.34180499747143,
+          76.92979200708618,
+          81.64380499747143
+        ]
+      },
+      {
+        "id": "fig6::unregistered.3",
+        "type": "text",
+        "bounds_mm": [
+          76.56054564022882,
+          69.41343908952986,
+          83.10104564022882,
+          72.71543908952987
+        ]
+      },
+      {
+        "id": "fig6::unregistered.4",
+        "type": "text",
+        "bounds_mm": [
+          66.47437708164058,
+          40.29721850308609,
+          73.93562708164058,
+          43.59921850308609
+        ]
+      },
+      {
+        "id": "fig6::unregistered.5",
+        "type": "text",
+        "bounds_mm": [
+          74.92736477180397,
+          48.66184645622877,
+          81.46786477180396,
+          51.96384645622877
+        ]
+      },
+      {
+        "id": "fig6::unregistered.6",
+        "type": "text",
+        "bounds_mm": [
+          102.95440639234688,
+          52.31719630007044,
+          109.71715639234688,
+          55.61919630007044
+        ]
+      },
+      {
+        "id": "fig6::unregistered.7",
+        "type": "text",
+        "bounds_mm": [
+          90.73991485037102,
+          55.218197981856605,
+          97.31216485037103,
+          58.520197981856604
+        ]
+      },
+      {
+        "id": "fig6::unregistered.8",
+        "type": "shape",
+        "bounds_mm": [
+          83.312,
+          60.35039999999999,
+          102.08768,
+          75.54024493571643
+        ]
+      },
+      {
+        "id": "fig6::unregistered.9",
+        "type": "shape",
+        "bounds_mm": [
+          65.45526786193847,
+          60.35039999999999,
+          94.34806653072357,
+          79.1260626887417
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "D:\L\AI\figpact\tools\g25s\run_stress.py", line 110, in child
+    sess = StyleSession(script=ADAPTER, config=None, scope=scope, overlay=overlay)
+  File "D:\L\AI\figpact\figpact\inspector_style.py", line 104, in __init__
+    self._frame, self._style = self._rebuild()
+                               ~~~~~~~~~~~~~^^
+  File "D:\L\AI\figpact\figpact\inspector_style.py", line 210, in _rebuild
+    frame = capture_figure(fig, reg, scope=resolved)
+  File "D:\L\AI\figpact\figpact\inspector.py", line 306, in capture_figure
+    raise InspectorError('受保护科学载荷在捕获过程中变化，拒绝出帧：'
+                         + '；'.join(str(item.get('message')) for item in changed))
+figpact.inspector.InspectorError: 受保护科学载荷在捕获过程中变化，拒绝出帧：Protected scientific payload differs from the baseline（capture_figure）

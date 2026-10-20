@@ -1,0 +1,590 @@
+{
+  "route": "overlay",
+  "scope": "fig3",
+  "revision": "d3ad5951f9aca5dfde73a158467fb77605b5de59afa5d74340e2a0e938cd018c",
+  "controls": [
+    {
+      "id": "fig3.ax[sae170a5bb0f1].tick.y.fontsize",
+      "path": null,
+      "target_id": "fig3.ax[sae170a5bb0f1].tick.y.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#0",
+        "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#1",
+        "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#2",
+        "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#3",
+        "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#4",
+        "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#5",
+        "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#6",
+        "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#7",
+        "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#8"
+      ],
+      "scope": "fig3",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "y tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "sae170a5bb0f1",
+        "axis": "y",
+        "count": 9
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "sae170a5bb0f1",
+        "axis": "y"
+      },
+      "description": "y tick labels"
+    },
+    {
+      "id": "fig3.ax[sb03135e6438c].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig3.ax[sb03135e6438c].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#0",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#1",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#2",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#3",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#4",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#5",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#6"
+      ],
+      "scope": "fig3",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels ax[2]",
+      "display": {
+        "axes_index": 2,
+        "axes_key": "sb03135e6438c",
+        "axis": "x",
+        "count": 7
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "sb03135e6438c",
+        "axis": "x"
+      },
+      "description": "x tick labels ax[2]"
+    },
+    {
+      "id": "fig3.ax[sb03135e6438c].tick.y.fontsize",
+      "path": null,
+      "target_id": "fig3.ax[sb03135e6438c].tick.y.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#0",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#1",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#2",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#3",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#4",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#5",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#6",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#7",
+        "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#8"
+      ],
+      "scope": "fig3",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "y tick labels ax[2]",
+      "display": {
+        "axes_index": 2,
+        "axes_key": "sb03135e6438c",
+        "axis": "y",
+        "count": 9
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "sb03135e6438c",
+        "axis": "y"
+      },
+      "description": "y tick labels ax[2]"
+    },
+    {
+      "id": "fig3.ax[sb4d52a42cc79].tick.y.fontsize",
+      "path": null,
+      "target_id": "fig3.ax[sb4d52a42cc79].tick.y.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#0",
+        "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#1",
+        "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#2",
+        "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#3",
+        "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#4",
+        "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#5",
+        "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#6",
+        "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#7",
+        "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#8"
+      ],
+      "scope": "fig3",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "y tick labels ax[1]",
+      "display": {
+        "axes_index": 1,
+        "axes_key": "sb4d52a42cc79",
+        "axis": "y",
+        "count": 9
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "sb4d52a42cc79",
+        "axis": "y"
+      },
+      "description": "y tick labels ax[1]"
+    }
+  ],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-first\\g25s-hist\\fig3\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/runs/gallery-first/g25s-hist/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-first\\g25s-hist\\original.py",
+        "f53afc840701f120446118be16e0e9767648d3107e1c8f37288ff70498224237"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "d3ad5951f9aca5dfde73a158467fb77605b5de59afa5d74340e2a0e938cd018c",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig3::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          127.0,
+          381.0
+        ]
+      },
+      {
+        "id": "fig3::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          11.867444444444445,
+          258.10162962962966,
+          123.19,
+          377.19
+        ]
+      },
+      {
+        "id": "fig3::panel.1",
+        "type": "panel",
+        "bounds_mm": [
+          11.867444444444445,
+          133.96853703703707,
+          123.19,
+          253.05690740740744
+        ]
+      },
+      {
+        "id": "fig3::panel.2",
+        "type": "panel",
+        "bounds_mm": [
+          11.867444444444445,
+          9.835444444444498,
+          123.19,
+          128.92381481481482
+        ]
+      },
+      {
+        "id": "fig3::unregistered.0",
+        "type": "collection",
+        "bounds_mm": [
+          11.867444444444446,
+          258.10162962962966,
+          123.19,
+          377.19
+        ]
+      },
+      {
+        "id": "fig3::unregistered.1",
+        "type": "collection",
+        "bounds_mm": [
+          11.867444444444446,
+          133.96853703703707,
+          123.19,
+          253.05690740740744
+        ]
+      },
+      {
+        "id": "fig3::unregistered.2",
+        "type": "collection",
+        "bounds_mm": [
+          11.867444444444446,
+          9.835444444444503,
+          123.19,
+          128.9238148148148
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          248.8135522114612,
+          9.398,
+          252.36955221146118
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          265.8775606602489,
+          9.398,
+          269.43356066024893
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          282.9415691090366,
+          9.398,
+          286.49756910903665
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          300.0055775578243,
+          9.398,
+          303.5615775578243
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          317.06958600661204,
+          9.398,
+          320.625586006612
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          334.13359445539976,
+          9.398,
+          337.68959445539974
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          3.81,
+          351.1976029041874,
+          9.398,
+          354.7536029041874
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#7",
+        "type": "text",
+        "bounds_mm": [
+          3.81,
+          368.26161135297514,
+          9.398,
+          371.8176113529751
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sae170a5bb0f1].tick.y.fontsize#8",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          385.32561980176285,
+          9.398,
+          388.88161980176284
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          -8.517226520981321,
+          3.8100000000000542,
+          -3.310226520981321,
+          7.366000000000054
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          15.947006936975546,
+          3.8100000000000542,
+          21.122256936975546,
+          7.366000000000054
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          40.39536539493242,
+          3.8100000000000542,
+          45.57061539493242,
+          7.366000000000054
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          66.32009885288929,
+          3.8100000000000542,
+          68.5425988528893,
+          7.366000000000054
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          90.76845731084616,
+          3.8100000000000542,
+          92.99095731084616,
+          7.366000000000054
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          115.21681576880304,
+          3.8100000000000542,
+          117.43931576880304,
+          7.366000000000054
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.x.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          139.6492992267599,
+          3.8100000000000542,
+          141.90354922675988,
+          7.366000000000054
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          0.5473670262760807,
+          9.398,
+          4.10336702627608
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          17.61137547506377,
+          9.398,
+          21.16737547506377
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          34.67538392385146,
+          9.398,
+          38.23138392385146
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          51.73939237263915,
+          9.398,
+          55.29539237263915
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          68.80340082142685,
+          9.398,
+          72.35940082142685
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          85.86740927021454,
+          9.398,
+          89.42340927021453
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          3.81,
+          102.93141771900225,
+          9.398,
+          106.48741771900225
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#7",
+        "type": "text",
+        "bounds_mm": [
+          3.81,
+          119.99542616778994,
+          9.398,
+          123.55142616778994
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb03135e6438c].tick.y.fontsize#8",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          137.05943461657762,
+          9.398,
+          140.61543461657763
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          124.68045961886864,
+          9.398,
+          128.23645961886865
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          141.74446806765636,
+          9.398,
+          145.30046806765637
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          158.80847651644405,
+          9.398,
+          162.36447651644406
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          175.87248496523173,
+          9.398,
+          179.42848496523175
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          192.93649341401945,
+          9.398,
+          196.49249341401946
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          210.00050186280714,
+          9.398,
+          213.55650186280715
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          3.81,
+          227.06451031159483,
+          9.398,
+          230.62051031159484
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#7",
+        "type": "text",
+        "bounds_mm": [
+          3.81,
+          244.12851876038255,
+          9.398,
+          247.68451876038256
+        ]
+      },
+      {
+        "id": "figpact.style.fig3.ax[sb4d52a42cc79].tick.y.fontsize#8",
+        "type": "text",
+        "bounds_mm": [
+          3.84175,
+          261.19252720917024,
+          9.398,
+          264.7485272091702
+        ]
+      }
+    ]
+  }
+}

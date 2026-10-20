@@ -1,0 +1,20 @@
+{
+  "id": "g25s-pie",
+  "local_path": "tools/g25s/gallery/raw/pie_pie_features.py",
+  "plot_types": [
+    "pie"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/pie_and_polar_charts/pie_features.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "f369451c39d1f1480335112ce02c0d5b658e86db9e5ae5eea974148a28233833",
+  "source_review": {
+    "filesystem": "none; inline literal sizes",
+    "network": "none",
+    "process": "none; imports matplotlib.pyplot only",
+    "supports_deps": [
+      "matplotlib"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "pie_and_polar_charts/pie_features.py"
+}

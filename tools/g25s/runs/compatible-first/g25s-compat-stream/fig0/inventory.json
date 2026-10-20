@@ -1,0 +1,1906 @@
+[
+  {
+    "id": "fig0.ax[s1674fd6cf26c].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s1674fd6cf26c",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0,
+            2.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Varying Line Width",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s1674fd6cf26c",
+      "axis": "x",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[s1674fd6cf26c].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s1674fd6cf26c",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0,
+            2.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Varying Line Width",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s1674fd6cf26c",
+      "axis": "y",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[s188879802e47].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s188879802e47",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0,
+            2.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Varying Density",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s188879802e47",
+      "axis": "x",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[s188879802e47].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s188879802e47",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0,
+            2.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Varying Density",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s188879802e47",
+      "axis": "y",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[s2634e9e9a08a].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s2634e9e9a08a",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            0,
+            3
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            0.7999999999999999,
+            0.15
+          ],
+          "height_ratios": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Controlling Starting Points",
+        "counts": {
+          "lines": 1,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 5,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−4",
+          "loc": -4.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "4",
+          "loc": 4.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s2634e9e9a08a",
+      "axis": "x",
+      "count": 5
+    }
+  },
+  {
+    "id": "fig0.ax[s2634e9e9a08a].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s2634e9e9a08a",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            0,
+            3
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            0.7999999999999999,
+            0.15
+          ],
+          "height_ratios": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Controlling Starting Points",
+        "counts": {
+          "lines": 1,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s2634e9e9a08a",
+      "axis": "y",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[s56f933f8d698].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s56f933f8d698",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            2,
+            3
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0,
+            2.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Streamplot with unbroken streamlines",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 5,
+      "axes_key": "s56f933f8d698",
+      "axis": "x",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[s56f933f8d698].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s56f933f8d698",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            2,
+            3
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0,
+            2.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Streamplot with unbroken streamlines",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 5,
+      "axes_key": "s56f933f8d698",
+      "axis": "y",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[s811a9a5925ef].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s811a9a5925ef",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            0,
+            3
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            0.7999999999999999,
+            0.15
+          ],
+          "height_ratios": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Varying Color",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 5,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−4",
+          "loc": -4.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "4",
+          "loc": 4.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "s811a9a5925ef",
+      "axis": "x",
+      "count": 5
+    }
+  },
+  {
+    "id": "fig0.ax[s811a9a5925ef].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s811a9a5925ef",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            0,
+            3
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            0.7999999999999999,
+            0.15
+          ],
+          "height_ratios": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Varying Color",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "s811a9a5925ef",
+      "axis": "y",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[s8e842b2afef9].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s8e842b2afef9",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            2,
+            3
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0,
+            2.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Streamplot with Masking",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 4,
+      "axes_key": "s8e842b2afef9",
+      "axis": "x",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[s8e842b2afef9].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s8e842b2afef9",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            2,
+            3
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0,
+            2.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -3.0,
+            3.0
+          ],
+          "ylim": [
+            -3.0,
+            3.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Streamplot with Masking",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 7,
+          "major_yticks": 7
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 7,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−3",
+          "loc": -3.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "−1",
+          "loc": -1.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "1",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "3",
+          "loc": 3.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 4,
+      "axes_key": "s8e842b2afef9",
+      "axis": "y",
+      "count": 7
+    }
+  },
+  {
+    "id": "fig0.ax[sfc31ed033d45].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sfc31ed033d45",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            0.7999999999999999,
+            0.15
+          ],
+          "height_ratios": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            1.0
+          ],
+          "ylim": [
+            -13.0,
+            1.9990817263544542
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 0,
+          "major_yticks": 8
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 8,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label2",
+          "text": "−15.0",
+          "loc": -15.0
+        },
+        {
+          "tick": 1,
+          "side": "label2",
+          "text": "−12.5",
+          "loc": -12.5
+        },
+        {
+          "tick": 2,
+          "side": "label2",
+          "text": "−10.0",
+          "loc": -10.0
+        },
+        {
+          "tick": 3,
+          "side": "label2",
+          "text": "−7.5",
+          "loc": -7.5
+        },
+        {
+          "tick": 4,
+          "side": "label2",
+          "text": "−5.0",
+          "loc": -5.0
+        },
+        {
+          "tick": 5,
+          "side": "label2",
+          "text": "−2.5",
+          "loc": -2.5
+        },
+        {
+          "tick": 6,
+          "side": "label2",
+          "text": "0.0",
+          "loc": 0.0
+        },
+        {
+          "tick": 7,
+          "side": "label2",
+          "text": "2.5",
+          "loc": 2.5
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": false,
+    "eligible": false,
+    "reason": "AMBIGUOUS_AXES",
+    "display": {
+      "axes_index": 6,
+      "axes_key": "sfc31ed033d45",
+      "axis": "y",
+      "count": 8
+    }
+  },
+  {
+    "id": "fig0.ax[sfc31ed033d45].tick.y.fontsize#2",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sfc31ed033d45",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            3,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            0.7999999999999999,
+            0.15
+          ],
+          "height_ratios": [
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            1.0
+          ],
+          "ylim": [
+            -13.0,
+            1.9990817263544542
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 0,
+          "major_yticks": 8
+        },
+        "curves": []
+      },
+      "axis": "y",
+      "count": 8,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label2",
+          "text": "−15.0",
+          "loc": -15.0
+        },
+        {
+          "tick": 1,
+          "side": "label2",
+          "text": "−12.5",
+          "loc": -12.5
+        },
+        {
+          "tick": 2,
+          "side": "label2",
+          "text": "−10.0",
+          "loc": -10.0
+        },
+        {
+          "tick": 3,
+          "side": "label2",
+          "text": "−7.5",
+          "loc": -7.5
+        },
+        {
+          "tick": 4,
+          "side": "label2",
+          "text": "−5.0",
+          "loc": -5.0
+        },
+        {
+          "tick": 5,
+          "side": "label2",
+          "text": "−2.5",
+          "loc": -2.5
+        },
+        {
+          "tick": 6,
+          "side": "label2",
+          "text": "0.0",
+          "loc": 0.0
+        },
+        {
+          "tick": 7,
+          "side": "label2",
+          "text": "2.5",
+          "loc": 2.5
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": false,
+    "eligible": false,
+    "reason": "AMBIGUOUS_AXES",
+    "display": {
+      "axes_index": 7,
+      "axes_key": "sfc31ed033d45",
+      "axis": "y",
+      "count": 8
+    }
+  }
+]

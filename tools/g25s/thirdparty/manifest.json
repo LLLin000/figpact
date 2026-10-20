@@ -1,0 +1,275 @@
+{
+  "acquisition": {
+    "date_utc": "2026-10-20",
+    "method": "gh api commit pin + curl raw download, bytes preserved verbatim (savefig/show lines kept as upstream wrote them)",
+    "model_calls": 0,
+    "note": "DEVELOPMENT stress-testing pilot for figpact G25-S. No G25 unseen certification claimed; no model was called. Parent runner stages each source as original.py and executes only reviewed sources under child-process write confinement + network/process denial; all savefig/show filesystem and GUI side effects are therefore contained/denied at runtime, not by editing sources.",
+    "upstream_bytes_preserved": true
+  },
+  "contract_note": "Shared contract: each record has id, repository, commit, upstream_path, raw_url, local_path (repo-relative), sha256, license_file, plot_types, source_review (network/process/filesystem risks), independent_signoff=false, split=DEVELOPMENT_EXPOSED.",
+  "failed_or_excluded": [
+    {
+      "reason": "Requires cartopy (extra dependency, not numpy/matplotlib-only); excluded from executable pool per parent steer.",
+      "upstream_path": "code/scales-projections/geo-projections.py"
+    },
+    {
+      "reason": "Requires imageio plus reads local data/*.png image assets; excluded from executable pool.",
+      "upstream_path": "code/coordinates/collage.py"
+    },
+    {
+      "reason": "Requires scipy.special (jn, jn_zeros); excluded from executable pool.",
+      "upstream_path": "code/ornaments/bessel-functions.py"
+    },
+    {
+      "reason": "Requires local asset bunny.obj via open(filename) (threed/bunny.py:61,80); excluded from executable pool.",
+      "upstream_path": "code/threed/bunny.py"
+    },
+    {
+      "reason": "Requires scipy.ndimage + shapely + mpl_toolkits.mplot3d + FontProperties (waterfall-3d.py); excluded from executable pool.",
+      "upstream_path": "code/showcases/waterfall-3d.py"
+    },
+    {
+      "reason": "Requires matplotlib.animation FuncAnimation/writers (windmap.py); excluded as non-static/executable-risk, not in pool.",
+      "upstream_path": "code/showcases/windmap.py"
+    },
+    {
+      "reason": "Header states CC BY-NC-SA 4.0 (not BSD code grant); moved to rejected to keep executable pool under one uniform verified code license.",
+      "upstream_path": "code/unsorted/hatched-bars.py"
+    }
+  ],
+  "independent_signoff": false,
+  "licenses": [
+    {
+      "file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "sha256": "f0b8e098275d9fa8b70665e944211e751aa5063ee9a9731c11e35ba0a6933440"
+    },
+    {
+      "file": "tools/g25s/thirdparty/licenses/LICENSE.matplotlib-cheatsheet.txt",
+      "sha256": "16276fd7b02c0b33e7731d7cf5dd2e73136a412f15a23245733e4f3ceb9d97aa"
+    }
+  ],
+  "rejected_sources": [
+    {
+      "id": "tp_book_hatched_bars",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": null,
+      "plot_types": [
+        "bar",
+        "annotated"
+      ],
+      "reason": "Upstream header declares CC BY-NC-SA 4.0; kept out of the BSD executable pool. No bytes downloaded into tree.",
+      "repository": "rougier/scientific-visualization-book",
+      "split": "DEVELOPMENT_EXPOSED"
+    }
+  ],
+  "repositories": {
+    "matplotlib-cheatsheet": {
+      "commit": "f65e2b11744ec89d4bcf269a92b8b977de2d0279",
+      "commit_date": "2020-07-07T05:28:15Z",
+      "license": "BSD 2-Clause (LICENSE)",
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.matplotlib-cheatsheet.txt"
+    },
+    "scientific-visualization-book": {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "commit_date": "2026-01-04T13:29:20Z",
+      "license": "BSD code grant (LICENSE.txt Code section, Copyright 2021 Nicolas P. Rougier); book prose is CC BY-NC-SA 4.0 (not used)",
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt"
+    }
+  },
+  "slice": "thirdparty",
+  "sources": [
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_elegant_scatter",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/elegant_scatter.py",
+      "plot_types": [
+        "statistical",
+        "uncertainty-scatter",
+        "complex legends"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/ornaments/elegant-scatter.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "7439ef7b9ffb0c4f38634e82465faa37061a0ac2cba9a3c7933e5fd3b3154a22",
+      "source_review": {
+        "dependency": "numpy + matplotlib only; no third-party/stat IO libs.",
+        "filesystem": "Upstream plt.savefig(../../figures/...) relative write + plt.show(); contained/denied by parent harness.",
+        "network": "No sockets/requests.",
+        "process": "No subprocess/shell.",
+        "risks": "Seeded RNG scatter (seed 1); custom font families fall back if absent; double legend artists via add_artist."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/ornaments/elegant-scatter.py"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_annotation_direct",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/annotation_direct.py",
+      "plot_types": [
+        "annotated",
+        "arrows",
+        "path-effects"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/ornaments/annotation-direct.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "0eb5a0904dd333c6d2012028e2a4638370682728bd606a2cea5d5bc2a2a76c55",
+      "source_review": {
+        "dependency": "numpy + matplotlib (patheffects) only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "Seeded scatter; arrow/style annotations only, no TeX."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/ornaments/annotation-direct.py"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_annotation_zoom",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/annotation_zoom.py",
+      "plot_types": [
+        "multi-panel",
+        "gridspec",
+        "zoom-inset",
+        "annotated"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/ornaments/annotation-zoom.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "6fe060a8bc6a871656a12b7daf43a0beef04cdd834338461eb2581306ea0b989",
+      "source_review": {
+        "dependency": "numpy + matplotlib (GridSpec, Rectangle, ConnectionPatch) only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "Creates 1 main + 5 zoom subplots per run; seeded RNG; ConnectionPatch across axes."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/ornaments/annotation-zoom.py"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_complex_layout",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/complex_layout.py",
+      "plot_types": [
+        "publication multi-panel",
+        "gridspec"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/layout/complex-layout.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "7be7484372566f39e36fcf3429b46e4b3f6ffa52ab5b2da211c5a5527dfaa134",
+      "source_review": {
+        "dependency": "numpy + matplotlib gridspec only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "7x7 GridSpec multi-axes figure; named font families (Roboto Condensed/Roboto) fall back if missing; no TeX/data IO."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/layout/complex-layout.py"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_scales_log_log",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/scales_log_log.py",
+      "plot_types": [
+        "multi-panel",
+        "log-scales",
+        "grid"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/scales-projections/scales-log-log.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "6e3abd675a85685d2b7d6d6113d95b798a2ed0deb9f435b7ae267c8b2088dc41",
+      "source_review": {
+        "dependency": "numpy + matplotlib (ticker) only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "2x2 linear/log scale comparison incl. 10**X over/underflow-prone range (runtime warning territory, no crash); math-text labels only, usetex off."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/scales-projections/scales-log-log.py"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_polar_patterns",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/polar_patterns.py",
+      "plot_types": [
+        "non-Cartesian",
+        "polar",
+        "multi-panel"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/scales-projections/polar-patterns.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "2707bddeb12353b98ba1498c177060dff9e0d6a90a7a79f6ae8f660ec29706bc",
+      "source_review": {
+        "dependency": "numpy + matplotlib only.",
+        "filesystem": "Upstream savefig/show as above.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "6 polar subplots; math formula comments only; no TeX/data IO."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/scales-projections/polar-patterns.py"
+    },
+    {
+      "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+      "id": "tp_book_domain_coloring",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+      "local_path": "tools/g25s/thirdparty/sources/domain_coloring.py",
+      "plot_types": [
+        "image",
+        "mesh",
+        "contour"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/showcases/domain-coloring.py",
+      "repository": "rougier/scientific-visualization-book",
+      "sha256": "1dd1c6fbfabaae2fb3b767c397bd5be3e508313a086341200dae1e131c58cd86",
+      "source_review": {
+        "dependency": "numpy + matplotlib (patheffects) only.",
+        "filesystem": "Upstream 2x savefig (600dpi png + pdf) + show; heaviest IO of the set, still harness-contained.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "2048x2048 complex mesh (~32M complex) is the heaviest compute/memory item (slow, not unsafe); division Z+1/Z singular at origin (inf/nan handled by normalize); no TeX/data IO."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "code/showcases/domain-coloring.py"
+    },
+    {
+      "commit": "f65e2b11744ec89d4bcf269a92b8b977de2d0279",
+      "id": "tp_cheat_collection_reference",
+      "independent_signoff": false,
+      "license_file": "tools/g25s/thirdparty/licenses/LICENSE.matplotlib-cheatsheet.txt",
+      "local_path": "tools/g25s/thirdparty/sources/collection_reference.py",
+      "plot_types": [
+        "collections",
+        "reference-sheet"
+      ],
+      "raw_url": "https://raw.githubusercontent.com/rougier/matplotlib-cheatsheet/f65e2b11744ec89d4bcf269a92b8b977de2d0279/reference-collection.py",
+      "repository": "rougier/matplotlib-cheatsheet",
+      "sha256": "cc6b9f6f4bfff3b4a70c339a2e3481fca3b4b14ac2548e1ddcec19af8ba0d71d",
+      "source_review": {
+        "dependency": "numpy + matplotlib (collections, path) only.",
+        "filesystem": "Upstream savefig png+pdf to CWD + show; harness-contained.",
+        "network": "None.",
+        "process": "None.",
+        "risks": "Long single-axes catalogue of 8 collection types; no TeX/data IO."
+      },
+      "split": "DEVELOPMENT_EXPOSED",
+      "upstream_path": "reference-collection.py"
+    }
+  ],
+  "split": "DEVELOPMENT_EXPOSED"
+}

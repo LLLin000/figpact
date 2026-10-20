@@ -1,0 +1,129 @@
+{
+  "route": "overlay",
+  "scope": "fig0",
+  "revision": "a083a6270f67bde176903117d6478385e5836f361f0eceecc0e13a9c79d07279",
+  "controls": [],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\thirdparty-first\\tp_book_annotation_direct\\fig0\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/runs/thirdparty-first/tp_book_annotation_direct/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\thirdparty-first\\tp_book_annotation_direct\\original.py",
+        "0eb5a0904dd333c6d2012028e2a4638370682728bd606a2cea5d5bc2a2a76c55"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "a083a6270f67bde176903117d6478385e5836f361f0eceecc0e13a9c79d07279",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig0::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          101.6,
+          101.6
+        ]
+      },
+      {
+        "id": "fig0::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          3.8100000000000005,
+          3.809999999999998,
+          97.79,
+          97.79
+        ]
+      },
+      {
+        "id": "fig0::unregistered.0",
+        "type": "text",
+        "bounds_mm": [
+          51.848687166543066,
+          64.30350395711946,
+          62.230937166543065,
+          71.13478485643752
+        ]
+      },
+      {
+        "id": "fig0::unregistered.1",
+        "type": "text",
+        "bounds_mm": [
+          24.133267749212223,
+          44.20606310476077,
+          34.51551774921222,
+          51.037344004078825
+        ]
+      },
+      {
+        "id": "fig0::unregistered.2",
+        "type": "text",
+        "bounds_mm": [
+          38.133374543831806,
+          35.08970661432781,
+          48.54737454383181,
+          41.92098751364587
+        ]
+      },
+      {
+        "id": "fig0::unregistered.3",
+        "type": "text",
+        "bounds_mm": [
+          61.91065614353942,
+          34.24199596488773,
+          72.51515614353941,
+          41.07327686420578
+        ]
+      },
+      {
+        "id": "fig0::unregistered.4",
+        "type": "text",
+        "bounds_mm": [
+          57.02297981814373,
+          23.950712429654594,
+          67.21472981814372,
+          30.781993328972654
+        ]
+      },
+      {
+        "id": "fig0::unregistered.5",
+        "type": "collection",
+        "bounds_mm": [
+          3.8100000000000005,
+          3.809999999999998,
+          97.79,
+          97.79
+        ]
+      },
+      {
+        "id": "fig0::unregistered.6",
+        "type": "collection",
+        "bounds_mm": [
+          28.08967052699,
+          20.65727110675043,
+          68.44762836576164,
+          63.47950707865975
+        ]
+      },
+      {
+        "id": "fig0::unregistered.7",
+        "type": "collection",
+        "bounds_mm": [
+          28.08967052699,
+          20.65727110675043,
+          68.44762836576164,
+          63.47950707865975
+        ]
+      }
+    ]
+  }
+}

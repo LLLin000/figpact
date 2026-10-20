@@ -1,0 +1,24 @@
+{
+  "commit": "62fa569f30333c817c13e4dc757877c1192fd15a",
+  "id": "tp_book_scales_log_log",
+  "independent_signoff": false,
+  "license_file": "tools/g25s/thirdparty/licenses/LICENSE.scientific-visualization-book.txt",
+  "local_path": "tools/g25s/thirdparty/sources/scales_log_log.py",
+  "plot_types": [
+    "multi-panel",
+    "log-scales",
+    "grid"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/rougier/scientific-visualization-book/62fa569f30333c817c13e4dc757877c1192fd15a/code/scales-projections/scales-log-log.py",
+  "repository": "rougier/scientific-visualization-book",
+  "sha256": "6e3abd675a85685d2b7d6d6113d95b798a2ed0deb9f435b7ae267c8b2088dc41",
+  "source_review": {
+    "dependency": "numpy + matplotlib (ticker) only.",
+    "filesystem": "Upstream savefig/show as above.",
+    "network": "None.",
+    "process": "None.",
+    "risks": "2x2 linear/log scale comparison incl. 10**X over/underflow-prone range (runtime warning territory, no crash); math-text labels only, usetex off."
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "code/scales-projections/scales-log-log.py"
+}

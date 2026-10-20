@@ -1,0 +1,82 @@
+{
+  "id": "g25s-polar",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "8f191de521cb284609ed0610d64784e5d3ea0e0f63c7b3e08bf2eeb42649dfa7",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [
+    {
+      "scope": "fig0",
+      "axes_count": 2,
+      "projections": [
+        "polar",
+        "polar"
+      ],
+      "artist_types": [
+        "Figure",
+        "Line2D",
+        "PolarAxes",
+        "RadialAxis",
+        "RadialTick",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "ThetaAxis",
+        "ThetaTick",
+        "Wedge"
+      ],
+      "probes": [
+        {
+          "name": "wrong-scope",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched scope"
+        },
+        {
+          "name": "stale-revision",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "stale or mismatched revision"
+        },
+        {
+          "name": "native-no-authority",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unavailable control route"
+        },
+        {
+          "name": "science-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "duplicate-control",
+          "boundary": "check_plan",
+          "rejected": true,
+          "error": "unknown or duplicate control"
+        },
+        {
+          "name": "axis.tick",
+          "skipped": "non-numeric current"
+        },
+        {
+          "name": "curve.linewidth",
+          "skipped": "non-numeric current"
+        }
+      ],
+      "inventory_count": 6,
+      "eligible_roles": [
+        "axis.tick",
+        "curve.linewidth"
+      ]
+    }
+  ],
+  "original_figure_count": 1,
+  "source_sha256_after": "8f191de521cb284609ed0610d64784e5d3ea0e0f63c7b3e08bf2eeb42649dfa7",
+  "source_unchanged": true
+}

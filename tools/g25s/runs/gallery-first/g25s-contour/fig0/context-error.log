@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "D:\L\AI\figpact\tools\g25s\run_stress.py", line 110, in child
+    sess = StyleSession(script=ADAPTER, config=None, scope=scope, overlay=overlay)
+  File "D:\L\AI\figpact\figpact\inspector_style.py", line 104, in __init__
+    self._frame, self._style = self._rebuild()
+                               ~~~~~~~~~~~~~^^
+  File "D:\L\AI\figpact\figpact\inspector_style.py", line 210, in _rebuild
+    frame = capture_figure(fig, reg, scope=resolved)
+  File "D:\L\AI\figpact\figpact\inspector.py", line 297, in capture_figure
+    snapshot = scene.snapshot(fig, registry, scope=scope, draw=False, contract=contract)
+  File "D:\L\AI\figpact\figpact\scene.py", line 1046, in snapshot
+    node = _artist_node(entry['artist'], node_id=unreg_id, gid=None, scope=scope, registered=False,
+                        renderer=renderer, mm_per_px=mm_per_px, descriptor=entry['descriptor'])
+  File "D:\L\AI\figpact\figpact\scene.py", line 622, in _artist_node
+    text = str(artist.get_text())
+               ~~~~~~~~~~~~~~~^^
+TypeError: ContourLabeler.get_text() missing 2 required positional arguments: 'lev' and 'fmt'

@@ -1,0 +1,208 @@
+{
+  "id": "g25s-contour",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "599394632d46acecef548955d16f3acd509f922a9f6dcb559977b482b994c7b1",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [
+    {
+      "scope": "fig0",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "axis.tick",
+          "skipped": "non-numeric current"
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ],
+      "context_error": "TypeError: ContourLabeler.get_text() missing 2 required positional arguments: 'lev' and 'fmt'"
+    },
+    {
+      "scope": "fig1",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "axis.tick",
+          "skipped": "non-numeric current"
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ],
+      "context_error": "TypeError: ContourLabeler.get_text() missing 2 required positional arguments: 'lev' and 'fmt'"
+    },
+    {
+      "scope": "fig2",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "axis.tick",
+          "skipped": "non-numeric current"
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ],
+      "context_error": "TypeError: ContourLabeler.get_text() missing 2 required positional arguments: 'lev' and 'fmt'"
+    },
+    {
+      "scope": "fig3",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "axis.tick",
+          "skipped": "non-numeric current"
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ],
+      "context_error": "TypeError: ContourLabeler.get_text() missing 2 required positional arguments: 'lev' and 'fmt'"
+    },
+    {
+      "scope": "fig4",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Line2D",
+        "QuadContourSet",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick"
+      ],
+      "probes": [
+        {
+          "name": "axis.tick",
+          "skipped": "non-numeric current"
+        }
+      ],
+      "inventory_count": 2,
+      "eligible_roles": [
+        "axis.tick"
+      ],
+      "context_error": "TypeError: ContourLabeler.get_text() missing 2 required positional arguments: 'lev' and 'fmt'"
+    },
+    {
+      "scope": "fig5",
+      "axes_count": 3,
+      "projections": [
+        "rectilinear",
+        "rectilinear",
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "AxesImage",
+        "Figure",
+        "Line2D",
+        "LineCollection",
+        "QuadContourSet",
+        "QuadMesh",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "XAxis",
+        "XTick",
+        "YAxis",
+        "YTick",
+        "_ColorbarSpine"
+      ],
+      "probes": [
+        {
+          "name": "axis.tick",
+          "skipped": "non-numeric current"
+        }
+      ],
+      "inventory_count": 4,
+      "eligible_roles": [
+        "axis.tick"
+      ],
+      "context_error": "TypeError: ContourLabeler.get_text() missing 2 required positional arguments: 'lev' and 'fmt'"
+    }
+  ],
+  "original_figure_count": 6,
+  "source_sha256_after": "599394632d46acecef548955d16f3acd509f922a9f6dcb559977b482b994c7b1",
+  "source_unchanged": true
+}

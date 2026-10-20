@@ -1,0 +1,119 @@
+{
+  "sources": [
+    {
+      "id": "g25s-compat-heatmap",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "images_contours_and_fields/image_annotated_heatmap.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/images_contours_and_fields/image_annotated_heatmap.py",
+      "local_path": "tools/g25s/compatible/heatmap.py",
+      "sha256": "c8f484ff44c02dfcd8415a38cc743b8fd6e7099c9fc1b8eacc1c0a29fbacaecc",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "heatmap",
+        "colorbar",
+        "annotation"
+      ],
+      "source_review": "Reviewed entire source: numpy/matplotlib only, seeded embedded data, no network/process/file IO; unchanged upstream original.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families"
+    },
+    {
+      "id": "g25s-compat-pie",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "pie_and_polar_charts/pie_features.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/pie_and_polar_charts/pie_features.py",
+      "local_path": "tools/g25s/compatible/pie.py",
+      "sha256": "d4ac777b57cdb0a7bfe78fa3c072f7dcf9bd3a731faa30d240e7b6168976f343",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "pie",
+        "wedge",
+        "legend"
+      ],
+      "source_review": "Reviewed entire source: pyplot only, embedded data, no network/process/file IO; unchanged upstream original.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families"
+    },
+    {
+      "id": "g25s-compat-violin",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "statistics/violinplot.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/statistics/violinplot.py",
+      "local_path": "tools/g25s/compatible/violin.py",
+      "sha256": "1063d3d51c2047213c07e3dbd280703afa70a564970aeaac02aa02e1986e1b2d",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "violin",
+        "statistics"
+      ],
+      "source_review": "Reviewed entire source: numpy/matplotlib only, seeded random data, no network/process/file IO; unchanged upstream original.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families"
+    },
+    {
+      "id": "g25s-compat-stream",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "images_contours_and_fields/plot_streamplot.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/images_contours_and_fields/plot_streamplot.py",
+      "local_path": "tools/g25s/compatible/stream.py",
+      "sha256": "6ece46ec6651d818c4fbe1a6758bfaec57d0d74d6a1d0a32f20365447b0e1e4f",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "streamplot",
+        "vector field",
+        "colorbar"
+      ],
+      "source_review": "Reviewed entire source: numpy/matplotlib only, embedded vector fields including intentional NaN/masking, no network/process/file IO.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families"
+    },
+    {
+      "id": "g25s-compat-sankey",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "specialty_plots/sankey_basics.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/specialty_plots/sankey_basics.py",
+      "local_path": "tools/g25s/compatible/sankey.py",
+      "sha256": "4cd0d6cc8774bafe4d46bcfd3631ab6ffb1d629efbb408b5468a6628c87b6c38",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "Sankey",
+        "patches",
+        "labels"
+      ],
+      "source_review": "Reviewed entire source: pyplot/matplotlib.sankey only, embedded flows, no network/process/file IO.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families"
+    },
+    {
+      "id": "g25s-compat-dates",
+      "repository": "matplotlib/matplotlib",
+      "commit": "1392cbe3c79cdb93f9282747841d648770f60249",
+      "upstream_path": "ticks/date_demo_convert.py",
+      "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/1392cbe3c79cdb93f9282747841d648770f60249/galleries/examples/ticks/date_demo_convert.py",
+      "local_path": "tools/g25s/compatible/dates.py",
+      "sha256": "5185b99d04d94f4e181ebe3eed8f0d7951a10ff7eb3d46bad27d7a93f511fa6f",
+      "license_file": "tools/g25s/compatible/LICENSE.matplotlib",
+      "plot_types": [
+        "dates",
+        "custom tick formatter"
+      ],
+      "source_review": "Reviewed entire source: datetime/numpy/matplotlib only, embedded date data, no network/process/file IO.",
+      "independent_signoff": false,
+      "split": "DEVELOPMENT_EXPOSED",
+      "version_note": "v3.10.8 source; heatmap and pie are version variants of gallery-first sources, NOT new independent families"
+    }
+  ],
+  "failed_sources": [],
+  "model_called": false,
+  "independent_signoff": false
+}

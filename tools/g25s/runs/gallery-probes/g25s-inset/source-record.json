@@ -1,0 +1,22 @@
+{
+  "id": "g25s-inset",
+  "local_path": "tools/g25s/gallery/raw/inset_zoom_inset_axes.py",
+  "plot_types": [
+    "inset axes",
+    "zoom effect"
+  ],
+  "raw_url": "https://raw.githubusercontent.com/matplotlib/matplotlib/d7a19fbf48918c1a99f771c954c49c14ea95fc5d/galleries/examples/subplots_axes_and_figures/zoom_inset_axes.py",
+  "repository": "matplotlib/matplotlib",
+  "sha256": "c4a33efd6de739b533a68d9ebe9656d0476c661093937863038fb931b90a51b6",
+  "source_review": {
+    "filesystem": "reads matplotlib-bundled sample data file axes_grid/bivariate_normal.npy via cbook.get_sample_data; no user files, no writes",
+    "network": "none",
+    "process": "none; imports matplotlib.cbook, matplotlib.pyplot, numpy only",
+    "supports_deps": [
+      "matplotlib",
+      "numpy"
+    ]
+  },
+  "split": "DEVELOPMENT_EXPOSED",
+  "upstream_path": "subplots_axes_and_figures/zoom_inset_axes.py"
+}

@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "D:\L\AI\figpact\tools\g25s\run_stress.py", line 84, in child
+    figures = original_figures()
+  File "D:\L\AI\figpact\tools\g25s\source_adapter.py", line 25, in original_figures
+    runpy.run_path(str(SOURCE), run_name='__main__')
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\L\AI\figpact\tools\g25s\runs\thirdparty-first\tp_cheat_collection_reference\original.py", line 172, in <module>
+    collection = RegularPolyCollection(numsides, rotation,
+                                       # linewidths = linewidths,
+    ...<3 lines>...
+                                       offsets = offsets,
+                                       transOffset=ax.transData)
+TypeError: RegularPolyCollection.__init__() takes 2 positional arguments but 3 positional arguments (and 1 keyword-only argument) were given

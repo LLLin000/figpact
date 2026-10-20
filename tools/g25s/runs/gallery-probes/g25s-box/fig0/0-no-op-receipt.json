@@ -1,0 +1,74 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 0,
+    "derived_total": 0,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig0.ax[s0490e61e779f].tick.x.fontsize.fontsize": null
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig0.ax[s0490e61e779f].tick.x.fontsize"
+      ],
+      "retained": []
+    }
+  },
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [
+      "«−200» 与 «change whisker length» 重叠 (面积 56.7 px²)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "FAIL",
+  "local_problems": [
+    "required targets unchanged: {'fig0.ax[s0490e61e779f].tick.x.fontsize.fontsize': None}"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-probes\\g25s-box\\fig0\\.inspect-d96821dbf01c4689aa4e898fa5f35946.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-probes\\g25s-box\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [
+      "«−200» 与 «change whisker length» 重叠 (面积 56.7 px²)"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "eligible": false,
+    "inherited": [],
+    "new": [],
+    "reason": "unmeasured: no verified QA pair",
+    "unmeasured": [
+      "unmeasured: no verified QA pair"
+    ],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": [
+    {
+      "after": [
+        10.0
+      ],
+      "before": [
+        10.0
+      ],
+      "id": "fig0.ax[s0490e61e779f].tick.x.fontsize",
+      "property": "fontsize",
+      "requested": 10.0,
+      "role": "axis.tick"
+    }
+  ]
+}

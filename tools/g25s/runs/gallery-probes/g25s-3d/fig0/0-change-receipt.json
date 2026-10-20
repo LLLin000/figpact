@@ -1,0 +1,105 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 3,
+    "derived_total": 3,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig0.ax[s4966b4051d59].tick.y.fontsize.fontsize": [
+        10.0,
+        10.5
+      ]
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig0.ax[s4966b4051d59].tick.y.fontsize"
+      ],
+      "retained": []
+    }
+  },
+  "draft": true,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [
+      "「s5f98dc302a66+axis:x+kind:major+pos:-4.0+side:label1」刻度标签超出画布 1956.95 mm（已超出画布）",
+      "「s5f98dc302a66+axis:x+kind:major+pos:-2.0+side:label1」刻度标签超出画布 942.05 mm（已超出画布）",
+      "「s5f98dc302a66+axis:x+kind:major+pos:2.0+side:label1」刻度标签超出画布 928.89 mm（已超出画布）",
+      "「s5f98dc302a66+axis:x+kind:major+pos:4.0+side:label1」刻度标签超出画布 1943.79 mm（已超出画布）",
+      "「s5f98dc302a66+axis:y+kind:major+pos:-4.0+side:label1」刻度标签超出画布 1956.95 mm（已超出画布）",
+      "「s5f98dc302a66+axis:y+kind:major+pos:-2.0+side:label1」刻度标签超出画布 942.05 mm（已超出画布）",
+      "「s5f98dc302a66+axis:y+kind:major+pos:2.0+side:label1」刻度标签超出画布 928.89 mm（已超出画布）",
+      "「s5f98dc302a66+axis:y+kind:major+pos:4.0+side:label1」刻度标签超出画布 1943.79 mm（已超出画布）"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "PASS",
+  "local_problems": [],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-probes\\g25s-3d\\fig0\\.inspect-fed79979ea1e4666baa2ec431d51b31b.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-probes\\g25s-3d\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [
+      "「s5f98dc302a66+axis:x+kind:major+pos:-4.0+side:label1」刻度标签超出画布 1956.95 mm（已超出画布）",
+      "「s5f98dc302a66+axis:x+kind:major+pos:-2.0+side:label1」刻度标签超出画布 942.05 mm（已超出画布）",
+      "「s5f98dc302a66+axis:x+kind:major+pos:2.0+side:label1」刻度标签超出画布 928.89 mm（已超出画布）",
+      "「s5f98dc302a66+axis:x+kind:major+pos:4.0+side:label1」刻度标签超出画布 1943.79 mm（已超出画布）",
+      "「s5f98dc302a66+axis:y+kind:major+pos:-4.0+side:label1」刻度标签超出画布 1956.95 mm（已超出画布）",
+      "「s5f98dc302a66+axis:y+kind:major+pos:-2.0+side:label1」刻度标签超出画布 942.05 mm（已超出画布）",
+      "「s5f98dc302a66+axis:y+kind:major+pos:2.0+side:label1」刻度标签超出画布 928.89 mm（已超出画布）",
+      "「s5f98dc302a66+axis:y+kind:major+pos:4.0+side:label1」刻度标签超出画布 1943.79 mm（已超出画布）"
+    ],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "ambiguous": [],
+    "eligible": true,
+    "inherited": [
+      "s5f98dc302a66+axis:x+kind:major+pos:-2.0+side:label1",
+      "s5f98dc302a66+axis:x+kind:major+pos:-4.0+side:label1",
+      "s5f98dc302a66+axis:x+kind:major+pos:2.0+side:label1",
+      "s5f98dc302a66+axis:x+kind:major+pos:4.0+side:label1",
+      "s5f98dc302a66+axis:y+kind:major+pos:-2.0+side:label1",
+      "s5f98dc302a66+axis:y+kind:major+pos:-4.0+side:label1",
+      "s5f98dc302a66+axis:y+kind:major+pos:2.0+side:label1",
+      "s5f98dc302a66+axis:y+kind:major+pos:4.0+side:label1"
+    ],
+    "new": [],
+    "reason": "无差异",
+    "unmeasured": [],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [],
+  "science_unchanged": true,
+  "source_commit_state": "COMMITTED_DRAFT",
+  "target_effects": [
+    {
+      "after": [
+        10.5,
+        10.5,
+        10.5,
+        10.5,
+        10.5
+      ],
+      "before": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "id": "fig0.ax[s4966b4051d59].tick.y.fontsize",
+      "property": "fontsize",
+      "requested": 10.5,
+      "role": "axis.tick"
+    }
+  ]
+}

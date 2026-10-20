@@ -1,0 +1,42 @@
+{
+  "audit_summary": {},
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "figure_verification_state": "ERROR",
+  "local_edit_state": "ERROR",
+  "local_problems": [
+    "OUT_OF_RANGE: 'fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth' value -1.0 outside [0.05, 20.0] for 'linewidth'"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\thirdparty-first\\tp_book_complex_layout\\fig0\\.inspect-a5bdbf4d5f2a4444a60a6af1159c5814.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\thirdparty-first\\tp_book_complex_layout\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [],
+    "glyph_floor": [],
+    "pass": false
+  },
+  "qa_delta": {
+    "eligible": false,
+    "inherited": [],
+    "new": [],
+    "reason": "unmeasured: no verified QA pair",
+    "unmeasured": [
+      "unmeasured: no verified QA pair"
+    ],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [
+    "OUT_OF_RANGE: 'fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth' value -1.0 outside [0.05, 20.0] for 'linewidth'"
+  ],
+  "science_unchanged": false,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": []
+}

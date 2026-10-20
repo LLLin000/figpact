@@ -1,0 +1,15 @@
+{
+  "id": "tp_cheat_collection_reference",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "cc6b9f6f4bfff3b4a70c339a2e3481fca3b4b14ac2548e1ddcec19af8ba0d71d",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [],
+  "baseline_error": "TypeError: RegularPolyCollection.__init__() takes 2 positional arguments but 3 positional arguments (and 1 keyword-only argument) were given",
+  "source_sha256_after": "cc6b9f6f4bfff3b4a70c339a2e3481fca3b4b14ac2548e1ddcec19af8ba0d71d",
+  "source_unchanged": true
+}

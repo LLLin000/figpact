@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "D:\L\AI\figpact\tools\g25s\run_stress.py", line 154, in child
+    receipt = ov.inspect_candidate(ADAPTER, None, scope,
+        edits=[{'target_id': target['id'], 'value': value}], overlay=overlay)
+  File "D:\L\AI\figpact\figpact\style_overlay.py", line 2191, in inspect_candidate
+    receipt = apply(script, config, scope, edits=edits, overlay=str(tmp),
+                    expected_before_sha256=None, allow_draft=True,
+                    remove=remove)
+  File "D:\L\AI\figpact\figpact\style_overlay.py", line 1656, in apply
+    v1 = _verify_pair(run1["before"], run1["after"], allowed_styles=allowed,
+                      required=required, proven=False)
+  File "D:\L\AI\figpact\figpact\style_overlay.py", line 911, in _verify_pair
+    audit = ca.audit_pair({"styles": before["styles"], "shapes": before["shapes"],
+                           "view": before["view"]},
+                          {"styles": after["styles"], "shapes": after["shapes"],
+                           "view": after["view"]}, allowed)
+  File "D:\L\AI\figpact\figpact\change_audit.py", line 266, in audit_pair
+    style_changes = _style_diff(before.get('styles') or {}, after.get('styles') or {})
+  File "D:\L\AI\figpact\figpact\change_audit.py", line 757, in _style_diff
+    elif vb == va:
+         ^^^^^^^^
+ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()

@@ -1,0 +1,325 @@
+{
+  "route": "overlay",
+  "scope": "fig1",
+  "revision": "ca01184e6e51fbcfc0560eeb258642d6363733135dd7f59031f57da53d2e03b4",
+  "controls": [
+    {
+      "id": "fig1.ax[se5fc22b48c54].tick.x.fontsize",
+      "path": null,
+      "target_id": "fig1.ax[se5fc22b48c54].tick.x.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#0",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#1",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#2",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#3",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#4",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#5",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#6",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#7"
+      ],
+      "scope": "fig1",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "x tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "se5fc22b48c54",
+        "axis": "x",
+        "count": 8
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "se5fc22b48c54",
+        "axis": "x"
+      },
+      "description": "x tick labels"
+    },
+    {
+      "id": "fig1.ax[se5fc22b48c54].tick.y.fontsize",
+      "path": null,
+      "target_id": "fig1.ax[se5fc22b48c54].tick.y.fontsize",
+      "role": "axis.tick",
+      "property": "fontsize",
+      "unit": "pt",
+      "current": 10.0,
+      "saved": null,
+      "value_shape": "scalar",
+      "objects": [
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#0",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#1",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#2",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#3",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#4",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#5",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#6",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#7",
+        "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#8"
+      ],
+      "scope": "fig1",
+      "min": 0.5,
+      "max": 100.0,
+      "label": "y tick labels",
+      "display": {
+        "axes_index": 0,
+        "axes_key": "se5fc22b48c54",
+        "axis": "y",
+        "count": 9
+      },
+      "selector": {
+        "kind": "tick_labels",
+        "axes": "se5fc22b48c54",
+        "axis": "y"
+      },
+      "description": "y tick labels"
+    }
+  ],
+  "source": {
+    "script": "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "config": null,
+    "overlay": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-probes\\g25s-stack\\fig1\\official.json",
+    "overlay_sha256": "",
+    "dependencies": {
+      "script": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+        "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438"
+      ],
+      "sci:D:/L/AI/figpact/tools/g25s/runs/gallery-probes/g25s-stack/original.py": [
+        "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\gallery-probes\\g25s-stack\\original.py",
+        "1157b7c6d6d4da271615c45e9d131a999f33d37169a6ef1e3e186638bb69b2b7"
+      ]
+    }
+  },
+  "session_context": {
+    "frame_revision": "ca01184e6e51fbcfc0560eeb258642d6363733135dd7f59031f57da53d2e03b4",
+    "overlay_sha256": "",
+    "issue_count": 0,
+    "nodes": [
+      {
+        "id": "fig1::canvas",
+        "type": "figure",
+        "bounds_mm": [
+          0.0,
+          0.0,
+          162.56,
+          121.92
+        ]
+      },
+      {
+        "id": "fig1::panel.0",
+        "type": "panel",
+        "bounds_mm": [
+          20.32,
+          13.4112,
+          146.304,
+          107.2896
+        ]
+      },
+      {
+        "id": "fig1::unregistered.0",
+        "type": "collection",
+        "bounds_mm": [
+          26.046545454545456,
+          17.6784,
+          140.57745454545454,
+          38.45657887029129
+        ]
+      },
+      {
+        "id": "fig1::unregistered.1",
+        "type": "collection",
+        "bounds_mm": [
+          26.046545454545456,
+          17.678400000054435,
+          140.57745454545454,
+          53.832499926718995
+        ]
+      },
+      {
+        "id": "fig1::unregistered.2",
+        "type": "collection",
+        "bounds_mm": [
+          26.046545454545456,
+          22.331482230560336,
+          140.57745454545454,
+          103.02239999999999
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          -0.558511363636361,
+          7.385755555555555,
+          6.839238636363639,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          24.935295454545454,
+          7.385755555555555,
+          27.157795454545454,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          46.73022727272727,
+          7.385755555555555,
+          51.17522727272727,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          69.63640909090908,
+          7.385755555555555,
+          74.08140909090909,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          92.52671590909091,
+          7.385755555555555,
+          97.0034659090909,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          115.43289772727272,
+          7.385755555555555,
+          119.90964772727273,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          137.22782954545454,
+          7.385755555555555,
+          143.92707954545452,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.x.fontsize#7",
+        "type": "text",
+        "bounds_mm": [
+          160.13401136363635,
+          7.385755555555555,
+          166.83326136363632,
+          10.941755555555556
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#0",
+        "type": "text",
+        "bounds_mm": [
+          12.675305555555553,
+          9.239747740352856,
+          17.850555555555555,
+          12.795747740352855
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#1",
+        "type": "text",
+        "bounds_mm": [
+          12.643555555555555,
+          21.421639134609602,
+          17.850555555555555,
+          24.977639134609603
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#2",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          33.60353052886635,
+          17.850555555555555,
+          37.15953052886635
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#3",
+        "type": "text",
+        "bounds_mm": [
+          15.596305555555555,
+          45.785421923123096,
+          17.850555555555555,
+          49.34142192312309
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#4",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          57.96731331737985,
+          17.850555555555555,
+          61.523313317379845
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#5",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          70.1492047116366,
+          17.850555555555555,
+          73.7052047116366
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#6",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          82.33109610589334,
+          17.850555555555555,
+          85.88709610589333
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#7",
+        "type": "text",
+        "bounds_mm": [
+          15.628055555555553,
+          94.51298750015009,
+          17.850555555555555,
+          98.06898750015009
+        ]
+      },
+      {
+        "id": "figpact.style.fig1.ax[se5fc22b48c54].tick.y.fontsize#8",
+        "type": "text",
+        "bounds_mm": [
+          15.596305555555555,
+          106.69487889440684,
+          17.850555555555555,
+          110.25087889440684
+        ]
+      }
+    ]
+  }
+}

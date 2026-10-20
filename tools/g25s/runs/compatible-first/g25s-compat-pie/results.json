@@ -1,0 +1,180 @@
+{
+  "id": "g25s-compat-pie",
+  "split": "DEVELOPMENT_EXPOSED",
+  "model_called": false,
+  "independent_signoff": false,
+  "python": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+  "matplotlib": "3.10.8",
+  "numpy": "2.3.3",
+  "source_sha256_before": "d4ac777b57cdb0a7bfe78fa3c072f7dcf9bd3a731faa30d240e7b6168976f343",
+  "adapter_sha256": "63592200adbb16c584c0758b8b6434eedbceedde850e795b1323edd50ef5c438",
+  "figures": [
+    {
+      "scope": "fig0",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "Wedge",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [],
+      "inventory_count": 0,
+      "eligible_roles": []
+    },
+    {
+      "scope": "fig1",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "Wedge",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [],
+      "inventory_count": 0,
+      "eligible_roles": []
+    },
+    {
+      "scope": "fig2",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "Wedge",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [],
+      "inventory_count": 0,
+      "eligible_roles": []
+    },
+    {
+      "scope": "fig3",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "Wedge",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [],
+      "inventory_count": 0,
+      "eligible_roles": []
+    },
+    {
+      "scope": "fig4",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "Wedge",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [],
+      "inventory_count": 0,
+      "eligible_roles": []
+    },
+    {
+      "scope": "fig5",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Rectangle",
+        "Shadow",
+        "Spine",
+        "Text",
+        "Wedge",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [],
+      "inventory_count": 0,
+      "eligible_roles": [],
+      "context_error": "InspectorError: 受保护科学载荷在捕获过程中变化，拒绝出帧：Protected scientific payload differs from the baseline（capture_figure）"
+    },
+    {
+      "scope": "fig6",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Rectangle",
+        "Spine",
+        "Text",
+        "Wedge",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [],
+      "inventory_count": 0,
+      "eligible_roles": []
+    },
+    {
+      "scope": "fig7",
+      "axes_count": 1,
+      "projections": [
+        "rectilinear"
+      ],
+      "artist_types": [
+        "Axes",
+        "Figure",
+        "Rectangle",
+        "Shadow",
+        "Spine",
+        "Text",
+        "Wedge",
+        "XAxis",
+        "YAxis"
+      ],
+      "probes": [],
+      "inventory_count": 0,
+      "eligible_roles": [],
+      "context_error": "InspectorError: 受保护科学载荷在捕获过程中变化，拒绝出帧：Protected scientific payload differs from the baseline（capture_figure）"
+    }
+  ],
+  "original_figure_count": 8,
+  "source_sha256_after": "d4ac777b57cdb0a7bfe78fa3c072f7dcf9bd3a731faa30d240e7b6168976f343",
+  "source_unchanged": true
+}

@@ -1,0 +1,1472 @@
+[
+  {
+    "id": "fig0.ax[s02069d660bcb].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s02069d660bcb",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "ylim": [
+            0.265,
+            8.735
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 7",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 4,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−50",
+          "loc": -50.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−25",
+          "loc": -25.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "25",
+          "loc": 25.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 6,
+      "axes_key": "s02069d660bcb",
+      "axis": "x",
+      "count": 4
+    }
+  },
+  {
+    "id": "fig0.ax[s51039f3d540c].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s51039f3d540c",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            5,
+            6
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            7.615,
+            8.385
+          ],
+          "ylim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 6",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 5,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "7.50",
+          "loc": 7.5
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "7.75",
+          "loc": 7.75
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "8.00",
+          "loc": 8.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "8.25",
+          "loc": 8.25
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "8.50",
+          "loc": 8.5
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 5,
+      "axes_key": "s51039f3d540c",
+      "axis": "x",
+      "count": 5
+    }
+  },
+  {
+    "id": "fig0.ax[s5bb5639f6f92].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s5bb5639f6f92",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            3,
+            4
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.265,
+            8.735
+          ],
+          "ylim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 4",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 5,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0.0",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "2.5",
+          "loc": 2.5
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "5.0",
+          "loc": 5.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "7.5",
+          "loc": 7.5
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "10.0",
+          "loc": 10.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s5bb5639f6f92",
+      "axis": "x",
+      "count": 5
+    }
+  },
+  {
+    "id": "fig0.ax[s63f3b63901dc].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s63f3b63901dc",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            2,
+            3
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "ylim": [
+            0.04499999999999987,
+            8.955
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 9",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 4,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−50",
+          "loc": -50.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−25",
+          "loc": -25.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "25",
+          "loc": 25.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 8,
+      "axes_key": "s63f3b63901dc",
+      "axis": "x",
+      "count": 4
+    }
+  },
+  {
+    "id": "fig0.ax[s6a734aec74d4].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s6a734aec74d4",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            3,
+            4
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "ylim": [
+            0.04499999999999987,
+            8.955
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 10",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 4,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−50",
+          "loc": -50.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−25",
+          "loc": -25.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "25",
+          "loc": 25.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 9,
+      "axes_key": "s6a734aec74d4",
+      "axis": "x",
+      "count": 4
+    }
+  },
+  {
+    "id": "fig0.ax[s7817ca6ddc69].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s7817ca6ddc69",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "ylim": [
+            0.15500000000000003,
+            8.844999999999999
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 8",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 4,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−50",
+          "loc": -50.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−25",
+          "loc": -25.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "25",
+          "loc": 25.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 7,
+      "axes_key": "s7817ca6ddc69",
+      "axis": "x",
+      "count": 4
+    }
+  },
+  {
+    "id": "fig0.ax[s8a6266c6b126].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s8a6266c6b126",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            4,
+            5
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            7.615,
+            8.385
+          ],
+          "ylim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 5",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 5,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "7.50",
+          "loc": 7.5
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "7.75",
+          "loc": 7.75
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "8.00",
+          "loc": 8.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "8.25",
+          "loc": 8.25
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "8.50",
+          "loc": 8.5
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 4,
+      "axes_key": "s8a6266c6b126",
+      "axis": "x",
+      "count": 5
+    }
+  },
+  {
+    "id": "fig0.ax[s8f60fb312db5].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s8f60fb312db5",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.48499999999999993,
+            8.515
+          ],
+          "ylim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 1",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 5,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0.0",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "2.5",
+          "loc": 2.5
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "5.0",
+          "loc": 5.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "7.5",
+          "loc": 7.5
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "10.0",
+          "loc": 10.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s8f60fb312db5",
+      "axis": "x",
+      "count": 5
+    }
+  },
+  {
+    "id": "fig0.ax[sad28e4475216].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sad28e4475216",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            5,
+            6
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "ylim": [
+            7.3950000000000005,
+            8.605
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 12",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 4,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−50",
+          "loc": -50.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−25",
+          "loc": -25.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "25",
+          "loc": 25.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 11,
+      "axes_key": "sad28e4475216",
+      "axis": "x",
+      "count": 4
+    }
+  },
+  {
+    "id": "fig0.ax[sc30863012e8a].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sc30863012e8a",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            4,
+            5
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "ylim": [
+            7.3950000000000005,
+            8.605
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 11",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 4,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 4,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−50",
+          "loc": -50.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "−25",
+          "loc": -25.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "25",
+          "loc": 25.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 10,
+      "axes_key": "sc30863012e8a",
+      "axis": "x",
+      "count": 4
+    }
+  },
+  {
+    "id": "fig0.ax[sc710bfbc46f1].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "sc710bfbc46f1",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            2,
+            3
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.265,
+            8.735
+          ],
+          "ylim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 3",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 5,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0.0",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "2.5",
+          "loc": 2.5
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "5.0",
+          "loc": 5.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "7.5",
+          "loc": 7.5
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "10.0",
+          "loc": 10.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "sc710bfbc46f1",
+      "axis": "x",
+      "count": 5
+    }
+  },
+  {
+    "id": "fig0.ax[se54a3e5e6681].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "se54a3e5e6681",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            6
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.375,
+            8.625
+          ],
+          "ylim": [
+            -31.34444121434739,
+            24.04780278396369
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "Custom violin 2",
+        "counts": {
+          "lines": 0,
+          "containers": 0,
+          "major_xticks": 5,
+          "major_yticks": 5
+        },
+        "curves": []
+      },
+      "axis": "x",
+      "count": 5,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "0.0",
+          "loc": 0.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "2.5",
+          "loc": 2.5
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "5.0",
+          "loc": 5.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "7.5",
+          "loc": 7.5
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "10.0",
+          "loc": 10.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "uniform": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "se54a3e5e6681",
+      "axis": "x",
+      "count": 5
+    }
+  }
+]

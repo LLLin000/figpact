@@ -1,0 +1,71 @@
+{
+  "audit_summary": {
+    "agreement": true,
+    "derived_allowed": 0,
+    "derived_total": 0,
+    "hard": 0,
+    "pair_runs": 2,
+    "required_changed": {
+      "fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth.linewidth": [
+        1.0,
+        1.5
+      ]
+    },
+    "transition": {
+      "no_change_request": false,
+      "requested_removals": [],
+      "requested_upserts": [
+        "fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth"
+      ],
+      "retained": []
+    }
+  },
+  "draft": false,
+  "drift": null,
+  "figure_qa": {
+    "blocking": [],
+    "glyph_floor": [],
+    "pass": true
+  },
+  "figure_verification_state": "FAIL",
+  "local_edit_state": "FAIL",
+  "local_problems": [
+    "science changed: [\"{'rule_id': 'SCIENCE_CHANGED', 'severity': 'blocker', 'object_ids': ['panel.1.unregistered.image.0', 'panel.10.unregistered.image.0', 'panel.11.unregistered.ima\"]"
+  ],
+  "overlay_path": "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\thirdparty-first\\tp_book_complex_layout\\fig0\\.inspect-7f695b4ca8c043708c1347557adb1835.json",
+  "protected_sources": [
+    "D:\\L\\AI\\figpact\\tools\\g25s\\source_adapter.py",
+    "D:\\L\\AI\\figpact\\tools\\g25s\\runs\\thirdparty-first\\tp_book_complex_layout\\original.py"
+  ],
+  "qa_before": {
+    "blocking": [],
+    "glyph_floor": [],
+    "pass": true
+  },
+  "qa_delta": {
+    "eligible": false,
+    "inherited": [],
+    "new": [],
+    "reason": "unmeasured: no verified QA pair",
+    "unmeasured": [
+      "unmeasured: no verified QA pair"
+    ],
+    "worsened": []
+  },
+  "schema": "figpact.style-overlay-receipt/1",
+  "science_notes": [
+    "{'rule_id': 'SCIENCE_CHANGED', 'severity': 'blocker', 'object_ids': ['panel.1.unregistered.image.0', 'panel.10.unregistered.image.0', 'panel.11.unregistered.image.0', 'panel.13.unregistered.image.0', 'panel.14.unregistered.image.0', 'panel.15.unregistered.image.0', 'panel.16.unregistered.image.0', '"
+  ],
+  "science_unchanged": false,
+  "source_commit_state": "NOT_WRITTEN",
+  "target_effects": [
+    {
+      "after": 1.5,
+      "before": 1.0,
+      "id": "fig0.ax[s0d41661d8801].curve.d06399b6c1297.le6a66b7a.linewidth",
+      "property": "linewidth",
+      "requested": 1.5,
+      "role": "curve.linewidth"
+    }
+  ]
+}

@@ -1,0 +1,2202 @@
+[
+  {
+    "id": "fig0.ax[s16d9c4c29e7b].curve.d3f9dbf7787e0.l7f1d0a5c.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s16d9c4c29e7b",
+      "data": "3f9dbf7787e0ab41",
+      "label": "_child0",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.001,
+            100.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "log",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Logarithmic",
+        "ylabel": "",
+        "title": "X logarithmic - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "3f9dbf7787e0ab41",
+      "label": "_child0",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s16d9c4c29e7b",
+      "n_points": 5000,
+      "label": "_child0"
+    }
+  },
+  {
+    "id": "fig0.ax[s16d9c4c29e7b].curve.d58614ea66fe0.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s16d9c4c29e7b",
+      "data": "58614ea66fe09a08",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.001,
+            100.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "log",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Logarithmic",
+        "ylabel": "",
+        "title": "X logarithmic - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "58614ea66fe09a08",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s16d9c4c29e7b",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s16d9c4c29e7b].curve.dab9edb97e2ab.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s16d9c4c29e7b",
+      "data": "ab9edb97e2ab5fbb",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.001,
+            100.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "log",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Logarithmic",
+        "ylabel": "",
+        "title": "X logarithmic - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "ab9edb97e2ab5fbb",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s16d9c4c29e7b",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s16d9c4c29e7b].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s16d9c4c29e7b",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.001,
+            100.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "log",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Logarithmic",
+        "ylabel": "",
+        "title": "X logarithmic - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "axis": "x",
+      "count": 8,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{-4}}$",
+          "loc": 0.0001
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{-3}}$",
+          "loc": 0.001
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{-2}}$",
+          "loc": 0.01
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{-1}}$",
+          "loc": 0.1
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{0}}$",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{1}}$",
+          "loc": 10.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{2}}$",
+          "loc": 100.0
+        },
+        {
+          "tick": 7,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{3}}$",
+          "loc": 1000.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s16d9c4c29e7b",
+      "axis": "x",
+      "count": 8
+    }
+  },
+  {
+    "id": "fig0.ax[s16d9c4c29e7b].xlabel.fontsize",
+    "role": "axis.title",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "axis_label",
+      "axes": "s16d9c4c29e7b",
+      "axis": "x",
+      "gid": null,
+      "text": "Logarithmic"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.001,
+            100.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "log",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Logarithmic",
+        "ylabel": "",
+        "title": "X logarithmic - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "text": "Logarithmic",
+      "gid": null
+    },
+    "current": {
+      "fontsize": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 3,
+      "axes_key": "s16d9c4c29e7b",
+      "axis": "x"
+    }
+  },
+  {
+    "id": "fig0.ax[s5133e2b6edc5].curve.d3f9dbf7787e0.l7f1d0a5c.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s5133e2b6edc5",
+      "data": "3f9dbf7787e0ab41",
+      "label": "_child0",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "linear",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Linear",
+        "ylabel": "Logarithmic",
+        "title": "X linear - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "3f9dbf7787e0ab41",
+      "label": "_child0",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s5133e2b6edc5",
+      "n_points": 5000,
+      "label": "_child0"
+    }
+  },
+  {
+    "id": "fig0.ax[s5133e2b6edc5].curve.d58614ea66fe0.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s5133e2b6edc5",
+      "data": "58614ea66fe09a08",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "linear",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Linear",
+        "ylabel": "Logarithmic",
+        "title": "X linear - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "58614ea66fe09a08",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s5133e2b6edc5",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s5133e2b6edc5].curve.dab9edb97e2ab.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s5133e2b6edc5",
+      "data": "ab9edb97e2ab5fbb",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "linear",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Linear",
+        "ylabel": "Logarithmic",
+        "title": "X linear - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "ab9edb97e2ab5fbb",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s5133e2b6edc5",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s5133e2b6edc5].tick.x.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s5133e2b6edc5",
+      "axis": "x"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "linear",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Linear",
+        "ylabel": "Logarithmic",
+        "title": "X linear - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "axis": "x",
+      "count": 8,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "4",
+          "loc": 4.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "6",
+          "loc": 6.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "8",
+          "loc": 8.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "10",
+          "loc": 10.0
+        },
+        {
+          "tick": 7,
+          "side": "label1",
+          "text": "12",
+          "loc": 12.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s5133e2b6edc5",
+      "axis": "x",
+      "count": 8
+    }
+  },
+  {
+    "id": "fig0.ax[s5133e2b6edc5].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s5133e2b6edc5",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "linear",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Linear",
+        "ylabel": "Logarithmic",
+        "title": "X linear - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "axis": "y",
+      "count": 8,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{-4}}$",
+          "loc": 0.0001
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{-3}}$",
+          "loc": 0.001
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{-2}}$",
+          "loc": 0.01
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{-1}}$",
+          "loc": 0.1
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{0}}$",
+          "loc": 1.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{1}}$",
+          "loc": 10.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{2}}$",
+          "loc": 100.0
+        },
+        {
+          "tick": 7,
+          "side": "label1",
+          "text": "$\\mathdefault{10^{3}}$",
+          "loc": 1000.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s5133e2b6edc5",
+      "axis": "y",
+      "count": 8
+    }
+  },
+  {
+    "id": "fig0.ax[s5133e2b6edc5].xlabel.fontsize",
+    "role": "axis.title",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "axis_label",
+      "axes": "s5133e2b6edc5",
+      "axis": "x",
+      "gid": null,
+      "text": "Linear"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "linear",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Linear",
+        "ylabel": "Logarithmic",
+        "title": "X linear - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "text": "Linear",
+      "gid": null
+    },
+    "current": {
+      "fontsize": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s5133e2b6edc5",
+      "axis": "x"
+    }
+  },
+  {
+    "id": "fig0.ax[s5133e2b6edc5].ylabel.fontsize",
+    "role": "axis.title",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "axis_label",
+      "axes": "s5133e2b6edc5",
+      "axis": "y",
+      "gid": null,
+      "text": "Logarithmic"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            1,
+            2
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.001,
+            100.0
+          ],
+          "xscale": "linear",
+          "yscale": "log",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "Linear",
+        "ylabel": "Logarithmic",
+        "title": "X linear - Y logarithmic",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "text": "Logarithmic",
+      "gid": null
+    },
+    "current": {
+      "fontsize": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 2,
+      "axes_key": "s5133e2b6edc5",
+      "axis": "y"
+    }
+  },
+  {
+    "id": "fig0.ax[s54c076e1c3f5].curve.d3f9dbf7787e0.l7f1d0a5c.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s54c076e1c3f5",
+      "data": "3f9dbf7787e0ab41",
+      "label": "_child0",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.001,
+            100.0
+          ],
+          "ylim": [
+            0.0,
+            10.0
+          ],
+          "xscale": "log",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "X logarithmic - Y linear",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "3f9dbf7787e0ab41",
+      "label": "_child0",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "s54c076e1c3f5",
+      "n_points": 5000,
+      "label": "_child0"
+    }
+  },
+  {
+    "id": "fig0.ax[s54c076e1c3f5].curve.d58614ea66fe0.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s54c076e1c3f5",
+      "data": "58614ea66fe09a08",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.001,
+            100.0
+          ],
+          "ylim": [
+            0.0,
+            10.0
+          ],
+          "xscale": "log",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "X logarithmic - Y linear",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "58614ea66fe09a08",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "s54c076e1c3f5",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s54c076e1c3f5].curve.dab9edb97e2ab.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s54c076e1c3f5",
+      "data": "ab9edb97e2ab5fbb",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            1,
+            2
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.001,
+            100.0
+          ],
+          "ylim": [
+            0.0,
+            10.0
+          ],
+          "xscale": "log",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "",
+        "title": "X logarithmic - Y linear",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "ab9edb97e2ab5fbb",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 1,
+      "axes_key": "s54c076e1c3f5",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s869db268127d].curve.d3f9dbf7787e0.l7f1d0a5c.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s869db268127d",
+      "data": "3f9dbf7787e0ab41",
+      "label": "_child0",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.0,
+            10.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "Linear",
+        "title": "X linear - Y linear",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "3f9dbf7787e0ab41",
+      "label": "_child0",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s869db268127d",
+      "n_points": 5000,
+      "label": "_child0"
+    }
+  },
+  {
+    "id": "fig0.ax[s869db268127d].curve.d58614ea66fe0.le6a66b7a.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s869db268127d",
+      "data": "58614ea66fe09a08",
+      "label": "_child1",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.0,
+            10.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "Linear",
+        "title": "X linear - Y linear",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "58614ea66fe09a08",
+      "label": "_child1",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s869db268127d",
+      "n_points": 5000,
+      "label": "_child1"
+    }
+  },
+  {
+    "id": "fig0.ax[s869db268127d].curve.dab9edb97e2ab.l0ab396c6.linewidth",
+    "role": "curve.linewidth",
+    "property": "linewidth",
+    "scope": "fig0",
+    "selector": {
+      "kind": "curve",
+      "axes": "s869db268127d",
+      "data": "ab9edb97e2ab5fbb",
+      "label": "_child2",
+      "gid": null,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.0,
+            10.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "Linear",
+        "title": "X linear - Y linear",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "data": "ab9edb97e2ab5fbb",
+      "label": "_child2",
+      "gid": null,
+      "n": 5000,
+      "line": {
+        "linestyle": "-",
+        "marker": "None",
+        "drawstyle": "default",
+        "transform": "CompositeGenericTransform",
+        "is_ax_transData": true
+      }
+    },
+    "current": {
+      "linewidth": 1.5
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s869db268127d",
+      "n_points": 5000,
+      "label": "_child2"
+    }
+  },
+  {
+    "id": "fig0.ax[s869db268127d].tick.y.fontsize",
+    "role": "axis.tick",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "tick_labels",
+      "axes": "s869db268127d",
+      "axis": "y"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.0,
+            10.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "Linear",
+        "title": "X linear - Y linear",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "axis": "y",
+      "count": 8,
+      "members": [
+        {
+          "tick": 0,
+          "side": "label1",
+          "text": "−2",
+          "loc": -2.0
+        },
+        {
+          "tick": 1,
+          "side": "label1",
+          "text": "0",
+          "loc": 0.0
+        },
+        {
+          "tick": 2,
+          "side": "label1",
+          "text": "2",
+          "loc": 2.0
+        },
+        {
+          "tick": 3,
+          "side": "label1",
+          "text": "4",
+          "loc": 4.0
+        },
+        {
+          "tick": 4,
+          "side": "label1",
+          "text": "6",
+          "loc": 6.0
+        },
+        {
+          "tick": 5,
+          "side": "label1",
+          "text": "8",
+          "loc": 8.0
+        },
+        {
+          "tick": 6,
+          "side": "label1",
+          "text": "10",
+          "loc": 10.0
+        },
+        {
+          "tick": 7,
+          "side": "label1",
+          "text": "12",
+          "loc": 12.0
+        }
+      ]
+    },
+    "current": {
+      "fontsizes": [
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33,
+        8.33
+      ],
+      "uniform": 8.33
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s869db268127d",
+      "axis": "y",
+      "count": 8
+    }
+  },
+  {
+    "id": "fig0.ax[s869db268127d].ylabel.fontsize",
+    "role": "axis.title",
+    "property": "fontsize",
+    "scope": "fig0",
+    "selector": {
+      "kind": "axis_label",
+      "axes": "s869db268127d",
+      "axis": "y",
+      "gid": null,
+      "text": "Linear"
+    },
+    "fingerprint": {
+      "axes": {
+        "slot": {
+          "kind": "subplot_spec",
+          "geometry": [
+            2,
+            2
+          ],
+          "rowspan": [
+            0,
+            1
+          ],
+          "colspan": [
+            0,
+            1
+          ],
+          "wspace": null,
+          "hspace": null,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null,
+          "width_ratios": [
+            1.0,
+            1.0
+          ],
+          "height_ratios": [
+            1.0,
+            1.0
+          ]
+        },
+        "projection": "rectilinear",
+        "view": {
+          "xlim": [
+            0.0,
+            10.0
+          ],
+          "ylim": [
+            0.0,
+            10.0
+          ],
+          "xscale": "linear",
+          "yscale": "linear",
+          "xinv": false,
+          "yinv": false
+        },
+        "xlabel": "",
+        "ylabel": "Linear",
+        "title": "X linear - Y linear",
+        "counts": {
+          "lines": 3,
+          "containers": 0,
+          "major_xticks": 8,
+          "major_yticks": 8
+        },
+        "curves": [
+          "3f9dbf7787e0ab41:_child0",
+          "58614ea66fe09a08:_child1",
+          "ab9edb97e2ab5fbb:_child2"
+        ]
+      },
+      "text": "Linear",
+      "gid": null
+    },
+    "current": {
+      "fontsize": 10.0
+    },
+    "unique": true,
+    "eligible": true,
+    "reason": "",
+    "display": {
+      "axes_index": 0,
+      "axes_key": "s869db268127d",
+      "axis": "y"
+    }
+  }
+]
