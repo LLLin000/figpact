@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://figpact.dev/design/render.schema.json",
+  "$comment": "R14 G0+G1 standalone contract. No runtime dependency: validators live in figpact/render_contract.py (stdlib only); this file documents the wire shapes. Coordinate constants: layout/page = page_top_left mm; scene source = canvas_bottom_left mm; projection converts explicitly. Evidence separates render/persistence/host/export; host/export-page are NOT_CONNECTED/NOT_RUN in round one.",
+  "title": "figpact-render/1",
+  "description": "Shared $defs for LayoutSnapshot, FigureFrame, EditIntent, Receipt. Layout origin page_top_left; scene origin canvas_bottom_left; preserve is exactly ['science','view'].",
+  "anyOf": [
+    {"$ref": "#/$defs/LayoutSnapshot"},
+    {"$ref": "#/$defs/FigureFrame"},
+    {"$ref": "#/$defs/EditIntent"},
+    {"$ref": "#/$defs/Receipt"}
+  ],
+  "$defs": {
+    "LayoutObject": {
+      "type": "object",
+      "required": ["id", "rect_mm", "measurement_status"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "rect_mm": {
+          "description": "Final-page top-left mm [x, y, w, h]; w,h > 0. Null allowed ONLY when measurement_status is unknown/unsupported (enforced by allOf below)."
+        },
+        "measurement_status": {"enum": ["measured", "conservative", "unknown", "unsupported"]},
+        "hidden": {"type": "boolean", "default": false},
+        "locked": {"type": "boolean", "default": false},
+        "rotation_deg": {"type": "number", "description": "Right angles only; normalized to {0,90,180,270}."},
+        "crop": {
+          "type": ["array", "null"], "minItems": 4, "maxItems": 4,
+          "prefixItems": [
+            {"type": "number", "minimum": 0},
+            {"type": "number", "minimum": 0},
+            {"type": "number", "exclusiveMinimum": 0},
+            {"type": "number", "exclusiveMinimum": 0}
+          ],
+          "description": "Canvas top-left mm [x, y, w, h]; x,y >= 0, w,h > 0; must fit inside scene canvas_mm."
+        },
+        "flip_h": {"type": "boolean", "default": false},
+        "flip_v": {"type": "boolean", "default": false},
+        "kind": {"type": ["string", "null"], "description": "Generic object kind, e.g. 'panel'. No host-specific names."},
+        "resource": {"type": ["string", "null"], "description": "Generic resource identity (opaque reference, not a host handle)."},
+        "source": {"type": ["object", "null"], "additionalProperties": {"type": "string"}, "description": "Generic provenance map, str->str. No host-specific keys."},
+        "z_index": {"type": ["integer", "null"], "description": "Stacking order; null = unknown (default None). Bool rejected; no fake 0."},
+        "capabilities": {"type": ["array", "null"], "items": {"type": "string", "minLength": 1}, "description": "Object capabilities; null = unknown vs [] = known-no-caps."}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"measurement_status": {"enum": ["measured", "conservative"]}}, "required": ["measurement_status"]},
+          "then": {"properties": {"rect_mm": {
+            "type": "array", "minItems": 4, "maxItems": 4,
+            "prefixItems": [
+              {"type": "number"},
+              {"type": "number"},
+              {"type": "number", "exclusiveMinimum": 0},
+              {"type": "number", "exclusiveMinimum": 0}
+            ]
+          }}, "required": ["rect_mm"]}
+        },
+        {
+          "if": {"properties": {"measurement_status": {"enum": ["unknown", "unsupported"]}}, "required": ["measurement_status"]},
+          "then": {"properties": {"rect_mm": {
+            "type": ["array", "null"], "minItems": 4, "maxItems": 4,
+            "prefixItems": [
+              {"type": "number"},
+              {"type": "number"},
+              {"type": "number", "exclusiveMinimum": 0},
+              {"type": "number", "exclusiveMinimum": 0}
+            ]
+          }}}
+        }
+      ],
+      "additionalProperties": false
+    },
+    "LayoutSnapshot": {
+      "type": "object",
+      "required": ["schema", "source_mode", "page_mm", "objects"],
+      "properties": {
+        "schema": {"const": "figpact.layout/1"},
+        "source_mode": {"enum": ["standalone", "saved", "live"]},
+        "page_mm": {
+          "type": "array", "minItems": 2, "maxItems": 2,
+          "prefixItems": [
+            {"type": "number", "exclusiveMinimum": 0},
+            {"type": "number", "exclusiveMinimum": 0}
+          ],
+          "description": "Final-page size mm [W, H], top-left origin; W,H > 0."
+        },
+        "objects": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/LayoutObject"}},
+        "project_id": {"type": ["string", "null"], "minLength": 1, "description": "Optional project binding; null = unbound."},
+        "page_id": {"type": ["string", "null"], "minLength": 1, "description": "Optional page binding; null = unbound."},
+        "host_revision": {"type": ["string", "null"], "minLength": 1, "description": "Optional host revision binding; null = unbound."},
+        "captured_at": {"type": "string", "description": "Informational only; excluded from revision."},
+        "revision": {"type": "string", "description": "Must equal computed content hash when supplied; recomputed by validate_layout."}
+      },
+      "additionalProperties": false
+    },
+    "SceneNode": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "gid": {"type": ["string", "null"]},
+        "type": {"type": ["string", "null"]},
+        "artist_type": {"type": ["string", "null"]},
+        "bounds_mm": {
+          "type": ["array", "null"], "minItems": 4, "maxItems": 4,
+          "items": {"type": "number"},
+          "description": "Canvas bottom-left mm [x0, y0, x1, y1]; None when unmeasured."
+        },
+        "measured": {"type": "boolean"},
+        "visible": {"type": "boolean", "description": "Verbatim artist visibility when available; required-content verification fails closed when absent."},
+        "fully_clipped": {"type": "boolean"}
+      }
+    },
+    "FigureFrame": {
+      "type": "object",
+      "required": ["schema", "frame_revision", "image_revision", "geometry_revision",
+        "png_base64", "png_sha256", "scene_json", "scene_sha256", "candidate_revision",
+        "revision", "source_revision", "base_config_revision", "scope", "science", "qa",
+        "qa_kind", "evidence", "renderer_fingerprint"],
+      "properties": {
+        "schema": {"const": "figpact.inspector/1"},
+        "frame_revision": {"type": "string"},
+        "image_revision": {"type": "string"},
+        "geometry_revision": {"type": "string"},
+        "png_base64": {"type": "string", "contentEncoding": "base64"},
+        "png_sha256": {"type": "string"},
+        "scene_json": {"type": "string", "description": "Canonical Inspector scene JSON; contains canvas_bounds_mm and measured nodes."},
+        "scene_sha256": {"type": "string"},
+        "candidate_revision": {"type": "string"},
+        "revision": {"type": "string", "description": "Alias of candidate_revision."},
+        "source_revision": {"type": ["string", "null"]},
+        "base_config_revision": {"type": "string"},
+        "scope": {"type": "string", "minLength": 1},
+        "renderer_fingerprint": {"$ref": "#/$defs/RendererFingerprint"},
+        "renderer_digest": {"type": "string", "description": "Optional convenience copy of renderer_fingerprint.digest."},
+        "session": {
+          "type": "object", "required": ["session_id", "scene_revision", "source_revision", "can_evaluate"],
+          "properties": {
+            "session_id": {"type": "string"},
+            "scene_revision": {"type": "string"},
+            "source_revision": {"type": ["string", "null"]},
+            "can_evaluate": {"const": false}
+          },
+          "additionalProperties": false
+        },
+        "science": {
+          "type": "object", "required": ["verified", "digest"],
+          "properties": {"verified": {"type": "boolean"}, "digest": {"type": ["string", "null"]}}
+        },
+        "qa": {"type": ["array", "null"], "items": {}},
+        "qa_kind": {"type": ["string", "null"]},
+        "evidence": {
+          "type": "object",
+          "required": ["render", "persistence", "host", "export_page"],
+          "properties": {
+            "render": {"type": "string"},
+            "persistence": {"type": "string"},
+            "host": {"const": "NOT_CONNECTED"},
+            "export_page": {"const": "NOT_RUN"}
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "RendererFingerprint": {
+      "type": "object",
+      "description": "Identity-only renderer metadata. frame_revision chain stays sha(png_sha256, scene_sha256). Version strings allow explicit None for cross-platform attr absence, never faked.",
+      "required": ["renderer_class", "canvas_class", "matplotlib_version", "freetype_version", "pillow_version", "dpi", "size_px", "digest"],
+      "properties": {
+        "renderer_class": {"type": "string"},
+        "canvas_class": {"type": "string"},
+        "matplotlib_version": {"type": ["string", "null"]},
+        "freetype_version": {"type": ["string", "null"]},
+        "pillow_version": {"type": ["string", "null"]},
+        "dpi": {"type": "number"},
+        "size_px": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "integer"}},
+        "digest": {"type": "string", "description": "Canonical sha256 of the above fields."}
+      },
+      "additionalProperties": false
+    },
+    "IntentEdit": {
+      "type": "object",
+      "required": ["control_id", "value"],
+      "properties": {
+        "control_id": {"type": "string", "minLength": 1},
+        "value": {"type": "number"},
+        "role": {"type": "string", "description": "Optional Native role; only when deterministically mapped, never invented."}
+      },
+      "additionalProperties": false
+    },
+    "EditIntent": {
+      "type": "object",
+      "required": ["schema", "panel_id", "edits", "fit_canvas", "required_content", "preserve"],
+      "additionalProperties": false,
+      "properties": {
+        "schema": {"const": "figpact.intent/1"},
+        "panel_id": {"type": "string", "minLength": 1},
+        "edits": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/IntentEdit"}, "uniqueItems": true},
+        "fit_canvas": {"type": "boolean"},
+        "required_content": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "preserve": {"type": "array", "prefixItems": [{"const": "science"}, {"const": "view"}], "minItems": 2, "maxItems": 2}
+      }
+    },
+    "ProjectedNode": {
+      "type": "object",
+      "required": ["id", "measurable", "scale_xy", "source"],
+      "properties": {
+        "id": {"type": "string"},
+        "rect_mm": {
+          "type": ["array", "null"], "minItems": 4, "maxItems": 4,
+          "items": {"type": "number"},
+          "description": "Page top-left mm [x, y, w, h]; None when unmeasurable/cropped-out."
+        },
+        "measurable": {"type": "boolean"},
+        "scale_xy": {
+          "type": ["array", "null"], "minItems": 2, "maxItems": 2,
+          "items": {"type": "number"},
+          "description": "Anisotropic pair; never a scalar."
+        },
+        "anisotropic": {"type": ["boolean", "null"]},
+        "source": {
+          "type": "object",
+          "required": ["scene_bounds_mm", "canvas_mm", "crop_mm", "flip_h", "flip_v", "rotation_deg"],
+          "properties": {
+            "scene_bounds_mm": {"type": ["array", "null"], "items": {"type": "number"}},
+            "canvas_mm": {"type": "array", "items": {"type": "number"}},
+            "crop_mm": {"type": "array", "items": {"type": "number"}},
+            "flip_h": {"type": "boolean"},
+            "flip_v": {"type": "boolean"},
+            "rotation_deg": {"type": "number"}
+          }
+        },
+        "reason": {"type": "string", "description": "Set for unmeasurable nodes: UNMEASURED_SOURCE or CROPPED_OUT."}
+      }
+    },
+    "Receipt": {
+      "type": "object",
+      "description": "Successful RenderSession preview receipt: Native trial evidence plus immutable request/source/layout bindings.",
+      "required": ["status", "verification", "candidate_revision", "source_revision",
+        "base_config_revision", "layout_revision", "request_id", "epoch"],
+      "properties": {
+        "status": {"const": "OK"},
+        "verification": {"enum": ["RENDER_CHECKED", "GEOMETRY_CHECKED"]},
+        "revision": {"type": "string", "description": "Native candidate configuration revision."},
+        "candidate_revision": {"type": "string"},
+        "source_revision": {"type": ["string", "null"]},
+        "base_config_revision": {"type": "string"},
+        "layout_revision": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "request_id": {"type": ["string", "integer"]},
+        "epoch": {"type": "integer", "minimum": 1},
+        "science_unchanged": {"type": "boolean"},
+        "checks": {"type": "array", "items": {"type": "object"}},
+        "diagnostics": {"type": "array", "items": {}},
+        "affected_objects": {"type": "array", "items": {"type": "string"}},
+        "relations": {"type": "array", "items": {"type": "string"}},
+        "qa": {"type": "array", "items": {}},
+        "qa_kind": {"type": ["string", "null"]},
+        "new_qa": {"type": "array", "items": {}}
+      },
+      "additionalProperties": true
+    }
+  }
+}

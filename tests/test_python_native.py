@@ -140,6 +140,26 @@ def test_read_layout_binding_does_not_run_main_guard(tmp_path):
     assert listing(tmp_path) == ['figure.py']
 
 
+def test_read_layout_binding_restores_dont_write_bytecode_on_import_error(tmp_path):
+    import sys
+
+    script = write_script(tmp_path, 'raise RuntimeError("boom")\n')
+    sentinel = object()
+    old = sys.dont_write_bytecode
+    sys.dont_write_bytecode = sentinel
+    try:
+        try:
+            read_layout_binding(script)
+        except RuntimeError:
+            pass
+        else:  # pragma: no cover - 导入期异常必须原样上抛
+            raise AssertionError("expected RuntimeError")
+        assert sys.dont_write_bytecode is sentinel
+    finally:
+        sys.dont_write_bytecode = old
+    assert listing(tmp_path) == ['figure.py']
+
+
 # ---------------------------------------------------------------- ast 定位
 
 def test_locate_layout_literal_offsets_slice_the_source(tmp_path):

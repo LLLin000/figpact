@@ -271,9 +271,13 @@ def exec_module_isolated(spec, module, *, argv):
 
     调用方的全局 rcParams 原样保留；导入期改掉的 rc 记在模块的
     `__figpact_import_rc__` 上（构建期由 `FigureSession._call_builder` 叠加）。
+    隔离导入不写字节码缓存：`sys.dont_write_bytecode` 只在此调用内为 True，
+    退出（包括异常路径）即恢复——不留 `__pycache__`。
     """
     old_argv = sys.argv
+    old_dont_write = sys.dont_write_bytecode
     sys.argv = list(argv)
+    sys.dont_write_bytecode = True
     try:
         import matplotlib as mpl
         entry = pristine_rc()
@@ -295,6 +299,7 @@ def exec_module_isolated(spec, module, *, argv):
             module.__figpact_import_rc__ = overlay
     finally:
         sys.argv = old_argv
+        sys.dont_write_bytecode = old_dont_write
     return module
 
 
@@ -303,6 +308,8 @@ def load_module(script, config, *, module_name=None):
 
     导入在调用时 rc 快照下隔离执行：脚本导入期的 `figure_style.apply()` 只污染
     隔离区，退出即还原——调用方的全局 rcParams 不会被改掉。
+    隔离导入不写字节码缓存（`__pycache__`）：`sys.dont_write_bytecode` 只在导入
+    期为 True，退出即恢复；不删调用方既有缓存。
     旧模块会被同目录下的新模块替换掉（源码改动后重载不会串味）。
     """
     script = Path(script).resolve()
@@ -982,6 +989,9 @@ class FigureSession:
         self._goals: dict[tuple, float] = {}
         self._proofs: dict[str, dict] = {}
         self._preview_cache: dict[str, dict] = {}
+        self._frame_cache: dict | None = None
+        self._frame_cache_key: tuple | None = None
+        self._frame_cache_shapes: dict | None = None
         self._baseline = None
         self._fig = None
         self._reg = None
@@ -1022,6 +1032,9 @@ class FigureSession:
         self._goals.clear()
         self._proofs.clear()
         self._preview_cache.clear()
+        self._frame_cache = None
+        self._frame_cache_key = None
+        self._frame_cache_shapes = None
         self._baseline = None
         self._close_built()
         mod = self._module
@@ -1080,6 +1093,9 @@ class FigureSession:
         if self._closed:
             return
         self._close_built()
+        self._frame_cache = None
+        self._frame_cache_key = None
+        self._frame_cache_shapes = None
         self._closed = True
         if self._tmpdir is not None:
             self._tmpdir.cleanup()
@@ -1879,6 +1895,10 @@ class FigureSession:
             self._goals = previous_goals
             result.setdefault('revision', self.revision)
             return result
+        # 候选身份变了：上一帧缓存作废（reset 与新目标一样），下一次捕获重画。
+        self._frame_cache = None
+        self._frame_cache_key = None
+        self._frame_cache_shapes = None
         result.update(revision=self.revision, changes=changes, goals=len(goals))
         return result
 
@@ -2700,14 +2720,269 @@ class FigureSession:
         out = dict(payload)
         out['cached'] = False
         return out
+    # -- 同帧捕获 / 导出（G0+G1 纵向切片：worker 权威，单 Figure 同 draw） --------
+
+    def capture_frame(self, *, revision=None):
+        """Worker 权威的同源帧：实际候选 Figure 上一次 Agg draw 的 PNG+Scene。
+
+        同一次 :func:`figpact.inspector.capture_figure` 绘制的 PNG 与 Scene（同一
+        renderer、同一 draw），绝不把 ``render_preview`` 的 savefig PNG 与另一次
+        draw 的 snapshot 拼成一帧。``qa``/``science`` 是同一候选 Figure 对象上的
+        实测证据（同一构建，不是重建前后拼凑）；``required_content`` 这类判定由
+        消费方用 Scene 自行查找，本帧只给事实。``qa`` 是绝对 QA 列表（候选实际
+        的阻断项/警告项），不是「相对基线无新增」——「无新增」不等于安全，策略由
+        消费方（Render API）自行应用。
+
+        返回在 Inspector 帧原样字段上追加的嵌套 provenance：
+        ``candidate_revision``/``revision``（候选配置哈希）、``source_revision``、
+        ``base_config_revision``、``scope``、``science``（``{verified, digest}``）、
+        ``qa``/``qa_kind``、``evidence``（``render``/``persistence``/``host``/
+        ``export_page``；首轮 ``host`` 恒为 ``NOT_CONNECTED``，
+        ``export_page`` 恒为 ``NOT_RUN``）。
+        """
+        self._sync()
+        if revision is not None and revision != self.revision:
+            raise StaleRevision(f'revision 已过期：请求 {revision}，当前 {self.revision}')
+        current = self.revision
+        key = (current, self._source_rev, self.base_config_revision)
+        cached = self._frame_cache
+        if cached is not None and self._frame_cache_key == key:
+            # 精确同一候选/同一源/同一基线：同一帧（深拷贝防调用方篡改缓存）。
+            return copy.deepcopy(cached)
+        fig, held = self.build_candidate(self.candidate_config)
+        try:
+            from figpact.inspector import capture_figure
+            # Inspector settles legal native view windows before its internal
+            # science baseline; pin baseline AFTER first capture (its draw-time
+            # guard already covers draw drift). Compare QA/shapes/recapture to it.
+            frame = capture_figure(fig, held, scope=self.scope, contract=self.contract,
+                                   science_manifest=self.science_manifest,
+                                   source_revision=self._source_rev)
+            base_science = self._capture_science(fig, held)
+            # QA/科学证据必须与最终 PNG+Scene 同一 draw 状态，且后续绘制不得
+            # 静默改变已捕获帧：QA/形状辅助绘制后做同 Figure 二次捕获并比较
+            # PNG+Scene 哈希，漂移即拒绝（不拼接不同渲染）。
+            qa_payload = self._qa(fig)
+            if self._capture_science(fig, held).get('digest') != base_science.get('digest'):
+                raise SessionError('QA 绘制改变了科学指纹，拒绝出帧')
+            shapes = drawn_shapes(fig, held, include_frames=True)
+            frame2 = capture_figure(fig, held, scope=self.scope, contract=self.contract,
+                                    science_manifest=self.science_manifest,
+                                    source_revision=self._source_rev)
+            if frame2.get('png_sha256') != frame.get('png_sha256') \
+                    or frame2.get('scene_sha256') != frame.get('scene_sha256') \
+                    or frame2.get('frame_revision') != frame.get('frame_revision'):
+                raise StaleRevision('候选 Figure 在捕获后发生绘制漂移，拒绝陈旧帧')
+            science = self._capture_science(fig, held)
+            if science.get('digest') != base_science.get('digest'):
+                raise SessionError('二次捕获后科学指纹变化，拒绝出帧')
+            frame['candidate_revision'] = current
+            frame['revision'] = current
+            frame['source_revision'] = self._source_rev
+            frame['base_config_revision'] = self.base_config_revision
+            frame['scope'] = self.scope
+            frame['science'] = {'verified': science.get('verified'),
+                                'digest': science.get('digest')}
+            frame['qa'] = qa_payload.get('qa')
+            frame['qa_kind'] = qa_payload.get('qa_kind')
+            frame['evidence'] = {'render': 'SAME_CAPTURE_PNG_SCENE',
+                                 'persistence': 'NOT_WRITTEN',
+                                 'host': 'NOT_CONNECTED',
+                                 'export_page': 'NOT_RUN'}
+            # worker 持有该候选 Figure：先关闭旧持有对象再安装新对象。
+            self._close_built()
+            self._fig, self._reg = fig, held
+            self._built_revision = current
+            fig = None
+            self._frame_cache = copy.deepcopy(frame)
+            self._frame_cache_key = key
+            self._frame_cache_shapes = shapes
+            return copy.deepcopy(frame)
+        finally:
+            if fig is not None:
+                import matplotlib.pyplot as plt
+                plt.close(fig)
+    def export_frame(self, output_dir, *, revision=None, frame_revision=None):
+        """导出精确请求的那一帧：同帧 PNG（same-capture 字节）+ 另一后端 PDF。
+
+        只接受 ``revision``/``frame_revision`` 与当前候选精确一致的请求，否则
+        :class:`StaleRevision` 拒绝（动态漂移同样拒绝，不伪造 provenance）。
+        PNG 字节就是 :meth:`capture_frame` 同一帧的字节（哈希复核）；PDF 是另一
+        后端（``savefig(format='pdf')``）单独声明的产物。导出前后只观测同一
+        Agg 侧 Figure 的科学指纹与显示几何（漂移即拒绝），写盘后实测 PDF 页框；
+        **不**声称发射后 PDF 字形/几何等价或终页 QA。PDF 物理尺寸用已安装支持的
+        依赖实测（复用 ``figpact.handoff.measure_pdf_page_mm``，缺 pypdf 时明确报
+        可选能力缺失，不 casually 加依赖）。产物落在 ``output_dir`` 下以候选/帧
+        寻址的**新建**不可变束里（已存在一律拒绝覆盖）；源脚本/配置/声明产物在
+        显式 commit 前一律不动；失败时只删自己新建的文件（原子清理），路径恒界定
+        在 ``output_dir`` 内，不写任意脚本文件。``renderer_fingerprint`` 随帧透传
+        进 provenance/回执并显式标注上述限制。
+        """
+        import os as _os
+        if not isinstance(output_dir, (str, _os.PathLike)) or not str(output_dir):
+            raise SessionError('export_frame 需要 output_dir')
+        if not isinstance(revision, str) or not revision:
+            raise SessionError('export_frame 需要 revision（精确候选，不猜当前）')
+        if not isinstance(frame_revision, str) or not frame_revision:
+            raise SessionError('export_frame 需要 frame_revision（精确帧，不猜当前）')
+        self._sync()
+        current = self.revision
+        if revision != current:
+            raise StaleRevision(f'revision 已过期：请求 {revision}，当前 {current}')
+        cached = self._frame_cache
+        key = (current, self._source_rev, self.base_config_revision)
+        if cached is None or self._frame_cache_key != key \
+                or cached.get('frame_revision') != frame_revision:
+            # 没有命中精确同一帧：重捕获一次，漂移/陈旧一律拒绝，不猜当前。
+            frame = self.capture_frame(revision=current)
+            if frame.get('frame_revision') != frame_revision:
+                raise StaleRevision('frame 已更新（动态漂移或请求陈旧），拒绝陈旧导出')
+        else:
+            frame = copy.deepcopy(cached)
+        png_bytes = base64.b64decode(frame['png_base64'])
+        if hashlib.sha256(png_bytes).hexdigest() != frame.get('png_sha256'):
+            raise SessionError('同帧 PNG 字节与摘要不一致，拒绝导出')
+        held_fig, held_reg = self._fig, self._reg
+        if held_fig is None or held_reg is None or self._built_revision != current:
+            raise StaleRevision('候选 Figure 已失效（缓存/重载后未重捕获），拒绝陈旧导出')
+        # 同一候选 Figure 上导出 PDF：绘制前后都做科学复核，漂移即拒绝。
+        before_science = self._capture_science(held_fig, held_reg)
+        if before_science.get('digest') != (frame.get('science') or {}).get('digest'):
+            raise SessionError('候选 Figure 的科学指纹与请求帧不一致（动态漂移），拒绝陈旧导出')
+        before_shapes = drawn_shapes(held_fig, held_reg, include_frames=True)
+        cached_shapes = self._frame_cache_shapes
+        if cached_shapes is not None:
+            drifted = sorted(set(_changed_shape_keys(cached_shapes, before_shapes)))
+            if drifted:
+                raise StaleRevision(f'候选 Figure 在捕获后发生几何漂移（{len(drifted)} 处），拒绝陈旧导出')
+        buf = io.BytesIO()
+        held_fig.savefig(buf, format='pdf')
+        pdf_bytes = buf.getvalue()
+        after_science = self._capture_science(held_fig, held_reg)
+        after_shapes = drawn_shapes(held_fig, held_reg, include_frames=True)
+        if after_science.get('digest') != before_science.get('digest'):
+            raise SessionError('PDF 后端绘制改变了同一 Figure 的科学指纹（draws 改动了图），'
+                               '无法保全 PNG/PDF 同源一致，拒绝导出')
+        drifted = sorted(set(_changed_shape_keys(before_shapes, after_shapes)))
+        if drifted:
+            raise StaleRevision(f'PDF 绘制改变了同一 Figure 的显示几何（{len(drifted)} 处，'
+                                f'渲染器容差内也不许伪造同源），拒绝导出')
+        self._sync()
+        if self.revision != current:
+            raise StaleRevision('导出期间来源变化，拒绝陈旧导出')
+        try:
+            from figpact.handoff import measure_pdf_page_mm
+        except ImportError as error:
+            raise SessionError('PDF 页面测量需要可选依赖 pypdf：'
+                               'python -m pip install "figpact[handoff]"') from error
+        root = Path(output_dir).expanduser().resolve()
+        if not root.is_dir():
+            raise SessionError(f'导出目标不存在或不是目录：{root}')
+        guarded = [Path(__file__).resolve().parent, Path(__file__).resolve().parent.parent / 'tools',
+                   Path(__file__).resolve().parent.parent / 'tests']
+        for base in guarded:
+            if root == base or base in root.parents:
+                raise SessionError(f'拒绝把导出束放在源码/前端/测试目录内：{root}')
+        script_parent = self.script.parent
+        if root == script_parent or script_parent in root.parents:
+            raise SessionError(f'拒绝把导出束放在源脚本目录内（避免覆盖正式产物）：{root}')
+        for declared in (self._outputs or []):
+            try:
+                other = Path(declared).resolve()
+            except Exception:
+                continue
+            if other == root or other in root.parents or root in other.parents:
+                raise SessionError(f'导出束与声明产物路径重叠，拒绝覆盖：{other}')
+        bundle = root / f'figpact-frame-{current[:16]}-{frame_revision[:16]}'
+        if _os.path.lexists(bundle):
+            raise SessionError(f'导出束已存在，拒绝覆盖：{bundle}')
+        created: list[Path] = []
+        try:
+            bundle.mkdir()
+            png_path = bundle / 'candidate.png'
+            with png_path.open('xb') as stream:
+                created.append(png_path)
+                stream.write(png_bytes)
+            pdf_path = bundle / 'candidate.pdf'
+            with pdf_path.open('xb') as stream:
+                created.append(pdf_path)
+                stream.write(pdf_bytes)
+            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp:
+                tmp.write(pdf_bytes)
+                tmp_name = tmp.name
+            try:
+                measured = measure_pdf_page_mm(Path(tmp_name))
+            finally:
+                try:
+                    _os.unlink(tmp_name)
+                except OSError:
+                    pass
+            provenance = {'candidate_revision': current, 'frame_revision': frame_revision,
+                          'source_revision': self._source_rev,
+                          'base_config_revision': self.base_config_revision,
+                          'scope': self.scope,
+                          'png_sha256': frame.get('png_sha256'),
+                          'pdf_sha256': hashlib.sha256(pdf_bytes).hexdigest(),
+                          'page_mm': list(measured.get('measured_page_mm') or []),
+                          'science_digest': (frame.get('science') or {}).get('digest'),
+                          'qa_kind': frame.get('qa_kind'),
+                          'qa_count': len(frame.get('qa') or []),
+                          'renderer_fingerprint': frame.get('renderer_fingerprint'),
+                          'renderer_digest': (frame.get('renderer_fingerprint') or {}).get('digest'),
+                          'limits': 'Agg capture stack identity only; no cross-machine pixel promise; '
+                                    'PDF is a separate backend product: science/state drift checked Agg-side '
+                                    'before/after, PDF page measured, no PDF glyph/geometry equivalence claimed.'}
+            prov_path = bundle / 'provenance.json'
+            with prov_path.open('xb') as stream:
+                created.append(prov_path)
+                stream.write(json.dumps(provenance, sort_keys=True, ensure_ascii=False,
+                                        separators=(',', ':')).encode('utf8'))
+            frame_path = bundle / 'frame.json'
+            with frame_path.open('xb') as stream:
+                created.append(frame_path)
+                stream.write(json.dumps(frame, sort_keys=True, ensure_ascii=True,
+                                        separators=(',', ':')).encode('ascii'))
+        except BaseException:
+            for path in created:
+                try:
+                    path.unlink()
+                except OSError:
+                    pass
+            try:
+                bundle.rmdir()
+            except OSError:
+                pass
+            raise
+        return {'bundle_dir': str(bundle), 'png_path': str(bundle / 'candidate.png'),
+                'pdf_path': str(bundle / 'candidate.pdf'),
+                'png_sha256': frame.get('png_sha256'),
+                'pdf_sha256': hashlib.sha256(pdf_bytes).hexdigest(),
+                'page_mm': list(measured.get('measured_page_mm') or []),
+                'pdf_measurement': measured,
+                'candidate_revision': current, 'frame_revision': frame_revision,
+                'source_revision': self._source_rev,
+                'base_config_revision': self.base_config_revision,
+                'science_digest': (frame.get('science') or {}).get('digest'),
+                'renderer_fingerprint': frame.get('renderer_fingerprint'),
+                'renderer_digest': (frame.get('renderer_fingerprint') or {}).get('digest'),
+                'qa': frame.get('qa'), 'qa_kind': frame.get('qa_kind'),
+                'evidence': {'render': 'SAME_CAPTURE_PNG_SEPARATE_PDF_BACKEND',
+                             'persistence': 'BUNDLE_WRITTEN_SOURCE_NOT_WRITTEN',
+                             'host': 'NOT_CONNECTED', 'export_page': 'NOT_RUN'}}
 
     # -- 快照 / 检查 ------------------------------------------------------- #
 
     def _current_figure(self):
+        # snapshot/inspect 用的候选 Figure：命中则复用 worker 持有的同一对象；
+        # 未命中（新候选/重载后）才重建并作废帧缓存。render_preview 行为不变：
+        # 它仍按 revision 走自己的 savefig 缓存，不碰帧缓存。
         current = self.revision
         if self._fig is not None and self._built_revision == current:
             return self._fig, self._reg
         self._close_built()
+        self._frame_cache = None
+        self._frame_cache_key = None
+        self._frame_cache_shapes = None
         self._fig, self._reg = self.build_candidate(self.candidate_config)
         self._built_revision = current
         return self._fig, self._reg

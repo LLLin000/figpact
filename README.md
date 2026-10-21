@@ -6,7 +6,7 @@ v0.1 只编辑已有授权对象。Overlay 支持坐标轴标题字号、刻度�
 
 许可证 **MIT**。安装、边界和三图操作见 [`docs/V0_1.md`](docs/V0_1.md)。G25 暂停、G25-S2 冻结；独立评测仍为 `BLOCKED`，不是这个受限点选产品的发布前置条件。
 
-与 Tavotto 的薄交接（只读尺寸/身份核验，不改布局）见 [`docs/HANDOFF.md`](docs/HANDOFF.md)；反向的 `figpact fit-layout` 可按 Tavotto 占位搜索授权 Native 字号候选，真实 preview，不自动保存。
+与 Tavotto 的薄交接（只读尺寸/身份核验，不改布局）见 [`docs/HANDOFF.md`](docs/HANDOFF.md)；反向的 `figpact fit-layout` 可按 Tavotto 占位搜索授权 Native 字号候选，真实 preview，不自动保存。独立渲染会话（无 Tavotto：`figpact render-session`，open/preview/commit/export 的 JSON-RPC）见 [`docs/R14_RENDER.md`](docs/R14_RENDER.md)。
 
 ## Quickstart
 

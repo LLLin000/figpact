@@ -308,6 +308,16 @@ class FigureWorker:
     def render_preview(self, *, revision=None):
         return self._session_request('render_preview', revision=revision)
 
+    def capture_frame(self, *, revision=None):
+        """Worker 权威的同源帧：子进程里实际候选 Figure 的 same-capture PNG+Scene。"""
+        return self._session_request('capture_frame', revision=revision)
+
+    def export_frame(self, output_dir, *, revision, frame_revision):
+        """导出精确请求的那一帧；revision/frame_revision 过期一律拒绝。"""
+        return self._session_request('export_frame', output_dir=str(output_dir),
+                                     revision=revision, frame_revision=frame_revision)
+
+
     def check_effects(self):
         return self._session_request('check_effects')
 
@@ -405,6 +415,11 @@ def _dispatch(method, kwargs, state):
         return session.try_layout(kwargs.get('operations') or [], revision=kwargs.get('revision'))
     if method == 'render_preview':
         return session.render_preview(revision=kwargs.get('revision'))
+    if method == 'capture_frame':
+        return session.capture_frame(revision=kwargs.get('revision'))
+    if method == 'export_frame':
+        return session.export_frame(kwargs.get('output_dir'), revision=kwargs.get('revision'),
+                                    frame_revision=kwargs.get('frame_revision'))
     if method == 'check_effects':
         return session.check_effects()
     if method == 'revision':

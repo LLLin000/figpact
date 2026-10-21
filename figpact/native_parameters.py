@@ -83,14 +83,6 @@ class NativeParameterSession:
         self.scope = scope
         self._agent = AgentSession(str(self.script), str(self.config), scope,
                                    output_dir=output_dir)
-        # In-process mirror: builds candidate figures from the worker's own
-        # candidate_config via the existing FigureSession.build_candidate
-        # path. The worker (subprocess) owns goals/truth; the mirror only
-        # renders. Framing reuses inspector.capture_figure -- the exact
-        # producer of figpact.inspector/1 bundles the existing JS
-        # validateFrame/verifyFrame accept. Never invented frame metadata.
-        from .session import FigureSession
-        self._local = FigureSession(str(self.script), str(self.config), scope)
         self._session_id: str | None = None
         self._pending: dict | None = None
         self._last_receipt: dict | None = None
@@ -103,32 +95,19 @@ class NativeParameterSession:
         self._base_frame: str | None = self._frame.get("frame_revision")
 
     def _capture_frame(self) -> dict:
-        """Real Inspector frame of the actual same candidate.
+        """Worker 权威的同源帧：子进程里实际候选 Figure 的 same-capture 帧。
 
-        ``session`` block mirrors the ``IntentSession._decorate`` convention
-        (``session_id`` / ``scene_revision`` / ``source_revision``) with
-        ``can_evaluate`` forced False so legacy drag never claims
-        authorization in this mode.
+        经 ``FigureWorker.capture_frame`` 取回；``session`` 块沿用既有 UI 约定
+        （``session_id`` / ``scene_revision`` / ``source_revision``），
+        ``can_evaluate`` 恒 False。``qa`` 继续沿用既有「无新增即不阻断」的
+        相对口径：基线行为不变，不新增 QA 结论；绝对 QA 列表位于同帧
+        ``qa``/``qa_kind`` 字段，供 Render API 侧自行应用策略。
         """
         import uuid
 
-        from .inspector import capture_figure
-
-        state = self._agent._call(self._agent._worker.state) or {}
-        self._local._sync()  # same-package reload gate: drift rebuilds, never stale-builds
-        fig, reg = self._local.build_candidate(state.get("candidate_config") or {})
-        try:
-            frame = capture_figure(
-                fig, reg, scope=self.scope,
-                contract=state.get("contract"),
-                science_manifest=state.get("science_manifest"),
-                source_revision=state.get("source_revision"))
-        finally:
-            try:
-                import matplotlib.pyplot as plt
-                plt.close(fig)
-            except Exception:
-                pass
+        frame = self._agent._call(self._agent._worker.capture_frame)
+        if not isinstance(frame, dict):
+            raise AgentError(SESSION_CLOSED, 'worker 未返回有效帧')
         if self._session_id is None:
             self._session_id = str(uuid.uuid4())
         scene = json.loads(frame["scene_json"])
@@ -137,6 +116,21 @@ class NativeParameterSession:
                             "source_revision": scene.get("source_revision"),
                             "can_evaluate": False}
         return frame
+
+    def export_frame(self, output_dir, revision: str, frame_revision: str) -> dict[str, Any]:
+        """导出精确请求的那一帧（worker 权威，内容寻址不可变束）。
+
+        直通 ``FigureWorker.export_frame``；无本地重建、无当前值兜底。
+        返回的束映射只做显式校验（必须是映射），远端诊断原样上抛，不吞错。
+        """
+        result = self._agent._call(
+            self._agent._worker.export_frame, str(output_dir),
+            revision=revision, frame_revision=frame_revision)
+        if not isinstance(result, dict):
+            raise AgentError(SESSION_CLOSED,
+                             f'worker 导出未返回束映射（得到 {type(result).__name__}）')
+        return result
+
 
     def _rebuild(self) -> tuple[dict, dict]:
         """Frame + native state for the actual same candidate."""

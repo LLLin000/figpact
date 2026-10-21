@@ -170,6 +170,7 @@ def _project_node(node: dict) -> dict:
         'descriptor': node.get('descriptor'),
         'scope': node.get('scope'),
         'parent': node.get('parent'),
+        'visible': node.get('visible'),
         'measured': bool(node.get('measured')),
         'fully_clipped': bool(node.get('fully_clipped')),
         'bounds_mm': node.get('bounds_mm'),
@@ -186,6 +187,7 @@ def _project_node(node: dict) -> dict:
         'science_policy': node.get('science_policy'),
         'editable_capability': EDITABLE_CAPABILITY,
         'structural': bool(node.get('structural')),
+        'font_size_pt': node.get('font_size_pt'),
     }
     note = _hit_note_of(node, runs)
     if note:
@@ -209,6 +211,34 @@ def _png_bytes(canvas, renderer) -> tuple[bytes, int, int]:
     image.save(buffer, format='PNG')
     return buffer.getvalue(), width_px, height_px
 
+
+def _renderer_fingerprint(renderer: Any, canvas: Any, dpi: float, width_px: int, height_px: int) -> dict[str, Any]:
+    """实际渲染器身份：类名 + 已装软件版本 + DPI + 像素尺寸的 canonical 摘要。
+
+    只用现场已有对象与已导入模块的版本属性（无新依赖、无 provider 注册表）；
+    未知字段一律 None 不抛错。明确限制：这是 Agg 捕获栈的身份，不是跨机器
+    逐像素复现承诺（系统回退字体可变）。
+    """
+    import matplotlib
+
+    from matplotlib import ft2font
+    freetype = getattr(ft2font, '__freetype_version__', None)
+    pillow = getattr(Image, '__version__', None)
+    facts = {
+        'renderer_class': type(renderer).__name__ if renderer is not None else None,
+        'canvas_class': type(canvas).__name__ if canvas is not None else None,
+        'matplotlib_version': getattr(matplotlib, '__version__', None),
+        'freetype_version': freetype,
+        'pillow_version': pillow,
+        'dpi': float(dpi) if dpi is not None else None,
+        'size_px': [int(width_px), int(height_px)],
+    }
+    try:
+        blob = json.dumps(facts, sort_keys=True, ensure_ascii=True,
+                          separators=(',', ':'), allow_nan=False)
+    except (TypeError, ValueError) as error:
+        raise InspectorError(f'渲染器身份不是有限 canonical JSON：{error}') from error
+    return {**facts, 'digest': hashlib.sha256(blob.encode('ascii')).hexdigest()}
 
 def _peak_anchors(science_manifest) -> dict:
     """清单里显式声明的 label→guide 峰锚点；没有就空，绝不从 gid 字符串猜。"""
@@ -383,7 +413,7 @@ def capture_figure(fig, registry=None, *, scope='measurement', contract=None,
     scene_sha256 = hashlib.sha256(scene_json.encode('utf-8')).hexdigest()
     png_sha256 = hashlib.sha256(png_bytes).hexdigest()
     frame_revision = hashlib.sha256(f'{png_sha256}\n{scene_sha256}'.encode('ascii')).hexdigest()
-    return {
+    frame = {
         'schema': FRAME_SCHEMA,
         'frame_revision': frame_revision,
         'image_revision': frame_revision,
@@ -393,6 +423,9 @@ def capture_figure(fig, registry=None, *, scope='measurement', contract=None,
         'scene_json': scene_json,
         'scene_sha256': scene_sha256,
     }
+    frame['renderer_fingerprint'] = _renderer_fingerprint(
+        renderer, canvas, dpi, width_px, height_px)
+    return frame
 
 
 def _refuse_unsafe_target(target: pathlib.Path) -> None:

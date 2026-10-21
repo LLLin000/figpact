@@ -539,6 +539,15 @@ def cmd_agent(args: argparse.Namespace) -> int:
     return serve(args.script, args.config, args.scope, output_dir=args.output_dir)
 
 
+def cmd_render_session(args: argparse.Namespace) -> int:
+    """独立渲染 JSON-RPC 会话：stdin/stdout 上跑协议，stdout 只承载协议本身。"""
+    from figpact.render_rpc import serve
+
+    return serve(args.script, args.config, args.scope, output_dir=args.output_dir)
+
+
+
+
 def cmd_export_params(args: argparse.Namespace) -> int:
     """从注册表与脚本规范导出全部参数为结构化 JSON。"""
     script = Path(args.script).expanduser().resolve()
@@ -1125,6 +1134,15 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_agent.add_argument("--scope", required=True, help="会话作用域（一张图一个工作进程）")
     p_agent.add_argument("--output-dir", default=None, dest="output_dir",
                          help="产物根目录（默认脚本所在目录）")
+
+    # render-session --script <py> --config <yaml> --scope <name> [--output-dir <dir>]
+    p_rs = subparsers.add_parser("render-session", help="独立渲染会话 JSON-RPC：open/snapshot/preview/cancel/commit/export/close")
+    p_rs.add_argument("--script", required=True, help="可信本地绘图脚本路径（命令行显式指定）")
+    p_rs.add_argument("--config", required=True, help="配置文件 YAML 路径")
+    p_rs.add_argument("--scope", required=True, help="会话作用域（一张图一个工作进程）")
+    p_rs.add_argument("--output-dir", default=None, dest="output_dir",
+                      help="产物根目录（默认脚本所在目录）")
+
     # final-size (read-only)
     p_fs = subparsers.add_parser("final-size", aliases=["audit-final-size"], help="只读 final-size 审计")
     p_fs.add_argument("--script", required=True, help="绘图脚本路径")
@@ -1252,7 +1270,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         return cmd_ui(args)
     elif args.subcommand == "agent":
         return cmd_agent(args)
-    return 0
+    elif args.subcommand == "render-session":
+        return cmd_render_session(args)
 
 
 if __name__ == "__main__":

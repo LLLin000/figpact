@@ -1,0 +1,216 @@
+{
+ "_comment": "Golden layout fixtures for tests/test_render_contract.py. Rects are explicit placeholder geometry for FTIR/NMR/XRD/bar panels plus rotated/cropped neighbours on an A4 page (210x297 top-left mm). kind/resource/source are generic identity/provenance (no host-specific names). photo/ghost carry rect_mm=None for unknown/unsupported (explicit unknown, never fake rect); values otherwise derived by hand, not claimed science-semantic measurements.",
+ "a4_two_panel": {
+  "objects": [
+   {
+    "id": "bar",
+    "kind": "panel",
+    "measurement_status": "measured",
+    "rect_mm": [
+     110.0,
+     90.0,
+     85.0,
+     60.0
+    ],
+    "resource": "bar_stats",
+    "source": {
+     "origin": "standalone_fixture"
+    }
+   },
+   {
+    "crop": [
+     10.0,
+     25.0,
+     20.0,
+     20.0
+    ],
+    "id": "crop",
+    "kind": "panel",
+    "measurement_status": "measured",
+    "rect_mm": [
+     15.0,
+     230.0,
+     85.0,
+     60.0
+    ],
+    "resource": "cropped_panel",
+    "source": {
+     "origin": "standalone_fixture"
+    }
+   },
+   {
+    "id": "ftir",
+    "kind": "panel",
+    "measurement_status": "measured",
+    "rect_mm": [
+     15.0,
+     20.0,
+     85.0,
+     60.0
+    ],
+    "resource": "ftir_trace",
+    "source": {
+     "origin": "standalone_fixture"
+    }
+   },
+   {
+    "hidden": true,
+    "id": "ghost",
+    "kind": "panel",
+    "measurement_status": "unsupported",
+    "rect_mm": null
+   },
+   {
+    "id": "nmr",
+    "kind": "panel",
+    "measurement_status": "measured",
+    "rect_mm": [
+     110.0,
+     20.0,
+     85.0,
+     60.0
+    ],
+    "resource": "nmr_trace",
+    "source": {
+     "origin": "standalone_fixture"
+    }
+   },
+   {
+    "id": "photo",
+    "kind": "image",
+    "measurement_status": "unknown",
+    "rect_mm": null,
+    "resource": "opaque_bitmap"
+   },
+   {
+    "id": "rot",
+    "kind": "panel",
+    "measurement_status": "measured",
+    "rect_mm": [
+     110.0,
+     160.0,
+     85.0,
+     60.0
+    ],
+    "resource": "rotated_panel",
+    "rotation_deg": 90
+   },
+   {
+    "id": "xrd",
+    "kind": "panel",
+    "measurement_status": "conservative",
+    "rect_mm": [
+     15.0,
+     90.0,
+     85.0,
+     60.0
+    ],
+    "resource": "xrd_trace",
+    "source": {
+     "origin": "standalone_fixture"
+    }
+   }
+  ],
+  "page_mm": [
+   210.0,
+   297.0
+  ],
+  "schema": "figpact.layout/1",
+  "source_mode": "standalone"
+ },
+ "overlap_page": {
+  "objects": [
+   {
+    "id": "target",
+    "kind": "panel",
+    "measurement_status": "measured",
+    "rect_mm": [
+     15.0,
+     20.0,
+     85.0,
+     60.0
+    ],
+    "source": {
+     "origin": "standalone_fixture"
+    }
+   },
+   {
+    "id": "near",
+    "kind": "panel",
+    "measurement_status": "conservative",
+    "rect_mm": [
+     60.0,
+     40.0,
+     85.0,
+     60.0
+    ]
+   },
+   {
+    "hidden": true,
+    "id": "hidden_near",
+    "kind": "panel",
+    "measurement_status": "measured",
+    "rect_mm": [
+     60.0,
+     40.0,
+     85.0,
+     60.0
+    ]
+   },
+   {
+    "id": "locked_near",
+    "kind": "panel",
+    "locked": true,
+    "measurement_status": "measured",
+    "rect_mm": [
+     20.0,
+     25.0,
+     30.0,
+     20.0
+    ]
+   }
+  ],
+  "page_mm": [
+   210.0,
+   297.0
+  ],
+  "schema": "figpact.layout/1",
+  "source_mode": "standalone"
+ },
+ "panel_plain": {
+  "id": "p1",
+  "kind": "panel",
+  "measurement_status": "measured",
+  "rect_mm": [
+   0.0,
+   0.0,
+   50.0,
+   25.0
+  ]
+ },
+ "scene_small": {
+  "_comment": "Canvas-bottom-left scene used for hand-checked projection tests.",
+  "canvas_mm": [
+   100.0,
+   50.0
+  ],
+  "coordinate_reference": "canvas_bottom_left",
+  "nodes": [
+   {
+    "bounds_mm": [
+     10.0,
+     10.0,
+     30.0,
+     20.0
+    ],
+    "id": "n1",
+    "measured": true
+   },
+   {
+    "bounds_mm": null,
+    "id": "n2",
+    "measured": false
+   }
+  ]
+ }
+}
