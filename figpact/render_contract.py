@@ -9,24 +9,38 @@ LayoutSnapshot (``figpact.layout/1``)::
 
     {schema: 'figpact.layout/1', source_mode: 'standalone'|'saved'|'live',
      page_mm: [W, H],                       # final-page size, top-left origin
-     objects: [{id, rect_mm: [x, y, w, h]|None,  # page top-left mm; None allowed
-                measurement_status: 'measured'|'conservative'|'unknown'|'unsupported',
-                hidden?: bool, locked?: bool,
-                rotation_deg?: number,      # right angles only, default 0
-                crop?: [x, y, w, h],        # canvas top-left mm, default None
-                flip_h?: bool, flip_v?: bool,
-                kind?: str,                 # generic object kind, e.g. 'panel'
-                resource?: str,             # generic resource identity
-                source?: {str: str},        # generic provenance map, no host names
-                z_index?: int|None,         # stacking order; None = unknown, bool rejected
-                capabilities?: [str]|None}, ...],  # None = unknown vs [] = known-no-caps
-     project_id?: str|None, page_id?: str|None, host_revision?: str|None,
-     captured_at?: str,                     # informational only, excluded from hash
-     revision?: str}                        # must match computed hash when supplied
+    objects: [{id, rect_mm: [x, y, w, h]|None,  # page top-left mm; None allowed
+               measurement_status: 'measured'|'conservative'|'unknown'|'unsupported',
+               hidden?: bool, locked?: bool,
+               rotation_deg?: number|None,  # right angles only, default 0 when omitted;
+                                           # explicit None ONLY for unknown/unsupported
+               crop?: [x, y, w, h],        # canvas top-left mm, default None
+               flip_h?: bool, flip_v?: bool,
+               kind?: str,                 # generic object kind, e.g. 'panel'
+               resource?: str,             # generic resource identity
+               source?: {str: str},        # generic provenance map, no host names
+               z_index?: int|None,         # stacking order; None = unknown, bool rejected
+               capabilities?: [str]|None,  # None = unknown vs [] = known-no-caps
+               group_id?: str|None,        # lightweight group membership; never solved
+               render_owner?: str|None,    # declared ownership; never inferred
+               native_size_mm?: [W, H]|None,  # stored source size, W,H > 0; never a page target
+               resource_revision?: str|None,  # hash-covered resource identity
+               overrides_revision?: str|None, # hash-covered override state
+               opacity?: number|None}, ...],  # finite [0, 1]; None = unknown
+    objects: [] is legal for a genuinely empty page (never an imaginary object).
+    project_id?: str|None, page_id?: str|None, host_revision?: str|None,
+    extensions?: {str: JSON}|None,       # strict finite JSON, string keys;
+                                         # deep-copied, idempotent, hash-covered,
+                                         # ignored by geometry; grants no permissions
+    captured_at?: str,                     # informational only, excluded from hash
+    revision?: str}                        # must match computed hash when supplied
 
 ``rect_mm=None`` is allowed ONLY for unknown/unsupported statuses (unknown
 geometry is explicit, never a fake rect); measured/conservative still require
-positive rects. precheck reports unknown neighbours as relation='unknown'
+positive rects: ``rect_mm`` is the FINAL post-rotation bbox (the stored
+content extent is transposed for 90/270, so projection scales/flips in
+content dims then rotates about the content-box centre; page origin and the
+reported panel rect stay final). precheck reports unknown neighbours as relation='unknown'
 with overlap None; target-unknown yields target_outside None plus
 MEASUREMENT_LIMITED; project_scene refuses unknown targets outright.
 
@@ -140,10 +154,12 @@ def _text(mapping: dict[str, Any], key: str, *, what: str, required: bool) -> st
 
 OBJECT_KEYS = frozenset({"id", "rect_mm", "measurement_status", "hidden", "locked",
                          "rotation_deg", "crop", "flip_h", "flip_v", "kind",
-                         "resource", "source", "z_index", "capabilities"})
+                         "resource", "source", "z_index", "capabilities",
+                         "group_id", "render_owner", "native_size_mm",
+                         "resource_revision", "overrides_revision", "opacity"})
 LAYOUT_KEYS = frozenset({"schema", "source_mode", "page_mm", "objects",
                          "project_id", "page_id", "host_revision",
-                         "captured_at", "revision"})
+                         "extensions", "captured_at", "revision"})
 INTENT_KEYS = frozenset({"schema", "panel_id", "edits", "fit_canvas",
                          "required_content", "preserve"})
 
@@ -172,8 +188,14 @@ def _validate_object(obj: dict[str, Any]) -> dict[str, Any]:
     crop_out = None
     if crop is not None:
         crop_out = _rect4(crop, what=f"object {oid!r} crop", allow_negative_xy=False)
-    rotation = _norm_rotation(obj.get("rotation_deg", 0),
-                              what=f"object {oid!r} rotation_deg")
+    rot_raw = obj.get("rotation_deg", 0)
+    if rot_raw is None:
+        if status not in UNMEASURED_STATUSES:
+            raise RenderContractError(
+                f"object {oid!r} rotation_deg=None allowed only for unknown/unsupported statuses")
+        rotation = None
+    else:
+        rotation = _norm_rotation(rot_raw, what=f"object {oid!r} rotation_deg")
     kind = _text(obj, "kind", what=f"object {oid!r}", required=False)
     resource = _text(obj, "resource", what=f"object {oid!r}", required=False)
     source = obj.get("source")
@@ -198,6 +220,26 @@ def _validate_object(obj: dict[str, Any]) -> dict[str, Any]:
                 or not all(bool(isinstance(c, str) and c) for c in caps_raw):
             raise RenderContractError(f"object {oid!r} capabilities must be list[str]|None (unknown vs [])")
         caps = list(caps_raw)
+    group_id = _text(obj, "group_id", what=f"object {oid!r}", required=False)
+    render_owner = _text(obj, "render_owner", what=f"object {oid!r}", required=False)
+    resource_revision = _text(obj, "resource_revision", what=f"object {oid!r}", required=False)
+    overrides_revision = _text(obj, "overrides_revision", what=f"object {oid!r}", required=False)
+    native_raw = obj.get("native_size_mm")
+    native_size: list[float] | None = None
+    if native_raw is not None:
+        _req(isinstance(native_raw, (list, tuple)) and len(native_raw) == 2
+             and all(_is_num(v) for v in native_raw),
+             f"object {oid!r} native_size_mm must be [W, H] positive numbers")
+        _nw, _nh = float(native_raw[0]), float(native_raw[1])
+        _req(_nw > 0.0 and _nh > 0.0,
+             f"object {oid!r} native_size_mm width/height must be > 0")
+        native_size = [_nw, _nh]
+    opacity_raw = obj.get("opacity")
+    opacity: float | None = None
+    if opacity_raw is not None:
+        _req(_is_num(opacity_raw) and 0.0 <= float(opacity_raw) <= 1.0,
+             f"object {oid!r} opacity must be a finite number in [0, 1]")
+        opacity = float(opacity_raw)
     return {
         "id": oid,
         "rect_mm": rect,
@@ -213,7 +255,49 @@ def _validate_object(obj: dict[str, Any]) -> dict[str, Any]:
         "source": source_out,
         "z_index": z_index,
         "capabilities": caps,
+        "group_id": group_id,
+        "render_owner": render_owner,
+        "native_size_mm": native_size,
+        "resource_revision": resource_revision,
+        "overrides_revision": overrides_revision,
+        "opacity": opacity,
     }
+
+
+def _json_value(value: Any, *, what: str) -> Any:
+    """Deep-copy one strict finite JSON value (string keys, no NaN/Infinity)."""
+    if value is None or isinstance(value, (bool, str)):
+        return value
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        _req(math.isfinite(value),
+             f"{what} must hold finite JSON numbers (NaN/Infinity rejected)")
+        return value
+    if isinstance(value, (list, tuple)):
+        return [_json_value(v, what=f"{what}[{i}]") for i, v in enumerate(value)]
+    if isinstance(value, dict):
+        out: dict[str, Any] = {}
+        for k, v in value.items():
+            _req(bool(isinstance(k, str) and k.strip()),
+                 f"{what} keys must be non-empty strings")
+            out[k] = _json_value(v, what=f"{what}[{k!r}]")
+        return out
+    raise RenderContractError(
+        f"{what} must be strict finite JSON (got {type(value).__name__})")
+
+
+def _validate_extensions(raw: Any) -> dict[str, Any] | None:
+    if raw is None:
+        return None
+    _req(isinstance(raw, dict), "layout extensions must be a dict|None")
+    assert isinstance(raw, dict)
+    out: dict[str, Any] = {}
+    for key, val in raw.items():
+        _req(bool(isinstance(key, str) and key.strip()),
+             "layout extensions keys must be non-empty strings")
+        out[key] = _json_value(val, what=f"layout extensions[{key!r}]")
+    return out
 
 
 def _canonical_layout_body(snapshot: dict[str, Any]) -> dict[str, Any]:
@@ -227,8 +311,8 @@ def _canonical_layout_body(snapshot: dict[str, Any]) -> dict[str, Any]:
          f"source_mode must be one of {sorted(SOURCE_MODES)}")
     page = _page_mm(snapshot.get("page_mm"))
     objects = snapshot.get("objects")
-    if not isinstance(objects, list) or not objects:
-        raise RenderContractError("layout objects must be a non-empty list")
+    if not isinstance(objects, list):
+        raise RenderContractError("layout objects must be a list ([] is a genuinely empty page)")
     canonical_objects = [_validate_object(o) for o in objects]
     ids = [o["id"] for o in canonical_objects]
     _req(len(set(ids)) == len(ids),
@@ -244,6 +328,7 @@ def _canonical_layout_body(snapshot: dict[str, Any]) -> dict[str, Any]:
         "project_id": _text(snapshot, "project_id", what="layout", required=False),
         "page_id": _text(snapshot, "page_id", what="layout", required=False),
         "host_revision": _text(snapshot, "host_revision", what="layout", required=False),
+        "extensions": _validate_extensions(snapshot.get("extensions")),
     }
     if captured_at is not None:
         canonical["captured_at"] = captured_at
@@ -444,13 +529,28 @@ def project_scene(scene: dict[str, Any], panel: dict[str, Any], page_mm: Any) ->
             f"panel {obj['id']!r} cannot be a projection target: "
             f"status={obj['measurement_status']!r} rect={obj['rect_mm']!r} "
             "(unknown/unsupported geometry is never projected)")
+    if obj["rotation_deg"] is None:
+        raise RenderContractError(
+            f"panel {obj['id']!r} cannot be a projection target: "
+            "rotation_deg=None marks unknown/unsupported transform")
     page = _page_mm(page_mm)
     assert obj["rect_mm"] is not None
+    assert obj["rotation_deg"] is not None
     px, py, pw, ph = obj["rect_mm"]
     crop: list[float] = obj["crop"] or [0.0, 0.0, cw, ch]
     _req(bool(crop[0] + crop[2] <= cw + 1e-9 and crop[1] + crop[3] <= ch + 1e-9),
          f"panel {obj['id']!r} crop exceeds canvas {cw}x{ch}mm")
-    sx, sy = pw / crop[2], ph / crop[3]
+    # rect_mm is the FINAL post-rotation bbox: for quarter turns the content
+    # extent is transposed, so scale/flip/rotate use the content dims while
+    # page origin and the reported panel rect stay final. Rotation is about
+    # the content-box centre; rotating the final bbox centre would misplace
+    # non-square content.
+    rotation = obj["rotation_deg"]
+    if rotation in (90.0, 270.0):
+        content_w, content_h = ph, pw
+    else:
+        content_w, content_h = pw, ph
+    sx, sy = content_w / crop[2], content_h / crop[3]
     out_nodes = []
     measurable_count = 0
     for node in clean:
@@ -479,15 +579,15 @@ def project_scene(scene: dict[str, Any], panel: dict[str, Any], page_mm: Any) ->
                 "reason": "CROPPED_OUT",
             })
             continue
-        lx = px + (clipped[0] - crop[0]) * sx
-        ly = py + (clipped[1] - crop[1]) * sy
+        lx = (clipped[0] - crop[0]) * sx
+        ly = (clipped[1] - crop[1]) * sy
         lw, lh = clipped[2] * sx, clipped[3] * sy
         if obj["flip_h"]:
-            lx = px + (pw - (lx - px + lw))
+            lx = content_w - (lx + lw)
         if obj["flip_v"]:
-            ly = py + (ph - (ly - py + lh))
-        rx, ry, rw, rh = _rotate_local(lx - px, ly - py, lw, lh, pw, ph,
-                                       obj["rotation_deg"])
+            ly = content_h - (ly + lh)
+        rx, ry, rw, rh = _rotate_local(lx, ly, lw, lh, content_w, content_h,
+                                       rotation)
         measurable_count += 1
         out_nodes.append({
             "id": node["id"],

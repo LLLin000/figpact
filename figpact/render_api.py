@@ -62,6 +62,13 @@ def _scene_for_projection(frame: dict[str, Any]) -> tuple[dict[str, Any], list[d
         _error("FIT_UNAVAILABLE", f"Inspector scene cannot be projected without measured bounds: {error}")
 
 
+def project_frame_scene(frame: dict[str, Any], panel: dict[str, Any],
+                        page_mm: Any) -> dict[str, Any]:
+    """Project a captured frame without running the renderer or changing its layout."""
+    scene, _ = _scene_for_projection(frame)
+    return project_scene(scene, panel, page_mm)
+
+
 class RenderSession:
     """One worker-backed (script, config, scope) session with explicit receipts."""
 

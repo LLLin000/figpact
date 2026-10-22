@@ -8,6 +8,10 @@ v0.1 只编辑已有授权对象。Overlay 支持坐标轴标题字号、刻度�
 
 与 Tavotto 的薄交接（只读尺寸/身份核验，不改布局）见 [`docs/HANDOFF.md`](docs/HANDOFF.md)；反向的 `figpact fit-layout` 可按 Tavotto 占位搜索授权 Native 字号候选，真实 preview，不自动保存。独立渲染会话（无 Tavotto：`figpact render-session`，open/preview/commit/export 的 JSON-RPC）见 [`docs/R14_RENDER.md`](docs/R14_RENDER.md)。
 
+保存版面的全对象快照（G2-A）使用 `figpact layout-snapshot --layout <保存文件> --base <图库根> --canvas <画布ID>`；包含 runtime、照片、文本及组信息，不执行脚本、不修改页面，也不代表当前活动页面。见 [G2-A 使用与证据边界](docs/R14_RENDER.md#g2-a-explicit-saved-tavotto-page)。
+
+活动页面交接与托管图件展示（G2-B/C）使用 `figpact host-session --base <当前项目根> --host-origin <Tavotto 页面来源>`，再由配套 Tavotto 前端显式连接、读取当前页并展示同源 PNG/Scene。它不读取 autosave 冒充活动页面，不自动修改页面尺寸，也不代表最终导出验收。见 [活动页面与 FrameBinding](docs/R14_RENDER.md#g2-bc-active-page-capture-and-managed-frame-display)。
+
 ## Quickstart
 
 ```bash

@@ -1,14 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://figpact.dev/design/render.schema.json",
-  "$comment": "R14 G0+G1 standalone contract. No runtime dependency: validators live in figpact/render_contract.py (stdlib only); this file documents the wire shapes. Coordinate constants: layout/page = page_top_left mm; scene source = canvas_bottom_left mm; projection converts explicitly. Evidence separates render/persistence/host/export; host/export-page are NOT_CONNECTED/NOT_RUN in round one.",
+  "$comment": "R14 standalone render and live handoff contracts. Core remains host-independent. Page/layout origin = page_top_left mm; Scene origin = canvas_bottom_left mm. Frame display is client-reported evidence, not host page acceptance or final export verification.",
   "title": "figpact-render/1",
-  "description": "Shared $defs for LayoutSnapshot, FigureFrame, EditIntent, Receipt. Layout origin page_top_left; scene origin canvas_bottom_left; preserve is exactly ['science','view'].",
+  "description": "Shared definitions for LayoutSnapshot, FigureFrame, EditIntent, FrameBinding and Receipt. Render, display, persistence and final export evidence remain distinct.",
   "anyOf": [
     {"$ref": "#/$defs/LayoutSnapshot"},
     {"$ref": "#/$defs/FigureFrame"},
     {"$ref": "#/$defs/EditIntent"},
-    {"$ref": "#/$defs/Receipt"}
+    {"$ref": "#/$defs/Receipt"},
+    {"$ref": "#/$defs/FrameBinding"}
   ],
   "$defs": {
     "LayoutObject": {
@@ -22,7 +23,7 @@
         "measurement_status": {"enum": ["measured", "conservative", "unknown", "unsupported"]},
         "hidden": {"type": "boolean", "default": false},
         "locked": {"type": "boolean", "default": false},
-        "rotation_deg": {"type": "number", "description": "Right angles only; normalized to {0,90,180,270}."},
+        "rotation_deg": {"type": ["number", "null"], "description": "Right angles only; normalized to {0,90,180,270}. Null allowed ONLY for unknown/unsupported statuses; omitted defaults to 0."},
         "crop": {
           "type": ["array", "null"], "minItems": 4, "maxItems": 4,
           "prefixItems": [
@@ -39,7 +40,13 @@
         "resource": {"type": ["string", "null"], "description": "Generic resource identity (opaque reference, not a host handle)."},
         "source": {"type": ["object", "null"], "additionalProperties": {"type": "string"}, "description": "Generic provenance map, str->str. No host-specific keys."},
         "z_index": {"type": ["integer", "null"], "description": "Stacking order; null = unknown (default None). Bool rejected; no fake 0."},
-        "capabilities": {"type": ["array", "null"], "items": {"type": "string", "minLength": 1}, "description": "Object capabilities; null = unknown vs [] = known-no-caps."}
+        "capabilities": {"type": ["array", "null"], "items": {"type": "string", "minLength": 1}, "description": "Object capabilities; null = unknown vs [] = known-no-caps."},
+        "group_id": {"type": ["string", "null"], "minLength": 1, "description": "Lightweight group membership; retained, never solved."},
+        "render_owner": {"type": ["string", "null"], "minLength": 1, "description": "Declared ownership only; never inferred from similarity."},
+        "native_size_mm": {"type": ["array", "null"], "minItems": 2, "maxItems": 2, "prefixItems": [{"type": "number", "exclusiveMinimum": 0}, {"type": "number", "exclusiveMinimum": 0}], "description": "Stored source size [W, H] mm; W,H > 0. Never a page target."},
+        "resource_revision": {"type": ["string", "null"], "minLength": 1, "description": "Hash-covered resource identity."},
+        "overrides_revision": {"type": ["string", "null"], "minLength": 1, "description": "Hash-covered override state."},
+        "opacity": {"type": ["number", "null"], "minimum": 0, "maximum": 1, "description": "Finite [0, 1]; null = unknown."}
       },
       "allOf": [
         {
@@ -65,6 +72,14 @@
               {"type": "number", "exclusiveMinimum": 0}
             ]
           }}}
+        },
+        {
+          "if": {"properties": {"measurement_status": {"enum": ["measured", "conservative"]}}, "required": ["measurement_status"]},
+          "then": {"properties": {"rotation_deg": {"type": "number"}}}
+        },
+        {
+          "if": {"properties": {"measurement_status": {"enum": ["unknown", "unsupported"]}}, "required": ["measurement_status"]},
+          "then": {"properties": {"rotation_deg": {"type": ["number", "null"]}}}
         }
       ],
       "additionalProperties": false
@@ -83,10 +98,11 @@
           ],
           "description": "Final-page size mm [W, H], top-left origin; W,H > 0."
         },
-        "objects": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/LayoutObject"}},
+        "objects": {"type": "array", "items": {"$ref": "#/$defs/LayoutObject"}, "description": "Selected objects in order; [] is a genuinely empty page (no imaginary objects)."},
         "project_id": {"type": ["string", "null"], "minLength": 1, "description": "Optional project binding; null = unbound."},
         "page_id": {"type": ["string", "null"], "minLength": 1, "description": "Optional page binding; null = unbound."},
         "host_revision": {"type": ["string", "null"], "minLength": 1, "description": "Optional host revision binding; null = unbound."},
+        "extensions": {"type": ["object", "null"], "description": "Strict finite JSON, string keys; deep-copied, idempotent, hash-covered, geometry-ignored; grants no permissions."},
         "captured_at": {"type": "string", "description": "Informational only; excluded from revision."},
         "revision": {"type": "string", "description": "Must equal computed content hash when supplied; recomputed by validate_layout."}
       },
@@ -231,6 +247,37 @@
         },
         "reason": {"type": "string", "description": "Set for unmeasurable nodes: UNMEASURED_SOURCE or CROPPED_OUT."}
       }
+    },
+    "FrameBinding": {
+      "type": "object",
+      "description": "A same-capture frame projected onto one exact page snapshot; displayed means client-reported image load, not G4 acceptance.",
+      "required": ["schema", "snapshot_revision", "project_id", "page_id", "panel_id",
+        "resource_revision", "overrides_revision", "source_revision", "base_config_revision",
+        "frame_revision", "native_size_mm", "preview_ref", "scene_ref", "request_id",
+        "display_status", "native_size_changed", "limits"],
+      "properties": {
+        "schema": {"const": "figpact.frame-binding/1"},
+        "snapshot_revision": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "project_id": {"type": ["string", "null"], "minLength": 1},
+        "page_id": {"type": ["string", "null"], "minLength": 1},
+        "panel_id": {"type": "string", "minLength": 1},
+        "resource_revision": {"type": ["string", "null"], "minLength": 1},
+        "overrides_revision": {"type": ["string", "null"], "minLength": 1},
+        "source_revision": {"type": "string", "minLength": 1},
+        "base_config_revision": {"type": "string", "minLength": 1},
+        "frame_revision": {"type": "string", "minLength": 1},
+        "native_size_mm": {
+          "type": "array", "minItems": 2, "maxItems": 2,
+          "items": {"type": "number", "exclusiveMinimum": 0}
+        },
+        "preview_ref": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "scene_ref": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "request_id": {"type": "integer", "minimum": 0},
+        "display_status": {"enum": ["offered", "displayed"]},
+        "native_size_changed": {"type": ["boolean", "null"]},
+        "limits": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
     },
     "Receipt": {
       "type": "object",

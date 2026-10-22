@@ -92,7 +92,6 @@ def test_rotation_normalizes_right_angles():
     ({"page_mm": [True, 297.0]}, "bool geometry"),
     ({"page_mm": [float("inf"), 297.0]}, "non-finite"),
     ({"source_mode": "tavotto"}, "bad mode"),
-    ({"objects": []}, "empty objects"),
 ])
 def test_layout_rejects_bad_envelope(patch, why):
     base = json.loads(json.dumps(_fixtures()["a4_two_panel"]))
@@ -209,6 +208,29 @@ def test_projection_applies_crop_and_rotation_once():
     # scale 2 -> local (0,10,40,20); rot90 about centre -> (10,0,20,40).
     assert n1["rect_mm"] == pytest.approx([10.0, 0.0, 20.0, 40.0])
     assert got["evidence"]["scale_xy"] == pytest.approx([2.0, 2.0])
+
+
+def test_projection_nonsquare_quarter_turn_uses_content_dims():
+    scene = {"coordinate_reference": "canvas_bottom_left",
+             "canvas_mm": [100.0, 80.0],
+             "nodes": [{"id": "spot", "measured": True,
+                        "bounds_mm": [25.0, 30.0, 35.0, 40.0]},
+                       {"id": "full", "measured": True,
+                        "bounds_mm": [25.0, 30.0, 75.0, 70.0]}]}
+    panel = {"id": "p90", "rect_mm": [10.0, 20.0, 40.0, 50.0],
+             "measurement_status": "measured",
+             "crop": [25.0, 10.0, 50.0, 40.0],
+             "rotation_deg": 90, "flip_h": True}
+    got = project_scene(scene, panel, [210.0, 297.0])
+    # Content extent is the transposed final bbox (50x40): scale is uniform
+    # (1,1); the cropped spot projects to [10,60,10,10].
+    assert got["evidence"]["scale_xy"] == pytest.approx([1.0, 1.0])
+    assert got["evidence"]["anisotropic"] is False
+    spot = next(n for n in got["nodes"] if n["id"] == "spot")
+    assert spot["rect_mm"] == pytest.approx([10.0, 60.0, 10.0, 10.0])
+    # Whole cropped extent projects exactly to the final rect.
+    full = next(n for n in got["nodes"] if n["id"] == "full")
+    assert full["rect_mm"] == pytest.approx([10.0, 20.0, 40.0, 50.0])
 
 
 def test_projection_rejects_crop_outside_canvas():
@@ -393,3 +415,108 @@ def test_precheck_rejects_ambiguous_target():
         precheck_layout(_fixtures()["overlap_page"], "missing")
     with pytest.raises(RenderContractError):
         precheck_layout(_fixtures()["overlap_page"], "")
+
+
+def _saved_base():
+    base = json.loads(json.dumps(_fixtures()["a4_two_panel"]))
+    base["source_mode"] = "saved"
+    return base
+
+
+def test_empty_page_is_legitimate():
+    layout = {
+        "schema": "figpact.layout/1", "source_mode": "saved",
+        "page_mm": [180.0, 254.4], "objects": [],
+    }
+    got = validate_layout(layout)
+    assert got["objects"] == []
+    assert got["revision"] == snapshot_revision(got)
+    assert validate_layout(got) == got
+    assert validate_layout(json.loads(json.dumps(got))) == got
+
+
+def test_saved_authority_group_resource_override_facts_change_revision():
+    base = validate_layout(_saved_base())
+
+    def with_fact(mut):
+        other = json.loads(json.dumps(base))
+        del other["revision"]
+        mut(other)
+        return validate_layout(other)
+
+    variants = [
+        lambda b: b["objects"][0].update({"group_id": "g_2f5a0z5m"}),
+        lambda b: b["objects"][0].update({"render_owner": "tavotto"}),
+        lambda b: b["objects"][0].update({"native_size_mm": [88.9, 63.5]}),
+        lambda b: b["objects"][0].update({"resource_revision": "abc123"}),
+        lambda b: b["objects"][0].update({"overrides_revision": "ov9"}),
+        lambda b: b["objects"][0].update({"opacity": 0.5}),
+        lambda b: b.update({"extensions": {"tavotto_saved": {"canvas_index": 3}}}),
+    ]
+    for mut in variants:
+        assert with_fact(mut)["revision"] != base["revision"]
+    # Extensions are evidence only: geometry QA is unchanged.
+    ext = with_fact(lambda b: b.update(
+        {"extensions": {"tavotto_saved": {"counts": {"objects": 33}}}}))
+    assert [r["kind"] for r in precheck_layout(ext, "bar")["risks"]] == [
+        r["kind"] for r in precheck_layout(base, "bar")["risks"]]
+
+
+def test_rotation_none_only_for_unknown_geometry():
+    for status in ("unknown", "unsupported"):
+        base = _saved_base()
+        base["objects"][0].update(
+            {"measurement_status": status, "rect_mm": None, "rotation_deg": None})
+        assert validate_layout(base)["objects"][0]["rotation_deg"] is None
+    bad = _saved_base()
+    bad["objects"][0].update({"rotation_deg": None})
+    with pytest.raises(RenderContractError):
+        validate_layout(bad)
+    # Opaque unknown rotation is never a projection target.
+    target = _saved_base()["objects"][0]
+    target.update({"measurement_status": "unknown", "rect_mm": None,
+                   "rotation_deg": None})
+    with pytest.raises(RenderContractError):
+        project_scene({"coordinate_reference": "canvas_bottom_left",
+                       "canvas_mm": [100.0, 50.0], "nodes": []},
+                      target, [210.0, 297.0])
+
+
+@pytest.mark.parametrize("mutate", [
+    lambda b: b["objects"][0].update({"opacity": 2.0}),
+    lambda b: b["objects"][0].update({"opacity": float("nan")}),
+    lambda b: b["objects"][0].update({"opacity": True}),
+    lambda b: b["objects"][0].update({"native_size_mm": [0.0, 5.0]}),
+    lambda b: b["objects"][0].update({"native_size_mm": [True, 5.0]}),
+    lambda b: b["objects"][0].update({"group_id": ""}),
+    lambda b: b["objects"][0].update({"render_owner": "  "}),
+    lambda b: b["objects"][0].update({"rotation_deg": None}),
+    lambda b: b.update({"extensions": []}),
+    lambda b: b.update({"extensions": {"": {"v": 1}}}),
+    lambda b: b.update({"extensions": {"e": float("nan")}}),
+    lambda b: b.update({"extensions": {"e": {"v": float("inf")}}}),
+    lambda b: b.update({"extensions": {"e": {1: "x"}}}),
+    lambda b: b.update({"extensions": {"e": object()}}),
+])
+def test_rejects_bad_saved_facts(mutate):
+    base = _saved_base()
+    mutate(base)
+    with pytest.raises(RenderContractError):
+        validate_layout(base)
+
+
+def test_extensions_deep_copy_idempotent_and_hash_covered():
+    base = _saved_base()
+    raw_ext = {"tavotto_saved": {"counts": {"objects": 33}, "tags": ["a", "b"]}}
+    base["extensions"] = raw_ext
+    got = validate_layout(base)
+    raw_ext["tavotto_saved"]["counts"]["objects"] = 0
+    raw_ext["tavotto_saved"]["tags"].append("zzz")
+    assert got["extensions"] == {
+        "tavotto_saved": {"counts": {"objects": 33}, "tags": ["a", "b"]}}
+    assert validate_layout(got) == got
+    assert validate_layout(json.loads(json.dumps(got))) == got
+    again = json.loads(json.dumps(got))
+    del again["revision"]
+    again["extensions"]["tavotto_saved"]["counts"]["objects"] = 34
+    assert validate_layout(again)["revision"] != got["revision"]

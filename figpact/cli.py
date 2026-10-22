@@ -546,6 +546,42 @@ def cmd_render_session(args: argparse.Namespace) -> int:
     return serve(args.script, args.config, args.scope, output_dir=args.output_dir)
 
 
+def cmd_host_session(args: argparse.Namespace) -> int:
+    """Explicit loopback handoff; no source writes or page acceptance."""
+    from .host_server import HostServer
+    from .render_api import RenderSession
+
+    render = server = None
+    try:
+        render_args = (args.script, args.config, args.scope, args.panel_id)
+        if any(render_args) and not all(render_args):
+            raise ValueError("--script, --config, --scope and --panel-id are required together")
+        if not 0 <= args.port <= 65535:
+            raise ValueError("--port must be between 0 and 65535")
+        if all(render_args):
+            render = RenderSession(args.script, args.config, args.scope)
+        server = HostServer(args.base, args.host_origin, address=("127.0.0.1", args.port),
+                            render_session=render, panel_id=args.panel_id)
+        endpoint = f"http://127.0.0.1:{server.server_address[1]}/"
+        print(json.dumps({"status": "LISTENING", "endpoint": endpoint,
+                          "connection": f"{endpoint}#token={server.token}",
+                          "source_writes": False, "page_acceptance": False},
+                         ensure_ascii=False), flush=True)
+        server.serve_forever()
+        return 0
+    except KeyboardInterrupt:
+        return 0
+    except (ValueError, OSError, RuntimeError) as error:
+        print(json.dumps({"status": "REFUSED", "message": str(error)},
+                         ensure_ascii=False), file=sys.stderr)
+        return 2
+    finally:
+        if server is not None:
+            server.server_close()
+        if render is not None:
+            render.close()
+
+
 
 
 def cmd_export_params(args: argparse.Namespace) -> int:
@@ -953,6 +989,20 @@ def cmd_overlay(args) -> int:
         return 1
 
 
+def cmd_layout_snapshot(args) -> int:
+    """Capture an explicitly selected saved page; never imply a live handoff."""
+    from .tavotto_saved import read_saved_layout
+
+    try:
+        snapshot = read_saved_layout(args.layout, base=args.base, canvas=args.canvas)
+        print(json.dumps(snapshot, ensure_ascii=False, indent=2, allow_nan=False))
+        return 0
+    except (ValueError, OSError) as error:
+        print(json.dumps({"status": "REFUSED", "message": str(error)},
+                         ensure_ascii=False, indent=2))
+        return 2
+
+
 def cmd_handoff(args) -> int:
     """figpact ↔ Tavotto handoff: real PDF page + real panel scale evidence."""
     from . import handoff
@@ -1080,6 +1130,20 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_ap.add_argument("--script", required=True, help="绘图脚本路径")
     p_ap.add_argument("--config", default=None, help="配置文件 YAML 路径")
     p_ap.add_argument("--output", default=None, help="输出 Markdown 报告路径")
+
+    p_ls = subparsers.add_parser("layout-snapshot", help="读取指定 Tavotto 保存版面全对象（非活动页面，不改布局）")
+    p_ls.add_argument("--layout", required=True, help="指定保存的布局 JSON；不自动寻找 autosave")
+    p_ls.add_argument("--base", required=True, help="解析素材与脚本引用的明确图库根")
+    p_ls.add_argument("--canvas", default=None, help="canvas 的精确 id 或 name；多画布时必填")
+
+    p_host = subparsers.add_parser("host-session", help="接收活动页面，展示 figpact Frame（不改源码或页面）")
+    p_host.add_argument("--base", required=True, help="显式授权的当前 Tavotto 项目根")
+    p_host.add_argument("--host-origin", required=True, help="授权的 Tavotto 页面来源，如 http://127.0.0.1:5089")
+    p_host.add_argument("--port", type=int, default=0, help="本机服务端口，0 为系统分配")
+    p_host.add_argument("--script", default=None, help="可选：受信任的 figpact-managed 脚本")
+    p_host.add_argument("--config", default=None, help="与脚本配套的配置")
+    p_host.add_argument("--scope", default=None, help="脚本作用域；渲染参数须一同提供")
+    p_host.add_argument("--panel-id", default=None, help="明确声明 figpact 归属的目标面板 id")
 
     # handoff: figpact ↔ Tavotto size/identity manifest (verification only)
     p_hand = subparsers.add_parser("handoff", help="figpact ↔ Tavotto 尺寸/身份交接（只读验证，不改布局）")
@@ -1262,6 +1326,10 @@ def main(argv: Optional[list[str]] = None) -> int:
             return cmd_plate_unify(args)
         elif args.plate_cmd == "receipt":
             return cmd_plate_receipt(args)
+    elif args.subcommand == "layout-snapshot":
+        return cmd_layout_snapshot(args)
+    elif args.subcommand == "host-session":
+        return cmd_host_session(args)
     elif args.subcommand == "handoff":
         return cmd_handoff(args)
     elif args.subcommand == "fit-layout":
