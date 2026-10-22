@@ -197,8 +197,24 @@ def _cli(argv: list[str]) -> argparse.Namespace:
 
 #: CLI 只在 `python "08 NMR.py" …` 时解析。作为模块被 native runtime 导入时
 #: **不碰调用方的 argv**（worker 的协议参数不该被 argparse 拒掉），也不输出、不落盘。
+#: 但 native runtime 是用 `--config <path> --inventory` 导入的：那份配置就是
+#: 本会话的基线配置，契约与基线必须按**同一份**配置建，否则画布一变
+#: （小画布放不下部分标注）契约就会声明当前图上不存在的图元。
+def _import_config_path() -> pathlib.Path | None:
+    """导入期从 argv 里取 `--config`；取不到就按默认（脚本旁边的 nmr.yaml）。"""
+    argv = list(sys.argv[1:])
+    for index, item in enumerate(argv):
+        if item == "--config" and index + 1 < len(argv):
+            return pathlib.Path(argv[index + 1]).expanduser()
+        if item.startswith("--config="):
+            return pathlib.Path(item.split("=", 1)[1]).expanduser()
+    return None
+
+
+_IMPORT_CONFIG = _import_config_path()
 ARGS = _cli(sys.argv[1:]) if __name__ == "__main__" else _cli([])
-CONFIG_PATH = pathlib.Path(ARGS.config).expanduser() if ARGS.config else ROOT / "nmr.yaml"
+CONFIG_PATH = (_IMPORT_CONFIG or
+               (pathlib.Path(ARGS.config).expanduser() if ARGS.config else ROOT / "nmr.yaml"))
 
 
 SCHEMA = {**SCALARS, "show_ppm": (bool,), "shifts_mm": (dict,), "peak_label_shifts_mm": (dict,),
@@ -1250,12 +1266,23 @@ _BASELINE_DEPTH = 0
 _BASELINE_OWNED: list = []
 
 
+def _baseline_key(scope: str) -> tuple:
+    """基线缓存键：作用域 + **当前生效的画布尺寸**。
+
+    画布尺寸决定标注能否放下：同一样品在不同画布上会得到不同的图元集合
+    （小画布上放不下的峰标注连同引线不注册）。若只用 scope 做键，契约就会
+    拿另一块画布建出的 gid 集合去校验当前画布，声明出当前图上并不存在的图元。
+    """
+    return (scope, float(CANVAS[0]), float(CANVAS[1]))
+
+
 def _baseline_scene(scope: str):
-    """该 scope 的基线 (Figure, GidRegistry)，同一次顶层调用内按 scope 缓存。"""
-    if scope not in _BASELINE_SCENES:
+    """该 scope 的基线 (Figure, GidRegistry)，同一次顶层调用内按 scope+画布缓存。"""
+    key = _baseline_key(scope)
+    if key not in _BASELINE_SCENES:
         _apply_config(CONFIG)
-        _BASELINE_SCENES[scope] = _build(load_science(), scope, _owned=_BASELINE_OWNED)
-    return _BASELINE_SCENES[scope]
+        _BASELINE_SCENES[key] = _build(load_science(), scope, _owned=_BASELINE_OWNED)
+    return _BASELINE_SCENES[key]
 
 
 def _baseline_call(func, *args, **kwargs):
@@ -1370,6 +1397,11 @@ def layout_contract(scope: str) -> dict:
     节点 / 角色 / 所属 panel 取自基线场景（`_baseline_scene`）；逐样品的毫米操作声明为
     **实际会动的那些图元**（整层或上方所有层），不声明不存在的 gid。逐标注微调同样按
     「真的画出来的标注」声明：路径第三段是 `peak.<sid>.<tag>` 整串一段，值形是 `[dx, dy]`。
+
+    契约必须描述**当前生效配置**画出来的那张图：画布尺寸决定标注能否放下，
+    小画布上放不下的标注不注册，其 gid 也不该出现在契约里。这里用导入期
+    读到的配置（模块级 `CONFIG`，即 session 传入的那份 YAML）建基线，
+    与 session 随后按同一份配置建的基线一致。
     """
     return _baseline_call(_layout_contract_inner, scope)
 
@@ -1487,12 +1519,15 @@ def _layout_contract_inner(scope: str) -> dict:
 
 def science_manifest(science: dict) -> dict:
     """JSONable 的科研来源 / 定标 / 受保护锚点声明（native runtime 与 capture_science 用）。
-
     `nodes` 只列**点名豁免**的装饰几何：基线虚线与峰标注引线，两者都声明
     `{"science_policy": "LAYOUT", "type": "guide"}`——引擎对原始 Line2D 的 x/y 一律保护，
     只有显式 `type: "guide"` 的装饰线才不进科学指纹。其余默认 LOCKED_SCIENCE
     （谱线、标注文字、轴文字、图例、图像像素永不豁免），与 `_science_policy` 一致。
     峰锚点用与绘图同一个 `_detect_peak`，保证「引线指的」就是「声明的」。
+    每个模板峰在 `peak_anchors` 里永远占一位（科学锚点不随画布消失），并用
+    `placement`（`DRAWN` / `NOT_PLACED`，口径复用 `_build` 的 `UNPLACED_GIDS`）
+    如实标注它的标注文字在本画布基线里是否画出；没画出的峰不产生任何 gid
+    声明——`nodes` 只收注册表里真实存在的图元，契约侧同样只声明真实画出来的。
     """
     return _baseline_call(_science_manifest_inner, science)
 
@@ -1500,19 +1535,25 @@ def science_manifest(science: dict) -> dict:
 def _science_manifest_inner(science: dict) -> dict:
     """内层：基线复用，生命周期由外层 `_baseline_call` 拥有。"""
     _apply_config(CONFIG)
-    _baseline_scene(SCOPE)          # 纯布局图元的判定来自真实建出来的图
+    reg = _baseline_scene(SCOPE)[1]  # 纯布局图元的判定来自真实建出来的图
+    registered = reg.all()
+    unplaced = set(UNPLACED_GIDS)
     anchors = {}
     for approx_ppm, sample_idx, group_name, _, _, _, win_search in PEAK_LABELS_TEMPLATE:
         sid = SAMPLES_CONFIG[sample_idx][7]
         ppm, peak_y = _detect_peak(science, sample_idx, approx_ppm, win_search)
-        anchors[_gid("peak", sid, _gid_tag(approx_ppm))] = {
+        label_gid = _gid("peak", sid, _gid_tag(approx_ppm))
+        drawn = label_gid in registered and label_gid not in unplaced
+        anchors[label_gid] = {
             "assignment": group_name, "exact_ppm": ppm,
             "guide_anchor_data": [ppm, peak_y],
             "guide_gid": _gid("guide", sid, _gid_tag(approx_ppm)),
+            "placement": "DRAWN" if drawn else "NOT_PLACED",
+            "drawn": bool(drawn),
         }
     return {
         "nodes": {gid: {"science_policy": "LAYOUT", "type": "guide"}
-                  for gid in sorted(_LAYOUT_GIDS)},
+                  for gid in sorted(_LAYOUT_GIDS) if gid in registered},
         "layout_viewports": {
             _gid("panel"): {"axis": "y",
                             "origin": CONFIG["layout_reference"]["main"]["axis_bottom_data"],

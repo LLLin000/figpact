@@ -697,3 +697,136 @@ The restored `layout-snapshot` command still captured the reference saved page's
 byte-hash unchanged. The successful CLI ended its sessions and explicitly
 returned inactive IDs. These are measured candidate and saved-page facts,
 not a live Tavotto display, multi-figure commit or final export proof.
+
+## G3-D: real three-figure integration (DERIVED standalone)
+
+G3-D does not extend the core. It adds two real Native providers and one
+read-only harness that consumes the **actual saved page** with the **actual**
+supported figures, and reports measured facts.
+
+- `examples/xrd/plot_xrd.py` + `examples/xrd/xrd.yaml`: a Native provider for
+  the real XRD panel. Scientific constants are locked verbatim from the
+  original project script (display window 10-80 deg, ALS 2e7/0.01/15,
+  Savitzky-Golay 7/2, offset step 2.40, wavelength 1.540593, the five ZnO
+  crystal faces at [31.77, 36.25, 47.54, 56.60, 62.86]). `data_dir` is
+  LOCKED_SCIENCE; the portable default is empty and `load_science` fails
+  clearly rather than guessing a path. The five real scan files that are
+  actually read are declared through `science_inputs()`, so the native worker
+  hashes them into the input revision: a changed scan invalidates the
+  candidate instead of silently producing a different rebuild.
+- `examples/plate/verify_three_figures.py`: one command that reads the real
+  saved page, keeps every original object and rectangle fixed, and runs one
+  bounded common-X-title search over NMR, FTIR and XRD. The managed binding
+  exists only inside a **DERIVED standalone** snapshot; the original page
+  stays untouched and its legacy runtime figures stay SPACE_ONLY.
+
+### Two status fields, never one exit code
+
+`evidence.json` carries independent fields:
+
+- `harness_status`: `OK` / `PREREQUISITE_MISSING` / `HARNESS_ERROR` - did the
+  harness execute and produce evidence.
+- `search_status`: `FEASIBLE` / `NO_CANDIDATE` / `UNSUPPORTED` / `STALE` /
+  `CONSTRAINT_VIOLATION` / `UNSUPPORTED_GEOMETRY` - the solver's verdict.
+
+The exit code maps `harness_status` only (0 / 2 / 1). A reader must never
+infer search feasibility from the exit code. A `NO_CANDIDATE` or `UNSUPPORTED`
+result with `harness_status: OK` means the chain ran and the layout is
+genuinely not solvable under the stated constraints - that is an integration
+result, not an optimization success.
+
+### Host placement is not a uniform scale
+
+The Tavotto host maps the **crop window** onto the placed rectangle with
+independent horizontal and vertical scales (`placement.py`: crop to source
+mm, then `sx = Rw/Cw`, `sy = Rh/Ch`; the canvas preview does the same as an
+overflow-hidden viewport). The crop window fills the rectangle; the rest of
+the native image lies outside the viewport. A cropped panel is therefore
+**not** a uniform-scale placement, and the harness refuses to assume 1:1.
+It proves, from measured frame and projection facts, that the measured extent
+matches the intended canvas, that the stored crop lies inside it (remapped
+with the existing G2 rule when the stored native basis differs), that the
+engine's projected scale equals the host's own crop-to-rect scales, and that
+the placement is not distorted. An unprovable placement is refused with
+`UNSUPPORTED_GEOMETRY` and the measured numbers; transforms are never
+auto-corrected.
+
+### Measured outcome and its limits
+
+The real run opened all three providers with verified science and proved the
+geometry for all three targets: NMR and XRD are isotropic (0.99191 and 1.0),
+while the FTIR panel is the host's own anisotropic crop-fill
+(sx 1.11776 / sy 0.99272, about 11.2 percent). A single scalar effective font
+is therefore not measurable for that panel, and the search refuses it with
+`ANISOTROPIC_SCALE` naming the panel and the role. No constraint was relaxed
+to obtain a candidate.
+
+Two real provider defects were found and fixed on the way, both by
+measurement rather than by guesswork:
+
+- The NMR provider parsed its own arguments with an empty list at import, so
+  its contract baseline was built from the repository default 48x48 config
+  while the session baseline used the page's native 41.0x46.13 mm. At the
+  smaller canvas four annotation objects are legitimately not placed, and the
+  contract then declared gids that did not exist. The provider now resolves
+  the configuration the native runtime passes it, and keys its baseline cache
+  by canvas size.
+- The XRD provider's label placement zipped the drawn artists against all
+  candidate items, so drawn labels were registered under the wrong gids. A
+  numeric bisection showed the label solver itself behaved identically to the
+  original project; only the gid pairing differed. It now follows the
+  solver's own dropped list.
+
+The XRD provider reproduces the original project's published figure: at the
+source canvas 41.0 x 46.13444575910199 mm it draws exactly `(100)`, `(102)`,
+`(103)` - the same three labels present in the original exported SVG. The
+original script drops `(101)` and `(110)` because they do not fit; those
+crystal faces remain scientific anchors in the manifest, marked
+`hkl_labels_not_drawn`, with no gid declared for an artist that was never
+drawn. The NMR manifest does the same for template peaks that cannot be
+placed at a given canvas (`placement: DRAWN` / `NOT_PLACED`).
+
+This is snapshot-bound, read-only integration evidence for a derived
+scenario. It is not a live Tavotto display, a multi-figure commit, a
+whole-page export or a claim that the three figures were jointly optimized.
+
+### G3-D exercised evidence
+
+One clean real run of the harness over the actual saved page and the three
+actual providers:
+
+- `harness_status: OK`, `search_status: UNSUPPORTED`, exit 0 (the exit code
+  reports execution only). Reason:
+  `p_ti835i4w:ANISOTROPIC_SCALE:fig2_ftir.main.xlabel`. The FTIR panel is the
+  host's own anisotropic crop-fill, so one scalar effective font is not
+  measurable there and the search refuses it by name. `render_count` 0, no
+  candidate, no preview, `active_candidates` false.
+- The page still reads 33 objects / 31 panels; all three targets bound and
+  proved geometry `PROVEN` with `engine_scale_matches_host` true:
+  NMR extent 41.0 x 46.1344 mm, no crop, scale 0.99191 isotropic; FTIR extent
+  38.8765 x 46.1344 mm, crop window [6.0914, 0, 32.7851, 43.8066] mm, host
+  and engine scale [1.11776380, 0.99271615], anisotropic; XRD extent
+  41.0 x 46.1344 mm, no crop, scale 1.0 isotropic.
+- Captured visible labels: XRD `hkl.100/102/103` drawn (`101`/`110` are
+  dropped by the source itself and have no artist); NMR peaks
+  `hama.6p18`, `vancho.3p91`, `vancho.9p83`, `vannh2.3p03`, `vanoh.4p62`
+  drawn, `vancho.3p68` and `hama.2p02` not placed. The template lists all
+  twelve identities; the required set is the captured visible subset.
+- Measured baseline effective title sizes: NMR 8.4313 pt on both titles, XRD
+  8.17 pt on both, FTIR unknown with `font_reason: ANISOTROPIC_SCALE`.
+- Invariants all true: original rectangles identical, untouched neighbours
+  identical, page bytes unchanged, official configs unchanged. All 14 inputs
+  (page, three YAMLs, three scripts, harness, five scan files) were
+  byte-identical before and after. All three sessions closed with no pending
+  candidate left behind.
+- Focused checks: 15 passed, 0 failed, 0 skipped
+  (`test_three_figure_integration.py`, `test_xrd_native.py`,
+  `test_nmr_sized_canvas.py`). The existing NMR checks (10 cases) also still
+  pass, so the default 48x48 path did not regress. No full-repository
+  regression was run.
+
+**G3-D verdict: integration verified, candidate infeasible.** The chain
+measured the real page, the real providers and the real placement rules, and
+reported precisely why one common effective font does not exist for this
+page as the host places it. It is not a claim that the three figures were
+jointly optimized, and it is not a final page export.

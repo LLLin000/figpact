@@ -16,6 +16,8 @@ v0.1 只编辑已有授权对象。Overlay 支持坐标轴标题字号、刻度�
 
 跨图共同有效字号搜索（G3-C）使用 `figpact layout-search --intent <JSON>`：在明确字号网格和授权内部参数候选内真实重建、测量、重放验证；不改页面、不保存、不宣称全局最优。见 [有界字号搜索](docs/R14_RENDER.md#g3-c-bounded-common-effective-font-search)。
 
+真实三图集成验收（G3-D）使用 `examples/plate/verify_three_figures.py`：读取真实保存版面，保留全部原对象与矩形，以 NMR/FTIR/XRD 三个真实 provider 做一次有界公共字号搜索；`evidence.json` 分开给出 `harness_status`（执行）与 `search_status`（可行性），退出码不代表可行性。主机裁剪是各向异性填满，因此共同字号可能诚实地不可解。见 [三图集成与证据边界](docs/R14_RENDER.md#g3-d-real-three-figure-integration-derived-standalone)。
+
 ## Quickstart
 
 ```bash
