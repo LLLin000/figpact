@@ -593,6 +593,51 @@ def _image_payload(artist: Any) -> dict[str, Any]:
     return payload
 
 
+def _semantic_facts(artist: Any, axes: Sequence[matplotlib.axes.Axes],
+                    axes_ids: dict[int, str]) -> dict[str, Any]:
+    """Same-capture role facts from Matplotlib membership, never labels or gids."""
+    owner = next((ax for ax in axes
+                  if artist is ax.xaxis.label or artist is ax.yaxis.label
+                  or any(artist is title for title in
+                         (ax.title, getattr(ax, '_left_title', None),
+                          getattr(ax, '_right_title', None)))), None)
+    role, axis = None, None
+    if owner is not None:
+        if artist is owner.xaxis.label:
+            role, axis = 'axis.title', 'x'
+        elif artist is owner.yaxis.label:
+            role, axis = 'axis.title', 'y'
+        else:
+            role = 'axes.title'
+    else:
+        for ax in axes:
+            if artist is ax.get_legend():
+                owner, role = ax, 'legend'
+                break
+            legend = ax.get_legend()
+            if legend is not None and any(artist is text for text in legend.get_texts()):
+                owner, role = ax, 'legend'
+                break
+            for name, axis_obj in (('x', ax.xaxis), ('y', ax.yaxis)):
+                ticks = (list(axis_obj.get_major_ticks()) + list(axis_obj.get_minor_ticks()))
+                if any(artist is label for tick in ticks for label in (tick.label1, tick.label2)):
+                    owner, role, axis = ax, 'axis.tick', name
+                    break
+            if owner is not None:
+                break
+    axes_id = axes_ids.get(id(owner)) if owner is not None else None
+    if owner is None:
+        context = 'unknown'
+    elif any(owner in getattr(parent, 'child_axes', ()) for parent in axes):
+        context = 'inset'
+    elif getattr(owner, 'get_subplotspec', lambda: None)() is not None:
+        context = 'root'
+    else:
+        context = 'unknown'
+    return {'role': role, 'axis': axis, 'axes_id': axes_id,
+            'axes_context': context, 'evidence': 'artist_identity' if role else 'unknown'}
+
+
 def _artist_node(artist: Any, *, node_id: Optional[str], gid: Optional[str], scope: str, registered: bool,
                  renderer: Any, mm_per_px: Optional[float], registry: Optional[GidRegistry] = None,
                  descriptor: Optional[str] = None) -> dict[str, Any]:
@@ -977,8 +1022,17 @@ def snapshot(fig: matplotlib.figure.Figure, registry: GidRegistry, *, scope: str
     panel_bounds: list[dict[str, Any]] = []
     registered_axes = {id(artist): gid for gid, artist in registry.all().items()
                        if isinstance(artist, matplotlib.axes.Axes)}
-    for index, ax in enumerate(fig.axes):
-        panel_id = registered_axes.get(id(ax), f'{scope}::panel.{index}')
+    all_axes = list(fig.axes)
+    index = 0
+    while index < len(all_axes):
+        for child in getattr(all_axes[index], 'child_axes', ()):
+            if all(id(child) != id(ax) for ax in all_axes):
+                all_axes.append(child)
+        index += 1
+    axes_ids = {id(ax): registered_axes.get(id(ax), f'{scope}::panel.{i}')
+                for i, ax in enumerate(all_axes)}
+    for index, ax in enumerate(all_axes):
+        panel_id = axes_ids[id(ax)]
         panel_ids[id(ax)] = panel_id
         if id(ax) in registered_axes:
             continue
@@ -1027,6 +1081,7 @@ def snapshot(fig: matplotlib.figure.Figure, registry: GidRegistry, *, scope: str
         node = _artist_node(artist, node_id=gid, gid=gid, scope=str(node_scope),
                             registered=True, renderer=renderer, mm_per_px=mm_per_px,
                             registry=registry)
+        node['semantic'] = _semantic_facts(artist, all_axes, axes_ids)
         node['controlled_by'], node['path_source'] = _node_paths(gid, registry, contract_paths)
         if node['path_source'] == 'unresolved_params' and node['params']:
             node['unresolved_bindings'] = list(node['params'])
@@ -1067,6 +1122,7 @@ def snapshot(fig: matplotlib.figure.Figure, registry: GidRegistry, *, scope: str
         unreg_id = f'{scope}::unregistered.{index}'
         node = _artist_node(entry['artist'], node_id=unreg_id, gid=None, scope=scope, registered=False,
                             renderer=renderer, mm_per_px=mm_per_px, descriptor=entry['descriptor'])
+        node['semantic'] = _semantic_facts(entry['artist'], all_axes, axes_ids)
         if not node['measured']:
             diag('UNMEASURED_GEOMETRY', f'{unreg_id} 的几何无法测量', [unreg_id],
                  severity='blocking')

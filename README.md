@@ -12,6 +12,8 @@ v0.1 只编辑已有授权对象。Overlay 支持坐标轴标题字号、刻度�
 
 活动页面交接与托管图件展示（G2-B/C）使用 `figpact host-session --base <当前项目根> --host-origin <Tavotto 页面来源>`，再由配套 Tavotto 前端显式连接、读取当前页并展示同源 PNG/Scene。它不读取 autosave 冒充活动页面，不自动修改页面尺寸，也不代表最终导出验收。见 [活动页面与 FrameBinding](docs/R14_RENDER.md#g2-bc-active-page-capture-and-managed-frame-display)。
 
+固定版面的角色能力与空间报告（G3-A/B）使用 `figpact layout-report`：绑定明确快照版本，读取真实 Frame 的字号、X/Y 与 inset 归属、共享控制耦合及固定邻居约束；不自动搜索、改页面或保存。旧 runtime 不会被擅自接管，未知与潜在冲突也不冒充 QA 通过。见 [报告用法与证据边界](docs/R14_RENDER.md#g3-ab-snapshot-bound-capability-and-fixed-layout-reports)。
+
 ## Quickstart
 
 ```bash

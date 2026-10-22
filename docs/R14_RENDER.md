@@ -402,3 +402,145 @@ missing-pandas environment preparation; that request was declined, not
 silently installed or treated as a successful redraw. Thus this evidence
 does not certify a complete legacy-page redraw, G3 optimization, G4
 acceptance, final vector resources or G5 native export.
+
+## G3-A/B: snapshot-bound capability and fixed-layout reports
+
+G2 is frozen at core `50f2ad0` paired with Tavotto fork `fd019239`
+(`feat/figpact-g2-live-handoff`). This stage adds read-only reports, not a
+solver. The `LayoutSnapshot` and `FrameBinding` contracts are unchanged.
+Same-capture Scene nodes gain optional `semantic` facts: canonical role,
+X/Y axis, axes identity and structural `root`/child-`inset` ownership.
+An arbitrary `add_axes` overlay is not guessed to be a scientific main plot.
+Unregistered inset labels remain measurable but do not acquire edit authority.
+
+```bash
+figpact layout-snapshot --layout /project/layout.json --base /project --canvas page
+# Use the exact revision returned above; a changed revision is refused.
+figpact layout-report --layout /project/layout.json --base /project --canvas page \
+  --expected-revision <snapshot-revision> --target nmr --target ftir
+```
+
+Without `--managed`, targets retain their actual page rectangles and neighbour
+constraints but are `SPACE_ONLY`; no runtime script is executed. To measure a
+supported, already figpact-managed figure, explicitly authorize it as well:
+
+```bash
+figpact layout-report --layout /project/layout.json --base /project --canvas page \
+  --expected-revision <snapshot-revision> --target nmr \
+  --managed nmr /project/nmr/plot.py /project/nmr/config.yaml main
+```
+
+All four managed arguments must agree with the captured host record. The
+adapter verifies explicit ownership, project-root-contained script/config,
+scope and absence of unreplayed overrides before any script starts. It does
+not migrate old Tavotto runtime figures or clear their overrides. Scripts are
+trusted executable local code: a path found in a layout alone is not execution
+authorization. Sessions are closed and temporary work removed on command exit.
+
+`--snapshot <file>` instead of `--layout` accepts an explicitly handed-off
+`figpact.layout/1` JSON, including a live G2 capture. It is still only that
+capture, not a subscription to the active page; `--canvas` applies only to
+`--layout`. Standalone managed objects declare exact `source.script`,
+`source.config` and `source.scope`, with no external override state.
+
+### Report facts and permissions
+
+- `figpact/role_report.py`: `capability_report(frame, controls, projection,
+  editable=False)` reads captured artist sizes and exact semantic ownership.
+  Role discovery never parses GIDs, text labels or parameter-name regexes.
+  Font-control authorization uses existing canonical role policy plus exact
+  Native path, object membership and Scene control bindings. Custom properties
+  without an explicit supported policy stay unbound, not guessed from `pt`.
+- `font_controls[].editable` is per measured role. Hidden, unregistered,
+  readonly or anisotropically scaled roles cannot become automatic font
+  targets. Shared controls list all affected IDs, role/axis/axes groups and
+  unmatched members; two labels sharing one parameter are not independently
+  editable. Generic text/Annotation remains unclassified measurement-only.
+- `figpact/spatial_report.py`: `spatial_report(layout, target_ids, observations,
+  regions=(), required_content=None)` reuses G2 page projection and conservative
+  prechecks. Fixed neighbours and targets are never moved. Known envelope
+  clipping/outside-page and absent required identities are separate from
+  potential neighbour overlap and unknown measurements. An envelope is not an
+  exact-ink silhouette; an unknown required label is `UNSUPPORTED`, not proved
+  lost and never a QA pass.
+- `figpact/layout_report.py`: `report_layout()` combines independent, existing
+  `RenderSession` snapshots using adapter-confirmed `source_bindings`. It
+  requires `expected_revision`, validates frame/source/config/scope bindings,
+  refuses pending candidates, and rechecks all measured source/frame identities
+  after collection. Optional `refresh_layout` re-reads the same page producer
+  before/after. This API imports no Tavotto host implementation.
+
+To declare an allocated row/column region and confirmed content IDs, pass a
+`--constraints` JSON containing only `regions` and/or `required_content`:
+
+```json
+{
+  "regions": [{
+    "id": "spectra",
+    "member_ids": ["nmr", "ftir"],
+    "axis": "x",
+    "region_mm": [10, 20, 126, 50],
+    "gap_mm": 2
+  }],
+  "required_content": {"nmr": ["fig2_nmr.main.xlabel"]}
+}
+```
+
+Regions and row/column membership are explicit user/host allocation, not
+inferred universal layout rules. The engine derives `available_mm` from the
+region, `occupied_mm` from current final member widths/heights plus declared
+gaps, and `current_span_mm` from actual member coordinates. These are different
+facts when current gaps differ from the declared row policy. `excess_mm > 0`
+is current budget information, not proof that internal changes cannot help.
+Hidden members are rejected; unknown geometry yields an unknown budget.
+
+The combined report is `figpact.layout-report/1`:
+
+- `READY`: measured report available, **not** a feasible candidate, saved result
+  or final-page PASS.
+- `UNSUPPORTED`: some requested capabilities/measurements are unavailable;
+  known geometry and its limits remain in the report.
+- `CONSTRAINT_VIOLATION`: a known geometric/content criterion fails.
+- `STALE`: requested snapshot/source/frame no longer matches; no retry quietly
+  accepts a different page.
+
+CLI exits are 0 for READY, 1 for a completed unsupported/violating report, and 2
+for refused/invalid/stale inputs. Evidence remains `SNAPSHOT_BOUND`,
+`persistence: NOT_WRITTEN`, `page: NOT_CHANGED`, `host: NOT_VERIFIED`,
+`export_page: NOT_RUN`. Reading a saved file twice, or fetching cached
+`host-session /snapshot` twice, cannot turn it into an active-page lock.
+No continuous live-report UI/transport, font search, page adjustment,
+multi-figure save transaction or final export is added here.
+
+### G3-A/B exercised evidence
+
+- The actual reference saved page produced 33 objects / 31 panels. All three
+  legacy runtime targets remained SPACE_ONLY; each retained all 32 neighbour
+  records. Old DLS/XRD/NMR runtime code was not executed to invent capability.
+- The actual public CLI independently rendered the supported NMR and FTIR
+  scripts with different uniform page scales. Both science fingerprints were
+  verified; measured title sizes were:
+
+  | Figure | Captured source pt | Final page pt |
+  | --- | ---: | ---: |
+  | NMR | 8.5 | 4.25 |
+  | FTIR | 8.5 | 6.375 |
+
+  Both reports exposed X/Y control coupling. The NMR baseline also exposed a
+  partly clipped `fig2_nmr.main.tick.3` envelope and correctly returned
+  CONSTRAINT_VIOLATION rather than PASS.
+- The derived budget regression checks 134.7 mm against 126 mm and reports
+  8.7 mm current excess without declaring global infeasibility. Other checks
+  cover actual child-inset labels, anisotropic scalar refusal, readonly
+  references, fixed-neighbour drift, missing versus unmeasured required
+  content, zero-extent baselines and source/config drift.
+- Related checks covered 95 distinct passed cases, one skipped case and two
+  passed subtests; the final-source rerun covered 53 cases including every new
+  G3 test. No full-repository regression or frontend build was run.
+- Original scripts/configs/page and all 33 original referenced asset/script
+  files remained byte-hash unchanged during the CLI scenarios. This is
+  saved-page and standalone rendering evidence, not a new active Tavotto
+  display/acceptance or whole-page export proof.
+
+Next gate is G3-C bounded common-effective-font candidate search, using these
+facts. G4 host acceptance/transactions and G5 final export remain separate.

@@ -188,6 +188,9 @@ def _project_node(node: dict) -> dict:
         'editable_capability': EDITABLE_CAPABILITY,
         'structural': bool(node.get('structural')),
         'font_size_pt': node.get('font_size_pt'),
+        'semantic': node.get('semantic') or {
+            'role': None, 'axis': None, 'axes_id': None,
+            'axes_context': 'unknown', 'evidence': 'unknown'},
     }
     note = _hit_note_of(node, runs)
     if note:

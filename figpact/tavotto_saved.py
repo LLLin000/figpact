@@ -566,3 +566,46 @@ def read_live_layout(payload: dict[str, Any], *, base: str | Path) -> dict[str, 
     if changed:
         raise LiveLayoutError(f"referenced resources changed during capture: {changed}")
     return canonical
+
+
+def managed_report_source(snapshot: dict[str, Any], panel_id: str, *,
+                          base: str | Path) -> dict[str, Any]:
+    """Read a managed source binding, without executing it or changing a page.
+
+    The caller must independently authorize the same script/config/scope before
+    creating a RenderSession. Overrides are not replayed by this adapter.
+    """
+    canonical = validate_layout(snapshot)
+    obj = next((item for item in canonical["objects"] if item["id"] == panel_id), None)
+    if obj is None or obj.get("kind") != "panel" or obj.get("render_owner") != "figpact":
+        raise SavedLayoutError(f"{panel_id!r} is not an explicitly managed panel")
+    mode = canonical["source_mode"]
+    if mode not in ("saved", "live"):
+        raise SavedLayoutError("managed_report_source needs an explicit Tavotto saved/live snapshot")
+    facts = (canonical.get("extensions") or {}).get(f"tavotto_{mode}", {})
+    evidence = facts.get("objects", {}).get(panel_id, {})
+    record = evidence.get("record")
+    if not isinstance(record, dict) or record.get("renderOwner") != "figpact":
+        raise SavedLayoutError("managed raw record is unavailable or has different ownership")
+    overrides = evidence.get("overrides") or {}
+    if record.get("overrides") not in (None, []) or overrides.get("present") is not False:
+        raise SavedLayoutError("host overrides are present or unknown; report source cannot replay them")
+    metadata = record.get("figpact")
+    if not isinstance(metadata, dict):
+        raise SavedLayoutError("managed record has no figpact config/scope")
+    root = Path(base).expanduser().resolve()
+    if facts.get("base_path") != str(root):
+        raise SavedLayoutError("report source root differs from the captured project root")
+    result: dict[str, Any] = {"overrides_present": False}
+    for key, value in (("script", record.get("script")), ("config", metadata.get("config"))):
+        if not isinstance(value, str) or not value.strip():
+            raise SavedLayoutError(f"managed record has no {key} path")
+        path = (root / value.replace("\\", "/")).resolve()
+        if not path.is_relative_to(root) or not path.is_file():
+            raise SavedLayoutError(f"managed {key} is outside the project root or missing")
+        result[key] = str(path)
+    scope = metadata.get("scope")
+    if not isinstance(scope, str) or not scope.strip():
+        raise SavedLayoutError("managed record has no explicit scope")
+    result["scope"] = scope
+    return result

@@ -1003,6 +1003,82 @@ def cmd_layout_snapshot(args) -> int:
         return 2
 
 
+def cmd_layout_report(args) -> int:
+    """Report one explicit snapshot; only caller-named managed scripts may run."""
+    from contextlib import ExitStack, redirect_stdout
+    from .layout_report import LayoutReportError, report_layout
+    from .render_api import RenderError, RenderSession
+    from .render_contract import validate_layout
+    from .tavotto_saved import managed_report_source, read_saved_layout
+
+    try:
+        base = Path(args.base).expanduser().resolve()
+
+        def read_layout():
+            if args.layout:
+                return read_saved_layout(args.layout, base=base, canvas=args.canvas)
+            return validate_layout(json.loads(Path(args.snapshot).read_text(encoding="utf-8-sig")))
+
+        layout = read_layout()
+        if layout["revision"] != args.expected_revision:
+            raise LayoutReportError("STALE", "requested revision differs from the selected snapshot")
+        objects = {item["id"]: item for item in layout["objects"]}
+        if len(set(args.target)) != len(args.target) or set(args.target) - set(objects):
+            raise LayoutReportError("INVALID", "targets must be unique existing object ids")
+        constraints = (json.loads(Path(args.constraints).read_text(encoding="utf-8-sig"))
+                       if args.constraints else {})
+        if not isinstance(constraints, dict) or set(constraints) - {"regions", "required_content"}:
+            raise LayoutReportError("INVALID", "constraints may contain only regions and required_content")
+        sources = {}
+        # Validate every host/source mapping BEFORE opening any script. Paths in
+        # a layout alone never authorize execution: --managed must name them too.
+        for panel_id, script, config, scope in args.managed:
+            if panel_id not in args.target or panel_id in sources:
+                raise LayoutReportError("INVALID", "managed panel ids must be unique selected targets")
+            if layout["source_mode"] == "standalone":
+                panel = objects[panel_id]
+                if panel.get("render_owner") != "figpact" or panel.get("kind") != "panel":
+                    raise LayoutReportError("UNSUPPORTED", "standalone target is not explicitly managed")
+                provenance = panel.get("source") or {}
+                if any(not isinstance(provenance.get(key), str) or not provenance[key].strip()
+                       for key in ("script", "config", "scope")):
+                    raise LayoutReportError("UNSUPPORTED", "standalone source needs explicit script/config/scope")
+                source = {"script": str((base / provenance["script"]).resolve()),
+                          "config": str((base / provenance["config"]).resolve()),
+                          "scope": provenance["scope"], "overrides_present": False}
+                if panel.get("overrides_revision") is not None:
+                    raise LayoutReportError("UNSUPPORTED", "standalone external override state is not replayed")
+            else:
+                source = managed_report_source(layout, panel_id, base=base)
+            if (Path(script).expanduser().resolve() != Path(source["script"])
+                    or Path(config).expanduser().resolve() != Path(source["config"])
+                    or scope != source["scope"]):
+                raise LayoutReportError("STALE", "explicit trusted script/config/scope differs from the host record")
+            sources[panel_id] = source
+        with ExitStack() as stack, redirect_stdout(sys.stderr):
+            work = stack.enter_context(tempfile.TemporaryDirectory(prefix="figpact-layout-report-"))
+            sessions = {}
+            for panel_id, source in sources.items():
+                session = RenderSession(source["script"], source["config"], source["scope"], output_dir=work)
+                stack.callback(session.close)
+                sessions[panel_id] = session
+            report = report_layout(
+                layout, args.target, sessions, expected_revision=args.expected_revision,
+                source_bindings=sources, regions=constraints.get("regions", ()),
+                required_content=constraints.get("required_content"), refresh_layout=read_layout)
+        print(json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False))
+        return 0 if report["status"] == "READY" else 1
+    except (ValueError, OSError, RuntimeError) as error:
+        status = getattr(error, "status", "INVALID")
+        if isinstance(error, RenderError) and status in ("STALE_REVISION", "REFRESH_REQUIRED"):
+            status = "STALE"
+        print(json.dumps({"schema": "figpact.layout-report/1", "status": status,
+                          "message": str(error), "evidence": {"persistence": "NOT_WRITTEN",
+                                                            "export_page": "NOT_RUN"}},
+                         ensure_ascii=False, indent=2))
+        return 2
+
+
 def cmd_handoff(args) -> int:
     """figpact ↔ Tavotto handoff: real PDF page + real panel scale evidence."""
     from . import handoff
@@ -1135,6 +1211,19 @@ def main(argv: Optional[list[str]] = None) -> int:
     p_ls.add_argument("--layout", required=True, help="指定保存的布局 JSON；不自动寻找 autosave")
     p_ls.add_argument("--base", required=True, help="解析素材与脚本引用的明确图库根")
     p_ls.add_argument("--canvas", default=None, help="canvas 的精确 id 或 name；多画布时必填")
+
+    p_lr = subparsers.add_parser("layout-report", help="只读角色能力与固定版面空间报告（不搜索、不保存、不改页面）")
+    lr_input = p_lr.add_mutually_exclusive_group(required=True)
+    lr_input.add_argument("--layout", help="明确指定 Tavotto 保存布局；仍只证明保存版本")
+    lr_input.add_argument("--snapshot", help="明确交接的 figpact.layout/1 JSON；不冒充当前活动页面")
+    p_lr.add_argument("--base", required=True, help="明确授权的项目根")
+    p_lr.add_argument("--canvas", default=None, help="--layout 的指定画布 id/name")
+    p_lr.add_argument("--expected-revision", required=True, help="G2 快照 revision；不自动接受新版本")
+    p_lr.add_argument("--target", action="append", required=True, help="目标对象 id，可重复；不传脚本则只检查空间")
+    p_lr.add_argument("--managed", nargs=4, action="append", default=[],
+                      metavar=("PANEL", "SCRIPT", "CONFIG", "SCOPE"),
+                      help="显式授权一个已托管目标；必须与宿主来源精确一致，可重复")
+    p_lr.add_argument("--constraints", default=None, help="仅含 regions/required_content 的 JSON；不推测规则")
 
     p_host = subparsers.add_parser("host-session", help="接收活动页面，展示 figpact Frame（不改源码或页面）")
     p_host.add_argument("--base", required=True, help="显式授权的当前 Tavotto 项目根")
@@ -1328,6 +1417,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             return cmd_plate_receipt(args)
     elif args.subcommand == "layout-snapshot":
         return cmd_layout_snapshot(args)
+    elif args.subcommand == "layout-report":
+        return cmd_layout_report(args)
     elif args.subcommand == "host-session":
         return cmd_host_session(args)
     elif args.subcommand == "handoff":

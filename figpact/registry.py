@@ -204,7 +204,16 @@ class GidRegistry:
             seen.add(id(artist))
             return artist, descriptor
 
-        for ax in fig.axes:
+        axes = list(fig.axes)
+        seen_axes = {id(ax) for ax in axes}
+        index = 0
+        while index < len(axes):
+            for child in axes[index].child_axes:
+                if isinstance(child, matplotlib.axes.Axes) and id(child) not in seen_axes:
+                    seen_axes.add(id(child))
+                    axes.append(child)
+            index += 1
+        for ax in axes:
             for name, txt in (("xlabel", ax.xaxis.label), ("ylabel", ax.yaxis.label), ("title", ax.title)):
                 if txt is not None and txt.get_visible() and txt.get_text().strip():
                     entry = take(txt, f"Text({name}): {_text_summary(txt)}")
