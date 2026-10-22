@@ -20,6 +20,8 @@ v0.1 只编辑已有授权对象。Overlay 支持坐标轴标题字号、刻度�
 
 宿主接纳准备（G4-A）使用 `figpact.acceptance.build_acceptance_plan`：把已验证候选变成**先备好并哈希**的不可变资源 + 最小页面改动，并逐项检查过期前置条件；只到 PREPARED，不写宿主文档、不改页面。旧 runtime 面板、各向异性裁剪面板、归属不匹配的绑定一律按名拒绝。见 [接纳计划与宿主事实](docs/R14_RENDER.md#g4-a-prepared-acceptance-plans-prepared-only)。
 
+宿主接纳双资源（G4-B）扩展接纳计划：已托管图件同时固化**不可变 PDF 与不可变候选配置**，并用重建证明两者同源；页面补丁同时更新 `fileId` 与 `figpact.config`。重开页面显示已保存的图，不再空白。见 [双资源持久化](docs/R14_RENDER.md#g4-b-dual-resource-persistence-and-reopen-verification)。
+
 ## Quickstart
 
 ```bash

@@ -935,3 +935,61 @@ in a temporary copy; they are not the live page, and no host write happened.
 G4-A reaches PREPARED only. `HOST_APPLIED`, `HOST_PERSISTED`,
 `REOPEN_VERIFIED` and `FINAL_EXPORT_VERIFIED` remain out of reach here, and
 G4's own goal is `REOPEN_VERIFIED`; the final export is G5.
+
+## G4-B: dual-resource persistence and reopen verification
+
+G4-A prepares resources. G4-B fixes the pair: a managed panel is displayed by
+the host from a LIVE figpact frame, not from its `fileId`, and a saved PDF
+whose `figpact.config` still points at the old config will re-render the OLD
+figure on reopen. Staging a PDF alone would therefore leave a page that shows
+one thing in the file and rebuilds another from the config. The plan must fix
+the immutable PDF **and** the immutable candidate CONFIG together, and patch
+the page with both `fileId` and `figpact.config`.
+
+### What the host needs from a reopened managed panel
+
+Today a managed panel with no live frame renders an empty box with a stale
+badge; its `fileId` is never fetched for display, and the in-memory stale PNG
+dies on reload. For a reopened page to show the figure, the host needs an
+explicit branch: when no live binding/frame exists, resolve the panel's own
+prepared resource and display it, keyed by the panel's identity facts
+(`fileId`, `script`, `config`, `scope`, `overrides`), never fabricating a
+binding or a display receipt. A managed panel whose `fileId` is still an
+opaque runtime id has no fetchable resource and keeps the empty/stale state
+with a reason. The live frame still wins when present.
+
+### What the plan now proves
+
+`build_acceptance_plan` gains `persist_config=True`: each managed candidate
+carries its Native `config_patch` plus the config source it was produced
+from. The plan applies that patch through the parameter catalog, stages the
+resulting config durably (same-dir temp file, fsync, replace, directory
+fsync; never overwriting a different file), rebuilds it in a fresh session
+over the staged path and requires the rebuild to reproduce the candidate:
+the science digest and verified flag, the same declared science inputs with
+identical content hashes, the same projection geometry, the same measured
+effective fonts within 0.01 pt, and the same required content in the visible
+measured crop. A patch that cannot be produced from the given source, a
+rebuild that renders a different figure or a changed science basis refuses
+the plan with `config_persisted`. The document patch for a managed panel
+then sets `fileId` and `figpact.config` (scope unchanged); a non-managed
+panel still receives `fileId` only.
+
+The review's three hardening items are part of the plan:
+
+- `required_content` is checked against visibility, measured state and the
+  visible crop, using the existing engine rule; an id that exists but is
+  invisible or cropped refuses, with the id named.
+- A target panel id must be unique across the whole document and belong to
+  the plan's canvas; a duplicate id anywhere else refuses instead of being
+  resolved by first match.
+- Staged resources are durably written before the page could ever reference
+  them, reusing the atomic-file discipline, not a second database.
+
+New plan fields: `resources[].config_path`, `config_sha256`,
+`config_rebuild_verified`, `config_rebuild_frame_revision`; new checks
+`config_persisted` and `panel_binding_update` alongside the eight G4-A names.
+G4-B reaches PREPARED only. HOST_APPLIED, HOST_PERSISTED and REOPEN_VERIFIED
+stay with the host: figpact prepares and verifies the pair, the host applies
+the one whole-document write, confirms the save, and re-reads the page from
+disk. The final export stays G5.
