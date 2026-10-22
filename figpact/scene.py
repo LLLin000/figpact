@@ -593,6 +593,35 @@ def _image_payload(artist: Any) -> dict[str, Any]:
     return payload
 
 
+def _axis_draw_visibility(fig: matplotlib.figure.Figure,
+                          axes: Sequence[matplotlib.axes.Axes]) -> dict[int, bool]:
+    """Use the renderer's axis draw eligibility, not Text.get_visible alone.
+
+    AutoLocator retains off-view tick Text with visible=True. Axis.draw skips
+    those ticks through _update_ticks; measuring their extents as displayed
+    content would invent clipping/obstacles that are absent from the PNG.
+    """
+    parents = {id(child): parent for parent in axes for child in parent.child_axes}
+    visibility: dict[int, bool] = {}
+    for ax in axes:
+        shown = bool(fig.get_visible())
+        ancestor: matplotlib.axes.Axes | None = ax
+        while ancestor is not None:
+            shown = shown and bool(ancestor.get_visible())
+            ancestor = parents.get(id(ancestor))
+        for axis in (ax.xaxis, ax.yaxis):
+            enabled = shown and bool(ax.axison) and bool(axis.get_visible())
+            visibility[id(axis.label)] = enabled and bool(axis.label.get_visible())
+            # Same selector used by Matplotlib Axis.draw, including nonlinear
+            # transforms and its native view-boundary tolerance. No extra draw.
+            drawn = {id(tick) for tick in getattr(axis, '_update_ticks')()} if enabled else set()
+            for tick in list(axis.get_major_ticks()) + list(axis.get_minor_ticks()):
+                tick_drawn = enabled and id(tick) in drawn and bool(tick.get_visible())
+                for label in (tick.label1, tick.label2):
+                    visibility[id(label)] = tick_drawn and bool(label.get_visible())
+    return visibility
+
+
 def _semantic_facts(artist: Any, axes: Sequence[matplotlib.axes.Axes],
                     axes_ids: dict[int, str]) -> dict[str, Any]:
     """Same-capture role facts from Matplotlib membership, never labels or gids."""
@@ -1031,6 +1060,7 @@ def snapshot(fig: matplotlib.figure.Figure, registry: GidRegistry, *, scope: str
         index += 1
     axes_ids = {id(ax): registered_axes.get(id(ax), f'{scope}::panel.{i}')
                 for i, ax in enumerate(all_axes)}
+    axis_visibility = _axis_draw_visibility(fig, all_axes)
     for index, ax in enumerate(all_axes):
         panel_id = axes_ids[id(ax)]
         panel_ids[id(ax)] = panel_id
@@ -1082,6 +1112,10 @@ def snapshot(fig: matplotlib.figure.Figure, registry: GidRegistry, *, scope: str
                             registered=True, renderer=renderer, mm_per_px=mm_per_px,
                             registry=registry)
         node['semantic'] = _semantic_facts(artist, all_axes, axes_ids)
+        if id(artist) in axis_visibility:
+            node['artist_visible'] = node.get('visible')
+            node['visible'] = axis_visibility[id(artist)]
+            node['visibility_source'] = 'matplotlib_native_axis_draw_filter'
         node['controlled_by'], node['path_source'] = _node_paths(gid, registry, contract_paths)
         if node['path_source'] == 'unresolved_params' and node['params']:
             node['unresolved_bindings'] = list(node['params'])
@@ -1123,6 +1157,10 @@ def snapshot(fig: matplotlib.figure.Figure, registry: GidRegistry, *, scope: str
         node = _artist_node(entry['artist'], node_id=unreg_id, gid=None, scope=scope, registered=False,
                             renderer=renderer, mm_per_px=mm_per_px, descriptor=entry['descriptor'])
         node['semantic'] = _semantic_facts(entry['artist'], all_axes, axes_ids)
+        if id(entry['artist']) in axis_visibility:
+            node['artist_visible'] = node.get('visible')
+            node['visible'] = axis_visibility[id(entry['artist'])]
+            node['visibility_source'] = 'matplotlib_native_axis_draw_filter'
         if not node['measured']:
             diag('UNMEASURED_GEOMETRY', f'{unreg_id} 的几何无法测量', [unreg_id],
                  severity='blocking')

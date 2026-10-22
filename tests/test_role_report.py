@@ -125,3 +125,55 @@ def test_annotation_subclasses_remain_measured_but_unclassified_and_not_editable
     assert row['source_font_pt'] == 6.0 and row['effective_font_pt'] == 3.0
     assert row['semantic_role'] is None and row['font_controls'] == []
     assert report['status'] == 'UNSUPPORTED'
+
+
+def test_scene_axis_visibility_matches_native_draw_without_changing_pixels():
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from matplotlib.text import Text
+    from figpact.registry import GidRegistry
+    from figpact.inspector import _project_node
+    from figpact.scene import snapshot
+
+    fig, ax = plt.subplots(figsize=(48 / 25.4, 48 / 25.4))
+    original_draw = Text.draw
+    drawn = set()
+
+    def observe_draw(text, renderer):
+        drawn.add(id(text))
+        return original_draw(text, renderer)
+
+    try:
+        fig.subplots_adjust(left=.24, right=.97, top=.94, bottom=.21)
+        ax.set_xlim(10.5, 0)
+        ax.set_xlabel('Chemical shift')
+        fig.canvas.draw()
+        registry = GidRegistry(scope='main')
+        labels = [tick.label1 for tick in ax.xaxis.get_major_ticks()]
+        for index, label in enumerate(labels):
+            registry.register(label, f'tick.{index}')
+        registry.register(ax.xaxis.label, 'xlabel')
+        Text.draw = observe_draw
+        for axis_visible, axes_visible in ((True, True), (False, True), (True, False)):
+            ax.xaxis.set_visible(axis_visible)
+            ax.set_visible(axes_visible)
+            drawn.clear()
+            fig.canvas.draw()
+            before = bytes(fig.canvas.buffer_rgba())
+            actual_draws = set(drawn)
+            nodes = {n['id']: n for n in snapshot(fig, registry, scope='main', draw=False)['nodes']}
+            assert bytes(fig.canvas.buffer_rgba()) == before
+            assert drawn == actual_draws
+            for index, label in enumerate(labels):
+                assert label.get_visible() is True
+                assert nodes[f'tick.{index}']['artist_visible'] is True
+                assert nodes[f'tick.{index}']['visible'] == (id(label) in actual_draws)
+                if id(label) not in actual_draws:
+                    assert _project_node(nodes[f'tick.{index}'])['hit_mode'] == 'none'
+            assert nodes['xlabel']['visible'] == (id(ax.xaxis.label) in actual_draws)
+            if axis_visible and axes_visible:
+                assert any(label.get_visible() and id(label) not in actual_draws for label in labels)
+    finally:
+        Text.draw = original_draw
+        plt.close(fig)

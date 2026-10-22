@@ -14,6 +14,8 @@ v0.1 只编辑已有授权对象。Overlay 支持坐标轴标题字号、刻度�
 
 固定版面的角色能力与空间报告（G3-A/B）使用 `figpact layout-report`：绑定明确快照版本，读取真实 Frame 的字号、X/Y 与 inset 归属、共享控制耦合及固定邻居约束；不自动搜索、改页面或保存。旧 runtime 不会被擅自接管，未知与潜在冲突也不冒充 QA 通过。见 [报告用法与证据边界](docs/R14_RENDER.md#g3-ab-snapshot-bound-capability-and-fixed-layout-reports)。
 
+跨图共同有效字号搜索（G3-C）使用 `figpact layout-search --intent <JSON>`：在明确字号网格和授权内部参数候选内真实重建、测量、重放验证；不改页面、不保存、不宣称全局最优。见 [有界字号搜索](docs/R14_RENDER.md#g3-c-bounded-common-effective-font-search)。
+
 ## Quickstart
 
 ```bash

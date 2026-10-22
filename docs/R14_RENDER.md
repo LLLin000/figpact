@@ -526,9 +526,11 @@ multi-figure save transaction or final export is added here.
   | NMR | 8.5 | 4.25 |
   | FTIR | 8.5 | 6.375 |
 
-  Both reports exposed X/Y control coupling. The NMR baseline also exposed a
-  partly clipped `fig2_nmr.main.tick.3` envelope and correctly returned
-  CONSTRAINT_VIOLATION rather than PASS.
+  Both reports exposed X/Y control coupling. The original G3-A/B report marked
+  `fig2_nmr.main.tick.3` as clipped. G3-C's native-draw audit subsequently
+  identified that finding as a **measurement false positive**: Matplotlib
+  retained a visible-flagged 15 ppm tick outside the 10.5–0 ppm display window,
+  but never drew it. The capture correction below supersedes that finding.
 - The derived budget regression checks 134.7 mm against 126 mm and reports
   8.7 mm current excess without declaring global infeasibility. Other checks
   cover actual child-inset labels, anisotropic scalar refusal, readonly
@@ -542,5 +544,156 @@ multi-figure save transaction or final export is added here.
   saved-page and standalone rendering evidence, not a new active Tavotto
   display/acceptance or whole-page export proof.
 
-Next gate is G3-C bounded common-effective-font candidate search, using these
-facts. G4 host acceptance/transactions and G5 final export remain separate.
+## G3-C: bounded common-effective-font search
+
+`figpact layout-search` searches one semantic font group across two or more
+explicitly managed figures. It uses existing hot `RenderSession` workers,
+G3-A role/control bindings, G2 placed-rectangle projection and G3-B conservative
+space checks. It does not use the old width-only fitter or move page objects.
+
+```bash
+figpact layout-search --snapshot /work/page.snapshot.json --base /work \
+  --expected-revision <snapshot-revision> --target nmr --target ftir \
+  --managed nmr /work/nmr/plot.py /work/nmr/config.yaml main \
+  --managed ftir /work/ftir/plot.py /work/ftir/config.yaml main \
+  --intent /work/font-intent.json
+```
+
+The page/source authorization rules are the same as `layout-report`. Every
+target needs an explicit trusted script/config/scope matching the host record.
+The intent may also be supplied as inline JSON:
+
+```json
+{
+  "schema": "figpact.font-search/1",
+  "role": "axis.title",
+  "axis": "x",
+  "axes_context": "root",
+  "candidate_pt": [10, 9, 8.5, 8],
+  "tolerance_pt": 0.02,
+  "max_renders": 16,
+  "allow_coupled": true,
+  "variants": [{}],
+  "required_content": {
+    "nmr": ["fig2_nmr.main.peak.vancho.9p83", "fig2_nmr.main.peak.hama.6p18"]
+  }
+}
+```
+
+`candidate_pt` is an explicit, positive, unique finite grid, searched in
+descending order; no binary search or monotonic-layout assumption is used.
+Supported roles are `axis.title`, `axis.tick` and `legend` when genuine
+bindings exist. Axis is `x`, `y` or null (both); context is structural `root`
+or child `inset`, never guessed from GID text. A single group's members must
+share an unambiguous authorized font control within each figure.
+
+`allow_coupled` defaults false. The example explicitly permits the shared
+X/Y title parameter to affect the Y label too; affected IDs and role groups
+are reported. The engine protects the selected and visible coupled labels
+in addition to the confirmed `required_content` IDs. It never hides required
+content to obtain a candidate.
+
+`variants` lists optional finite alternatives, each mapping a panel ID to
+Native scalar edits. For example, a discrete alternative can include
+`{"nmr":[{"control_id":"[\"legend_cols\"]","value":2}]}`. Numeric types and
+declared ranges are preserved; unknown/locked controls and duplicate edits
+are refused. Variants cannot override the automatic font control. Defaults
+are one empty alternative, tolerance 0.02 pt and 24 preview calls. Hard caps
+are 128 grid points, 64 alternatives and 512 preview calls.
+
+### What is actually verified
+
+- Each attempt is an absolute Native preview from the accepted baseline,
+  not accumulated edits from a previous candidate. Extra edits may change
+  native canvas extent; the engine measures the resulting frame and corrects
+  the font proposal from its actual projection. It never substitutes a
+  config width for measured native extent.
+- Effective size is remeasured after drawing. Nonuniform/unknown scaling,
+  unavailable bindings, disappearing selected members or changed scientific
+  payload cannot be accepted. Explicit scientific/view protections remain
+  enforced by the Native engine.
+- Every target is checked against fixed page neighbours, including other
+  target panels. Known clipping/outside-page, required-content failures and
+  relevant conservative envelope conflicts block a candidate. Broad canvas
+  rectangle overlap and current budget excess alone do not establish
+  infeasibility. Initial conflicts are not assumed irreparable.
+- Preview-call budget includes **failed calls**, intermediate measurements
+  and winning replay; it is not a claim about internal Matplotlib draw count.
+  Source checks native to each preview are retained, with all-session checks
+  at batch boundaries and after replay rather than redundant checks before
+  every draw.
+- The winner is rebuilt on every session, remeasured and frame-hash compared
+  with its trial. Final page/source/pending-ID checks reject stale results.
+  Failure cancels only the search's own pending candidates; unrelated
+  candidates are never cancelled. Callers must give the API exclusive use
+  of its sessions; this is not a G4 lease or multi-figure transaction.
+
+`search_common_font(layout, sessions, intent, expected_revision=...,
+source_bindings=..., refresh_layout=...)` returns
+`figpact.font-search-result/1`. Outcomes are `FEASIBLE`, `NO_CANDIDATE`,
+`UNSUPPORTED`, `STALE` or `CONSTRAINT_VIOLATION`; invalid input is refused.
+Attempts include the checked point/alternative and failure bottlenecks.
+`NO_CANDIDATE` describes the checked finite search, not mathematical global
+infeasibility. Unexpected renderer failures are not reclassified as ordinary
+layout failures.
+
+For the Python API, a successful result leaves only the replayed winner
+pending in each caller-owned session, with current IDs, captured frames,
+projected geometry, actual fonts and absolute edits. Nothing is saved.
+The CLI closes its sessions: its returned `active_candidates` is false,
+`lifetime` is `ENDED` and those IDs cannot be reused for commit. Frame bytes
+and plans are evidence, not an active host transaction. CLI exits 0 for a
+feasible candidate, 1 for a completed nonfeasible/unsupported report, and 2
+for stale/invalid/refused input.
+
+### Native visibility correction
+
+`Text.get_visible()` alone does not prove native draw eligibility. Scene
+capture now reuses Matplotlib's native axis tick selector, axis visibility
+and axes/ancestor visibility. Off-view tick nodes retain their raw
+`artist_visible` flag and `visibility_source`, but are not reported as drawn
+content or exposed as geometric hit targets. No artist flags, scientific
+window or pixels are modified. The regression observes actual `Text.draw`
+calls and checks the same RGBA buffer before/after capture; there is no
+second draw or screenshot-similarity shortcut.
+
+G4 host acceptance/multi-figure transactions and G5 native final export
+remain separate. All G3-C evidence remains snapshot-bound,
+`NOT_WRITTEN`, `host: NOT_VERIFIED`, `export_page: NOT_RUN`.
+
+### G3-C exercised evidence
+
+Two independent verification jobs checked the API and the actual public CLI:
+58 related cases passed and one was skipped. After the final narrow changes,
+only the directly affected real two-figure lifecycle test and two CLI boundary
+tests were rerun: all three passed. No full regression or frontend build ran.
+
+The public CLI used actual NMR and FTIR scripts with different fixed page
+rectangles. In grid `[10, 9, 8.5, 8]`, 10 pt exceeded FTIR's declared source
+font range; 9 and 8.5 pt were rejected by Native QA. The selected 8 pt point
+was rebuilt and replayed, with source/scientific/content evidence retained:
+
+| Figure | Captured source pt | Measured page scale | Final effective pt |
+| --- | ---: | ---: | ---: |
+| NMR | 8 | 1 | 8 |
+| FTIR | 10.6667 | 0.75 | 8 |
+
+A final-source CLI run also selected the explicit integer-valued NMR
+`legend_cols=2` alternative at that common effective size. It used four
+preview calls out of twelve: two figure trials and their two replays.
+Native extents did not change on this path, so no additional scale-correction
+preview was needed; canvas-changing G3-C variants are not claimed exercised
+by this scenario.
+
+The real API check covered failed previews consuming budget, coupled-control
+refusal, returned IDs matching currently pending replay frames, and an owner
+moving the fixed photo during replay. The last case returned STALE, exposed
+no candidate and removed only the search's own pending candidates. Confirmed
+NMR annotation IDs remained required throughout.
+
+The restored `layout-snapshot` command still captured the reference saved page's
+33 objects / 31 panels; its legacy runtime figures remained SPACE_ONLY in
+`layout-report`. Original scripts, configurations and reference page were
+byte-hash unchanged. The successful CLI ended its sessions and explicitly
+returned inactive IDs. These are measured candidate and saved-page facts,
+not a live Tavotto display, multi-figure commit or final export proof.

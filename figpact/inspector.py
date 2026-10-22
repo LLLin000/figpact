@@ -125,7 +125,7 @@ def _stroke_of(node: dict) -> dict:
 
 
 def _hit_mode_of(node: dict, runs) -> str:
-    if not node.get('measured') or node.get('fully_clipped'):
+    if node.get('visible') is False or not node.get('measured') or node.get('fully_clipped'):
         return 'none'
     if node.get('collection_geometry') in ('UNMEASURED', 'UNSUPPORTED'):
         return 'none'
@@ -138,6 +138,8 @@ def _hit_mode_of(node: dict, runs) -> str:
 
 
 def _hit_note_of(node: dict, runs) -> Optional[str]:
+    if node.get('visible') is False:
+        return '未参与原生绘制：不提供几何命中'
     geometry = node.get('collection_geometry')
     if geometry == 'UNSUPPORTED':
         return node.get('collection_geometry_reason') or '集合显示几何不可测'
@@ -195,7 +197,7 @@ def _project_node(node: dict) -> dict:
     note = _hit_note_of(node, runs)
     if note:
         projected['hit_note'] = note
-    for key in ('envelope_source', 'rotation_deg'):
+    for key in ('envelope_source', 'rotation_deg', 'artist_visible', 'visibility_source'):
         if key in node:
             projected[key] = node[key]
     return projected
