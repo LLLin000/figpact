@@ -751,12 +751,14 @@ the placement is not distorted. An unprovable placement is refused with
 `UNSUPPORTED_GEOMETRY` and the measured numbers; transforms are never
 auto-corrected.
 
-### Measured outcome and its limits
+The measured outcome and its limits
 
 The real run opened all three providers with verified science and proved the
 geometry for all three targets: NMR and XRD are isotropic (0.99191 and 1.0),
 while the FTIR panel is the host's own anisotropic crop-fill
-(sx 1.11776 / sy 0.99272, about 11.2 percent). A single scalar effective font
+(sx 1.11776 / sy 0.99272; the horizontal scale exceeds the vertical one by
+about 12.6 percent of the vertical scale, and the two differ by about 11.2
+percent of the horizontal one). A single scalar effective font
 is therefore not measurable for that panel, and the search refuses it with
 `ANISOTROPIC_SCALE` naming the panel and the role. No constraint was relaxed
 to obtain a candidate.
@@ -830,3 +832,106 @@ measured the real page, the real providers and the real placement rules, and
 reported precisely why one common effective font does not exist for this
 page as the host places it. It is not a claim that the three figures were
 jointly optimized, and it is not a final page export.
+
+## G4-A: prepared acceptance plans (PREPARED only)
+
+G4 turns a **verified** figpact candidate into something the host actually
+uses. G4-A is the thin first half: it prepares immutable resources and the
+minimal document change, and checks every stale precondition before anything
+is staged. It never writes a host document, never commits a Native config and
+never mutates a page.
+
+The two halves of the evidence stay separate, as they must: figpact proves
+"this figure may be changed this way"; the host proves "this current page has
+actually adopted the result". Neither substitutes for the other.
+
+### What the host already provides (reused, not rebuilt)
+
+The Tavotto host has one document authority and one atomic writer
+(`engine/atomicio.py`: same-directory temp file, fsync, `os.replace`,
+directory fsync), reached through two whole-document save routes that both
+validate, take a per-path lock, compare an optional `base_revision` and
+re-read the revision inside the lock. Staleness is the **content-hash
+revision** (`X-Tavotto-Revision`), not `updatedAt`; a mismatch is
+`409 external_change`. There is **no per-panel endpoint and no batch-panel
+helper**, so applying several prepared figures is **one whole-document
+write**, not one request per panel. The backend's only revert path is the
+versions timeline (full-document snapshots); undo/redo is frontend-only.
+Panels reference resources by a relative `fileId`; there is no content hash
+field inside a panel object. figpact therefore adds **no** second page model,
+resource store, revision model or undo system.
+
+### The plan
+
+`figpact.acceptance.build_acceptance_plan(candidates, *, host_document,
+base_revision, resources_dir, expected_document_revision=None)` returns a
+`figpact.acceptance-plan/1` document:
+
+- `status` `READY` (state `PREPARED`) or `REFUSED`, and
+  `evidence.first_failure` naming the failed check.
+- `preconditions`: every check with its expected and observed values, in
+  order: `document_identity`, `candidate_freshness`,
+  `panel_identity_ownership`, `panel_placement`, `uniform_scale`,
+  `required_content`, `resource_preparation`, `document_patch_minimality`.
+- `resources`: per panel, the staged PDF's project-relative path, the
+  absolute staging path, its `bytes_sha256`, the measured `page_mm` and the
+  frame/candidate/science facts it came from.
+- `document_patch`: the canvas and the exact per-panel field changes, and
+  `next_document`: the schema-3 document the host **would** write, computed
+  but never written.
+
+The order matters: resources are produced and hashed **before** any page
+reference exists, so the page can never point at bytes that were not fully
+prepared. The prepared reference is relative to the project root, because
+that is how the host resolves a panel's `fileId`; a staging directory outside
+the project root is refused rather than producing a dangling reference. The
+prepared PDF's measured page size must equal the panel's stored
+`nativeW`/`nativeH`, otherwise the panel's displayed layout would change and
+the candidate's measured sizes would no longer describe the page.
+
+### What the plan refuses
+
+- A page, candidate or override that moved since the plan was based on it
+  (`document_identity`, `candidate_freshness`).
+- A panel that is not explicitly figpact-managed, whose `figpact`
+  config/scope binding does not match the candidate, or that carries
+  unreplayed host overrides (`panel_identity_ownership`). Legacy runtime
+  panels are **not** migrated by flipping an owner flag; native figure
+  migration is a separate, explicitly authorized action that keeps the old
+  resource and a recovery path.
+- A panel whose placement no longer matches the one the candidate was
+  measured against (`panel_placement`).
+- A panel placed with an **anisotropic** host transform (`uniform_scale`).
+  The host maps a crop window onto the placed rectangle with independent
+  horizontal and vertical scales, so a cropped panel has no single scalar
+  effective font; the plan refuses it by name instead of accepting a font
+  measurement that does not exist.
+- A confirmed required id that is absent from the prepared resource
+  (`required_content`).
+- Any difference between the host document and the computed next document
+  outside the named panel fields (`document_patch_minimality`).
+
+### G4-A exercised evidence
+
+One real run against the actual saved page and the actual providers, in a
+temporary copy of the project root. All twelve inputs (the page, three
+provider scripts, three provider YAMLs, five Rigaku scan files) were
+byte-identical before and after, and **no case wrote the host document**.
+
+- Legacy page as-is: **REFUSED**, `panel_identity_ownership` - the real
+  panels are `renderOwner` tavotto/asset with no `figpact` binding.
+- The real FTIR panel in a derived managed host document: **REFUSED**,
+  `uniform_scale`, observed scales `[1.11776380, 0.99271615]` - the same
+  honest verdict G3-D reached, now enforced before anything is staged.
+- The real XRD panel in a derived managed host document (isotropic,
+  41.0 x 46.1344 mm): **READY / PREPARED**. The resource was staged and
+  hashed, its project-relative path resolves to exactly those bytes, the
+  prepared PDF's measured page size matched the stored native size, the patch
+  set only that panel's `fileId`, and the next document differed from the host
+  document in that field alone.
+
+The derived host documents in the last two cases were prepared for the plan
+in a temporary copy; they are not the live page, and no host write happened.
+G4-A reaches PREPARED only. `HOST_APPLIED`, `HOST_PERSISTED`,
+`REOPEN_VERIFIED` and `FINAL_EXPORT_VERIFIED` remain out of reach here, and
+G4's own goal is `REOPEN_VERIFIED`; the final export is G5.

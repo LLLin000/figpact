@@ -18,6 +18,8 @@ v0.1 只编辑已有授权对象。Overlay 支持坐标轴标题字号、刻度�
 
 真实三图集成验收（G3-D）使用 `examples/plate/verify_three_figures.py`：读取真实保存版面，保留全部原对象与矩形，以 NMR/FTIR/XRD 三个真实 provider 做一次有界公共字号搜索；`evidence.json` 分开给出 `harness_status`（执行）与 `search_status`（可行性），退出码不代表可行性。主机裁剪是各向异性填满，因此共同字号可能诚实地不可解。见 [三图集成与证据边界](docs/R14_RENDER.md#g3-d-real-three-figure-integration-derived-standalone)。
 
+宿主接纳准备（G4-A）使用 `figpact.acceptance.build_acceptance_plan`：把已验证候选变成**先备好并哈希**的不可变资源 + 最小页面改动，并逐项检查过期前置条件；只到 PREPARED，不写宿主文档、不改页面。旧 runtime 面板、各向异性裁剪面板、归属不匹配的绑定一律按名拒绝。见 [接纳计划与宿主事实](docs/R14_RENDER.md#g4-a-prepared-acceptance-plans-prepared-only)。
+
 ## Quickstart
 
 ```bash
