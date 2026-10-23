@@ -184,15 +184,68 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             self._send({"status": "NOT_FOUND", "message": "unknown route"}, 404)
 
     def _managed_resource(self) -> None:
+        """托管面板所用脚本/配置的字节；`kind=file` 时按 `path` 读 base 内的那一份。
+
+        `kind=file` 是给页面重开核验用的：批次写进页面的就是这份 PDF 的**原字节**，
+        拿 `/api/render` 的重渲染结果去比对哈希是错的语义。这条仍限 base 之内、
+        仍是同一套鉴权，并且只接受本会话已授权托管面板实际引用的那两个相对路径。
+        """
         query = parse_qs(urlsplit(self.path).query, keep_blank_values=True)
         ids, kinds = query.get("id", []), query.get("kind", [])
-        if len(ids) != 1 or len(kinds) != 1 or kinds[0] not in ("script", "config"):
-            self._send({"status": "INVALID", "message": "resource needs one id and one kind"}, 400)
+        kind = kinds[0] if len(kinds) == 1 else None
+        if kind not in ("script", "config", "file"):
+            self._send({"status": "INVALID", "message": "resource needs one kind"}, 400)
+            return
+        if kind != "file" and len(ids) != 1:
+            self._send({"status": "INVALID", "message": "resource needs one id"}, 400)
             return
         with self._app._state_lock:
             layout = self._app._layout
         if layout is None:
             self._send({"status": "NO_CAPTURE", "message": "capture a layout first"}, 409)
+            return
+        if kinds[0] == "file":
+            paths = query.get("path", [])
+            if len(paths) != 1:
+                self._send({"status": "INVALID", "message": "file needs one path"}, 400)
+                return
+            # 只发**本会话已授权托管面板实际引用**的那几个相对路径：base 不是文件下载器。
+            records = (layout.get("extensions", {}).get("tavotto_live", {}).get("objects", {}) or {})
+            allowed = set()
+            for item in records.values():
+                record = item.get("record") if isinstance(item, dict) else None
+                if not isinstance(record, dict) or record.get("renderOwner") != "figpact":
+                    continue
+                if record.get("overrides") not in (None, []):
+                    continue
+                for value in (record.get("script"), (record.get("figpact") or {}).get("config"),
+                              record.get("fileId")):
+                    if isinstance(value, str) and value.strip() and not value.startswith("runtime:"):
+                        allowed.add(Path(value.replace("\\", "/")).as_posix())
+            wanted = Path(unquote(paths[0]).replace("\\", "/"))
+            if wanted.is_absolute() or wanted.as_posix() not in allowed:
+                self._send({"status": "NOT_AUTHORIZED",
+                            "message": "resource is not referenced by an authorized managed panel"}, 403)
+                return
+            root = self._app.base.resolve()
+            path = (root / wanted).resolve()
+            try:
+                path.relative_to(root)
+            except ValueError:
+                self._send({"status": "PATH_OUTSIDE_BASE", "message": "resource is outside base"}, 403)
+                return
+            if path.suffix.lower() not in (".pdf", ".png", ".jpg", ".jpeg", ".yaml", ".yml"):
+                self._send({"status": "INVALID", "message": "unsupported resource type"}, 400)
+                return
+            try:
+                data = path.read_bytes()
+            except OSError:
+                self._send({"status": "NOT_FOUND", "message": "resource is missing"}, 404)
+                return
+            self._send({"schema": "figpact.host-resource/1", "kind": "file",
+                        "path": path.relative_to(root).as_posix(),
+                        "sha256": hashlib.sha256(data).hexdigest(),
+                        "bytes_base64": base64.b64encode(data).decode("ascii")})
             return
         try:
             record = self._managed_record(layout, unquote(ids[0]))

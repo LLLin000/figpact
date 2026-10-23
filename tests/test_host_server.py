@@ -156,6 +156,35 @@ def test_resource_route_serves_only_the_authorized_managed_config(server, tmp_pa
     assert status == 409 and body["status"] == "NO_CAPTURE"
 
 
+def test_file_route_serves_only_paths_a_managed_panel_references(server, tmp_path):
+    import base64
+    script, config = tmp_path / "plot.py", tmp_path / "plot.yaml"
+    pdf, secret = tmp_path / "panel.pdf", tmp_path / "secret.pdf"
+    for path in (script, config, pdf, secret):
+        path.write_bytes(b"%PDF-1.4\n" + path.name.encode() if path.suffix == ".pdf" else b"k: 1\n")
+    record = {"renderOwner": "figpact", "script": "plot.py", "fileId": "panel.pdf",
+              "figpact": {"config": "plot.yaml", "scope": "main"}, "overrides": []}
+    layout = validate_layout({
+        "schema": "figpact.layout/1", "source_mode": "live", "page_mm": [100, 100], "objects": [],
+        "extensions": {"tavotto_live": {"objects": {"panel": {"record": record}}}}})
+    server._layout = layout
+
+    status, _, body = _request(server, token=server.token, path="/resource?kind=file&path=panel.pdf")
+    assert status == 200 and body["kind"] == "file" and body["path"] == "panel.pdf"
+    assert base64.b64decode(body["bytes_base64"]) == pdf.read_bytes()
+
+    # 页面没引用的文件（哪怕就在 base 里）读不到，越出 base 更读不到。
+    status, _, body = _request(server, token=server.token, path="/resource?kind=file&path=secret.pdf")
+    assert status == 403 and body["status"] == "NOT_AUTHORIZED"
+    status, _, body = _request(server, token=server.token, path="/resource?kind=file&path=../x.pdf")
+    assert status in (403, 404)
+    # 页面引用了 plot.py 自己；换个页面没引用的同类型文件同样不给。
+    other = tmp_path / "notes.yaml"
+    other.write_text("x: 1\n", encoding="utf-8")
+    status, _, body = _request(server, token=server.token, path="/resource?kind=file&path=notes.yaml")
+    assert status == 403 and body["status"] == "NOT_AUTHORIZED"
+
+
 def test_equal_generation_rechecks_resource_revision_and_invalidates_stale_proof(server, tmp_path):
     image_path = tmp_path / "photo.png"
     Image.new("RGB", (8, 6), "red").save(image_path)
