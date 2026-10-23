@@ -1,6 +1,8 @@
 """Authenticated loopback service for explicit live-layout capture and display."""
 from __future__ import annotations
 
+import base64
+import hashlib
 import hmac
 import http.server
 import json
@@ -9,7 +11,7 @@ import secrets
 import threading
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from .frame_binding import FrameBindingError, bind_frame, validate_display
 from .render_contract import validate_layout
@@ -172,8 +174,47 @@ class _Handler(http.server.BaseHTTPRequestHandler):
                     self._send({"status": "NO_CAPTURE", "message": "capture a layout first"}, 409)
                 else:
                     self._send({"layout": self._app._layout, "display": self._app._display_receipt})
+        elif path == "/resource":
+            # 页面重开后的核验必须能读到**托管面板自己那份配置**的字节：Tavotto 的
+            # safe_resolve 只发 PDF/图片，配置字节它读不到，于是「PDF 与配置同源」
+            # 这条不变量在宿主侧永远只能报 unreadable。读取权因此归 figpact：
+            # 只发已授权托管面板所用脚本/配置这两个路径，仍在 base 之内，只回字节与哈希。
+            self._managed_resource()
         else:
             self._send({"status": "NOT_FOUND", "message": "unknown route"}, 404)
+
+    def _managed_resource(self) -> None:
+        query = parse_qs(urlsplit(self.path).query, keep_blank_values=True)
+        ids, kinds = query.get("id", []), query.get("kind", [])
+        if len(ids) != 1 or len(kinds) != 1 or kinds[0] not in ("script", "config"):
+            self._send({"status": "INVALID", "message": "resource needs one id and one kind"}, 400)
+            return
+        with self._app._state_lock:
+            layout = self._app._layout
+        if layout is None:
+            self._send({"status": "NO_CAPTURE", "message": "capture a layout first"}, 409)
+            return
+        try:
+            record = self._managed_record(layout, unquote(ids[0]))
+        except Exception as exc:
+            self._fail(exc)
+            return
+        # 已过 _managed_record 的相等校验：这份记录指向的正是受信 RenderSession 的脚本/配置。
+        raw = record["script"] if kinds[0] == "script" else record["figpact"]["config"]
+        path = (self._app.base / Path(raw.replace("\\", "/"))).resolve()
+        try:
+            path.relative_to(self._app.base.resolve())
+        except ValueError:
+            self._send({"status": "PATH_OUTSIDE_BASE", "message": "resource is outside base"}, 403)
+            return
+        try:
+            data = path.read_bytes()
+        except OSError:
+            self._send({"status": "NOT_FOUND", "message": "resource is missing"}, 404)
+            return
+        self._send({"schema": "figpact.host-resource/1", "kind": kinds[0],
+                    "sha256": hashlib.sha256(data).hexdigest(),
+                    "bytes_base64": base64.b64encode(data).decode("ascii")})
 
     def do_POST(self) -> None:
         if not self._authorize():

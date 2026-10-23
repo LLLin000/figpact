@@ -993,3 +993,96 @@ G4-B reaches PREPARED only. HOST_APPLIED, HOST_PERSISTED and REOPEN_VERIFIED
 stay with the host: figpact prepares and verifies the pair, the host applies
 the one whole-document write, confirms the save, and re-reads the page from
 disk. The final export stays G5.
+
+## G4-C/D: batch acceptance, one write, reopen and audit
+
+G4-C turns several verified managed figures into ONE page change. G4-D makes
+that change recoverable and provable after it lands.
+
+### The batch plan (figpact)
+
+`figpact.acceptance_batch.build_batch_acceptance_plan(candidates, *,
+host_document, base_revision, resources_dir, expected_document_revision=None,
+batch_id=None)` composes the G4-B plan for the whole list. Every candidate is
+prepared before any document change is computed; one `document_patch` and one
+`next_document` cover every panel. A batch is all-or-nothing: one unacceptable
+candidate refuses the WHOLE batch, names every failing candidate in
+`failures`, returns no `next_document`, leaves no resource staged
+(`evidence.cleaned_up` lists every path that was created and removed), and
+never writes the host document.
+
+The `batch_id` is a hash of the base revision, the sorted candidate identities
+and the deterministic plan content. It deliberately excludes the exported PDF
+bytes and the staged file names: measured exports are not byte-reproducible
+(the renderer stamps metadata), so including them would make a retry look like
+a different batch. The id is therefore stable across retries and changes when
+the base revision or the candidate set changes.
+
+Each manifest entry carries exactly what the page has to store: `pdf_path` as
+the panel's `fileId`, `config_path` as its `figpact.config`, the scope, and the
+SHA-256 of both. Two candidates may never target the same panel.
+
+### The host flow (Tavotto)
+
+The host applies the batch against its existing authorities, not a new one:
+
+1. **Apply** - every panel of the batch changes in ONE `updateObjects`
+   commit, so the whole batch is one history entry and one undo step. A
+   manifest that disagrees with the patch, a non-managed panel, or a resource
+   that does not match its prepared hash is refused with zero writes.
+2. **Persist** - a versions-timeline checkpoint of the current document is
+   taken first, then ONE whole-document write carrying the disk's current
+   `base_revision` (re-read immediately before the write, never assumed). A
+   `409 external_change` or `stale_write` leaves the disk untouched and the
+   batch unpersisted; the baselines are not advanced.
+3. **Ambiguous saves** - a timeout is resolved by re-reading the disk and
+   comparing, never by re-sending a write over a document the user may have
+   changed meanwhile. The outcome is `persisted`, `absent`, `diverged` or
+   `unreadable`, never a guess.
+4. **Reopen** - the document is re-read from disk with a fresh GET (not the
+   in-memory object) and verified: every panel reference equals the prepared
+   one, every prepared resource and config still hashes as prepared, and every
+   object outside the batch is unchanged. Only full agreement yields
+   `REOPEN_VERIFIED`.
+5. **Undo** - the single batch commit is undone in one step, restoring the
+   previous references, which still resolve to their resources.
+6. **Audit** - the batch writes an audit record into the existing versions
+   timeline: batch id, panels, resource hashes, disk revision before and after,
+   and the applied/persisted/reopen verdicts. No new subsystem.
+
+Re-applying the same `batch_id` is recognised: identical references report
+`alreadyApplied` with no new history entry, and a conflicting re-application is
+refused.
+
+### Verifying the config leg honestly
+
+The review's open item was that the host could not read the prepared CONFIG,
+so "the PDF and the config are the same candidate" could never be verified -
+the config leg would always report `unreadable`. Tavotto's asset resolver
+serves PDFs and images only, and must keep doing so for user files. The
+missing capability belongs to figpact, which already owns the trusted
+`figpact.config` path: its host service now serves the bytes of an
+**already-authorized** managed panel's script or config
+(`GET /resource?id=<panel>&kind=config|script`), behind the same Bearer token,
+Host and Origin checks as every other figpact host route, and only after the
+managed-record checks (figpact-owned, no overrides, script and config equal to
+the trusted render session). It returns the bytes with their SHA-256, confined
+to the configured base. Anything else is refused.
+
+The host's reopen verification fetches that route for the config leg and
+requires both the served hash and the recomputed hash to equal the prepared
+one. When no figpact host is connected the config leg stays honestly
+`unreadable` and the batch is NOT `REOPEN_VERIFIED` - an unverified config is
+never reported as verified.
+
+### States
+
+PREPARED (figpact) -> HOST_APPLIED -> HOST_PERSISTED -> REOPEN_VERIFIED
+(host). `FINAL_EXPORT_VERIFIED` remains G5 and is never claimed here. A batch
+that reaches `HOST_PERSISTED` but not `REOPEN_VERIFIED` is reported as exactly
+that, with the mismatch named.
+
+Unchanged guardrails: no managed figure is migrated by flipping
+`renderOwner`; legacy runtime panels stay unmanaged; an anisotropic host
+placement is refused rather than normalized; the offline display fallback
+shows the prepared file without fabricating a binding or a display receipt.

@@ -22,6 +22,8 @@ v0.1 只编辑已有授权对象。Overlay 支持坐标轴标题字号、刻度�
 
 宿主接纳双资源（G4-B）扩展接纳计划：已托管图件同时固化**不可变 PDF 与不可变候选配置**，并用重建证明两者同源；页面补丁同时更新 `fileId` 与 `figpact.config`。重开页面显示已保存的图，不再空白。见 [双资源持久化](docs/R14_RENDER.md#g4-b-dual-resource-persistence-and-reopen-verification)。
 
+多图批量接纳（G4-C/D）使用 `figpact.acceptance_batch.build_batch_acceptance_plan`：所有候选先备齐、整批全有或全无，得到一个 `batch_id`、一份合并补丁和一份整篇文档；宿主以**一次提交、一次整文档写入**落地，并做重开核验、单步撤销与审计。托管配置的字节由 figpact 宿主服务受控提供，因此“PDF 与配置同源”在宿主侧可被真正验证。见 [批量接纳与审计](docs/R14_RENDER.md#g4-cd-batch-acceptance-one-write-reopen-and-audit)。
+
 ## Quickstart
 
 ```bash

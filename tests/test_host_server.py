@@ -112,6 +112,50 @@ def test_managed_guard_rejects_override_replay(server, tmp_path):
         handler._managed_record(layout, "panel")
 
 
+
+def _managed_layout(files):
+    return validate_layout({
+        "schema": "figpact.layout/1", "source_mode": "live", "page_mm": [100, 100],
+        "objects": [],
+        "extensions": {"tavotto_live": {"objects": {
+            "panel": {"record": {"renderOwner": "figpact", "script": files["script"].name,
+                                  "figpact": {"config": files["config"].name, "scope": "main"},
+                                  "overrides": []}}}}},
+    })
+
+
+def test_resource_route_serves_only_the_authorized_managed_config(server, tmp_path):
+    import base64
+    import hashlib
+    script, config = tmp_path / "plot.py", tmp_path / "plot.yaml"
+    script.write_text("print('x')\n", encoding="utf-8")
+    config.write_text("canvas_w_mm: 41.0\n", encoding="utf-8")
+    server.render_session = SimpleNamespace(
+        script=script, config=config, scope="main", output_dir=tmp_path)
+    server._layout = _managed_layout({"script": script, "config": config})
+
+    status, _, body = _request(server, token=server.token, path="/resource?id=panel&kind=config")
+    assert status == 200 and body["schema"] == "figpact.host-resource/1"
+    assert body["kind"] == "config"
+    assert base64.b64decode(body["bytes_base64"]) == config.read_bytes()
+    assert body["sha256"] == hashlib.sha256(config.read_bytes()).hexdigest()
+    status, _, body = _request(server, token=server.token, path="/resource?id=panel&kind=script")
+    assert status == 200 and base64.b64decode(body["bytes_base64"]) == script.read_bytes()
+
+    # 只要不是这个已授权托管面板、或不是 script/config 两档，一律不给字节。
+    status, _, body = _request(server, token=server.token, path="/resource?id=other&kind=config")
+    assert status == 400 and body["status"] == "UNKNOWN_PANEL"
+    status, _, body = _request(server, token=server.token, path="/resource?id=panel&kind=doc")
+    assert status == 400 and body["status"] == "INVALID"
+    status, _, body = _request(server, path="/resource?id=panel&kind=config")
+    assert status == 401
+
+    # 没有捕获就没有可授权的托管记录。
+    server._layout = None
+    status, _, body = _request(server, token=server.token, path="/resource?id=panel&kind=config")
+    assert status == 409 and body["status"] == "NO_CAPTURE"
+
+
 def test_equal_generation_rechecks_resource_revision_and_invalidates_stale_proof(server, tmp_path):
     image_path = tmp_path / "photo.png"
     Image.new("RGB", (8, 6), "red").save(image_path)
